@@ -74,7 +74,7 @@ export const PrizeShowcase: React.FC<PrizeShowcaseProps> = ({
                     <Icon className="w-4 h-4" />
                   </div>
                   <span className={`text-[10px] font-mono font-bold ${isSelected ? "text-[#D4AF37]" : "text-white/40"}`}>
-                    {pillar.valueGBP || pillar.valueUSD}
+                    {pillar.valueGBP}
                   </span>
                 </div>
                 <div>
@@ -98,7 +98,7 @@ export const PrizeShowcase: React.FC<PrizeShowcaseProps> = ({
                   <span className="px-3 py-1 rounded-full bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30 text-xs font-semibold uppercase tracking-wider">
                     {activePillar.badge}
                   </span>
-                  <span className="text-xs text-white/50 font-mono">Valued at {activePillar.valueGBP || activePillar.valueUSD}</span>
+                  <span className="text-xs text-white/50 font-mono">Valued at {activePillar.valueGBP}</span>
                 </div>
 
                 <h3 className="text-2xl sm:text-3xl font-light text-white">

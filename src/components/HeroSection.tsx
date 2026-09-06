@@ -62,7 +62,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     {
       icon: Landmark,
       title: "VIP Banking",
-      subtitle: "Multi-currency corporate accounts",
+      subtitle: "GBP corporate accounts",
       badge: "Fast-Track Setup",
       color: "text-cyan-400 border-cyan-500/30 bg-cyan-500/10",
     },

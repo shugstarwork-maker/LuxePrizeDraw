@@ -52,8 +52,8 @@ export default function App() {
 
   const [stats, setStats] = useState<CompetitionStats>({
     totalEntries: 42890,
-    prizePoolValueUSD: 220000,
-    cashPrizeUSD: 100000,
+    prizePoolValueGBP: 220000,
+    cashPrizeGBP: 100000,
     visaYears: 3,
     recentEntrants: [
       { id: "UAE-7829-DXB", name: "Siddharth M.", country: "India", timestamp: "Just now", business: "FinTech Platform" },

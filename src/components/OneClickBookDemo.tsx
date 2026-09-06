@@ -29,9 +29,7 @@ export const OneClickBookDemo: React.FC<OneClickBookDemoProps> = ({ onOpenEntry 
     concierge: {
       name: "Dubai VIP Concierge & Chauffeur",
       service: "Private Chauffeur & Luxury Marina Yacht Experience",
-      priceAED: 2450,
       priceGBP: 525,
-      priceUSD: 667,
       duration: "4 Hours VIP Experience",
       location: "Dubai Marina & Palm Jumeirah",
       avatar: "🛥️",
@@ -39,9 +37,7 @@ export const OneClickBookDemo: React.FC<OneClickBookDemoProps> = ({ onOpenEntry 
     advisory: {
       name: "Global Executive Strategy Advisory",
       service: "1-on-1 Dubai Market Expansion & Licensing Masterclass",
-      priceAED: 1850,
       priceGBP: 395,
-      priceUSD: 503,
       duration: "60 Min Private Session",
       location: "DIFC Gate Tower / Remote Video",
       avatar: "👔",
@@ -49,9 +45,7 @@ export const OneClickBookDemo: React.FC<OneClickBookDemoProps> = ({ onOpenEntry 
     realestate: {
       name: "Emirates Ultra-Prime Estates",
       service: "Private Helicopter & Villa Tour (Downtown & Emirates Hills)",
-      priceAED: 3800,
       priceGBP: 815,
-      priceUSD: 1034,
       duration: "Full Day VIP Inspection",
       location: "Dubai Heliport / Luxury Villa Site",
       avatar: "🏰",
@@ -93,9 +87,9 @@ export const OneClickBookDemo: React.FC<OneClickBookDemoProps> = ({ onOpenEntry 
       let reply = "Your request has been analyzed by the UAE AI Engine! We have reserved your priority slot and synced your booking with Dubai real-time availability.";
       const lower = query.toLowerCase();
       if (lower.includes("price") || lower.includes("cost") || lower.includes("how much")) {
-        reply = `Pricing for this service is AED ${currentPreset.priceAED} (£${currentPreset.priceGBP} GBP). With the One-Click feature, your client can pay instantly with Apple Pay or credit card with 0% payment drop-off!`;
+        reply = `Pricing for this service is £${currentPreset.priceGBP} GBP. With the One-Click feature, your client can pay instantly with Apple Pay or credit card with 0% payment drop-off!`;
       } else if (lower.includes("visa") || lower.includes("license") || lower.includes("tax")) {
-        reply = "In the UAE, business profits benefit from zero personal tax, and this app automatically handles multi-currency invoicing across AED, USD, EUR and crypto gateways.";
+        reply = "In the UAE, business profits benefit from zero personal tax, and this app uses transparent GBP pricing for every booking.";
       } else if (lower.includes("one click") || lower.includes("book") || lower.includes("how it works")) {
         reply = "The One-Click Book feature bypasses 5 tedious registration steps. With biometric FaceID or 1-tap Apple Pay, clients confirm appointments in under 2.4 seconds!";
       }
@@ -211,7 +205,7 @@ export const OneClickBookDemo: React.FC<OneClickBookDemoProps> = ({ onOpenEntry 
                 </li>
                 <li className="flex items-center gap-2.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>Integrated UAE payment rails (AED, USD, EUR, GBP)</span>
+                  <span>GBP payment rails</span>
                 </li>
               </ul>
             </div>
@@ -286,8 +280,7 @@ export const OneClickBookDemo: React.FC<OneClickBookDemoProps> = ({ onOpenEntry 
                         <div className="flex items-baseline justify-between pt-1">
                           <span className="text-xs text-white/40 uppercase tracking-wider">Total:</span>
                           <div className="text-right">
-                            <span className="text-base font-bold text-white">AED {currentPreset.priceAED.toLocaleString()}</span>
-                            <span className="text-[10px] text-white/40 ml-1 font-mono">(£{currentPreset.priceGBP} GBP)</span>
+                            <span className="text-base font-bold text-white">£{currentPreset.priceGBP.toLocaleString()} GBP</span>
                           </div>
                         </div>
                       </div>

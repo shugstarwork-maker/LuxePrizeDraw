@@ -52,8 +52,6 @@ app.get("/api/competition/stats", (req, res) => {
     totalEntries: totalEntriesCount,
     prizePoolValueGBP: 220000,
     cashPrizeGBP: 100000,
-    prizePoolValueUSD: 220000,
-    cashPrizeUSD: 100000,
     visaYears: 3,
     recentEntrants: verifiedEntrants,
     drawDate: "2026-10-31T18:00:00Z",
@@ -238,10 +236,10 @@ Return a valid JSON object with the following fields:
   "appOneClickFeatureConcept": "A creative description of how the 'One-Click Book' feature should be customized specifically for this business",
   "aiCopilotIntegration": "How AI can automate customer onboarding or operations in their custom app",
   "budgetAllocation100k": [
-    {"category": "Product Development & AI Cloud", "amountGBP": 35000, "amountUSD": 35000, "description": "App enhancement, AI fine-tuning & server architecture"},
-    {"category": "UAE & UK Go-To-Market & PR", "amountGBP": 30000, "amountUSD": 30000, "description": "Targeted GCC & UK marketing, LinkedIn ads, Dubai launch event"},
-    {"category": "Working Capital & Operations", "amountGBP": 20000, "amountUSD": 20000, "description": "Initial inventory / team runway / prime flexi-desk"},
-    {"category": "Reserve & Treasury Fund", "amountGBP": 15000, "amountUSD": 15000, "description": "High-yield UAE corporate treasury deposit in GBP/AED"}
+    {"category": "Product Development & AI Cloud", "amountGBP": 35000, "description": "App enhancement, AI fine-tuning & server architecture"},
+    {"category": "UAE & UK Go-To-Market & PR", "amountGBP": 30000, "description": "Targeted GCC & UK marketing, LinkedIn ads, Dubai launch event"},
+    {"category": "Working Capital & Operations", "amountGBP": 20000, "description": "Initial inventory / team runway / prime flexi-desk"},
+    {"category": "Reserve & Treasury Fund", "amountGBP": 15000, "description": "High-yield UAE corporate treasury deposit in GBP"}
   ],
   "threeYearRoadmap": [
     {"year": "Year 1", "milestone": "Launch MVP app with One-Click Booking, establish corporate banking with Emirates NBD/Wio, capture initial 500 high-value clients"},
@@ -262,10 +260,10 @@ Return a valid JSON object with the following fields:
         appOneClickFeatureConcept: `A 1-touch VIP instant reservation pipeline allowing UAE clients to secure services with biometric Apple Pay / Google Pay and instant WhatsApp confirmation.`,
         aiCopilotIntegration: "24/7 Multilingual AI concierge that answers client queries in Arabic & English, qualifies high-ticket leads, and auto-dispatches bookings.",
         budgetAllocation100k: [
-          { category: "Product Development & Cloud AI", amountGBP: 35000, amountUSD: 35000, description: "App architecture, One-Click book pipeline, AI agents" },
-          { category: "GCC & Global Marketing", amountGBP: 30000, amountUSD: 30000, description: "Dubai billboard & digital omnichannel acquisition" },
-          { category: "Operational Runway & Team", amountGBP: 20000, amountUSD: 20000, description: "Office presence and local commercial operations" },
-          { category: "Corporate Treasury Reserve", amountGBP: 15000, amountUSD: 15000, description: "Zero-risk high yield GBP/AED savings cushion" }
+          { category: "Product Development & Cloud AI", amountGBP: 35000, description: "App architecture, One-Click book pipeline, AI agents" },
+          { category: "GCC & Global Marketing", amountGBP: 30000, description: "Dubai billboard & digital omnichannel acquisition" },
+          { category: "Operational Runway & Team", amountGBP: 20000, description: "Office presence and local commercial operations" },
+          { category: "Corporate Treasury Reserve", amountGBP: 15000, description: "Zero-risk high yield GBP savings cushion" }
         ],
         threeYearRoadmap: [
           { year: "Year 1", milestone: "Establish corporate license, deploy Web & Mobile App, achieve £150K Gross Volume in UAE." },
@@ -304,10 +302,10 @@ Return a valid JSON object with the following fields:
       appOneClickFeatureConcept: "Smart frictionless booking system featuring one-tap instant checkout, automated calendar sync, and real-time SMS/WhatsApp confirmation.",
       aiCopilotIntegration: "Autonomous AI customer agent handling multilingual inquiries, custom quote generation, and booking optimization.",
       budgetAllocation100k: [
-        { category: "Platform & App Polish", amountGBP: 35000, amountUSD: 35000, description: "One-Click engine, AI automation, cloud security" },
-        { category: "UAE Launch & PR Campaign", amountGBP: 30000, amountUSD: 30000, description: "Growth marketing across Dubai, Abu Dhabi, and GCC" },
-        { category: "Operations & Equipment", amountGBP: 20000, amountUSD: 20000, description: "Prime workspace and essential business tooling" },
-        { category: "Reserve Treasury", amountGBP: 15000, amountUSD: 15000, description: "Emergency fund in UAE corporate bank account" }
+        { category: "Platform & App Polish", amountGBP: 35000, description: "One-Click engine, AI automation, cloud security" },
+        { category: "UAE Launch & PR Campaign", amountGBP: 30000, description: "Growth marketing across Dubai, Abu Dhabi, and GCC" },
+        { category: "Operations & Equipment", amountGBP: 20000, description: "Prime workspace and essential business tooling" },
+        { category: "Reserve Treasury", amountGBP: 15000, description: "Emergency fund in UAE corporate bank account" }
       ],
       threeYearRoadmap: [
         { year: "Year 1", milestone: "Incorporate company, launch Web/App, activate UAE bank accounts, hit 1,000 users." },
@@ -342,7 +340,7 @@ You are helping a prospective winner understand the full prize package:
 User Business Context: ${userBusinessContext || "Aspiring entrepreneur entering the competition"}
 User Question: "${question}"
 
-Provide a concise, direct, helpful, and inspiring response (2-3 paragraphs max) packed with accurate UAE business knowledge (0% personal tax, 9% corporate tax on profits above AED 375k with qualifying freezone exemptions, family visa sponsorship, fast-track banking, app launch).`;
+Provide a concise, direct, helpful, and inspiring response (2-3 paragraphs max) packed with accurate UAE business knowledge (0% personal tax, 9% corporate tax on profits above the applicable corporate-tax threshold with qualifying freezone exemptions, family visa sponsorship, fast-track banking, app launch).`;
 
     if (!process.env.GEMINI_API_KEY) {
       return res.json({

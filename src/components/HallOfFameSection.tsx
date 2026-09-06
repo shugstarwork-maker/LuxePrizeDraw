@@ -11,7 +11,6 @@ export interface HallOfFameWinner {
   country: string;
   flag: string;
   winningsGBP: number;
-  winningsUSD: number;
   drawDate: string;
   edition: string;
   ventureCreated: string;
@@ -31,12 +30,11 @@ export const HALL_OF_FAME_WINNERS: HallOfFameWinner[] = [
     country: "United Kingdom / UAE",
     flag: "🇬🇧 🇦🇪",
     winningsGBP: 220000,
-    winningsUSD: 285000,
     drawDate: "November 2025",
     edition: "Autumn Founder Grand Draw",
     ventureCreated: "Aethelgard AI Logistics (DIFC Innovation Hub)",
     location: "DIFC Dubai & London",
-    storyQuote: "Winning the £220,000 package gave us the license, Dubai Marina penthouse living, and seed runway to scale to $3.2M ARR in our first 10 months.",
+    storyQuote: "Winning the £220,000 package gave us the license, Dubai Marina penthouse living, and seed runway to scale to £3.2M ARR in our first 10 months.",
     tier: "Grand Champion",
     verifiedCertId: "DET-CERT-2025-884102",
     category: "Tech & AI",
@@ -48,7 +46,6 @@ export const HALL_OF_FAME_WINNERS: HallOfFameWinner[] = [
     country: "Canada",
     flag: "🇨🇦",
     winningsGBP: 185000,
-    winningsUSD: 240000,
     drawDate: "August 2025",
     edition: "Summer Solstice Venture Series",
     ventureCreated: "SilkRoad Private Client Escapes & Yacht Concierge",
@@ -65,7 +62,6 @@ export const HALL_OF_FAME_WINNERS: HallOfFameWinner[] = [
     country: "Australia",
     flag: "🇦🇺",
     winningsGBP: 150000,
-    winningsUSD: 195000,
     drawDate: "May 2025",
     edition: "Spring Horizon Draw",
     ventureCreated: "Apex Quant Algorithms (DMCC Crypto Centre)",
@@ -82,7 +78,6 @@ export const HALL_OF_FAME_WINNERS: HallOfFameWinner[] = [
     country: "Ireland",
     flag: "🇮🇪",
     winningsGBP: 120000,
-    winningsUSD: 155000,
     drawDate: "February 2025",
     edition: "Winter Pioneer Gala",
     ventureCreated: "Solaris Water Tech & Desert Agriscience",
@@ -99,7 +94,6 @@ export const HALL_OF_FAME_WINNERS: HallOfFameWinner[] = [
     country: "Spain",
     flag: "🇪🇸",
     winningsGBP: 110000,
-    winningsUSD: 142000,
     drawDate: "December 2024",
     edition: "Year-End Platinum Draw",
     ventureCreated: "Iberia Luxe D2C Fashion & Arabian Scents",
@@ -232,9 +226,6 @@ export const HallOfFameSection: React.FC<{ onOpenEntry?: () => void }> = ({ onOp
                     <div className="flex items-baseline justify-between">
                       <span className="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-[#D4AF37] to-amber-400 font-mono">
                         &pound;{winner.winningsGBP.toLocaleString()}
-                      </span>
-                      <span className="text-xs text-white/50 font-mono">
-                        (&asymp; ${winner.winningsUSD.toLocaleString()} USD)
                       </span>
                     </div>
                   </div>

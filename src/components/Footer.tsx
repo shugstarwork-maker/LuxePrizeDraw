@@ -45,7 +45,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenEntry, onOpenWallet }) => 
               <li className="hover:text-[#D4AF37] transition-colors cursor-pointer">Turnkey UAE LLC Formation</li>
               <li className="hover:text-[#D4AF37] transition-colors cursor-pointer">App & Web with One-Click Book</li>
               <li className="hover:text-[#D4AF37] transition-colors cursor-pointer">Autonomous AI Concierge</li>
-              <li className="hover:text-[#D4AF37] transition-colors cursor-pointer">VIP Multi-Currency Banking</li>
+              <li className="hover:text-[#D4AF37] transition-colors cursor-pointer">VIP GBP Banking</li>
             </ul>
           </div>
 

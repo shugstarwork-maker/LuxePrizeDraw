@@ -148,7 +148,7 @@ export const AiPitchEvaluator: React.FC<AiPitchEvaluatorProps> = ({ onApplyIdeaT
                   >
                     <option>One-Click Booking & AI Assistant</option>
                     <option>1-Tap VIP Concierge & WhatsApp Bot</option>
-                    <option>Instant Multi-Currency Checkout</option>
+                    <option>Instant GBP Checkout</option>
                     <option>AI Lead Qualifier & Automated Scheduling</option>
                   </select>
                 </div>
@@ -244,7 +244,7 @@ export const AiPitchEvaluator: React.FC<AiPitchEvaluatorProps> = ({ onApplyIdeaT
                           <p className="text-[10px] text-white/40">{item.description}</p>
                         </div>
                         <span className="font-mono font-bold text-[#D4AF37] shrink-0">
-                          £{(item.amountGBP || item.amountUSD).toLocaleString()}
+                          £{item.amountGBP.toLocaleString()}
                         </span>
                       </div>
                     ))}

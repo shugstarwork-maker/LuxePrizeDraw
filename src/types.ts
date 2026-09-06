@@ -2,7 +2,6 @@ export interface PrizePillar {
   id: string;
   title: string;
   shortTitle: string;
-  valueUSD?: string;
   valueGBP: string;
   tagline: string;
   badge: string;
@@ -39,7 +38,6 @@ export interface AiPitchEvaluation {
   budgetAllocation100k: {
     category: string;
     amountGBP: number;
-    amountUSD?: number;
     description: string;
   }[];
   threeYearRoadmap: {
@@ -54,7 +52,6 @@ export interface BookingDemoSlot {
   id: string;
   serviceTitle: string;
   duration: string;
-  priceAED: number;
   priceGBP: number;
   timeSlot: string;
   vipTier: string;
@@ -132,8 +129,6 @@ export interface DrawAuditRecord {
 
 export interface CompetitionStats {
   totalEntries: number;
-  prizePoolValueUSD?: number;
-  cashPrizeUSD?: number;
   prizePoolValueGBP: number;
   cashPrizeGBP: number;
   visaYears: number;
