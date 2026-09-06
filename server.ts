@@ -155,7 +155,8 @@ app.post("/api/competition/enter", (req, res) => {
       entryType = "FREE",
       planId,
       ticketsCount = 1,
-      charityAmount = 0
+      charityAmount = 0,
+      demo = false
     } = req.body;
 
     if (!fullName || !email) {
@@ -163,11 +164,12 @@ app.post("/api/competition/enter", (req, res) => {
     }
 
     const count = Number(ticketsCount) || 1;
-    totalEntriesCount += count;
-
-    if (charityAmount && Number(charityAmount) > 0) {
-      totalCharityRaisedGBP += Number(charityAmount);
-      if (Math.random() > 0.5) totalScholarshipsFunded += 1;
+    if (!demo) {
+      totalEntriesCount += count;
+      if (charityAmount && Number(charityAmount) > 0) {
+        totalCharityRaisedGBP += Number(charityAmount);
+        if (Math.random() > 0.5) totalScholarshipsFunded += 1;
+      }
     }
 
     const ticketId = `UAE-${Math.floor(100000 + Math.random() * 900000)}-${(country || "GLB").slice(0, 3).toUpperCase()}`;
@@ -180,8 +182,10 @@ app.post("/api/competition/enter", (req, res) => {
       business: businessIdea ? businessIdea.slice(0, 25) + "..." : (entryType === "SUBSCRIBER_VIP" ? "VIP Founder Subscriber" : "UAE Dream Venture"),
       entryType: entryType as "FREE" | "SUBSCRIBER_VIP" | "POWER_BUNDLE",
     };
-    verifiedEntrants.unshift(newEntrant);
-    if (verifiedEntrants.length > 20) verifiedEntrants.pop();
+    if (!demo) {
+      verifiedEntrants.unshift(newEntrant);
+      if (verifiedEntrants.length > 20) verifiedEntrants.pop();
+    }
 
     return res.json({
       success: true,
@@ -193,7 +197,7 @@ app.post("/api/competition/enter", (req, res) => {
       businessIdea,
       targetIndustry: targetIndustry || "Tech & Innovation",
       entryTimestamp: new Date().toISOString(),
-      ticketStatus: "VERIFIED_ACTIVE",
+      ticketStatus: demo ? "PREVIEW_ONLY" : "VERIFIED_ACTIVE",
       drawDate: "October 31, 2026 at 18:00 GST (Dubai Time)",
       bonusEntriesAwarded: count > 1 ? count - 1 : 1,
       totalTickets: count,

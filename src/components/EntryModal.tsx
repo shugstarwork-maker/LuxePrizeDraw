@@ -26,9 +26,10 @@ export const EntryModal: React.FC<EntryModalProps> = ({
   initialIndustry = "Tech & Innovation",
   onTicketGenerated,
 }) => {
-  const [entryMode, setEntryMode] = useState<EntryMode>("subscription");
+  const [entryMode, setEntryMode] = useState<EntryMode>("bundle");
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>(SUBSCRIPTION_PLANS[0]);
-  const [selectedBundle, setSelectedBundle] = useState<TicketBundle>(TICKET_BUNDLES[2]); // 25 tickets
+  const [selectedBundle, setSelectedBundle] = useState<TicketBundle>(TICKET_BUNDLES[0]);
+  const [selectedCategory, setSelectedCategory] = useState<TicketBundle["category"]>("Cash Challenges");
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -39,7 +40,6 @@ export const EntryModal: React.FC<EntryModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [generatedTicket, setGeneratedTicket] = useState<CompetitionTicket | null>(null);
   const [generatedBatchCount, setGeneratedBatchCount] = useState(1);
-  const [charityDonatedAmount, setCharityDonatedAmount] = useState(0);
   const [copiedLink, setCopiedLink] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -67,7 +67,7 @@ export const EntryModal: React.FC<EntryModalProps> = ({
   const handleSubmitEntry = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName.trim() || !email.trim()) {
-      setErrorMsg("Please provide your full name and official email address.");
+      setErrorMsg("Please provide your name and email address.");
       return;
     }
 
@@ -89,6 +89,7 @@ export const EntryModal: React.FC<EntryModalProps> = ({
           planId: entryMode === "subscription" ? selectedPlan.id : (entryMode === "bundle" ? selectedBundle.id : "free"),
           ticketsCount: ticketsToMint,
           charityAmount: charityDonation,
+          demo: true,
         }),
       });
 
@@ -106,7 +107,7 @@ export const EntryModal: React.FC<EntryModalProps> = ({
         businessIdea: data.businessIdea,
         targetIndustry: data.targetIndustry,
         entryTimestamp: data.entryTimestamp,
-        ticketStatus: entryMode === "subscription" ? "GOLD_BONUS" : "VERIFIED_ACTIVE",
+        ticketStatus: "PREVIEW_ONLY",
         drawDate: data.drawDate,
         bonusEntriesAwarded: ticketsToMint > 1 ? ticketsToMint - 1 : 1,
         totalTickets: ticketsToMint,
@@ -114,7 +115,6 @@ export const EntryModal: React.FC<EntryModalProps> = ({
 
       setGeneratedTicket(ticket);
       setGeneratedBatchCount(ticketsToMint);
-      setCharityDonatedAmount(charityDonation);
       onTicketGenerated(ticket);
 
       // Trigger grand celebratory confetti explosion
@@ -131,14 +131,13 @@ export const EntryModal: React.FC<EntryModalProps> = ({
         businessIdea,
         targetIndustry,
         entryTimestamp: new Date().toISOString(),
-        ticketStatus: entryMode === "subscription" ? "GOLD_BONUS" : "VERIFIED_ACTIVE",
+        ticketStatus: "PREVIEW_ONLY",
         drawDate: "October 31, 2026 at 18:00 GST",
         bonusEntriesAwarded: ticketsToMint > 1 ? ticketsToMint - 1 : 1,
         totalTickets: ticketsToMint,
       };
       setGeneratedTicket(fallbackTicket);
       setGeneratedBatchCount(ticketsToMint);
-      setCharityDonatedAmount(charityDonation);
       onTicketGenerated(fallbackTicket);
       triggerGoldConfetti();
     } finally {
@@ -172,7 +171,7 @@ export const EntryModal: React.FC<EntryModalProps> = ({
               <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-[10px] uppercase tracking-widest font-bold">
                   <Trophy className="w-3.5 h-3.5 text-[#D4AF37]" />
-                  <span>Grand £220,000 Package Draw</span>
+                  <span>GBP Demo Prize Categories</span>
                 </span>
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-400 text-[10px] uppercase tracking-widest font-bold">
                   <Heart className="w-3 h-3 fill-rose-400/40" />
@@ -181,10 +180,10 @@ export const EntryModal: React.FC<EntryModalProps> = ({
               </div>
 
               <h3 className="text-2xl sm:text-3xl font-light text-white tracking-tight">
-                Enter the Official <span className="font-bold text-[#D4AF37]">UAE Dream Competition</span>
+                Explore <span className="font-bold text-[#D4AF37]">Demo Prize Categories</span>
               </h3>
               <p className="text-xs sm:text-sm text-white/60 font-light leading-relaxed">
-                Win <strong className="text-emerald-400 font-semibold">£100K Cash</strong>, <strong className="text-yellow-400 font-semibold">2-Week 5-Star Dubai Luxury Holiday</strong>, <strong className="text-[#D4AF37] font-semibold">3-Yr Investor Visa</strong>, <strong className="text-white font-semibold">Turnkey LLC</strong>, & custom <strong className="text-indigo-300 font-semibold">App with One-Click Book & AI</strong>.
+                This preview uses smaller, GBP-only demo prize categories and illustrative entry amounts. No payment is processed and no prize can be claimed.
               </p>
             </div>
 
@@ -200,8 +199,8 @@ export const EntryModal: React.FC<EntryModalProps> = ({
                 }`}
               >
                 <Star className="w-3.5 h-3.5" />
-                <span>Monthly Club</span>
-                <span className="text-[9px] px-1 rounded bg-black/20 text-black font-extrabold hidden sm:inline">20-50x</span>
+                <span>Demo Memberships</span>
+                <span className="text-[9px] px-1 rounded bg-black/20 text-black font-extrabold hidden sm:inline">Preview</span>
               </button>
 
               <button
@@ -214,7 +213,7 @@ export const EntryModal: React.FC<EntryModalProps> = ({
                 }`}
               >
                 <Zap className="w-3.5 h-3.5" />
-                <span>Ticket Bundles</span>
+                <span>Demo Categories</span>
               </button>
 
               <button
@@ -227,7 +226,7 @@ export const EntryModal: React.FC<EntryModalProps> = ({
                 }`}
               >
                 <Ticket className="w-3.5 h-3.5" />
-                <span>100% Free</span>
+                <span>Free Preview</span>
               </button>
             </div>
 
@@ -237,9 +236,9 @@ export const EntryModal: React.FC<EntryModalProps> = ({
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
-                    <span>Select Monthly Entry Subscription (Cancel Anytime)</span>
+                    <span>Explore Demo Membership Options</span>
                   </span>
-                  <span className="text-emerald-400 font-semibold text-[11px]">Auto-Renews &bull; Instant Roll-over</span>
+                  <span className="text-emerald-400 font-semibold text-[11px]">Illustrative only</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
@@ -266,14 +265,14 @@ export const EntryModal: React.FC<EntryModalProps> = ({
                         </div>
                         <div className="text-lg font-extrabold text-white">
                           £{plan.priceGBP.toFixed(2)}
-                          <span className="text-[10px] font-normal text-white/50">/mo</span>
+                          <span className="text-[10px] font-normal text-white/50"> demo</span>
                         </div>
                         <p className="text-[10px] text-emerald-400 font-semibold mt-1">
-                          {plan.recurringTicketsPerMonth} Automatic Tickets/mo
+                          {plan.recurringTicketsPerMonth} Demo entries
                         </p>
                         <div className="mt-2 pt-2 border-t border-white/10 flex items-center justify-between text-[9px] text-rose-300">
-                          <span>Donates:</span>
-                          <span className="font-bold">£{plan.charityDonationGBP.toFixed(2)} to Charity</span>
+                          <span>Preview:</span>
+                          <span className="font-bold">No payment taken</span>
                         </div>
                       </div>
                     );
@@ -284,27 +283,24 @@ export const EntryModal: React.FC<EntryModalProps> = ({
 
             {entryMode === "bundle" && (
               <div className="space-y-3">
-                <span className="font-bold text-white text-xs uppercase tracking-wider block">
-                  Select One-Off Ticket Power Bundle
-                </span>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {TICKET_BUNDLES.slice(1).map((bundle) => {
+                <div className="flex flex-wrap gap-2" role="tablist" aria-label="Demo prize categories">
+                  {(["Cash Challenges", "Tech & Gaming", "Travel & Lifestyle", "Instant Wins"] as const).map((category) => (
+                    <button key={category} type="button" onClick={() => { setSelectedCategory(category); const first = TICKET_BUNDLES.find((bundle) => bundle.category === category && bundle.priceGBP > 0); if (first) setSelectedBundle(first); }} className={`px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider border ${selectedCategory === category ? "bg-[#D4AF37] border-[#D4AF37] text-black" : "bg-white/5 border-white/10 text-white/60 hover:text-white"}`}>{category}</button>
+                  ))}
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-bold text-white text-xs uppercase tracking-wider">{selectedCategory} demo options</span>
+                  <span className="text-[10px] text-amber-300">Prototype only · no payment taken</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {TICKET_BUNDLES.filter((bundle) => bundle.category === selectedCategory && bundle.priceGBP > 0).map((bundle) => {
                     const isSelected = selectedBundle.id === bundle.id;
                     return (
-                      <div
-                        key={bundle.id}
-                        onClick={() => setSelectedBundle(bundle)}
-                        className={`p-3 rounded-2xl border cursor-pointer transition-all text-center ${
-                          isSelected
-                            ? "bg-white/20 border-white shadow-lg"
-                            : "bg-white/5 border-white/10 hover:border-white/20"
-                        }`}
-                      >
+                      <button type="button" key={bundle.id} onClick={() => setSelectedBundle(bundle)} className={`p-3 rounded-2xl border transition-all text-left ${isSelected ? "bg-white/20 border-white shadow-lg" : "bg-white/5 border-white/10 hover:border-white/20"}`}>
                         <span className="text-[9px] uppercase font-bold text-[#D4AF37] block">{bundle.badge}</span>
-                        <div className="text-base font-bold text-white mt-1">{bundle.tickets} Tickets</div>
-                        <div className="text-xs font-bold text-emerald-400 mt-0.5">£{bundle.priceGBP.toFixed(2)}</div>
-                        <p className="text-[8px] text-rose-300 mt-1">£{bundle.charityDonationGBP.toFixed(2)} to Charity</p>
-                      </div>
+                        <div className="text-base font-bold text-white mt-1">{bundle.name}</div>
+                        <div className="mt-2 flex items-center justify-between"><span className="text-xs text-white/60">£{bundle.prizeValueGBP} demo prize</span><span className="text-sm font-bold text-emerald-400">£{bundle.priceGBP.toFixed(2)} demo</span></div>
+                      </button>
                     );
                   })}
                 </div>
@@ -316,9 +312,9 @@ export const EntryModal: React.FC<EntryModalProps> = ({
                 <div className="space-y-0.5">
                   <span className="font-bold text-white flex items-center gap-1.5">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Official Single Free Entry (1 Ticket)</span>
+                    <span>Free Demo Entry (1 Preview Ticket)</span>
                   </span>
-                  <p className="text-[11px] text-white/50">No purchase necessary. Verified entry for the October 31, 2026 draw.</p>
+                  <p className="text-[11px] text-white/50">No payment or real entry is created in this preview.</p>
                 </div>
                 <span className="px-2.5 py-1 rounded bg-white/10 text-white font-mono font-bold">£0.00</span>
               </div>
@@ -332,21 +328,15 @@ export const EntryModal: React.FC<EntryModalProps> = ({
                 </div>
                 <div>
                   <p className="text-xs font-bold text-white">
-                    25% Charity Contribution Commitment
+                    Prototype notice
                   </p>
                   <p className="text-[11px] text-white/60">
-                    {charityDonation > 0 ? (
-                      <span>
-                        This selection directly donates <strong className="text-rose-300 font-bold">£{charityDonation.toFixed(2)}</strong> to youth entrepreneurship & school scholarships.
-                      </span>
-                    ) : (
-                      <span>All paid subscriptions and bundles fund Dubai Cares & Global Youth Enterprise Fund.</span>
-                    )}
+<span>Prices, prizes, entries, and charity contributions are illustrative only until the app is reviewed and launched.</span>
                   </p>
                 </div>
               </div>
               <span className="text-[10px] uppercase tracking-wider font-mono font-bold text-rose-400 shrink-0 hidden sm:inline">
-                {charityDonation > 0 ? `+£${charityDonation.toFixed(2)} Donated` : "25% PROCEEDS"}
+                "DEMO ONLY"
               </span>
             </div>
 
@@ -355,7 +345,7 @@ export const EntryModal: React.FC<EntryModalProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[10px] uppercase tracking-wider font-bold text-white/70 mb-1">
-                    Your Full Legal Name *
+                    Your Name *
                   </label>
                   <input
                     type="text"
@@ -369,7 +359,7 @@ export const EntryModal: React.FC<EntryModalProps> = ({
 
                 <div>
                   <label className="block text-[10px] uppercase tracking-wider font-bold text-white/70 mb-1">
-                    Official Email Address *
+                    Email Address *
                   </label>
                   <input
                     type="email"
@@ -423,7 +413,7 @@ export const EntryModal: React.FC<EntryModalProps> = ({
 
               <div>
                 <label className="block text-[10px] uppercase tracking-wider font-bold text-white/70 mb-1">
-                  What business would you launch in Dubai with your £100K grant?
+                  What type of prize challenge interests you?
                 </label>
                 <textarea
                   rows={2}
@@ -446,17 +436,17 @@ export const EntryModal: React.FC<EntryModalProps> = ({
                   {isSubmitting ? (
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin text-black" />
-                      <span>Minting {ticketsToMint} Verified Tickets & Syncing Charity...</span>
+                      <span>Creating demo preview...</span>
                     </>
                   ) : (
                     <>
                       <Sparkles className="w-4 h-4 text-black" />
                       <span>
                         {entryMode === "subscription"
-                          ? `Start Monthly Club (£${currentPrice.toFixed(2)}/mo &bull; ${ticketsToMint} Tickets/mo)`
+                          ? `Preview membership (£${currentPrice.toFixed(2)} demo)`
                           : (entryMode === "bundle"
-                              ? `Claim ${ticketsToMint} Entry Bundle (£${currentPrice.toFixed(2)})`
-                              : "Claim 100% Free Single Entry Pass")}
+                              ? `Preview ${selectedBundle.name} (£${currentPrice.toFixed(2)} demo)`
+                              : "Create free demo preview")}
                       </span>
                     </>
                   )}
@@ -466,10 +456,10 @@ export const EntryModal: React.FC<EntryModalProps> = ({
               <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-white/40 pt-1">
                 <span className="flex items-center gap-1">
                   <Lock className="w-3 h-3 text-emerald-400" />
-                  <span>256-Bit SSL Encrypted &middot; Regulated Draw</span>
+                  <span>Demo preview &middot; no payment processed</span>
                 </span>
                 <span className="text-rose-400/80">
-                  {charityDonation > 0 ? `£${charityDonation.toFixed(2)} to Charity` : "25% Proceeds to Charity"}
+                  "DEMO ONLY"
                 </span>
               </div>
             </form>
@@ -481,13 +471,13 @@ export const EntryModal: React.FC<EntryModalProps> = ({
               <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest flex items-center justify-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                 {generatedBatchCount > 1
-                  ? `${generatedBatchCount} Official Tickets Minted & Synchronized!`
-                  : "Ticket Successfully Minted & Verified!"}
+                  ? `${generatedBatchCount} Demo Tickets Previewed`
+                  : "Demo Ticket Preview Created"}
               </span>
               <h3 className="text-2xl sm:text-3xl font-light text-white">
-                Your Official <span className="font-bold text-[#D4AF37]">Gold Pass</span>
+                Your <span className="font-bold text-[#D4AF37]">Demo Pass</span>
               </h3>
-              <p className="text-xs text-white/50">Saved to your wallet. Keep this ticket ID for the live draw on Oct 31, 2026.</p>
+              <p className="text-xs text-white/50">This is a prototype preview only. No entry, payment, or prize claim has been created.</p>
             </div>
 
             {/* Luxurious Golden Ticket Pass */}
@@ -499,8 +489,8 @@ export const EntryModal: React.FC<EntryModalProps> = ({
                     UAE
                   </div>
                   <div>
-                    <p className="text-[9px] font-bold tracking-widest uppercase text-black/70">Official Founder Competition</p>
-                    <p className="text-xs font-bold tracking-wider text-black">UAE DREAM GRAND PRIZE PASS</p>
+                    <p className="text-[9px] font-bold tracking-widest uppercase text-black/70">Prototype Challenge Preview</p>
+                    <p className="text-xs font-bold tracking-wider text-black">DEMO PRIZE CATEGORY PASS</p>
                   </div>
                 </div>
 
@@ -525,12 +515,12 @@ export const EntryModal: React.FC<EntryModalProps> = ({
                   <p className="font-bold text-black truncate">{generatedTicket.fullName}</p>
                 </div>
                 <div>
-                  <p className="text-[9px] font-bold text-black/70 uppercase tracking-wider">Total Entries</p>
-                  <p className="font-bold text-black font-mono text-sm sm:text-base">{generatedBatchCount} Active Tickets</p>
+                  <p className="text-[9px] font-bold text-black/70 uppercase tracking-wider">Demo Entries</p>
+                  <p className="font-bold text-black font-mono text-sm sm:text-base">{generatedBatchCount} Preview Tickets</p>
                 </div>
                 <div>
                   <p className="text-[9px] font-bold text-black/70 uppercase tracking-wider">Prize Value</p>
-                  <p className="font-bold text-black">£220,000+ (£100K Cash)</p>
+                  <p className="font-bold text-black">Selected demo category</p>
                 </div>
               </div>
 
@@ -540,23 +530,15 @@ export const EntryModal: React.FC<EntryModalProps> = ({
                   ||| | |||| || ||||| ||| |||| | ||| ||||| |||
                 </div>
                 <div className="text-[10px] font-bold text-black">
-                  Verified Cryptographic Draw Entry
+                  Non-redeemable preview
                 </div>
               </div>
             </div>
 
-            {/* Charity Donation Certificate Notification */}
-            {charityDonatedAmount > 0 && (
-              <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center gap-3">
-                <Heart className="w-5 h-5 text-rose-400 fill-rose-400 shrink-0" />
-                <div className="text-left text-xs">
-                  <p className="font-bold text-rose-300">Thank You for Your Impact!</p>
-                  <p className="text-white/60 text-[11px]">
-                    <strong className="text-white">£{charityDonatedAmount.toFixed(2)}</strong> of your entry has been credited toward global student scholarships and youth startup grants.
-                  </p>
-                </div>
-              </div>
-            )}
+            <div className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center gap-3">
+              <Heart className="w-5 h-5 text-indigo-300 shrink-0" />
+              <p className="text-white/60 text-[11px]">This preview is for product design review only. No money, charity donation, entry, or prize entitlement is created.</p>
+            </div>
 
             {/* Share to Get +3 Bonus Entries */}
             <div className="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">

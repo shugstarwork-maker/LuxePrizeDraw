@@ -22,7 +22,7 @@ export interface CompetitionTicket {
   businessIdea?: string;
   targetIndustry?: string;
   entryTimestamp: string;
-  ticketStatus: "VERIFIED_ACTIVE" | "PENDING_DRAW" | "GOLD_BONUS";
+  ticketStatus: "VERIFIED_ACTIVE" | "PENDING_DRAW" | "GOLD_BONUS" | "PREVIEW_ONLY";
   drawDate: string;
   bonusEntriesAwarded: number;
   totalTickets: number;
@@ -93,6 +93,8 @@ export interface SubscriptionPlan {
 export interface TicketBundle {
   id: string;
   name: string;
+  category: "Cash Challenges" | "Tech & Gaming" | "Travel & Lifestyle" | "Instant Wins";
+  prizeValueGBP: number;
   tickets: number;
   priceGBP: number;
   badge?: string;

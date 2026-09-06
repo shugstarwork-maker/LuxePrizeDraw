@@ -251,38 +251,13 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
 ];
 
 export const TICKET_BUNDLES: TicketBundle[] = [
-  {
-    id: "free-entry",
-    name: "Official Free Single Entry",
-    tickets: 1,
-    priceGBP: 0.00,
-    badge: "100% Free",
-    charityDonationGBP: 0.00,
-  },
-  {
-    id: "booster-5",
-    name: "5-Ticket Entry Booster",
-    tickets: 5,
-    priceGBP: 4.99,
-    badge: "+4 Bonus Entries",
-    charityDonationGBP: 1.25,
-  },
-  {
-    id: "power-25",
-    name: "25-Ticket Power Bundle",
-    tickets: 25,
-    priceGBP: 14.99,
-    badge: "Popular Bundle",
-    charityDonationGBP: 3.75,
-  },
-  {
-    id: "syndicate-100",
-    name: "100-Ticket Mega Syndicate Pack",
-    tickets: 100,
-    priceGBP: 49.99,
-    badge: "Maximum Odds",
-    charityDonationGBP: 12.50,
-  },
+  { id: "cash-25", name: "£25 Cash Challenge", category: "Cash Challenges", prizeValueGBP: 25, tickets: 1, priceGBP: 0.49, badge: "Demo tier", charityDonationGBP: 0 },
+  { id: "cash-100", name: "£100 Cash Challenge", category: "Cash Challenges", prizeValueGBP: 100, tickets: 3, priceGBP: 0.99, badge: "3 demo entries", charityDonationGBP: 0 },
+  { id: "tech-50", name: "£50 Tech & Gaming Challenge", category: "Tech & Gaming", prizeValueGBP: 50, tickets: 2, priceGBP: 0.79, badge: "Demo tier", charityDonationGBP: 0 },
+  { id: "tech-250", name: "£250 Tech & Gaming Challenge", category: "Tech & Gaming", prizeValueGBP: 250, tickets: 5, priceGBP: 1.99, badge: "5 demo entries", charityDonationGBP: 0 },
+  { id: "travel-100", name: "£100 Travel & Lifestyle Challenge", category: "Travel & Lifestyle", prizeValueGBP: 100, tickets: 3, priceGBP: 0.99, badge: "Demo tier", charityDonationGBP: 0 },
+  { id: "instant-50", name: "£50 Instant Win Challenge", category: "Instant Wins", prizeValueGBP: 50, tickets: 2, priceGBP: 0.79, badge: "Demo tier", charityDonationGBP: 0 },
+  { id: "free-entry", name: "Official Free Demo Entry", category: "Cash Challenges", prizeValueGBP: 25, tickets: 1, priceGBP: 0, badge: "100% Free", charityDonationGBP: 0 },
 ];
 
 export const CHARITY_IMPACT_DATA: CharityImpactMetrics = {
