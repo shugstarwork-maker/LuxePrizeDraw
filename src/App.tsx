@@ -9,6 +9,7 @@ import { HeroSection } from "./components/HeroSection";
 import { PrizeShowcase } from "./components/PrizeShowcase";
 import { CharityImpactSection } from "./components/CharityImpactSection";
 import { OneClickBookDemo } from "./components/OneClickBookDemo";
+import { GamesArena } from "./components/GamesArena";
 import { AiPitchEvaluator } from "./components/AiPitchEvaluator";
 import { PackageCustomizer } from "./components/PackageCustomizer";
 import { DrawVerificationSection } from "./components/DrawVerificationSection";
@@ -179,6 +180,9 @@ export default function App() {
 
         {/* Special Feature #1: One-Click Book & AI Interactive Sandbox */}
         <OneClickBookDemo onOpenEntry={() => setIsEntryModalOpen(true)} />
+
+        {/* Demo-only 1v1 games and token challenges */}
+        <GamesArena />
 
         {/* Special Feature #2: AI Business Pitch & Feasibility Evaluator (Gemini 3.7) */}
         <AiPitchEvaluator onApplyIdeaToEntry={handleApplyIdeaToEntry} />

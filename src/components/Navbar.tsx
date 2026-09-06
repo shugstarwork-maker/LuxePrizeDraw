@@ -50,6 +50,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: "draw-verification", label: "Auditable Draw" },
     { id: "charity-impact", label: "Charity (25%)" },
     { id: "one-click-demo", label: "One-Click & AI" },
+    { id: "games", label: "Games & Challenges" },
     { id: "ai-evaluator", label: "AI Feasibility" },
     { id: "customizer", label: "Simulator" },
     { id: "live-draw", label: "Live Draw" },
