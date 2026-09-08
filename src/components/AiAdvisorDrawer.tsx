@@ -71,7 +71,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                 <Sparkles className="w-5 h-5 text-black" />
               </div>
               <div>
-                <h3 className="text-sm font-bold uppercase tracking-wider text-white">UAE Business AI Advisor</h3>
+                <h3 className="text-sm font-bold uppercase tracking-wider text-white">Luxe Prize Draws AI Advisor</h3>
                 <p className="text-[10px] text-emerald-400 font-semibold tracking-wider uppercase">Live &middot; Gemini 2.5 Flash</p>
               </div>
             </div>

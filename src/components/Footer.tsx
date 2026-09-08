@@ -19,15 +19,15 @@ export const Footer: React.FC<FooterProps> = ({ onOpenEntry, onOpenWallet }) => 
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-[#D4AF37] flex items-center justify-center font-bold text-black text-sm shadow-lg shadow-[#D4AF37]/20">
-                UAE
+                LUXE
               </div>
               <div>
-                <span className="font-bold text-sm uppercase tracking-wider text-white">UAE DREAM PACKAGE</span>
-                <p className="text-[10px] text-[#D4AF37] font-semibold uppercase tracking-wider">Official 2026 Founder Draw</p>
+                <span className="font-bold text-sm uppercase tracking-wider text-white">LUXE PRIZE DRAWS</span>
+                <p className="text-[10px] text-[#D4AF37] font-semibold uppercase tracking-wider">Official 2026 Grand Draw</p>
               </div>
             </div>
             <p className="text-xs text-white/50 font-light leading-relaxed max-w-sm">
-              The premier global founder competition granting one visionary entrepreneur a turnkey UAE business setup: £100K Cash, 2-Week 5-Star Dubai Luxury Holiday, 3-Year Residency Visa, 100% Foreign-Owned LLC, Full Branding Suite, Custom App & Website with One-Click Book & AI, and Tier-1 VIP Corporate Banking.
+              Luxe Prize Draws gives one visionary entrepreneur a turnkey UAE business setup: £100K Cash, 2-Week 5-Star Dubai Luxury Holiday, 3-Year Residency Visa, 100% Foreign-Owned LLC, Full Branding Suite, Custom App & Website with One-Click Book & AI, and Tier-1 VIP Corporate Banking.
             </p>
             <div className="flex items-center gap-2 text-xs text-emerald-400 font-medium">
               <ShieldCheck className="w-4 h-4" />
