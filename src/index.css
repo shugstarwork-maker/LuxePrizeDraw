@@ -127,6 +127,7 @@
   display: flex;
   width: max-content;
   animation: competitionTicker 28s linear infinite;
+  will-change: transform;
 }
 
 .competition-ticker:hover .competition-ticker__track,
@@ -147,7 +148,10 @@
 }
 
 .competition-ticker__group button {
+  border: 0;
+  background: transparent;
   color: #fde68a;
+  cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -158,7 +162,16 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .competition-ticker { overflow-x: auto; }
-  .competition-ticker__track { animation: none; }
+  .competition-ticker {
+    overflow-x: auto;
+    white-space: normal;
+  }
+  .competition-ticker__track {
+    width: 100%;
+    animation: none;
+  }
+  .competition-ticker__group {
+    flex-wrap: wrap;
+  }
   .competition-ticker__group[aria-hidden="true"] { display: none; }
 }

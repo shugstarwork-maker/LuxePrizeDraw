@@ -43,6 +43,14 @@ export const Navbar: React.FC<NavbarProps> = ({
     return () => clearInterval(timer);
   }, []);
 
+  const tickerItems = [
+    { label: "Featured competitions" },
+    { label: "Explore the latest prize experiences" },
+    { label: "Play skill-game demos", sectionId: "games", ariaLabel: "Jump to the games section" },
+    { label: "Discover the prize package", sectionId: "prizes", ariaLabel: "Jump to the prize package section" },
+    { label: "Competition updates and draw information" },
+  ];
+
   const navItems = [
     { id: "prizes", label: "The £220K Package" },
     { id: "dubai-gallery", label: "Dubai Gallery" },
@@ -71,11 +79,21 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="competition-ticker__track">
           {[0, 1].map((repeat) => (
             <div className="competition-ticker__group" key={repeat} aria-hidden={repeat === 1}>
-              <span>Featured competitions</span><span className="competition-ticker__dot">•</span>
-              <span>Explore the latest prize experiences</span><span className="competition-ticker__dot">•</span>
-              <button onClick={() => scrollTo("games")} tabIndex={repeat ? -1 : undefined}>Play skill-game demos</button><span className="competition-ticker__dot">•</span>
-              <button onClick={() => scrollTo("prizes")} tabIndex={repeat ? -1 : undefined}>Discover the prize package</button><span className="competition-ticker__dot">•</span>
-              <span>Competition updates and draw information</span><span className="competition-ticker__dot">•</span>
+              {tickerItems.map((item, index) => (
+                <React.Fragment key={item.label}>
+                  {index > 0 && <span className="competition-ticker__dot" aria-hidden="true">•</span>}
+                  {item.sectionId ? (
+                    <button
+                      type="button"
+                      aria-label={item.ariaLabel}
+                      onClick={() => scrollTo(item.sectionId!)}
+                      tabIndex={repeat ? -1 : undefined}
+                    >
+                      {item.label}
+                    </button>
+                  ) : <span>{item.label}</span>}
+                </React.Fragment>
+              ))}
             </div>
           ))}
         </div>
