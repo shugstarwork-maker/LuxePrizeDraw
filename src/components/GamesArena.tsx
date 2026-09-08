@@ -106,8 +106,12 @@ function createConnect4State(): Connect4State {
   };
 }
 
-function cloneBoard<T>(board: T[][]): T[][] {
-  return board.map((row) => row.map((cell) => (cell && typeof cell === "object" ? { ...cell } : cell))) as T[][];
+function cloneChessBoard(board: Array<Array<ChessPiece | null>>): Array<Array<ChessPiece | null>> {
+  return board.map((row) => row.map((cell) => (cell ? { ...cell } : null)));
+}
+
+function cloneDraughtsBoard(board: Array<Array<DraughtsPiece | null>>): Array<Array<DraughtsPiece | null>> {
+  return board.map((row) => row.map((cell) => (cell ? { ...cell } : null)));
 }
 
 function inBounds(row: number, col: number): boolean {
@@ -302,7 +306,7 @@ export const GamesArena: React.FC = () => {
         return { ...currentState, message: "That move is not available in the demo chess board." };
       }
 
-      const board = cloneBoard(currentState.board);
+      const board = cloneChessBoard(currentState.board);
       const captured = board[row][col];
       board[row][col] = board[selectedRow][selectedCol];
       board[selectedRow][selectedCol] = null;
@@ -373,7 +377,7 @@ export const GamesArena: React.FC = () => {
         return { ...currentState, message: "Draughts moves must stay on diagonal dark squares." };
       }
 
-      const board = cloneBoard(currentState.board);
+      const board = cloneDraughtsBoard(currentState.board);
       let captured = false;
 
       if (absRowDiff === 1) {
