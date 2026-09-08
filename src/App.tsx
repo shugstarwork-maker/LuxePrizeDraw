@@ -109,7 +109,7 @@ export default function App() {
           name: newTicket.fullName.split(" ")[0] + " " + (newTicket.fullName.split(" ")[1] ? newTicket.fullName.split(" ")[1][0] + "." : ""),
           country: newTicket.country,
           timestamp: "Just now",
-          business: newTicket.businessIdea ? newTicket.businessIdea.slice(0, 20) + "..." : "UAE Dream Venture",
+          business: newTicket.businessIdea ? newTicket.businessIdea.slice(0, 20) + "..." : "Luxe Prize Draw Venture",
         },
         ...prev.recentEntrants.slice(0, 5),
       ],

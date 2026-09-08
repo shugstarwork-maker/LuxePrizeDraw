@@ -180,7 +180,7 @@ app.post("/api/competition/enter", (req, res) => {
       name: fullName.split(" ")[0] + " " + (fullName.split(" ")[1] ? fullName.split(" ")[1][0] + "." : ""),
       country: country || "International",
       timestamp: "Just now",
-      business: businessIdea ? businessIdea.slice(0, 25) + "..." : (entryType === "SUBSCRIBER_VIP" ? "VIP Founder Subscriber" : "UAE Dream Venture"),
+      business: businessIdea ? businessIdea.slice(0, 25) + "..." : (entryType === "SUBSCRIBER_VIP" ? "VIP Founder Subscriber" : "Luxe Prize Draw Venture"),
       entryType: entryType as "FREE" | "SUBSCRIBER_VIP" | "POWER_BUNDLE",
     };
     if (!demo) {
@@ -222,7 +222,7 @@ app.post("/api/gemini/pitch-evaluate", async (req, res) => {
     }
 
     const ai = getAiClient();
-    const prompt = `You are the Lead UAE Commercial Strategy & Free Zone Advisor for the official UAE Dream Package Competition.
+    const prompt = `You are the Lead UAE Commercial Strategy & Free Zone Advisor for the official Luxe Prize Draws competition.
 Evaluate the following business idea that a participant wants to launch in the UAE with their 2-Week 5-Star Dubai Luxury Holiday, £100K Sterling Cash Prize, 3-Year Residency Visa, UAE Limited Company, Custom Branding, and Web/App with One-Click Book & AI.
 
 Business Details:
@@ -332,7 +332,7 @@ app.post("/api/gemini/ask-advisor", async (req, res) => {
     }
 
     const ai = getAiClient();
-    const prompt = `You are the UAE Dream Package Senior Business & Legal Advisor.
+    const prompt = `You are the Luxe Prize Draws Senior Business & Legal Advisor.
 You are helping a prospective winner understand the full prize package:
 1. 2-Week VIP Dubai Holiday & 5-Star Hotel Stay (Business class flights for 2, luxury suite, private chauffeur, £4,000 dining credit)
 2. UAE Limited Company Formation (Freezone/Mainland 100% foreign ownership)
@@ -349,7 +349,7 @@ Provide a concise, direct, helpful, and inspiring response (2-3 paragraphs max) 
 
     if (!process.env.GEMINI_API_KEY) {
       return res.json({
-        answer: `As a winner of the UAE Dream Package, your entire journey is 100% covered. We handle the entire company incorporation with 100% foreign ownership, provide your complete brand identity, build and launch your custom iOS/Android app with One-Click Booking & AI features, sponsor your 3-Year UAE Investor Residency Visa, and treat you to a 2-Week 5-Star Dubai VIP Holiday.\n\nYour £100,000 Sterling cash prize is deposited directly into your newly minted UAE corporate bank account at premier institutions like Emirates NBD or Wio Bank. You will benefit from the UAE's world-leading 0% personal income tax and zero capital gains tax, giving you the ultimate launchpad to scale globally.`
+        answer: `As a winner of Luxe Prize Draws, your entire journey is 100% covered. We handle the entire company incorporation with 100% foreign ownership, provide your complete brand identity, build and launch your custom iOS/Android app with One-Click Booking & AI features, sponsor your 3-Year UAE Investor Residency Visa, and treat you to a 2-Week 5-Star Dubai VIP Holiday.\n\nYour £100,000 Sterling cash prize is deposited directly into your newly minted UAE corporate bank account at premier institutions like Emirates NBD or Wio Bank. You will benefit from the UAE's world-leading 0% personal income tax and zero capital gains tax, giving you the ultimate launchpad to scale globally.`
       });
     }
 
@@ -367,7 +367,7 @@ Provide a concise, direct, helpful, and inspiring response (2-3 paragraphs max) 
   } catch (error: any) {
     console.error("AI Advisor error:", error);
     return res.json({
-      answer: "The UAE Dream Package is designed for maximum speed and zero friction. From company licensing, 5-Star luxury holiday, and 3-Year Residency to corporate bank setup and transferring your £100,000 cash grant, everything is orchestrated so you can focus entirely on growing your business with your custom app and One-Click booking system.",
+      answer: "Luxe Prize Draws is designed for maximum speed and zero friction. From company licensing, 5-Star luxury holiday, and 3-Year Residency to corporate bank setup and transferring your £100,000 cash grant, everything is orchestrated so you can focus entirely on growing your business with your custom app and One-Click booking system.",
     });
   }
 });
@@ -389,7 +389,7 @@ async function startServer() {
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`UAE Dream Package Competition Server running on http://0.0.0.0:${PORT}`);
+    console.log(`Luxe Prize Draws server running on http://0.0.0.0:${PORT}`);
   });
 }
 

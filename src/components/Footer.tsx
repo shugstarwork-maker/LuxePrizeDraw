@@ -114,7 +114,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenEntry, onOpenWallet }) => 
         {/* Bottom Bar with Compliance Notice */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/40 font-light">
           <div className="space-y-1 text-center sm:text-left">
-            <p>&copy; 2026 UAE Dream Package Competition. All rights reserved.</p>
+            <p>&copy; 2026 Luxe Prize Draws. All rights reserved.</p>
             <p className="text-[10px] text-white/30">
               Zero purchase necessary. Open to worldwide residents 18+. Regulated under official UAE promotional guidelines.
             </p>

@@ -296,7 +296,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               Complete Turnkey Package Specifications
             </span>
             <h2 className="text-2xl sm:text-4xl font-light text-white">
-              The 7 Pillars of the <span className="font-bold text-[#D4AF37]">UAE Dream Prize</span>
+              The 7 Pillars of the <span className="font-bold text-[#D4AF37]">Luxe Grand Prize</span>
             </h2>
           </div>
 

@@ -118,7 +118,7 @@ export const TicketWalletModal: React.FC<TicketWalletModalProps> = ({
                     )}
                   </div>
                   <p className="text-xs text-white font-medium">{ticket.fullName}</p>
-                  <p className="text-[10px] text-white/50 truncate max-w-xs">{ticket.businessIdea || "UAE Dream Package Entry"}</p>
+                  <p className="text-[10px] text-white/50 truncate max-w-xs">{ticket.businessIdea || "Luxe Prize Draw Entry"}</p>
                 </div>
 
                   <div className="flex items-center gap-2">

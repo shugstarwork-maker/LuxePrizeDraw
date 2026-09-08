@@ -15,7 +15,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
   const [messages, setMessages] = useState<Array<{ role: "ai" | "user"; text: string }>>([
     {
       role: "ai",
-      text: "Marhaba! I am your UAE Dream Package Commercial & Legal AI Advisor. Ask me anything about Dubai Freezones, the 3-Year Residency Visa, 0% personal tax rules, opening VIP bank accounts with Emirates NBD/Wio, or how the One-Click Book feature works!",
+      text: "Marhaba! I am your Luxe Prize Draws Commercial & Legal AI Advisor. Ask me anything about Dubai Freezones, the 3-Year Residency Visa, 0% personal tax rules, opening VIP bank accounts with Emirates NBD/Wio, or how the One-Click Book feature works!",
     },
   ]);
   const [inputQuery, setInputQuery] = useState("");
@@ -46,13 +46,13 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
       });
 
       const data = await response.json();
-      setMessages((prev) => [...prev, { role: "ai", text: data.answer || "The UAE Dream Package covers 100% of all legal, technical, and financial setup." }]);
+      setMessages((prev) => [...prev, { role: "ai", text: data.answer || "Luxe Prize Draws covers 100% of the legal, technical, and financial setup." }]);
     } catch (err) {
       setMessages((prev) => [
         ...prev,
         {
           role: "ai",
-          text: "The UAE Dream Package is designed to give the winner an unfair advantage: £100,000 GBP clean seed cash, an all-inclusive 2-week 5-star luxury holiday to Dubai, 3-year investor visa, 100% foreign-owned UAE company, and a custom web/mobile app with One-Click Book & AI automation.",
+          text: "Luxe Prize Draws is designed to give the winner an unfair advantage: £100,000 GBP clean seed cash, an all-inclusive 2-week 5-star luxury holiday to Dubai, 3-year investor visa, 100% foreign-owned UAE company, and a custom web/mobile app with One-Click Book & AI automation.",
         },
       ]);
     } finally {

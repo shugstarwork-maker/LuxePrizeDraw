@@ -29,7 +29,7 @@ export const CharityImpactSection: React.FC<CharityImpactSectionProps> = ({ onOp
           </h2>
 
           <p className="text-white/50 text-base sm:text-lg max-w-2xl font-light leading-relaxed">
-            When you enter the UAE Dream Package or join our Monthly Entry Club, you are directly investing in the next generation. A verified <strong className="text-white font-semibold">25% of all ticket bundles and recurring subscription proceeds</strong> fund real scholarships, laptops, and startup seed grants worldwide.
+            When you enter Luxe Prize Draws or join our Monthly Entry Club, you are directly investing in the next generation. A verified <strong className="text-white font-semibold">25% of all ticket bundles and recurring subscription proceeds</strong> fund real scholarships, laptops, and startup seed grants worldwide.
           </p>
         </div>
 
