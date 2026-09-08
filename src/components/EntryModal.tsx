@@ -146,7 +146,8 @@ export const EntryModal: React.FC<EntryModalProps> = ({
   };
 
   const handleCopyReferral = () => {
-    const link = `https://uae-dream-package.com/draw?ref=${generatedTicket?.ticketId || "UAE-7729"}`;
+    const baseUrl = window.location.origin;
+    const link = `${baseUrl}/draw?ref=${generatedTicket?.ticketId || "UAE-7729"}`;
     navigator.clipboard.writeText(link);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);

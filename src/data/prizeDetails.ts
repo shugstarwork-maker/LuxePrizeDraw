@@ -4,7 +4,7 @@ export const PRIZE_PILLARS: PrizePillar[] = [
   {
     id: "cash-prize",
     title: "£100,000 Sterling Cash Grant",
-    shortTitle: "£100K Cash Prize",
+    shortTitle: "£100K Grand Prize",
     valueGBP: "£100,000",
     tagline: "Direct Seed Capital in GBP with 0% Personal Tax",
     badge: "100% Liquid Seed Capital",
@@ -356,7 +356,7 @@ export const COMPETITION_FAQ = [
   },
   {
     q: "How is the winner selected? Explain the Verifiably Random Computer Process & Certified Physical Drawing System.",
-    a: "Our drawing process is designed to exceed international lottery and gaming audit standards with a dual-verification model: (1) Verifiably Random Computer Process: We use a cryptographically provable CSPRNG algorithm. Before tickets are issued, the Server Seed Hash (SHA-256) is published publicly. At the draw time, entropy from Bitcoin Block #894,120 and the NIST Randomness Beacon is combined with our HMAC-SHA256 engine to select the winning ticket index. All tickets are anchored into an immutable Merkle Tree, allowing anyone to verify the mathematical proof. (2) Certified Physical Drawing System: In our physical studio, we utilize a Smartplay Saturn Gravity-Feed Air-Mix mechanical blower loaded with precision-calibrated (3.000g ±0.005g) laser-engraved RFID balls under the on-site supervision of independent legal notaries and the Dubai Department of Economy and Tourism (DET Permit #DET-PROMO-REG-2026-98124).",
+    a: "Our Luxe Prize Draws process is designed to exceed international lottery and gaming audit standards with a dual-verification model: (1) Verifiably Random Computer Process: We use a cryptographically provable CSPRNG algorithm. Before tickets are issued, the Server Seed Hash (SHA-256) is published publicly. At the draw time, entropy from Bitcoin Block #894,120 and the NIST Randomness Beacon is combined with our HMAC-SHA256 engine to select the winning ticket index. All tickets are anchored into an immutable Merkle Tree, allowing anyone to verify the mathematical proof. (2) Certified Physical Drawing System: In our physical studio, we utilize a Smartplay Saturn Gravity-Feed Air-Mix mechanical blower loaded with precision-calibrated (3.000g ±0.005g) laser-engraved RFID balls under the on-site supervision of independent legal notaries and the Dubai Department of Economy and Tourism (DET Permit #DET-PROMO-REG-2026-98124).",
   },
   {
     q: "Can I independently verify my ticket ID and the draw mathematics?",
@@ -369,7 +369,7 @@ export const SUCCESS_STORIES = [
     name: "Julian Vance",
     origin: "London, United Kingdom",
     company: "Vance Luxury Logistics LLC (Meydan Free Zone)",
-    quote: "Winning the UAE package transformed my life. Within 12 days, my Dubai company was active, our app was live with One-Click Book, and the £100K seed money let us hire 3 top developers. We crossed £750k revenue in Year 1!",
+    quote: "Winning the Luxe Prize Draws grand prize transformed my life. Within 12 days, my Dubai company was active, our app was live with One-Click Book, and the £100K seed money let us hire 3 top developers. We crossed £750k revenue in Year 1!",
     avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
     verifiedDate: "Previous Winner (2025 Edition)",
   },
