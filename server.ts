@@ -11,6 +11,7 @@ const app = express();
 const PORT = 3000;
 
 app.use(express.json());
+app.set("query parser", "simple");
 
 // Lazy / safe Gemini initialization
 let aiClient: GoogleGenAI | null = null;
