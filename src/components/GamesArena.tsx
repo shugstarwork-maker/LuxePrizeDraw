@@ -31,7 +31,7 @@ type DraughtsState = {
   message: string;
 };
 
-type Connect4Disc = "gold" | "blue";
+type Connect4Disc = "red" | "yellow";
 
 type Connect4State = {
   board: Array<Array<Connect4Disc | null>>;
@@ -40,10 +40,10 @@ type Connect4State = {
   message: string;
 };
 
-const GAMES: Array<{ id: GameId; name: string; description: string; badge: string; color: string }> = [
-  { id: "chess", name: "Chess", description: "Classic timed 1v1 matches with ranked divisions.", badge: "Strategist", color: "from-amber-400 to-orange-600" },
-  { id: "draughts", name: "Draughts", description: "Quick tactical 1v1 challenges for every skill level.", badge: "Board Master", color: "from-rose-400 to-red-600" },
-  { id: "connect-4", name: "Connect 4", description: "Fast head-to-head rounds with instant rematches.", badge: "Four in a Row", color: "from-indigo-400 to-blue-600" },
+const GAMES: Array<{ id: GameId; name: string; description: string; badge: string; image: string }> = [
+  { id: "chess", name: "Chess", description: "Classic timed 1v1 matches with ranked divisions.", badge: "Strategist", image: "/games/chess.svg" },
+  { id: "draughts", name: "Draughts", description: "Quick tactical 1v1 challenges for every skill level.", badge: "Board Master", image: "/games/draughts.svg" },
+  { id: "connect-4", name: "Connect 4", description: "The classic UK red-and-yellow four-in-a-row game.", badge: "Four in a Row", image: "/games/connect-four.svg" },
 ];
 
 const STAKES = [25, 100, 250] as const;
@@ -100,9 +100,9 @@ function createDraughtsState(): DraughtsState {
 function createConnect4State(): Connect4State {
   return {
     board: createInitialConnect4Board(),
-    current: "gold",
+    current: "red",
     winner: null,
-    message: "Gold to move. Drop a disc into any column.",
+    message: "Red to move. Drop a disc into any column.",
   };
 }
 
@@ -460,7 +460,7 @@ export const GamesArena: React.FC = () => {
           board,
           current: currentState.current,
           winner: currentState.current,
-          message: `${currentState.current === "gold" ? "Gold" : "Blue"} connects four and wins.`,
+          message: `${currentState.current === "red" ? "Red" : "Yellow"} connects four and wins.`,
         };
       }
 
@@ -474,12 +474,12 @@ export const GamesArena: React.FC = () => {
         };
       }
 
-      const nextPlayer: Connect4Disc = currentState.current === "gold" ? "blue" : "gold";
+      const nextPlayer: Connect4Disc = currentState.current === "red" ? "yellow" : "red";
       return {
         board,
         current: nextPlayer,
         winner: null,
-        message: `${nextPlayer === "gold" ? "Gold" : "Blue"} to move.`,
+        message: `${nextPlayer === "red" ? "Red" : "Yellow"} to move.`,
       };
     });
   };
@@ -578,12 +578,12 @@ export const GamesArena: React.FC = () => {
           Reset board
         </button>
       </div>
-      <div className="grid grid-cols-7 gap-2 rounded-3xl bg-[#0b1d4a] p-4 shadow-inner shadow-black/40">
+      <div className="grid grid-cols-7 gap-2 rounded-3xl bg-[#0758cc] p-4 shadow-inner shadow-black/40">
         {Array.from({ length: 7 }, (_, column) => (
           <button
             key={`connect4-column-${column}`}
             onClick={() => handleConnect4Drop(column)}
-            className="rounded-2xl bg-white/5 p-2 transition hover:bg-white/10"
+            className="rounded-2xl bg-[#043f9d] p-2 transition hover:bg-[#074bb3]"
             aria-label={`Connect 4 column ${column + 1}`}
           >
             <div className="space-y-2">
@@ -591,7 +591,7 @@ export const GamesArena: React.FC = () => {
                 <div
                   key={`connect4-cell-${rowIndex}-${column}`}
                   className={`mx-auto h-9 w-9 rounded-full border border-white/10 sm:h-11 sm:w-11 ${
-                    boardRow[column] === "gold" ? "bg-[#D4AF37]" : boardRow[column] === "blue" ? "bg-sky-400" : "bg-slate-950/80"
+                    boardRow[column] === "red" ? "bg-[#e5252a]" : boardRow[column] === "yellow" ? "bg-[#ffd21e]" : "bg-[#f7f0d2]"
                   }`}
                 />
               ))}
@@ -644,7 +644,7 @@ export const GamesArena: React.FC = () => {
               }}
               className={`text-left rounded-3xl p-6 border transition-all ${selectedGame === item.id ? "border-[#D4AF37] bg-white/10 shadow-xl shadow-amber-500/10" : "border-white/10 bg-white/[0.03] hover:border-white/30"}`}
             >
-              <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center`}><Swords className="w-6 h-6 text-white" /></div>
+              <img src={item.image} alt="" className="h-40 w-full rounded-2xl border border-white/10 object-cover shadow-lg" />
               <div className="mt-5 flex items-start justify-between gap-3"><h3 className="text-xl font-bold text-white">{item.name}</h3><span className="text-[10px] px-2 py-1 rounded-full bg-white/10 text-white/70">1v1</span></div>
               <p className="mt-2 text-sm text-white/55 leading-relaxed">{item.description}</p>
               <div className="mt-5 pt-4 border-t border-white/10 flex items-center justify-between text-xs"><span className="flex items-center gap-1.5 text-emerald-300"><Users className="w-3.5 h-3.5" /> Live demo board</span><span className="flex items-center gap-1.5 text-[#D4AF37]"><BadgeCheck className="w-3.5 h-3.5" /> {item.badge}</span></div>
