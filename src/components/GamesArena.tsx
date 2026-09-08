@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { BadgeCheck, Crown, Gamepad2, RotateCcw, ShieldCheck, Swords, Trophy, Users } from "lucide-react";
+import { BadgeCheck, Crown, Gamepad2, RotateCcw, ShieldCheck, Swords, Trophy, Users, Zap } from "lucide-react";
 
 type GameId = "chess" | "draughts" | "connect-4";
 type PlayerColor = "white" | "black";
@@ -47,6 +47,31 @@ const GAMES: Array<{ id: GameId; name: string; description: string; badge: strin
 ];
 
 const STAKES = [25, 100, 250] as const;
+
+type DemoOpponent = {
+  name: string;
+  initials: string;
+  rating: number;
+  wins: number;
+  losses: number;
+  streak: number;
+  accent: string;
+};
+
+const DEMO_OPPONENTS: Record<GameId, DemoOpponent[]> = {
+  chess: [
+    { name: "Amelia Knight", initials: "AK", rating: 1482, wins: 42, losses: 18, streak: 4, accent: "from-violet-500 to-indigo-700" },
+    { name: "Marcus Bishop", initials: "MB", rating: 1537, wins: 51, losses: 24, streak: 2, accent: "from-sky-500 to-blue-700" },
+  ],
+  draughts: [
+    { name: "Ruby Clarke", initials: "RC", rating: 1396, wins: 37, losses: 16, streak: 5, accent: "from-rose-500 to-red-700" },
+    { name: "Theo Mills", initials: "TM", rating: 1441, wins: 44, losses: 21, streak: 3, accent: "from-orange-500 to-amber-700" },
+  ],
+  "connect-4": [
+    { name: "Mia Carter", initials: "MC", rating: 1328, wins: 29, losses: 14, streak: 3, accent: "from-red-500 to-rose-700" },
+    { name: "Leo Foster", initials: "LF", rating: 1362, wins: 35, losses: 19, streak: 6, accent: "from-yellow-500 to-orange-700" },
+  ],
+};
 
 const chessBackRank: ChessPiece["kind"][] = ["rook", "knight", "bishop", "queen", "king", "bishop", "knight", "rook"];
 
@@ -257,6 +282,7 @@ export const GamesArena: React.FC = () => {
   const [selectedGame, setSelectedGame] = useState<GameId>("chess");
   const [selectedStake, setSelectedStake] = useState<(typeof STAKES)[number]>(100);
   const [notice, setNotice] = useState("Choose a game and challenge another player.");
+  const [opponent, setOpponent] = useState<DemoOpponent | null>(null);
   const [chessState, setChessState] = useState<ChessState>(createChessState);
   const [draughtsState, setDraughtsState] = useState<DraughtsState>(createDraughtsState);
   const [connect4State, setConnect4State] = useState<Connect4State>(createConnect4State);
@@ -268,8 +294,11 @@ export const GamesArena: React.FC = () => {
       setNotice("You need more demo tokens to enter this challenge.");
       return;
     }
+    const opponents = DEMO_OPPONENTS[selectedGame];
+    const selectedOpponent = opponents[Math.floor(Math.random() * opponents.length)];
     setTokens((value) => value - selectedStake);
-    setNotice(`${game.name} challenge created for ${selectedStake} demo tokens. Waiting for an opponent.`);
+    setOpponent(selectedOpponent);
+    setNotice(`${selectedOpponent.name} accepted your ${game.name} demo challenge for ${selectedStake} tokens.`);
   };
 
   const handleChessCellClick = (row: number, col: number) => {
@@ -640,6 +669,7 @@ export const GamesArena: React.FC = () => {
               key={item.id}
               onClick={() => {
                 setSelectedGame(item.id);
+                setOpponent(null);
                 setNotice(`Selected ${item.name}. Choose a demo-token stake or start the live board preview below.`);
               }}
               className={`text-left rounded-3xl p-6 border transition-all ${selectedGame === item.id ? "border-[#D4AF37] bg-white/10 shadow-xl shadow-amber-500/10" : "border-white/10 bg-white/[0.03] hover:border-white/30"}`}
@@ -660,8 +690,21 @@ export const GamesArena: React.FC = () => {
             <div className="mt-6 flex flex-wrap gap-3">
               {STAKES.map((stake) => <button key={stake} onClick={() => setSelectedStake(stake)} className={`px-5 py-3 rounded-xl text-sm font-bold border ${selectedStake === stake ? "border-[#D4AF37] bg-[#D4AF37] text-black" : "border-white/15 bg-white/5 text-white hover:bg-white/10"}`}>{stake} tokens</button>)}
             </div>
-            <button onClick={createChallenge} className="mt-6 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#D4AF37] hover:bg-[#e6c352] text-black font-bold text-sm uppercase tracking-wider transition-colors"><Swords className="w-4 h-4" /> Create demo challenge</button>
+            <button onClick={createChallenge} className="mt-6 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#D4AF37] hover:bg-[#e6c352] text-black font-bold text-sm uppercase tracking-wider transition-colors"><Swords className="w-4 h-4" /> Find demo opponent</button>
             <p aria-live="polite" className="mt-4 text-sm text-emerald-300">{notice}</p>
+            {opponent && (
+              <div className="mt-6 overflow-hidden rounded-2xl border border-[#D4AF37]/40 bg-gradient-to-br from-white/10 to-white/[0.03]">
+                <div className="flex items-center justify-between border-b border-white/10 px-5 py-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#D4AF37]">
+                  <span>Demo opponent found</span><span className="text-white/50">Local preview</span>
+                </div>
+                <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center">
+                  <div className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${opponent.accent} text-lg font-black text-white shadow-lg`}>{opponent.initials}</div>
+                  <div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h4 className="text-lg font-bold text-white">{opponent.name}</h4><span className="rounded-full bg-emerald-400/15 px-2 py-1 text-[10px] font-bold text-emerald-300">Ready</span></div><p className="mt-1 text-sm text-white/55">Matched for {game.name} · Demo-only 1v1</p></div>
+                  <div className="grid grid-cols-3 gap-3 text-center sm:min-w-[220px]"><div><div className="text-lg font-black text-white">{opponent.rating}</div><div className="text-[9px] uppercase tracking-wider text-white/45">ELO</div></div><div><div className="text-lg font-black text-white">{opponent.wins}-{opponent.losses}</div><div className="text-[9px] uppercase tracking-wider text-white/45">Record</div></div><div><div className="flex items-center justify-center gap-1 text-lg font-black text-[#D4AF37]"><Zap className="h-3.5 w-3.5" />{opponent.streak}</div><div className="text-[9px] uppercase tracking-wider text-white/45">Streak</div></div></div>
+                </div>
+                <div className="border-t border-white/10 bg-black/20 px-5 py-3 text-xs text-white/60">Expected rating change: <span className="font-bold text-emerald-300">+18 win</span><span className="mx-2 text-white/25">/</span><span className="font-bold text-rose-300">−12 loss</span></div>
+              </div>
+            )}
           </div>
           <aside className="lg:col-span-2 rounded-2xl bg-white/5 border border-white/10 p-5">
             <div className="flex items-center gap-2 text-white font-bold"><ShieldCheck className="w-5 h-5 text-emerald-400" /> Demo safeguards</div>
