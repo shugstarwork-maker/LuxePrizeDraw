@@ -9,6 +9,7 @@ import { HeroSection } from "./components/HeroSection";
 import { CompetitionHub } from "./components/CompetitionHub";
 import { FreeDraws } from "./components/FreeDraws";
 import { AdminTickets } from "./components/AdminTickets";
+import { ComplianceDashboard } from "./components/ComplianceDashboard";
 import { PrizeShowcase } from "./components/PrizeShowcase";
 import { CharityImpactSection } from "./components/CharityImpactSection";
 import { OneClickBookDemo } from "./components/OneClickBookDemo";
@@ -128,6 +129,9 @@ export default function App() {
 
   if (typeof window !== "undefined" && window.location.pathname === "/admin/tickets") {
     return <div className="min-h-screen bg-[#050505] text-white font-sans pt-10"><AdminTickets /></div>;
+  }
+  if (typeof window !== "undefined" && window.location.pathname === "/admin/compliance") {
+    return <ComplianceDashboard />;
   }
 
   return (
