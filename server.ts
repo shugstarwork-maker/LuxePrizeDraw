@@ -3,6 +3,7 @@ import path from "path";
 import crypto from "crypto";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
+import { neon } from "@neondatabase/serverless";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -47,99 +48,163 @@ const verifiedEntrants = [
   { id: "UAE-7833-NYC", name: "Tyler Harrison", country: "United States", timestamp: "12 mins ago", business: "E-Commerce Lifestyle Hub", entryType: "FREE" },
 ];
 
-// API: Competition Stats & Charity Metrics
-app.get("/api/competition/stats", (req, res) => {
+type EntropyAudit = {
+  drawId: string;
+  status: "PENDING" | "SETTLED";
+  serverSeedHash: string;
+  publicClientSeed: string;
+  blockHeight: number;
+  bitcoinBlockHash: string | null;
+  nistBeaconOutput: string | null;
+  nistPulseTime: string | null;
+  finalSeedHash: string | null;
+  totalEntries: number | null;
+  settledAt: string | null;
+};
+
+const drawId = process.env.ENTROPY_DRAW_ID || "2026-10-31-founder-draw";
+const targetBlockHeight = Number(process.env.ENTROPY_BTC_BLOCK_HEIGHT || "0");
+const publicClientSeed = process.env.ENTROPY_CLIENT_SEED || "DUBAI-2026-GRAND-DRAW-COMMITTED";
+const databaseUrl = process.env.ENTROPY_AUDIT_DATABASE_URL;
+
+function getAuditDatabase() {
+  if (!databaseUrl) throw new Error("ENTROPY_AUDIT_DATABASE_URL is not configured.");
+  return neon(databaseUrl);
+}
+
+async function ensureEntropyAuditTable() {
+  const sql = getAuditDatabase();
+  await sql`CREATE TABLE IF NOT EXISTS entropy_draw_audits (
+    draw_id TEXT PRIMARY KEY,
+    status TEXT NOT NULL CHECK (status IN ('PENDING', 'SETTLED')),
+    server_seed_hash TEXT NOT NULL,
+    public_client_seed TEXT NOT NULL,
+    block_height INTEGER NOT NULL,
+    bitcoin_block_hash TEXT,
+    nist_beacon_output TEXT,
+    nist_pulse_time TIMESTAMPTZ,
+    final_seed_hash TEXT,
+    total_entries INTEGER,
+    settled_at TIMESTAMPTZ
+  )`;
+}
+
+async function getEntropyAudit(): Promise<EntropyAudit | null> {
+  await ensureEntropyAuditTable();
+  const sql = getAuditDatabase();
+  const rows = await sql`SELECT draw_id, status, server_seed_hash, public_client_seed, block_height, bitcoin_block_hash, nist_beacon_output, nist_pulse_time, final_seed_hash, total_entries, settled_at FROM entropy_draw_audits WHERE draw_id = ${drawId}`;
+  if (!rows[0]) return null;
+  const row = rows[0];
+  return {
+    drawId: row.draw_id, status: row.status, serverSeedHash: row.server_seed_hash,
+    publicClientSeed: row.public_client_seed, blockHeight: row.block_height,
+    bitcoinBlockHash: row.bitcoin_block_hash, nistBeaconOutput: row.nist_beacon_output,
+    nistPulseTime: row.nist_pulse_time, finalSeedHash: row.final_seed_hash,
+    totalEntries: row.total_entries, settledAt: row.settled_at,
+  };
+}
+
+async function fetchPublicEntropy(blockHeight: number) {
+  if (!Number.isSafeInteger(blockHeight) || blockHeight < 1) throw new Error("ENTROPY_BTC_BLOCK_HEIGHT is not configured.");
+  const bitcoinResponse = await fetch(`https://blockstream.info/api/block-height/${blockHeight}`);
+  const bitcoinBlockHash = (await bitcoinResponse.text()).trim();
+  if (!bitcoinResponse.ok || !/^[0-9a-f]{64}$/i.test(bitcoinBlockHash)) throw new Error("Bitcoin block hash is unavailable for the configured height.");
+
+  const nistResponse = await fetch("https://beacon.nist.gov/beacon/2.0/pulse/last");
+  if (!nistResponse.ok) throw new Error("NIST beacon is unavailable.");
+  const nistPayload = await nistResponse.json();
+  const pulse = nistPayload?.pulse;
+  if (!pulse?.outputValue || !pulse?.timeStamp) throw new Error("NIST beacon response is incomplete.");
+  return { bitcoinBlockHash, nistBeaconOutput: pulse.outputValue, nistPulseTime: pulse.timeStamp };
+}
+
+function requireSettlementAuthorization(authorization?: string) {
+  const cronSecret = process.env.CRON_SECRET;
+  if (!cronSecret) throw new Error("CRON_SECRET is not configured.");
+  const expected = `Bearer ${cronSecret}`;
+  const actual = authorization || "";
+  return actual.length === expected.length && crypto.timingSafeEqual(Buffer.from(actual), Buffer.from(expected));
+}
+
+// API: durable public audit record. Pending state carries no fake entropy values.
+app.get("/api/draw/audit", async (_req, res) => {
+  try {
+    const audit = await getEntropyAudit();
+    res.json(audit || { drawId, status: "PENDING", blockHeight: targetBlockHeight, publicClientSeed, bitcoinBlockHash: null, nistBeaconOutput: null, nistPulseTime: null, finalSeedHash: null, totalEntries: null, settledAt: null });
+  } catch (error) {
+    console.error("Audit read error:", error);
+    res.status(503).json({ error: "Draw audit storage is unavailable." });
+  }
+});
+
+// API: protected pre-commitment. Call before entries close to publish the server-seed hash.
+app.post("/api/draw/commit", async (req, res) => {
+  try {
+    if (!requireSettlementAuthorization(req.header("authorization"))) return res.status(401).json({ error: "Unauthorized commitment request." });
+    const serverSeed = process.env.ENTROPY_DRAW_SERVER_SEED;
+    if (!serverSeed || !Number.isSafeInteger(targetBlockHeight) || targetBlockHeight < 1) return res.status(503).json({ error: "Entropy draw configuration is incomplete." });
+    await ensureEntropyAuditTable();
+    const existing = await getEntropyAudit();
+    if (existing) return res.json(existing);
+    const serverSeedHash = crypto.createHash("sha256").update(serverSeed).digest("hex");
+    const sql = getAuditDatabase();
+    await sql`INSERT INTO entropy_draw_audits (draw_id, status, server_seed_hash, public_client_seed, block_height)
+      VALUES (${drawId}, 'PENDING', ${serverSeedHash}, ${publicClientSeed}, ${targetBlockHeight})`;
+    res.status(201).json(await getEntropyAudit());
+  } catch (error) {
+    console.error("Entropy commitment error:", error);
+    res.status(503).json({ error: "Draw commitment could not be recorded." });
+  }
+});
+
+// API: protected, idempotent settlement. Invoke only after the target block has been mined.
+app.post("/api/draw/settle", async (req, res) => {
+  try {
+    if (!requireSettlementAuthorization(req.header("authorization"))) return res.status(401).json({ error: "Unauthorized settlement request." });
+    const serverSeed = process.env.ENTROPY_DRAW_SERVER_SEED;
+    if (!serverSeed || !Number.isSafeInteger(targetBlockHeight) || targetBlockHeight < 1) return res.status(503).json({ error: "Entropy draw configuration is incomplete." });
+    const sql = getAuditDatabase();
+    await ensureEntropyAuditTable();
+    const existing = await getEntropyAudit();
+    if (existing?.status === "SETTLED") return res.json(existing);
+    if (!existing || existing.serverSeedHash !== crypto.createHash("sha256").update(serverSeed).digest("hex")) return res.status(409).json({ error: "The server-seed commitment must be recorded before settlement." });
+
+    const entropy = await fetchPublicEntropy(targetBlockHeight);
+    const serverSeedHash = crypto.createHash("sha256").update(serverSeed).digest("hex");
+    const finalSeedHash = crypto.createHash("sha256").update(`${serverSeed}:${publicClientSeed}:${entropy.bitcoinBlockHash}:${entropy.nistBeaconOutput}`).digest("hex");
+    const rows = await sql`UPDATE entropy_draw_audits
+      SET status = 'SETTLED', bitcoin_block_hash = ${entropy.bitcoinBlockHash}, nist_beacon_output = ${entropy.nistBeaconOutput}, nist_pulse_time = ${entropy.nistPulseTime}, final_seed_hash = ${finalSeedHash}, total_entries = ${totalEntriesCount}, settled_at = NOW()
+      WHERE draw_id = ${drawId} AND status = 'PENDING' AND server_seed_hash = ${serverSeedHash}
+      RETURNING draw_id`;
+    if (!rows[0]) return res.status(409).json({ error: "The pre-committed draw record could not be settled." });
+    res.status(201).json(await getEntropyAudit());
+  } catch (error) {
+    console.error("Entropy settlement error:", error);
+    res.status(503).json({ error: "Public entropy could not be captured; the draw remains unsettled." });
+  }
+});
+
+// API: competition stats expose a pending audit state only; settled inputs are read from durable storage.
+app.get("/api/competition/stats", async (_req, res) => {
+  const audit = await getEntropyAudit().catch(() => null);
   res.json({
-    totalEntries: totalEntriesCount,
-    prizePoolValueGBP: 220000,
-    cashPrizeGBP: 100000,
-    visaYears: 3,
-    recentEntrants: verifiedEntrants,
-    drawDate: "2026-10-31T18:00:00Z",
-    charityImpact: {
-      totalRaisedGBP: totalCharityRaisedGBP,
-      percentageDonated: 25,
-      scholarshipsFunded: totalScholarshipsFunded,
-      microGrantsAwarded: totalMicroGrants,
-      partnerCharities: [
-        {
-          name: "Dubai Cares",
-          focus: "Global Primary & Secondary Education",
-          logoText: "DUBAI CARES",
-          description: "A UAE-based global philanthropic organization working to provide children and youth in developing nations with access to quality education.",
-        },
-        {
-          name: "Global Youth Enterprise Fund",
-          focus: "Seed Grants for Underprivileged Founders",
-          logoText: "GLOBAL ENTERPRISE",
-          description: "Empowering visionary young creators with seed funding, mentorship, and equipment to escape poverty through technology entrepreneurship.",
-        },
-        {
-          name: "MENA STEM Tech Academy",
-          focus: "Coding & AI Literacy for Emerging Communities",
-          logoText: "STEM ACADEMY",
-          description: "Delivering free coding bootcamps, laptop grants, and digital skill certifications to aspiring youth across the Middle East & Africa.",
-        },
-      ],
-    },
-    auditRecord: {
-      systemType: "CRYPTOGRAPHIC_CSPRNG",
-      serverSeedHash: "a9482f3d61b34e2c88d8b39414bc9102b4929841804b4d7c04118fec93b96317",
-      publicClientSeed: "DUBAI-2026-GRAND-DRAW-COMMITTED",
-      blockHeight: 894120,
-      bitcoinBlockHash: "00000000000000000001bc89a74e2d31f99c15d482a4726bdf3b5812903fe92b",
-      nistBeaconOutput: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      merkleRoot: "7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
-      physicalDrumModel: "Smartplay Saturn Gravity-Feed Air-Mix Blower v4.8 (Cert #DET-2026-DXB-998)",
-      ballWeightTolerance: "3.000g ± 0.005g (ISO-17025 Calibrated)",
-      auditorOrganization: "Dubai Department of Economy and Tourism (DET) & Notary Public Bureau",
-      certNumber: "DET-PROMO-REG-2026-98124",
-      lastCalibrated: "2026-08-15T09:30:00Z",
-    },
+    totalEntries: totalEntriesCount, prizePoolValueGBP: 220000, cashPrizeGBP: 100000, visaYears: 3,
+    recentEntrants: verifiedEntrants, drawDate: "2026-10-31T18:00:00Z", auditRecord: audit,
   });
 });
 
-// API: Provable Fairness & Draw Verification Endpoint
-app.post("/api/draw/verify", (req, res) => {
+// API: verifies the settled seed calculation. It never accepts a client-supplied server seed.
+app.post("/api/draw/verify", async (req, res) => {
   try {
-    const { ticketId, serverSeed, clientSeed, nonce = 1, totalTickets = 42890 } = req.body;
-
-    const activeServerSeed = serverSeed || "a9482f3d61b34e2c88d8b39414bc9102b4929841804b4d7c04118fec93b96317";
-    const activeClientSeed = clientSeed || "DUBAI-2026-GRAND-DRAW-COMMITTED";
-    const activeNonce = Number(nonce) || 1;
-    const entries = Number(totalTickets) || 42890;
-
-    // HMAC-SHA256 calculation for provable randomness
-    const hmac = crypto.createHmac("sha256", activeServerSeed);
-    hmac.update(`${activeClientSeed}:${activeNonce}`);
-    const hash = hmac.digest("hex");
-
-    // First 8 characters converted to integer modulo totalTickets gives the winning ticket index
-    const decimalValue = parseInt(hash.substring(0, 8), 16);
-    const winningIndex = (decimalValue % entries) + 1;
-
-    // Generate deterministic ticket checksum
-    const ticketSha = crypto.createHash("sha256").update(ticketId || "UAE-782914-GLB").digest("hex");
-
-    res.json({
-      verified: true,
-      ticketId: ticketId || "UAE-782914-GLB",
-      ticketChecksum: ticketSha,
-      serverSeedHash: crypto.createHash("sha256").update(activeServerSeed).digest("hex"),
-      clientSeed: activeClientSeed,
-      nonce: activeNonce,
-      hmacSha256Result: hash,
-      decimalSlice: decimalValue,
-      totalEntriesPool: entries,
-      calculatedWinningIndex: winningIndex,
-      isWinner: winningIndex === 7829, // example deterministic sample match
-      provableFairnessAuditStatus: "MATHEMATICALLY_VERIFIED",
-      notaryVerificationStatus: "GOVERNMENT_COMPLIANT",
-      algorithm: "HMAC-SHA256 CSPRNG with Merkle Tree Commitment",
-    });
-  } catch (error: any) {
+    const audit = await getEntropyAudit();
+    if (!audit || audit.status !== "SETTLED" || !audit.finalSeedHash || !audit.totalEntries) return res.status(409).json({ error: "The draw has not settled yet." });
+    const { ticketId, nonce = 1 } = req.body;
+    const decimalValue = parseInt(audit.finalSeedHash.substring(0, 8), 16);
+    const calculatedWinningIndex = (decimalValue % audit.totalEntries) + 1;
+    res.json({ verified: true, ticketId: ticketId || "", serverSeedHash: audit.serverSeedHash, publicClientSeed: audit.publicClientSeed, bitcoinBlockHash: audit.bitcoinBlockHash, nistBeaconOutput: audit.nistBeaconOutput, nonce: Number(nonce) || 1, finalSeedHash: audit.finalSeedHash, decimalSlice: decimalValue, totalEntriesPool: audit.totalEntries, calculatedWinningIndex, algorithm: "SHA-256(server seed + client seed + Bitcoin block hash + NIST beacon output)" });
+  } catch (error) {
     console.error("Verification error:", error);
-    res.status(500).json({ error: "Failed to perform cryptographic audit verification." });
+    res.status(503).json({ error: "Draw audit storage is unavailable." });
   }
 });
 

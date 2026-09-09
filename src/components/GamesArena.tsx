@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { BadgeCheck, BookOpen, CheckCircle2, Crown, Flame, Gamepad2, RotateCcw, ShieldCheck, Swords, Target, Trophy, Users, Zap } from "lucide-react";
+import { BadgeCheck, BookOpen, CheckCircle2, Crown, Flame, Gamepad2, RotateCcw, ShieldCheck, Swords, Target, Trophy, TrendingUp, Users, Zap } from "lucide-react";
 
 type GameId = "chess" | "draughts" | "connect-4";
 type PlayerColor = "white" | "black";
@@ -47,6 +47,12 @@ const GAMES: Array<{ id: GameId; name: string; description: string; badge: strin
 ];
 
 const STAKES = [25, 100, 250] as const;
+const POLL_STAKES = [10, 25, 50] as const;
+
+const PREDICTION_POLLS = [
+  { id: "founder-pitch", question: "Which finalist will top the community pitch vote?", options: ["Amina's Green Packaging", "Marcus's Logistics SaaS"], closes: "Closes Friday" },
+  { id: "game-night", question: "Who wins this week's Connect 4 community showdown?", options: ["Mia Carter", "Leo Foster"], closes: "Closes Sunday" },
+] as const;
 
 type DemoOpponent = {
   name: string;
@@ -291,6 +297,11 @@ export const GamesArena: React.FC = () => {
   const [activeLesson, setActiveLesson] = useState(0);
   const [completedLessons, setCompletedLessons] = useState<number[]>([]);
   const [puzzleSolved, setPuzzleSolved] = useState(false);
+  const [selectedPollId, setSelectedPollId] = useState<(typeof PREDICTION_POLLS)[number]["id"]>("founder-pitch");
+  const [selectedPrediction, setSelectedPrediction] = useState(0);
+  const [selectedPollStake, setSelectedPollStake] = useState<(typeof POLL_STAKES)[number]>(25);
+  const [pollNotice, setPollNotice] = useState("Choose an outcome to start a free-play 1v1 prediction.");
+  const [pollChallenge, setPollChallenge] = useState<{ opponent: string; points: number } | null>(null);
 
   const game = useMemo(() => GAMES.find((item) => item.id === selectedGame)!, [selectedGame]);
   const chessLessons = [
@@ -327,6 +338,23 @@ export const GamesArena: React.FC = () => {
     setTokens((value) => value - selectedStake);
     setOpponent(selectedOpponent);
     setNotice(`${selectedOpponent.name} accepted your ${game.name} demo challenge for ${selectedStake} tokens.`);
+  };
+
+  const selectedPoll = PREDICTION_POLLS.find((poll) => poll.id === selectedPollId)!;
+
+  const createPollChallenge = () => {
+    if (pollChallenge) {
+      setPollNotice("This prediction is already matched. Select another poll to create a new challenge.");
+      return;
+    }
+    if (tokens < selectedPollStake) {
+      setPollNotice("You need more demo tokens to make this free-play prediction.");
+      return;
+    }
+    const opponent = ["Jordan P.", "Riley S.", "Taylor K."][Math.floor(Math.random() * 3)];
+    setTokens((value) => value - selectedPollStake);
+    setPollChallenge({ opponent, points: selectedPollStake });
+    setPollNotice(`${opponent} took the opposite side of “${selectedPoll.options[selectedPrediction]}” for ${selectedPollStake} demo tokens. Results settle when the poll closes.`);
   };
 
   const handleChessCellClick = (row: number, col: number) => {
@@ -699,6 +727,25 @@ export const GamesArena: React.FC = () => {
           <div className="rounded-2xl bg-white/5 border border-[#D4AF37]/30 px-5 py-4 min-w-56">
             <div className="text-[10px] uppercase tracking-widest text-white/45">Demo token balance</div>
             <div className="mt-1 flex items-center gap-2 text-2xl font-bold text-[#D4AF37]"><Crown className="w-5 h-5" /> {tokens.toLocaleString()} tokens</div>
+          </div>
+        </div>
+
+        <div className="mb-8 rounded-3xl border border-violet-400/30 bg-gradient-to-br from-violet-500/15 via-indigo-500/10 to-slate-950 p-5 sm:p-6">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+            <div className="max-w-2xl">
+              <div className="flex flex-wrap items-center gap-2"><h3 className="text-lg font-bold text-white">1v1 prediction polls</h3><span className="rounded-full border border-violet-300/40 bg-violet-400/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-violet-100">Free-play only</span></div>
+              <p className="mt-1 text-sm text-white/60">Choose an outcome, challenge a player on the opposite side, and compete for demo tokens. No deposits, withdrawals, or cash prizes.</p>
+            </div>
+            <span className="w-fit rounded-xl border border-violet-300/30 bg-violet-400/15 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-violet-100">Virtual points only</span>
+          </div>
+          <div className="mt-6 grid gap-4 lg:grid-cols-2">
+            {PREDICTION_POLLS.map((poll) => <button key={poll.id} type="button" onClick={() => { setSelectedPollId(poll.id); setSelectedPrediction(0); setPollChallenge(null); setPollNotice(`Selected poll: ${poll.question}`); }} className={`rounded-2xl border p-5 text-left transition-all ${selectedPollId === poll.id ? "border-violet-300 bg-violet-400/15" : "border-white/10 bg-white/[0.03] hover:border-white/30"}`}><div className="flex items-center justify-between gap-3"><span className="text-[10px] font-bold uppercase tracking-widest text-violet-200">{poll.closes}</span><span className="text-[10px] text-white/40">1v1 poll</span></div><h4 className="mt-3 font-bold text-white">{poll.question}</h4></button>)}
+          </div>
+          <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-5">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between"><div className="flex-1"><p className="text-sm font-bold text-white">{selectedPoll.question}</p><div className="mt-4 grid gap-3 sm:grid-cols-2">{selectedPoll.options.map((option, index) => <button key={option} type="button" onClick={() => setSelectedPrediction(index)} className={`rounded-xl border px-4 py-3 text-left text-sm font-bold transition-colors ${selectedPrediction === index ? "border-[#D4AF37] bg-[#D4AF37] text-black" : "border-white/15 bg-white/5 text-white hover:bg-white/10"}`}>{option}</button>)}</div></div><div><p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-white/45">Demo-token stake</p><div className="flex gap-2">{POLL_STAKES.map((stake) => <button key={stake} type="button" onClick={() => setSelectedPollStake(stake)} className={`rounded-lg border px-3 py-2 text-xs font-bold ${selectedPollStake === stake ? "border-violet-300 bg-violet-400/20 text-violet-100" : "border-white/15 text-white/60"}`}>{stake}</button>)}</div></div></div>
+            <button type="button" onClick={createPollChallenge} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-violet-300 px-5 py-3 text-sm font-bold text-slate-950 transition-colors hover:bg-violet-200"><TrendingUp className="h-4 w-4" /> Challenge opposite pick</button>
+            <p aria-live="polite" className="mt-3 text-sm text-violet-100">{pollNotice}</p>
+            {pollChallenge && <div className="mt-4 rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100"><strong>{pollChallenge.opponent}</strong> accepted the opposite outcome for {pollChallenge.points} demo tokens. Your result is pending poll close.</div>}
           </div>
         </div>
 

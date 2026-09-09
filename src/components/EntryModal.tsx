@@ -176,7 +176,7 @@ export const EntryModal: React.FC<EntryModalProps> = ({
                 </span>
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-400 text-[10px] uppercase tracking-widest font-bold">
                   <Heart className="w-3 h-3 fill-rose-400/40" />
-                  <span>25% Donated to Charity</span>
+                  <span>Community causes: prototype</span>
                 </span>
               </div>
 

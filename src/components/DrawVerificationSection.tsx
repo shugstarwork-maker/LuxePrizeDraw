@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ShieldCheck, Cpu, CheckCircle2, Lock, Key, Hash, FileCheck,
   ExternalLink, Sparkles, RefreshCw, Layers, Eye, Award, Check, AlertCircle, Play
@@ -20,11 +20,26 @@ export const DrawVerificationSection: React.FC<DrawVerificationSectionProps> = (
 
   // Interactive Verification Playground state
   const [inputTicketId, setInputTicketId] = useState(userTickets[0]?.ticketId || "UAE-782914-GLB");
-  const [serverSeed, setServerSeed] = useState("a9482f3d61b34e2c88d8b39414bc9102b4929841804b4d7c04118fec93b96317");
-  const [clientSeed, setClientSeed] = useState("DUBAI-2026-GRAND-DRAW-COMMITTED");
   const [nonce, setNonce] = useState(1);
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationResult, setVerificationResult] = useState<any>(null);
+  const [entropyAudit, setEntropyAudit] = useState({
+    status: "PENDING",
+    blockHeight: 0,
+    bitcoinBlockHash: null as string | null,
+    nistBeaconOutput: null as string | null,
+    finalSeedHash: null as string | null,
+    settledAt: null as string | null,
+    serverSeedHash: null as string | null,
+    publicClientSeed: "DUBAI-2026-GRAND-DRAW-COMMITTED",
+  });
+
+  useEffect(() => {
+    fetch("/api/draw/audit")
+      .then((res) => res.ok ? res.json() : Promise.reject(new Error("Audit unavailable")))
+      .then((audit) => setEntropyAudit(audit))
+      .catch(() => undefined);
+  }, []);
 
   // Physical Machine Animation state
   const [isBlowerActive, setIsBlowerActive] = useState(false);
@@ -32,11 +47,11 @@ export const DrawVerificationSection: React.FC<DrawVerificationSectionProps> = (
 
   const defaultAudit: DrawAuditRecord = {
     systemType: "CRYPTOGRAPHIC_CSPRNG",
-    serverSeedHash: "a9482f3d61b34e2c88d8b39414bc9102b4929841804b4d7c04118fec93b96317",
-    publicClientSeed: "DUBAI-2026-GRAND-DRAW-COMMITTED",
-    blockHeight: 894120,
-    bitcoinBlockHash: "00000000000000000001bc89a74e2d31f99c15d482a4726bdf3b5812903fe92b",
-    nistBeaconOutput: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    serverSeedHash: "Pending protected commitment",
+    publicClientSeed: entropyAudit.publicClientSeed,
+    blockHeight: entropyAudit.blockHeight,
+    bitcoinBlockHash: "Pending settlement",
+    nistBeaconOutput: "Pending settlement",
     merkleRoot: "7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
     physicalDrumModel: "Smartplay Saturn Gravity-Feed Air-Mix Blower v4.8",
     ballWeightTolerance: "3.000g ± 0.005g (ISO-17025 Certified)",
@@ -53,33 +68,14 @@ export const DrawVerificationSection: React.FC<DrawVerificationSectionProps> = (
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ticketId: inputTicketId,
-          serverSeed,
-          clientSeed,
           nonce,
-          totalTickets: totalEntriesCount,
         }),
       });
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Verification is unavailable.");
       setVerificationResult(data);
-    } catch (e) {
-      // Fallback deterministic computation
-      const decimalValue = 2849102941;
-      const calculatedWinningIndex = (decimalValue % totalEntriesCount) + 1;
-      setVerificationResult({
-        verified: true,
-        ticketId: inputTicketId,
-        ticketChecksum: "9b71d224bd62f3785d96d46ad3ea3d73319bfbc2890caadae2dff72519673ca72",
-        serverSeedHash: "a9482f3d61b34e2c88d8b39414bc9102b4929841804b4d7c04118fec93b96317",
-        clientSeed,
-        nonce,
-        hmacSha256Result: "a9df4821c900e4b38910bc49281a792384c718b20938472910fa8c21894b9102",
-        decimalSlice: decimalValue,
-        totalEntriesPool: totalEntriesCount,
-        calculatedWinningIndex,
-        provableFairnessAuditStatus: "MATHEMATICALLY_VERIFIED",
-        notaryVerificationStatus: "GOVERNMENT_COMPLIANT",
-        algorithm: "HMAC-SHA256 CSPRNG with Merkle Tree Commitment",
-      });
+    } catch (error) {
+      setVerificationResult({ error: error instanceof Error ? error.message : "Verification is unavailable." });
     } finally {
       setIsVerifying(false);
     }
@@ -158,10 +154,10 @@ export const DrawVerificationSection: React.FC<DrawVerificationSectionProps> = (
                 </div>
                 <h4 className="text-base font-bold text-white">1. Pre-Committed SHA-256 Hash</h4>
                 <p className="text-xs text-white/60 leading-relaxed">
-                  The Server Seed is cryptographically hashed and published publicly before tickets are issued. We cannot alter the outcome without invalidating the pre-published hash.
+                  A protected commitment records the server-seed hash before settlement. The settlement endpoint rejects a seed that does not match that pre-commitment.
                 </p>
                 <div className="pt-2 text-[10px] font-mono text-white/40 truncate">
-                  Hash: {defaultAudit.serverSeedHash.slice(0, 24)}...
+                  {entropyAudit.serverSeedHash ? `Hash: ${entropyAudit.serverSeedHash.slice(0, 24)}...` : "Commitment pending"}
                 </div>
               </div>
 
@@ -171,11 +167,12 @@ export const DrawVerificationSection: React.FC<DrawVerificationSectionProps> = (
                 </div>
                 <h4 className="text-base font-bold text-white">2. Immutable Public Entropy</h4>
                 <p className="text-xs text-white/60 leading-relaxed">
-                  The draw entropy incorporates future Bitcoin Block Hash #{defaultAudit.blockHeight} and the NIST Randomness Beacon, ensuring nobody can predict or manipulate the final seed.
+                  Settlement captures the configured Bitcoin block hash and NIST Randomness Beacon output, then derives and publishes a final seed hash. No entropy is displayed before settlement.
                 </p>
                 <div className="pt-2 text-[10px] font-mono text-emerald-400">
-                  Target BTC Block: #{defaultAudit.blockHeight} (Oct 31, 2026)
+                  {entropyAudit.status === "SETTLED" ? `Settled BTC Block: #${entropyAudit.blockHeight}` : entropyAudit.blockHeight > 0 ? `Target BTC Block: #${entropyAudit.blockHeight} (pending settlement)` : "Target BTC Block: awaiting configuration"}
                 </div>
+                {entropyAudit.status === "SETTLED" && <div className="pt-1 text-[9px] font-mono text-white/50 truncate">BTC: {entropyAudit.bitcoinBlockHash} · NIST: {entropyAudit.nistBeaconOutput}</div>}
               </div>
 
               <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl space-y-3">
@@ -240,15 +237,8 @@ export const DrawVerificationSection: React.FC<DrawVerificationSectionProps> = (
                 </div>
 
                 <div>
-                  <label className="block text-[10px] uppercase font-bold text-white/70 mb-1.5">
-                    Committed Public Client Seed
-                  </label>
-                  <input
-                    type="text"
-                    value={clientSeed}
-                    onChange={(e) => setClientSeed(e.target.value)}
-                    className="w-full bg-white/5 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-[#D4AF37]"
-                  />
+                  <label className="block text-[10px] uppercase font-bold text-white/70 mb-1.5">Committed Public Client Seed</label>
+                  <div className="w-full break-all rounded-xl border border-white/15 bg-white/5 px-3.5 py-2.5 text-xs font-mono text-white">{entropyAudit.publicClientSeed}</div>
                 </div>
 
                 <div>
@@ -265,7 +255,7 @@ export const DrawVerificationSection: React.FC<DrawVerificationSectionProps> = (
               <div className="p-3.5 rounded-xl bg-black/50 border border-white/10 font-mono text-[11px] text-white/70 space-y-1">
                 <p className="text-[10px] uppercase font-bold text-[#D4AF37]">Provable Winning Formula:</p>
                 <code className="text-xs text-amber-200 block overflow-x-auto whitespace-nowrap">
-                  WinningIndex = (parseInt(HMAC_SHA256(ServerSeed, ClientSeed + &quot;:&quot; + Nonce).slice(0, 8), 16) % TotalEntries) + 1
+                  WinningIndex = (parseInt(SHA256(ServerSeed + ClientSeed + BitcoinBlockHash + NistBeacon).slice(0, 8), 16) % TotalEntries) + 1
                 </code>
               </div>
 
@@ -291,12 +281,13 @@ export const DrawVerificationSection: React.FC<DrawVerificationSectionProps> = (
                 </button>
 
                 <span className="text-[10px] text-white/40 font-mono">
-                  Standard: FIPS 198-1 HMAC &bull; SHA-256 Merkle Proof
+                  Standard: SHA-256 public-entropy settlement
                 </span>
               </div>
 
               {/* Live Verification Result Box */}
-              {verificationResult && (
+              {verificationResult?.error && <div className="rounded-2xl border border-amber-400/30 bg-amber-400/10 p-4 text-sm text-amber-100">{verificationResult.error}</div>}
+              {verificationResult && !verificationResult.error && (
                 <div className="p-5 rounded-2xl bg-black/80 border border-emerald-500/40 space-y-3 animate-fade-in font-mono text-xs">
                   <div className="flex items-center justify-between pb-2 border-b border-white/10">
                     <span className="text-emerald-400 font-bold flex items-center gap-1.5">
@@ -312,8 +303,8 @@ export const DrawVerificationSection: React.FC<DrawVerificationSectionProps> = (
                       <p className="text-white break-all">{verificationResult.serverSeedHash}</p>
                     </div>
                     <div>
-                      <p className="text-white/40 uppercase text-[9px]">HMAC-SHA256 Output Result</p>
-                      <p className="text-[#D4AF37] break-all">{verificationResult.hmacSha256Result}</p>
+                      <p className="text-white/40 uppercase text-[9px]">Final SHA-256 Seed Hash</p>
+                      <p className="text-[#D4AF37] break-all">{verificationResult.finalSeedHash}</p>
                     </div>
                     <div>
                       <p className="text-white/40 uppercase text-[9px]">Hex Slice (First 8 chars) &rarr; Decimal</p>
@@ -328,7 +319,7 @@ export const DrawVerificationSection: React.FC<DrawVerificationSectionProps> = (
                   </div>
 
                   <p className="text-[10px] text-emerald-400/80 pt-2 border-t border-white/10 font-sans">
-                    ✓ Validated: Any third-party terminal or Python/Node script running HMAC-SHA256 with these inputs will produce the exact same outcome.
+                    ✓ Validated: Any third-party terminal or Python/Node script running SHA-256 with the published entropy inputs will produce the exact same outcome.
                   </p>
                 </div>
               )}

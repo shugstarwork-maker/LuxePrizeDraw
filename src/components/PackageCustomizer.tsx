@@ -3,7 +3,7 @@ import {
   Building2, Palette, Smartphone, Sparkles, CheckCircle2,
   CreditCard, ShieldCheck, Zap, Sliders, ArrowRight, Layers, Palmtree, Star, Compass
 } from "lucide-react";
-import { FREEZONES_DATA } from "../data/prizeDetails";
+import { FREEZONES_DATA, PRIZE_PILLARS } from "../data/prizeDetails";
 
 interface PackageCustomizerProps {
   onOpenEntry: () => void;
@@ -16,6 +16,7 @@ export const PackageCustomizer: React.FC<PackageCustomizerProps> = ({ onOpenEntr
   const [brandStyle, setBrandStyle] = useState<"luxury-gold" | "cyber-emerald" | "royal-sapphire">("luxury-gold");
   const [selectedHotel, setSelectedHotel] = useState("atlantis-the-royal");
   const [oneClickFeature, setOneClickFeature] = useState("instant-vip-booking");
+  const [selectedPrizeId, setSelectedPrizeId] = useState("monthly-stipend");
 
   const hotelOptions = [
     {
@@ -74,6 +75,7 @@ export const PackageCustomizer: React.FC<PackageCustomizerProps> = ({ onOpenEntr
   const currentTheme = brandThemes[brandStyle];
   const activeZoneObj = FREEZONES_DATA.find((z) => z.id === selectedZone) || FREEZONES_DATA[0];
   const activeHotelObj = hotelOptions.find((h) => h.id === selectedHotel) || hotelOptions[0];
+  const activePrizeObj = PRIZE_PILLARS.find((pillar) => pillar.id === selectedPrizeId) || PRIZE_PILLARS[0];
 
   return (
     <section id="customizer" className="py-24 relative">
@@ -88,7 +90,7 @@ export const PackageCustomizer: React.FC<PackageCustomizerProps> = ({ onOpenEntr
             Design Your <span className="font-bold text-[#D4AF37]">Winning UAE Setup</span>
           </h2>
           <p className="text-white/50 text-base sm:text-lg max-w-2xl font-light leading-relaxed">
-            Preview your 2-week 5-star hotel itinerary, custom company license, and luxury corporate debit card exactly as they will be handed to you.
+            Mix classic founder rewards with bold wildcard tiers, then preview the luxury lifestyle and launch energy behind the prize package that fits your ambition.
           </p>
         </div>
 
@@ -100,6 +102,43 @@ export const PackageCustomizer: React.FC<PackageCustomizerProps> = ({ onOpenEntr
                 <Layers className="w-4 h-4 text-[#D4AF37]" />
                 <span>Configure Your Prize Preferences</span>
               </h3>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-white/60 mb-2">
+                  Select Prize Tier
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {PRIZE_PILLARS.map((pillar) => {
+                    const isSelected = selectedPrizeId === pillar.id;
+                    return (
+                      <button
+                        key={pillar.id}
+                        type="button"
+                        onClick={() => setSelectedPrizeId(pillar.id)}
+                        className={`p-3 rounded-xl border text-left transition-all ${
+                          isSelected
+                            ? "bg-white/10 border-[#D4AF37] shadow-[0_0_15px_rgba(212,175,55,0.2)]"
+                            : "bg-white/5 border-white/10 hover:border-white/20"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-xs font-bold text-white truncate">
+                            <span className="mr-1">{pillar.emoji}</span>
+                            {pillar.shortTitle}
+                          </p>
+                          {isSelected && (
+                            <CheckCircle2 className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
+                          )}
+                        </div>
+                        <p className="text-[10px] text-[#D4AF37] mt-1">{pillar.valueGBP}</p>
+                        <p className="text-[9px] text-white/40 mt-0.5">
+                          {pillar.prizeTier === "alternative" ? "Wacky alternative tier" : "Traditional prize tier"}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
               {/* 5-Star Hotel Choice */}
               <div>
@@ -224,6 +263,42 @@ export const PackageCustomizer: React.FC<PackageCustomizerProps> = ({ onOpenEntr
 
           {/* Right Live Simulation Preview Display */}
           <div className="lg:col-span-6 space-y-6">
+            <div className={`p-5 rounded-2xl bg-gradient-to-br ${activePrizeObj.accentColor} border border-white/15 shadow-2xl backdrop-blur-xl space-y-4 text-white`}>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.25em] font-bold text-white/70">
+                    {activePrizeObj.prizeTier === "alternative" ? "Wacky prize tier" : "Traditional prize tier"}
+                  </p>
+                  <h4 className="text-lg sm:text-xl font-semibold mt-1">
+                    <span className="mr-2">{activePrizeObj.emoji}</span>
+                    {activePrizeObj.title}
+                  </h4>
+                  <p className="text-sm text-white/80 mt-1">{activePrizeObj.tagline}</p>
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-black/20 border border-white/20">
+                  {activePrizeObj.valueGBP}
+                </span>
+              </div>
+
+              <p className="text-sm text-white/80 leading-relaxed">
+                {activePrizeObj.description}
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                {(activePrizeObj.valueBreakdown || activePrizeObj.specifications.slice(0, 3)).map((item) => (
+                  <div key={item.label} className="p-3 rounded-xl bg-black/20 border border-white/10">
+                    <p className="text-[9px] uppercase tracking-wider text-white/55">{item.label}</p>
+                    <p className="font-bold text-white mt-1">{item.value}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="p-3 rounded-xl bg-black/20 border border-white/10 text-xs text-white/85">
+                <span className="text-white/60 uppercase tracking-[0.2em] text-[9px] font-bold">Aspirational angle</span>
+                <p className="mt-1 leading-relaxed">{activePrizeObj.highlightQuote}</p>
+              </div>
+            </div>
+
             {/* 1. 2-Week 5-Star VIP Holiday Boarding & Suite Pass Mockup */}
             <div className="p-5 rounded-2xl bg-gradient-to-br from-yellow-900/20 via-black/40 to-[#1E40AF]/20 border border-[#D4AF37]/30 shadow-2xl backdrop-blur-xl space-y-3">
               <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
@@ -335,7 +410,7 @@ export const PackageCustomizer: React.FC<PackageCustomizerProps> = ({ onOpenEntr
               onClick={onOpenEntry}
               className="w-full py-4 rounded-xl bg-[#D4AF37] hover:bg-[#e6c352] text-black font-bold text-xs uppercase tracking-widest shadow-[0_10px_30px_rgba(212,175,55,0.25)] transition-all flex items-center justify-center gap-2"
             >
-              <span>Lock in This Package & Get Official Ticket</span>
+              <span>Lock in {activePrizeObj.shortTitle} & Get Official Ticket</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
