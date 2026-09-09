@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { BadgeCheck, Crown, Gamepad2, RotateCcw, ShieldCheck, Swords, Trophy, Users, Zap } from "lucide-react";
+import { BadgeCheck, Crown, Gamepad2, RotateCcw, ShieldCheck, Swords, Trophy, Users, Zap, TrendingUp } from "lucide-react";
 
 type GameId = "chess" | "draughts" | "connect-4";
 type PlayerColor = "white" | "black";
@@ -660,6 +660,13 @@ export const GamesArena: React.FC = () => {
           <div className="rounded-2xl bg-white/5 border border-[#D4AF37]/30 px-5 py-4 min-w-56">
             <div className="text-[10px] uppercase tracking-widest text-white/45">Demo token balance</div>
             <div className="mt-1 flex items-center gap-2 text-2xl font-bold text-[#D4AF37]"><Crown className="w-5 h-5" /> {tokens.toLocaleString()} tokens</div>
+          </div>
+        </div>
+
+        <div className="mb-8 overflow-hidden rounded-3xl border border-violet-400/30 bg-gradient-to-br from-violet-500/15 via-indigo-500/10 to-slate-950 p-5 sm:p-6">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-4"><div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-violet-300/30 bg-violet-400/15 text-violet-200"><TrendingUp className="h-6 w-6" /></div><div><div className="flex flex-wrap items-center gap-2"><h3 className="text-lg font-bold text-white">Free prediction markets</h3><span className="rounded-full border border-violet-300/40 bg-violet-400/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-violet-100">Coming soon</span></div><p className="mt-1 max-w-xl text-sm text-white/60">Make predictions, earn virtual points, and climb community leaderboards. Free-play only: no deposits, withdrawals, or cash prizes.</p></div></div>
+            <span className="w-fit rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-white/50">Preview feature</span>
           </div>
         </div>
 
