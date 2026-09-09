@@ -18,18 +18,18 @@ export const CharityImpactSection: React.FC<CharityImpactSectionProps> = ({ onOp
         <div className="flex flex-col items-center text-center space-y-3 mb-14">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-rose-500/10 border border-rose-500/30 rounded-full text-[10px] uppercase tracking-[0.2em] text-rose-400 font-bold">
             <Heart className="w-3.5 h-3.5 text-rose-400 fill-rose-400/30" />
-            <span>Philanthropic Commitment &middot; 25% of Ticket Revenue</span>
+            <span>Community causes &middot; prototype plan</span>
           </div>
 
           <h2 className="text-3xl sm:text-5xl font-light text-white tracking-tight">
-            Every Entry Directly Fuels <br />
+            Building Support for <br />
             <span className="font-bold bg-gradient-to-r from-rose-400 via-amber-300 to-[#D4AF37] bg-clip-text text-transparent">
-              Global Education & Youth Founders
+              Community Wellbeing & Opportunity
             </span>
           </h2>
 
           <p className="text-white/50 text-base sm:text-lg max-w-2xl font-light leading-relaxed">
-            When you enter Luxe Prize Draws or join our Monthly Entry Club, you are directly investing in the next generation. A verified <strong className="text-white font-semibold">25% of all ticket bundles and recurring subscription proceeds</strong> fund real scholarships, laptops, and startup seed grants worldwide.
+            This prototype highlights the community causes we aim to support as the product develops: mental-health and wellbeing, youth opportunity, and local projects tackling isolation and hardship. <strong className="text-white font-semibold">No donation, allocation, or partner relationship is created through this preview.</strong>
           </p>
         </div>
 
@@ -37,57 +37,57 @@ export const CharityImpactSection: React.FC<CharityImpactSectionProps> = ({ onOp
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
           <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl relative overflow-hidden group hover:border-rose-500/40 transition-all">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] uppercase tracking-widest text-rose-400 font-bold">Total Donated</span>
+              <span className="text-[10px] uppercase tracking-widest text-rose-400 font-bold">Prototype reserve</span>
               <Heart className="w-4 h-4 text-rose-400 fill-rose-400/20" />
             </div>
             <div className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
               £{CHARITY_IMPACT_DATA.totalRaisedGBP.toLocaleString()}
             </div>
-            <p className="text-xs text-white/40 mt-1">Disbursed to verified non-profits</p>
+            <p className="text-xs text-white/40 mt-1">No funds allocated in this preview</p>
             <div className="mt-3 w-full bg-white/10 h-1 rounded-full overflow-hidden">
-              <div className="bg-rose-400 h-full w-3/4 rounded-full"></div>
+              <div className="bg-rose-400 h-full w-0 rounded-full"></div>
             </div>
           </div>
 
           <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl relative overflow-hidden group hover:border-amber-500/40 transition-all">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] uppercase tracking-widest text-[#D4AF37] font-bold">Charity Allocation</span>
+              <span className="text-[10px] uppercase tracking-widest text-[#D4AF37] font-bold">Community causes</span>
               <Award className="w-4 h-4 text-[#D4AF37]" />
             </div>
             <div className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
               {CHARITY_IMPACT_DATA.percentageDonated}%
             </div>
-            <p className="text-xs text-white/40 mt-1">Of every ticket & subscription</p>
+            <p className="text-xs text-white/40 mt-1">Partner selection before launch</p>
             <div className="mt-3 w-full bg-white/10 h-1 rounded-full overflow-hidden">
-              <div className="bg-[#D4AF37] h-full w-full rounded-full"></div>
+              <div className="bg-[#D4AF37] h-full w-0 rounded-full"></div>
             </div>
           </div>
 
           <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl relative overflow-hidden group hover:border-emerald-500/40 transition-all">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] uppercase tracking-widest text-emerald-400 font-bold">Scholarships</span>
+              <span className="text-[10px] uppercase tracking-widest text-emerald-400 font-bold">Youth opportunity</span>
               <GraduationCap className="w-4 h-4 text-emerald-400" />
             </div>
             <div className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
               {CHARITY_IMPACT_DATA.scholarshipsFunded.toLocaleString()}+
             </div>
-            <p className="text-xs text-white/40 mt-1">Students sponsored in school</p>
+            <p className="text-xs text-white/40 mt-1">Planned support area</p>
             <div className="mt-3 w-full bg-white/10 h-1 rounded-full overflow-hidden">
-              <div className="bg-emerald-400 h-full w-4/5 rounded-full"></div>
+              <div className="bg-emerald-400 h-full w-0 rounded-full"></div>
             </div>
           </div>
 
           <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl relative overflow-hidden group hover:border-indigo-500/40 transition-all">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] uppercase tracking-widest text-indigo-400 font-bold">Micro-Grants</span>
+              <span className="text-[10px] uppercase tracking-widest text-indigo-400 font-bold">Community connection</span>
               <Sparkles className="w-4 h-4 text-indigo-400" />
             </div>
             <div className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
               {CHARITY_IMPACT_DATA.microGrantsAwarded}+
             </div>
-            <p className="text-xs text-white/40 mt-1">Underprivileged founders launched</p>
+            <p className="text-xs text-white/40 mt-1">Planned support area</p>
             <div className="mt-3 w-full bg-white/10 h-1 rounded-full overflow-hidden">
-              <div className="bg-indigo-400 h-full w-2/3 rounded-full"></div>
+              <div className="bg-indigo-400 h-full w-0 rounded-full"></div>
             </div>
           </div>
         </div>
@@ -96,12 +96,12 @@ export const CharityImpactSection: React.FC<CharityImpactSectionProps> = ({ onOp
         <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border border-white/10 backdrop-blur-2xl space-y-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-white/10">
             <div>
-              <span className="text-[10px] font-bold text-[#D4AF37] uppercase tracking-widest">Audited Philanthropy</span>
-              <h3 className="text-2xl font-light text-white mt-1">Our Official Charity Partners</h3>
+              <span className="text-[10px] font-bold text-[#D4AF37] uppercase tracking-widest">Community impact plan</span>
+              <h3 className="text-2xl font-light text-white mt-1">Community causes we aim to support</h3>
             </div>
             <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>Independently Audited & Verified Disbursements</span>
+              <span>Partners to be confirmed before launch</span>
             </div>
           </div>
 
@@ -129,10 +129,10 @@ export const CharityImpactSection: React.FC<CharityImpactSectionProps> = ({ onOp
             <div className="space-y-1 text-center sm:text-left">
               <h4 className="text-lg font-bold text-white flex items-center gap-2 justify-center sm:justify-start">
                 <Heart className="w-4 h-4 text-rose-400 fill-rose-400" />
-                <span>Win Big While Giving Back</span>
+                <span>Support local communities</span>
               </h4>
               <p className="text-xs text-white/60 font-light max-w-xl">
-                Subscribe to our Monthly Entry Club for £9.99/mo to secure 20 recurring entries every draw and directly donate £2.50 every month toward youth coding scholarships.
+                This product preview outlines future support for mental-health services, youth opportunity, and community connection. Funding and partner commitments require confirmed arrangements before launch.
               </p>
             </div>
 
@@ -140,7 +140,7 @@ export const CharityImpactSection: React.FC<CharityImpactSectionProps> = ({ onOp
               onClick={onOpenEntry}
               className="px-6 py-3.5 bg-gradient-to-r from-[#D4AF37] to-amber-500 hover:from-[#e6c352] hover:to-amber-400 text-black font-bold text-xs uppercase tracking-widest rounded-xl shadow-[0_5px_20px_rgba(212,175,55,0.3)] transition-all shrink-0 flex items-center gap-2 hover:scale-105"
             >
-              <span>Get Entries & Support Charity</span>
+              <span>Explore community causes</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
