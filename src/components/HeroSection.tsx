@@ -93,17 +93,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center mb-16">
           {/* Left Column: Hero Header & Primary CTAs */}
           <div className="lg:col-span-7 flex flex-col justify-center space-y-6">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full w-fit">
-              <span className="w-2 h-2 bg-[#D4AF37] rounded-full animate-pulse"></span>
-              <span className="text-[10px] uppercase tracking-[0.2em] text-[#D4AF37] font-bold">
-                Exclusive 2026 Founder Opportunity
-              </span>
-            </div>
-
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-light leading-[1.1] text-white tracking-tight">
               Win Your <span className="font-bold text-[#D4AF37]">Future</span> <br className="hidden sm:inline" />
               in the Emirates
             </h1>
+
+            <div className="inline-flex w-fit max-w-full items-center gap-2 self-start rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/10 px-3.5 py-1.5">
+              <span className="h-2 w-2 shrink-0 rounded-full bg-[#D4AF37] animate-pulse"></span>
+              <span className="text-[10px] font-bold uppercase leading-relaxed tracking-[0.16em] text-[#D4AF37]">
+                Exclusive 2026 Founder Opportunity
+              </span>
+            </div>
 
             <p className="text-base sm:text-lg text-white/50 max-w-xl leading-relaxed">
               The ultimate residency and business package. We don't just give you a prize; we build your turnkey legacy in Dubai with <strong className="text-white font-semibold">£100,000 Cash</strong>, an all-inclusive <strong className="text-[#D4AF37] font-semibold">2-Week 5-Star Dubai Holiday</strong>, a <strong className="text-white font-semibold">3-Year Residency Visa</strong>, and a custom <strong className="text-[#D4AF37] font-semibold">App with One-Click Book & AI</strong>.
