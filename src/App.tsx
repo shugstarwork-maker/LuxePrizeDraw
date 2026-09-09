@@ -12,6 +12,7 @@ import { CharityImpactSection } from "./components/CharityImpactSection";
 import { OneClickBookDemo } from "./components/OneClickBookDemo";
 import { GamesArena } from "./components/GamesArena";
 import { LuxePokerLeague } from "./components/LuxePokerLeague";
+import { FreeDraws } from "./components/FreeDraws";
 import { AiPitchEvaluator } from "./components/AiPitchEvaluator";
 import { PackageCustomizer } from "./components/PackageCustomizer";
 import { DrawVerificationSection } from "./components/DrawVerificationSection";
@@ -168,6 +169,11 @@ export default function App() {
         />
 
         <CompetitionHub />
+
+        <FreeDraws onEnter={() => {
+          setPrefilledIdea("");
+          setIsEntryModalOpen(true);
+        }} />
 
         {/* 6 Prize Pillars Detailed Breakdown */}
         <PrizeShowcase
