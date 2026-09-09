@@ -1,4 +1,4 @@
-import express from "express";
+import express, { type Request, type Response } from "express";
 import path from "path";
 import crypto from "crypto";
 import { createServer as createViteServer } from "vite";
@@ -66,6 +66,9 @@ const drawId = process.env.ENTROPY_DRAW_ID || "2026-10-31-founder-draw";
 const targetBlockHeight = Number(process.env.ENTROPY_BTC_BLOCK_HEIGHT || "0");
 const publicClientSeed = process.env.ENTROPY_CLIENT_SEED || "DUBAI-2026-GRAND-DRAW-COMMITTED";
 const databaseUrl = process.env.ENTROPY_AUDIT_DATABASE_URL;
+const settlementRateLimitWindowMs = 60_000;
+const settlementRateLimitMaxAttempts = 5;
+const settlementRateLimit = new Map<string, { count: number; resetAt: number }>();
 
 function getAuditDatabase() {
   if (!databaseUrl) throw new Error("ENTROPY_AUDIT_DATABASE_URL is not configured.");
@@ -126,6 +129,32 @@ function requireSettlementAuthorization(authorization?: string) {
   return actual.length === expected.length && crypto.timingSafeEqual(Buffer.from(actual), Buffer.from(expected));
 }
 
+function getSettlementRateLimitKey(req: Request) {
+  const forwardedFor = req.header("x-forwarded-for");
+  const clientAddress = forwardedFor?.split(",")[0]?.trim() || req.ip || "unknown";
+  return `draw-admin:${clientAddress}`;
+}
+
+function applySettlementRateLimit(req: Request, res: Response) {
+  const now = Date.now();
+  const key = getSettlementRateLimitKey(req);
+  const existing = settlementRateLimit.get(key);
+
+  if (!existing || existing.resetAt <= now) {
+    settlementRateLimit.set(key, { count: 1, resetAt: now + settlementRateLimitWindowMs });
+    return false;
+  }
+
+  if (existing.count >= settlementRateLimitMaxAttempts) {
+    res.setHeader("Retry-After", Math.ceil((existing.resetAt - now) / 1000).toString());
+    res.status(429).json({ error: "Too many draw administration attempts. Try again shortly." });
+    return true;
+  }
+
+  existing.count += 1;
+  return false;
+}
+
 // API: durable public audit record. Pending state carries no fake entropy values.
 app.get("/api/draw/audit", async (_req, res) => {
   try {
@@ -140,6 +169,7 @@ app.get("/api/draw/audit", async (_req, res) => {
 // API: protected pre-commitment. Call before entries close to publish the server-seed hash.
 app.post("/api/draw/commit", async (req, res) => {
   try {
+    if (applySettlementRateLimit(req, res)) return;
     if (!requireSettlementAuthorization(req.header("authorization"))) return res.status(401).json({ error: "Unauthorized commitment request." });
     const serverSeed = process.env.ENTROPY_DRAW_SERVER_SEED;
     if (!serverSeed || !Number.isSafeInteger(targetBlockHeight) || targetBlockHeight < 1) return res.status(503).json({ error: "Entropy draw configuration is incomplete." });
@@ -160,6 +190,7 @@ app.post("/api/draw/commit", async (req, res) => {
 // API: protected, idempotent settlement. Invoke only after the target block has been mined.
 app.post("/api/draw/settle", async (req, res) => {
   try {
+    if (applySettlementRateLimit(req, res)) return;
     if (!requireSettlementAuthorization(req.header("authorization"))) return res.status(401).json({ error: "Unauthorized settlement request." });
     const serverSeed = process.env.ENTROPY_DRAW_SERVER_SEED;
     if (!serverSeed || !Number.isSafeInteger(targetBlockHeight) || targetBlockHeight < 1) return res.status(503).json({ error: "Entropy draw configuration is incomplete." });
