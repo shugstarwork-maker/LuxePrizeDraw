@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { BadgeCheck, Crown, Gamepad2, RotateCcw, ShieldCheck, Swords, Trophy, Users, Zap } from "lucide-react";
+import { BadgeCheck, BookOpen, CheckCircle2, Crown, Flame, Gamepad2, RotateCcw, ShieldCheck, Swords, Target, Trophy, Users, Zap } from "lucide-react";
 
 type GameId = "chess" | "draughts" | "connect-4";
 type PlayerColor = "white" | "black";
@@ -286,8 +286,36 @@ export const GamesArena: React.FC = () => {
   const [chessState, setChessState] = useState<ChessState>(createChessState);
   const [draughtsState, setDraughtsState] = useState<DraughtsState>(createDraughtsState);
   const [connect4State, setConnect4State] = useState<Connect4State>(createConnect4State);
+  const [chessXp, setChessXp] = useState(120);
+  const [chessStreak, setChessStreak] = useState(3);
+  const [activeLesson, setActiveLesson] = useState(0);
+  const [completedLessons, setCompletedLessons] = useState<number[]>([]);
+  const [puzzleSolved, setPuzzleSolved] = useState(false);
 
   const game = useMemo(() => GAMES.find((item) => item.id === selectedGame)!, [selectedGame]);
+  const chessLessons = [
+    { title: "Open with purpose", detail: "Control the centre, develop a knight, and keep your king safe.", xp: 20 },
+    { title: "Spot the fork", detail: "Use your knight to attack two valuable pieces in one move.", xp: 30 },
+    { title: "Finish the attack", detail: "Coordinate your queen and rook to create a decisive threat.", xp: 40 },
+  ];
+
+  const lessonDone = completedLessons.includes(activeLesson);
+
+  const completeLesson = () => {
+    if (lessonDone) return;
+    const lesson = chessLessons[activeLesson];
+    setChessXp((value) => value + lesson.xp);
+    setChessStreak((value) => Math.max(value, 4));
+    setCompletedLessons((value) => [...value, activeLesson]);
+    setActiveLesson((value) => (value + 1) % chessLessons.length);
+  };
+
+  const solvePuzzle = () => {
+    if (!puzzleSolved) {
+      setChessXp((value) => value + 35);
+      setPuzzleSolved(true);
+    }
+  };
 
   const createChallenge = () => {
     if (tokens < selectedStake) {
@@ -514,11 +542,18 @@ export const GamesArena: React.FC = () => {
   };
 
   const renderChessBoard = () => (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="rounded-2xl border border-[#D4AF37]/35 bg-gradient-to-br from-[#2a2110] to-[#110f16] p-5 lg:col-span-2">
+          <div className="flex items-start justify-between gap-4"><div><div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-[#f6d46b]"><BookOpen className="h-4 w-4" /> Guided lesson {activeLesson + 1}</div><h4 className="mt-2 text-xl font-bold text-white">{chessLessons[activeLesson].title}</h4><p className="mt-1 text-sm text-white/60">{chessLessons[activeLesson].detail}</p></div><span className="rounded-full bg-[#D4AF37]/15 px-3 py-1 text-xs font-bold text-[#f6d46b]">+{chessLessons[activeLesson].xp} XP</span></div>
+          <button onClick={completeLesson} disabled={lessonDone} className={`mt-5 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-wider transition ${lessonDone ? "bg-emerald-400/20 text-emerald-200" : "bg-[#D4AF37] text-black hover:bg-[#f6d46b]"}`}><CheckCircle2 className="h-4 w-4" /> {lessonDone ? "Lesson complete" : "Complete lesson"}</button>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5"><div className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/45">Your progress</div><div className="mt-4 flex items-center justify-between"><div><div className="flex items-center gap-1 text-2xl font-black text-white"><Zap className="h-5 w-5 text-[#D4AF37]" />{chessXp}</div><div className="text-xs text-white/45">Chess XP</div></div><div><div className="flex items-center gap-1 text-2xl font-black text-orange-300"><Flame className="h-5 w-5" />{chessStreak}</div><div className="text-xs text-white/45">day streak</div></div></div><div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full w-[60%] rounded-full bg-gradient-to-r from-[#D4AF37] to-orange-400" /></div><p className="mt-2 text-xs text-white/50">80 XP to reach Knight level</p></div>
+      </div>
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h4 className="text-lg font-bold text-white">Playable chess demo</h4>
-          <p className="text-sm text-white/55">Standard piece movement with instant queen promotion and king capture win condition.</p>
+          <h4 className="text-lg font-bold text-white">Practice board</h4>
+          <p className="text-sm text-white/55">Learn by playing: select a piece, choose a legal destination, and take turns locally.</p>
         </div>
         <button
           onClick={() => setChessState(createChessState())}
@@ -547,6 +582,10 @@ export const GamesArena: React.FC = () => {
         )}
       </div>
       <p className="text-sm text-emerald-300">{chessState.message}</p>
+      <div className="rounded-2xl border border-indigo-400/25 bg-indigo-500/[0.08] p-5">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center"><div><div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-indigo-200"><Target className="h-4 w-4" /> Daily puzzle</div><h4 className="mt-2 text-lg font-bold text-white">Win the queen in two moves</h4><p className="mt-1 text-sm text-white/60">Train your eye for a knight fork. Find the forcing move, then reveal the solution.</p></div><button onClick={solvePuzzle} className={`shrink-0 rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-wider transition ${puzzleSolved ? "bg-emerald-400/20 text-emerald-200" : "bg-white/10 text-white hover:bg-white/20"}`}>{puzzleSolved ? "Solved · +35 XP" : "Reveal solution"}</button></div>
+        {puzzleSolved && <p className="mt-4 rounded-xl border border-emerald-400/20 bg-emerald-400/10 p-3 text-sm text-emerald-200">Look for the knight jump that attacks both the queen and rook. Great tactics begin with forcing moves.</p>}
+      </div>
     </div>
   );
 
