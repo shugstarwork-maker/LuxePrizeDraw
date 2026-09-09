@@ -21,6 +21,7 @@ import { TicketWalletModal } from "./components/TicketWalletModal";
 import { AiAdvisorDrawer } from "./components/AiAdvisorDrawer";
 import { Footer } from "./components/Footer";
 import { LuxeHost } from "./components/LuxeHost";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import { CompetitionTicket, CompetitionStats } from "./types";
 import { Sparkles, Ticket, Heart } from "lucide-react";
 
@@ -281,6 +282,7 @@ export default function App() {
         onOpenEntry={() => setIsEntryModalOpen(true)}
         onOpenWallet={() => setIsWalletModalOpen(true)}
       />
+      <SpeedInsights />
     </div>
   );
 }
