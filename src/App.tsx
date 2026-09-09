@@ -7,6 +7,8 @@ import React, { useState, useEffect } from "react";
 import { Navbar } from "./components/Navbar";
 import { HeroSection } from "./components/HeroSection";
 import { PrizeShowcase } from "./components/PrizeShowcase";
+import { ExperiencePrizes } from "./components/ExperiencePrizes";
+import { KnockoutTournament } from "./components/KnockoutTournament";
 import { CharityImpactSection } from "./components/CharityImpactSection";
 import { OneClickBookDemo } from "./components/OneClickBookDemo";
 import { GamesArena } from "./components/GamesArena";
@@ -175,6 +177,8 @@ export default function App() {
           }}
         />
 
+        <ExperiencePrizes />
+
         {/* 25% Charity Contribution & Monthly Membership Subscriptions */}
         <CharityImpactSection
           onOpenEntry={() => setIsEntryModalOpen(true)}
@@ -183,8 +187,9 @@ export default function App() {
         {/* Special Feature #1: One-Click Book & AI Interactive Sandbox */}
         <OneClickBookDemo onOpenEntry={() => setIsEntryModalOpen(true)} />
 
-        {/* Games hub: demo challenges followed by draw verification */}
+        {/* Games hub and free-play elimination tournament */}
         <GamesArena />
+        <KnockoutTournament />
 
         {/* Verifiably random draw verification, grouped beneath the Games tab */}
         <DrawVerificationSection
