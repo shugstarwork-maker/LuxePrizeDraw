@@ -1,4 +1,5 @@
-import express, { type NextFunction, type Request, type Response } from "express";
+import express from "express";
+import rateLimit from "express-rate-limit";
 import path from "path";
 import crypto from "crypto";
 import { createServer as createViteServer } from "vite";
@@ -66,9 +67,13 @@ const drawId = process.env.ENTROPY_DRAW_ID || "2026-10-31-founder-draw";
 const targetBlockHeight = Number(process.env.ENTROPY_BTC_BLOCK_HEIGHT || "0");
 const publicClientSeed = process.env.ENTROPY_CLIENT_SEED || "DUBAI-2026-GRAND-DRAW-COMMITTED";
 const databaseUrl = process.env.ENTROPY_AUDIT_DATABASE_URL;
-const settlementRateLimitWindowMs = 60_000;
-const settlementRateLimitMaxAttempts = 5;
-const settlementRateLimit = new Map<string, { count: number; resetAt: number }>();
+const settlementRateLimitMiddleware = rateLimit({
+  windowMs: 60_000,
+  limit: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many draw administration attempts. Try again shortly." },
+});
 
 function getAuditDatabase() {
   if (!databaseUrl) throw new Error("ENTROPY_AUDIT_DATABASE_URL is not configured.");
@@ -127,37 +132,6 @@ function requireSettlementAuthorization(authorization?: string) {
   const expected = `Bearer ${cronSecret}`;
   const actual = authorization || "";
   return actual.length === expected.length && crypto.timingSafeEqual(Buffer.from(actual), Buffer.from(expected));
-}
-
-function getSettlementRateLimitKey(req: Request) {
-  const forwardedFor = req.header("x-forwarded-for");
-  const clientAddress = forwardedFor?.split(",")[0]?.trim() || req.ip || "unknown";
-  return `draw-admin:${clientAddress}`;
-}
-
-function applySettlementRateLimit(req: Request, res: Response) {
-  const now = Date.now();
-  const key = getSettlementRateLimitKey(req);
-  const existing = settlementRateLimit.get(key);
-
-  if (!existing || existing.resetAt <= now) {
-    settlementRateLimit.set(key, { count: 1, resetAt: now + settlementRateLimitWindowMs });
-    return false;
-  }
-
-  if (existing.count >= settlementRateLimitMaxAttempts) {
-    res.setHeader("Retry-After", Math.ceil((existing.resetAt - now) / 1000).toString());
-    res.status(429).json({ error: "Too many draw administration attempts. Try again shortly." });
-    return true;
-  }
-
-  existing.count += 1;
-  return false;
-}
-
-function settlementRateLimitMiddleware(req: Request, res: Response, next: NextFunction) {
-  if (applySettlementRateLimit(req, res)) return;
-  next();
 }
 
 // API: durable public audit record. Pending state carries no fake entropy values.
