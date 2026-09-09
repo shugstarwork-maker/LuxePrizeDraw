@@ -54,12 +54,11 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const navItems = [
     { id: "prizes", label: "The £220K Package" },
+    { id: "games", label: "Games" },
     { id: "dubai-gallery", label: "Dubai Gallery" },
     { id: "hall-of-fame", label: "Hall of Fame (£100K+)" },
-    { id: "draw-verification", label: "Auditable Draw" },
     { id: "charity-impact", label: "Charity (25%)" },
     { id: "one-click-demo", label: "One-Click & AI" },
-    { id: "games", label: "Games & Challenges" },
     { id: "ai-evaluator", label: "AI Feasibility" },
     { id: "customizer", label: "Simulator" },
     { id: "live-draw", label: "Live Draw" },

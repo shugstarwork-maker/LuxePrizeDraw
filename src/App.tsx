@@ -181,21 +181,21 @@ export default function App() {
         {/* Special Feature #1: One-Click Book & AI Interactive Sandbox */}
         <OneClickBookDemo onOpenEntry={() => setIsEntryModalOpen(true)} />
 
-        {/* Demo-only 1v1 games and token challenges */}
+        {/* Games hub: demo challenges followed by draw verification */}
         <GamesArena />
+
+        {/* Verifiably random draw verification, grouped beneath the Games tab */}
+        <DrawVerificationSection
+          userTickets={tickets}
+          totalEntriesCount={stats.totalEntries}
+          onOpenEntry={() => setIsEntryModalOpen(true)}
+        />
 
         {/* Special Feature #2: AI Business Pitch & Feasibility Evaluator (Gemini 3.7) */}
         <AiPitchEvaluator onApplyIdeaToEntry={handleApplyIdeaToEntry} />
 
         {/* Interactive Prize Customizer / Simulator */}
         <PackageCustomizer onOpenEntry={() => setIsEntryModalOpen(true)} />
-
-        {/* Verifiably Random & Auditable Drawing System (Provably Fair CSPRNG & Certified Physical Blower) */}
-        <DrawVerificationSection
-          userTickets={tickets}
-          totalEntriesCount={stats.totalEntries}
-          onOpenEntry={() => setIsEntryModalOpen(true)}
-        />
 
         {/* Dubai Destination & Lifestyle Photo Gallery */}
         <DubaiPhotoGallery onOpenEntry={() => setIsEntryModalOpen(true)} />
