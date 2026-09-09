@@ -114,6 +114,68 @@
   background: #D4AF37;
 }
 
+@keyframes competitionTicker {
+  to { transform: translateX(-50%); }
+}
+
+.competition-ticker {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.competition-ticker__track {
+  display: flex;
+  width: max-content;
+  animation: competitionTicker 28s linear infinite;
+  will-change: transform;
+}
+
+.competition-ticker:hover .competition-ticker__track,
+.competition-ticker:focus-within .competition-ticker__track {
+  animation-play-state: paused;
+}
+
+.competition-ticker__group {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.45rem 0;
+  padding-right: 0.8rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.competition-ticker__group button {
+  border: 0;
+  background: transparent;
+  color: #fde68a;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.competition-ticker__dot {
+  color: #fbbf24;
+  font-size: 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .competition-ticker {
+    overflow-x: auto;
+    white-space: normal;
+  }
+  .competition-ticker__track {
+    width: 100%;
+    animation: none;
+  }
+  .competition-ticker__group {
+    flex-wrap: wrap;
+  }
+  .competition-ticker__group[aria-hidden="true"] { display: none; }
+}
+
 .nav-tabs {
   scrollbar-width: none;
 }
@@ -131,4 +193,27 @@
 .nav-tab:focus-visible {
   outline: 2px solid #f8d778;
   outline-offset: 2px;
+}
+
+.nav-tab:not(.nav-tab--active):hover {
+ color: #fff7d6;
+ box-shadow: inset 0 0 0 1px rgba(248, 215, 120, 0.3), 0 0 18px rgba(212, 175, 55, 0.14);
+ text-shadow: 0 0 12px rgba(248, 215, 120, 0.65);
+}
+
+.nav-tab:active,
+.competition-ticker__group button:active {
+ transform: scale(0.96);
+}
+
+.competition-ticker__group button:hover,
+.competition-ticker__group button:focus-visible {
+ color: #fff7d6;
+ text-shadow: 0 0 12px rgba(248, 215, 120, 0.85);
+}
+
+.competition-ticker__group button:focus-visible {
+ outline: 2px solid #f8d778;
+ outline-offset: 3px;
+ border-radius: 2px;
 }
