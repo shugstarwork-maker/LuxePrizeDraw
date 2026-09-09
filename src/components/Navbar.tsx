@@ -49,6 +49,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     { label: "Play skill-game demos", sectionId: "games", ariaLabel: "Jump to the games section" },
     { label: "Discover the prize package", sectionId: "prizes", ariaLabel: "Jump to the prize package section" },
     { label: "Competition updates and draw information" },
+    { label: "Our ambition: build the world's most valuable app-launch prize" },
   ];
 
   const navItems = [
