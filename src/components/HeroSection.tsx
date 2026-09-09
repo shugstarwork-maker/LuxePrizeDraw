@@ -264,8 +264,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <div className="bg-gradient-to-br from-[#1E40AF]/20 via-purple-900/20 to-black/40 border border-white/10 p-6 rounded-2xl backdrop-blur-xl">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h3 className="text-indigo-300 text-xs uppercase tracking-widest font-bold">Autonomous Tech Stack</h3>
-                  <p className="text-[11px] text-white/50">Delivered fully operational</p>
+                  <h3 className="text-indigo-300 text-xs uppercase tracking-widest font-bold">Launch-Ready Founder Stack</h3>
+                  <p className="text-[11px] text-white/50">Built to convert, support and scale from day one</p>
                 </div>
                 <span className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded border border-indigo-500/30 uppercase tracking-widest font-bold">
                   ACTIVE
@@ -274,15 +274,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <ul className="space-y-2.5">
                 <li className="flex items-center gap-3 text-xs sm:text-sm text-white/80">
                   <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full shadow-[0_0_8px_#818cf8]"></div>
-                  <span>Instant FaceID & Apple Pay 1-Click Booking Engine</span>
+                  <span>Frictionless one-tap booking with Apple Pay</span>
                 </li>
                 <li className="flex items-center gap-3 text-xs sm:text-sm text-white/80">
                   <div className="w-1.5 h-1.5 bg-[#D4AF37] rounded-full shadow-[0_0_8px_#D4AF37]"></div>
-                  <span>24/7 Gemini Multilingual Client AI Copilot</span>
+                  <span>Always-on multilingual AI client concierge</span>
                 </li>
                 <li className="flex items-center gap-3 text-xs sm:text-sm text-white/80">
                   <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full shadow-[0_0_8px_#34d399]"></div>
-                  <span>Turnkey UAE LLC Formation & 0% Personal Tax</span>
+                  <span>UAE business setup pathway and tax-ready guidance</span>
                 </li>
               </ul>
             </div>
