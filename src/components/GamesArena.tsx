@@ -40,10 +40,10 @@ type Connect4State = {
   message: string;
 };
 
-const GAMES: Array<{ id: GameId; name: string; description: string; badge: string; image: string }> = [
-  { id: "chess", name: "Chess", description: "Classic timed 1v1 matches with ranked divisions.", badge: "Strategist", image: "/games/chess.svg" },
-  { id: "draughts", name: "Draughts", description: "Quick tactical 1v1 challenges for every skill level.", badge: "Board Master", image: "/games/draughts.svg" },
-  { id: "connect-4", name: "Connect 4", description: "The classic UK red-and-yellow four-in-a-row game.", badge: "Four in a Row", image: "/games/connect-four.svg" },
+const GAMES: Array<{ id: GameId; name: string; description: string; badge: string; image: string; accent: string; mode: string }> = [
+  { id: "chess", name: "Chess", description: "Train tactics, build your streak, and master the board.", badge: "Strategist", image: "/games/chess.svg", accent: "from-amber-300 via-[#D4AF37] to-orange-600", mode: "Learn & play" },
+  { id: "draughts", name: "Draughts", description: "Fast tactical battles built for sharp decision-making.", badge: "Board Master", image: "/games/draughts.svg", accent: "from-rose-300 via-red-500 to-orange-600", mode: "Quick match" },
+  { id: "connect-4", name: "Connect 4", description: "Drop, block, and connect four before your opponent does.", badge: "Four in a Row", image: "/games/connect-four.svg", accent: "from-sky-300 via-blue-500 to-indigo-700", mode: "Instant play" },
 ];
 
 const STAKES = [25, 100, 250] as const;
@@ -736,9 +736,9 @@ export const GamesArena: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-10">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-400/30 text-indigo-200 text-[10px] uppercase tracking-[0.2em] font-bold">
+            <div className="interactive-badge inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-400/30 text-indigo-200 text-[10px] uppercase tracking-[0.2em] font-bold">
               <Gamepad2 className="w-3.5 h-3.5" />
-              Games & Challenges
+              Playable games
             </div>
             <h2 className="mt-4 text-3xl sm:text-5xl font-light text-white tracking-tight">Head-to-head <span className="font-bold text-[#D4AF37]">skill games</span></h2>
             <p className="mt-3 text-white/60">Play 1v1 Chess, Draughts, and Connect 4 in the demo arena. Tokens are non-redeemable, have no cash value, and cannot be bought or withdrawn.</p>
@@ -753,10 +753,10 @@ export const GamesArena: React.FC = () => {
         <div className="mb-8 rounded-3xl border border-violet-400/30 bg-gradient-to-br from-violet-500/15 via-indigo-500/10 to-slate-950 p-5 sm:p-6">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div className="max-w-2xl">
-              <div className="flex flex-wrap items-center gap-2"><h3 className="text-lg font-bold text-white">1v1 prediction polls</h3><span className="rounded-full border border-violet-300/40 bg-violet-400/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-violet-100">Free-play only</span></div>
+              <div className="flex flex-wrap items-center gap-2"><h3 className="text-lg font-bold text-white">1v1 prediction polls</h3><span className="interactive-badge rounded-full border border-violet-300/40 bg-violet-400/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-violet-100">Free-play only</span></div>
               <p className="mt-1 text-sm text-white/60">Choose an outcome, challenge a player on the opposite side, and compete for demo tokens. No deposits, withdrawals, or cash prizes.</p>
             </div>
-            <span className="w-fit rounded-xl border border-violet-300/30 bg-violet-400/15 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-violet-100">Virtual points only</span>
+            <span className="interactive-badge w-fit rounded-xl border border-violet-300/30 bg-violet-400/15 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-violet-100">Virtual points only</span>
           </div>
           <div className="mt-6 grid gap-4 lg:grid-cols-2">
             {PREDICTION_POLLS.map((poll) => <button key={poll.id} type="button" onClick={() => { setSelectedPollId(poll.id); setSelectedPrediction(0); setPollChallenge(null); setPollNotice(`Selected poll: ${poll.question}`); }} className={`rounded-2xl border p-5 text-left transition-all ${selectedPollId === poll.id ? "border-violet-300 bg-violet-400/15" : "border-white/10 bg-white/[0.03] hover:border-white/30"}`}><div className="flex items-center justify-between gap-3"><span className="text-[10px] font-bold uppercase tracking-widest text-violet-200">{poll.closes}</span><span className="text-[10px] text-white/40">1v1 poll</span></div><h4 className="mt-3 font-bold text-white">{poll.question}</h4></button>)}
@@ -778,12 +778,15 @@ export const GamesArena: React.FC = () => {
                 setOpponent(null);
                 setNotice(`Selected ${item.name}. Choose a demo-token stake or start the live board preview below.`);
               }}
-              className={`text-left rounded-3xl p-6 border transition-all ${selectedGame === item.id ? "border-[#D4AF37] bg-white/10 shadow-xl shadow-amber-500/10" : "border-white/10 bg-white/[0.03] hover:border-white/30"}`}
+              className={`group relative overflow-hidden text-left rounded-3xl border transition-all duration-300 ${selectedGame === item.id ? "border-[#D4AF37] bg-white/10 shadow-2xl shadow-amber-500/20 -translate-y-1" : "border-white/10 bg-white/[0.03] hover:border-white/30 hover:-translate-y-1"}`}
             >
-              <img src={item.image} alt="" className="h-40 w-full rounded-2xl border border-white/10 object-cover shadow-lg" />
-              <div className="mt-5 flex items-start justify-between gap-3"><h3 className="text-xl font-bold text-white">{item.name}</h3><span className="text-[10px] px-2 py-1 rounded-full bg-white/10 text-white/70">1v1</span></div>
-              <p className="mt-2 text-sm text-white/55 leading-relaxed">{item.description}</p>
-              <div className="mt-5 pt-4 border-t border-white/10 flex items-center justify-between text-xs"><span className="flex items-center gap-1.5 text-emerald-300"><Users className="w-3.5 h-3.5" /> Live demo board</span><span className="flex items-center gap-1.5 text-[#D4AF37]"><BadgeCheck className="w-3.5 h-3.5" /> {item.badge}</span></div>
+              <div className="relative h-52 overflow-hidden">
+                <img src={item.image} alt={`${item.name} game artwork`} className="h-full w-full object-cover transition duration-700 group-hover:scale-110" />
+                <div className={`absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t ${item.accent} opacity-55 mix-blend-color`} />
+                <div className="absolute left-4 top-4 flex items-center gap-2"><span className="interactive-badge rounded-full border border-white/25 bg-black/60 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-white backdrop-blur"><Gamepad2 className="mr-1 inline h-3.5 w-3.5" /> {item.mode}</span></div>
+                <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between gap-3"><h3 className="text-2xl font-black tracking-tight text-white drop-shadow-lg">{item.name}</h3><span className={`interactive-badge rounded-full bg-gradient-to-r ${item.accent} px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-950 shadow-lg`}>{item.badge}</span></div>
+              </div>
+              <div className="p-5"><p className="text-sm leading-relaxed text-white/65">{item.description}</p><div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4 text-xs"><span className="flex items-center gap-1.5 text-emerald-300"><span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(74,222,128,0.9)]" /> Playable now</span><span className="interactive-badge flex items-center gap-1.5 rounded-full border border-[#D4AF37]/35 bg-[#D4AF37]/10 px-2.5 py-1 text-[#f6d46b]"><BadgeCheck className="h-3.5 w-3.5" /> Select game</span></div></div>
             </button>
           ))}
         </div>
