@@ -261,28 +261,28 @@ export const TICKET_BUNDLES: TicketBundle[] = [
 ];
 
 export const CHARITY_IMPACT_DATA: CharityImpactMetrics = {
-  totalRaisedGBP: 48620,
-  percentageDonated: 25,
-  scholarshipsFunded: 1350,
-  microGrantsAwarded: 84,
+  totalRaisedGBP: 0,
+  percentageDonated: 0,
+  scholarshipsFunded: 0,
+  microGrantsAwarded: 0,
   partnerCharities: [
     {
-      name: "Dubai Cares",
-      focus: "Global Primary & Secondary Education",
-      logoText: "DUBAI CARES",
-      description: "A UAE-based global philanthropic organization working to provide children and youth in developing nations with access to quality education.",
+      name: "Mental Health & Wellbeing",
+      focus: "Local mental-health support and crisis services",
+      logoText: "WELLBEING",
+      description: "A proposed focus area for community organisations that expand access to mental-health support and early intervention.",
     },
     {
-      name: "Global Youth Enterprise Fund",
-      focus: "Seed Grants for Underprivileged Founders",
-      logoText: "GLOBAL ENTERPRISE",
-      description: "Empowering visionary young creators with seed funding, mentorship, and equipment to escape poverty through technology entrepreneurship.",
+      name: "Youth Opportunity",
+      focus: "Skills, mentoring and employment pathways",
+      logoText: "YOUTH FUTURES",
+      description: "A proposed focus area for programmes that help young people build skills, confidence and routes into work.",
     },
     {
-      name: "MENA STEM Tech Academy",
-      focus: "Coding & AI Literacy for Emerging Communities",
-      logoText: "STEM ACADEMY",
-      description: "Delivering free coding bootcamps, laptop grants, and digital skill certifications to aspiring youth across the Middle East & Africa.",
+      name: "Community Connection",
+      focus: "Local projects tackling isolation and hardship",
+      logoText: "COMMUNITY",
+      description: "A proposed focus area for grassroots projects that strengthen local connection and practical support.",
     },
   ],
 };
