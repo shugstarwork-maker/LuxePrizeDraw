@@ -96,8 +96,8 @@ export const CharityImpactSection: React.FC<CharityImpactSectionProps> = ({ onOp
         <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border border-white/10 backdrop-blur-2xl space-y-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-white/10">
             <div>
-              <span className="text-[10px] font-bold text-[#D4AF37] uppercase tracking-widest">Community impact plan</span>
-              <h3 className="text-2xl font-light text-white mt-1">Community causes we aim to support</h3>
+              <span className="text-[10px] font-bold text-[#D4AF37] uppercase tracking-widest">Community impact by category</span>
+              <h3 className="text-2xl font-light text-white mt-1">Causes we aim to support</h3>
             </div>
             <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -117,8 +117,9 @@ export const CharityImpactSection: React.FC<CharityImpactSectionProps> = ({ onOp
                   </span>
                   <BookOpen className="w-4 h-4 text-white/30" />
                 </div>
+                <p className="text-[10px] font-bold text-rose-300 uppercase tracking-widest">{charity.category}</p>
                 <h4 className="text-base font-bold text-white">{charity.name}</h4>
-                <p className="text-[11px] font-medium text-rose-300 uppercase tracking-wider">{charity.focus}</p>
+                <p className="text-[11px] font-medium text-white/55 uppercase tracking-wider">{charity.focus}</p>
                 <p className="text-xs text-white/50 leading-relaxed font-light">{charity.description}</p>
               </div>
             ))}
