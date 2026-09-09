@@ -11,6 +11,9 @@ export interface PrizePillar {
   keyDeliverables: string[];
   specifications: { label: string; value: string }[];
   highlightQuote: string;
+  emoji?: string;
+  prizeTier?: "traditional" | "alternative";
+  valueBreakdown?: { label: string; value: string }[];
 }
 
 export interface CompetitionTicket {

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
   Coins, ShieldCheck, Building2, Smartphone, Palette, Landmark, Palmtree,
-  CheckCircle2, Sparkles, ChevronRight, Zap, Award, FileText, ArrowUpRight
+  CheckCircle2, Sparkles, ChevronRight, Zap, Award, Compass
 } from "lucide-react";
 import { PRIZE_PILLARS } from "../data/prizeDetails";
 import { PrizePillar } from "../types";
@@ -26,6 +26,9 @@ export const PrizeShowcase: React.FC<PrizeShowcaseProps> = ({
       case "Smartphone": return Smartphone;
       case "Palette": return Palette;
       case "Landmark": return Landmark;
+      case "Award": return Award;
+      case "Compass": return Compass;
+      case "Sparkles": return Sparkles;
       default: return Sparkles;
     }
   };
@@ -74,7 +77,7 @@ export const PrizeShowcase: React.FC<PrizeShowcaseProps> = ({
                     <Icon className="w-4 h-4" />
                   </div>
                   <span className={`text-[10px] font-mono font-bold ${isSelected ? "text-[#D4AF37]" : "text-white/40"}`}>
-                    {pillar.valueGBP}
+                    {pillar.emoji ? `${pillar.emoji} ${pillar.valueGBP}` : pillar.valueGBP}
                   </span>
                 </div>
                 <div>
@@ -98,10 +101,14 @@ export const PrizeShowcase: React.FC<PrizeShowcaseProps> = ({
                   <span className="px-3 py-1 rounded-full bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30 text-xs font-semibold uppercase tracking-wider">
                     {activePillar.badge}
                   </span>
+                  <span className="px-3 py-1 rounded-full bg-white/5 text-white/70 border border-white/10 text-xs font-semibold uppercase tracking-wider">
+                    {activePillar.prizeTier === "alternative" ? "Wacky Alternative" : "Traditional Prize"}
+                  </span>
                   <span className="text-xs text-white/50 font-mono">Valued at {activePillar.valueGBP}</span>
                 </div>
 
                 <h3 className="text-2xl sm:text-3xl font-light text-white">
+                  <span className="mr-2">{activePillar.emoji}</span>
                   {activePillar.title}
                 </h3>
                 <p className="text-sm font-medium text-[#D4AF37]">
@@ -112,6 +119,25 @@ export const PrizeShowcase: React.FC<PrizeShowcaseProps> = ({
               <p className="text-white/60 text-sm sm:text-base leading-relaxed">
                 {activePillar.description}
               </p>
+
+              {activePillar.valueBreakdown && (
+                <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/60">
+                      Value Breakdown
+                    </p>
+                    <span className="text-[11px] font-mono text-[#D4AF37]">{activePillar.valueGBP} total</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    {activePillar.valueBreakdown.map((item) => (
+                      <div key={item.label} className="p-3 rounded-xl bg-black/20 border border-white/10">
+                        <p className="text-[10px] uppercase tracking-wider text-white/40">{item.label}</p>
+                        <p className="text-sm font-bold text-white mt-1">{item.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Special callout if Web & Mobile App */}
               {activePillar.id === "web-mobile-app" && (
