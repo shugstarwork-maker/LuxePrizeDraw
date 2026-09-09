@@ -313,7 +313,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                     <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-[#D4AF37] group-hover:border-[#D4AF37]/40 transition-colors">
                       <IconComp className="w-6 h-6" />
                     </div>
-                    <span className="text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full bg-white/5 text-white/70 border border-white/10">
+                    <span className="interactive-badge text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full bg-white/5 text-white/70 border border-white/10">
                       {prize.badge}
                     </span>
                   </div>

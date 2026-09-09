@@ -95,7 +95,7 @@ export const PrizeShowcase: React.FC<PrizeShowcaseProps> = ({
             <div className="lg:col-span-7 space-y-6">
               <div className="space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="px-3 py-1 rounded-full bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30 text-xs font-semibold uppercase tracking-wider">
+                  <span className="interactive-badge px-3 py-1 rounded-full bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30 text-xs font-semibold uppercase tracking-wider">
                     {activePillar.badge}
                   </span>
                   <span className="text-xs text-white/50 font-mono">Valued at {activePillar.valueGBP}</span>
