@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from "react";
 import { Navbar } from "./components/Navbar";
 import { HeroSection } from "./components/HeroSection";
+import { CompetitionHub } from "./components/CompetitionHub";
 import { PrizeShowcase } from "./components/PrizeShowcase";
 import { CharityImpactSection } from "./components/CharityImpactSection";
 import { OneClickBookDemo } from "./components/OneClickBookDemo";
@@ -164,6 +165,8 @@ export default function App() {
           }}
           stats={stats}
         />
+
+        <CompetitionHub />
 
         {/* 6 Prize Pillars Detailed Breakdown */}
         <PrizeShowcase

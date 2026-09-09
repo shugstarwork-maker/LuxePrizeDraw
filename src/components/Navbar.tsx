@@ -53,6 +53,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   ];
 
   const navItems = [
+    { id: "competition-hub", label: "Prize Draws" },
+    { id: "games", label: "Games" },
+    { id: "leaderboards", label: "Leaderboards" },
     { id: "prizes", label: "The £220K Package" },
     { id: "dubai-gallery", label: "Dubai Gallery" },
     { id: "hall-of-fame", label: "Hall of Fame (£100K+)" },
