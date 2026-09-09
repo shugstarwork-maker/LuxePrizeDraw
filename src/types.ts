@@ -110,6 +110,7 @@ export interface CharityImpactMetrics {
     name: string;
     focus: string;
     logoText: string;
+    category: string;
     description: string;
   }[];
 }
