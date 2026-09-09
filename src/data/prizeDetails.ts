@@ -12,6 +12,8 @@ export const PRIZE_PILLARS: PrizePillar[] = [
     accentColor: "from-amber-400 to-yellow-600",
     description:
       "A non-dilutive, zero-strings-attached cash injection deposited straight into your new UAE corporate bank account. Use it to hire talent, fuel ad spend, build inventory, or scale operations at maximum velocity.",
+    emoji: "💷",
+    prizeTier: "traditional",
     keyDeliverables: [
       "Direct wire transfer of £100,000 GBP",
       "Zero equity taken — you keep 100% of your company",
@@ -38,6 +40,8 @@ export const PRIZE_PILLARS: PrizePillar[] = [
     accentColor: "from-amber-300 via-yellow-500 to-amber-600",
     description:
       "Arrive in Dubai like royalty with an all-inclusive 14-day ultra-luxury holiday for two. Stay at world-famous 5-star iconic resorts like Atlantis The Royal, Burj Al Arab, or Jumeirah Al Naseem, complete with round-trip Business Class flights, private luxury chauffeur, Michelin-star dining, and VIP desert & yacht excursions while your turnkey residency and business license are finalized.",
+    emoji: "🏝️",
+    prizeTier: "traditional",
     keyDeliverables: [
       "Round-trip VIP Business Class flights to Dubai International Airport (DXB) for 2 people",
       "14 nights in a luxury ocean or skyline suite at a premier 5-star Dubai hotel (Atlantis The Royal / Burj Al Arab / Jumeirah)",
@@ -66,6 +70,8 @@ export const PRIZE_PILLARS: PrizePillar[] = [
     accentColor: "from-emerald-400 to-teal-600",
     description:
       "Full investor residency visa package for 3 years. Complete white-glove service including VIP express medical tests, luxury escort for biometric capture, fast-tracked Emirates ID delivery, and family sponsorship eligibility.",
+    emoji: "🛂",
+    prizeTier: "traditional",
     keyDeliverables: [
       "3-Year UAE Investor / Partner Residency Visa sponsorship",
       "VIP Express Medical Fitness test with private lounge & escort",
@@ -93,6 +99,8 @@ export const PRIZE_PILLARS: PrizePillar[] = [
     accentColor: "from-blue-400 to-indigo-600",
     description:
       "Fully compliant commercial company formation in your choice of premier UAE jurisdiction (e.g. IFZA, DMCC, Meydan, DAFZA, or Dubai Mainland). Covers all license fees, MOA notarization, government approvals, and a 1-year registered flexi-desk address.",
+    emoji: "🏙️",
+    prizeTier: "traditional",
     keyDeliverables: [
       "Commercial / Tech / Service Trade License valid for 1 full year",
       "100% foreign legal ownership with zero local sponsor requirement",
@@ -120,6 +128,8 @@ export const PRIZE_PILLARS: PrizePillar[] = [
     accentColor: "from-violet-400 to-purple-600",
     description:
       "A tailor-made, high-conversion web platform and native iOS & Android mobile application for your venture. Comes pre-integrated with our proprietary One-Click Booking system, instant Stripe/Apple Pay checkout, and an autonomous AI Business Assistant.",
+    emoji: "📱",
+    prizeTier: "traditional",
     keyDeliverables: [
       "⚡ Proprietary ONE-CLICK BOOK system for instant reservation & client checkout",
       "🧠 Embedded AI Assistant: 24/7 client triage, smart quote generation, multilingual AI",
@@ -147,6 +157,8 @@ export const PRIZE_PILLARS: PrizePillar[] = [
     accentColor: "from-rose-400 to-pink-600",
     description:
       "A complete agency-grade brand overhaul tailored to the prestige of the Dubai & international luxury market. From primary vector logos and dynamic brand books to 3D packaging mockups and investor pitch decks.",
+    emoji: "🎨",
+    prizeTier: "traditional",
     keyDeliverables: [
       "Primary, secondary, and sub-mark vector logo variations",
       "Complete Brand Book: typographic hierarchy, color systems, tone of voice",
@@ -174,6 +186,8 @@ export const PRIZE_PILLARS: PrizePillar[] = [
     accentColor: "from-cyan-400 to-blue-600",
     description:
       "Overcome the traditional banking hurdles with our dedicated VIP banker relationships. Guaranteed concierge introduction and fast-track opening with premier UAE institutions such as Emirates NBD, ADCB, Mashreq Neo Biz, and Wio Bank.",
+    emoji: "🏦",
+    prizeTier: "traditional",
     keyDeliverables: [
       "GBP corporate account",
       "Personal VIP bank account with Platinum/Infinite debit & credit cards",
@@ -189,6 +203,230 @@ export const PRIZE_PILLARS: PrizePillar[] = [
       { label: "Wire Rails", value: "Instant Local & Global SWIFT / Faster Payments" },
     ],
     highlightQuote: "Seamless international treasury management so you can invoice and receive payments worldwide with zero friction.",
+  },
+  {
+    id: "monthly-stipend",
+    title: "Monthly Stipend Prize",
+    shortTitle: "£10K / Month",
+    valueGBP: "£120,000",
+    tagline: "A founder salary for 12 months so you can build with runway, not panic.",
+    badge: "12-Month Runway Prize",
+    iconName: "Coins",
+    accentColor: "from-amber-300 via-yellow-500 to-orange-500",
+    description:
+      "Swap the one-time lump sum for a beautifully disciplined founder runway: £10,000 landing every month for 12 months. It feels like having a private backer on autopilot, giving you the freedom to build, test, travel, and hire without burning through everything in one dramatic quarter.",
+    emoji: "💸",
+    prizeTier: "alternative",
+    keyDeliverables: [
+      "£10,000 GBP paid every month for 12 consecutive months",
+      "Predictable runway for salary, team, product, and launch planning",
+      "Optional treasury session to map monthly allocation milestones",
+      "Luxury founder lifestyle pacing instead of a single high-burn transfer",
+    ],
+    specifications: [
+      { label: "Monthly Payout", value: "£10,000" },
+      { label: "Term Length", value: "12 Months" },
+      { label: "Total Value", value: "£120,000" },
+      { label: "Founder Benefit", value: "Steady Cashflow Runway" },
+    ],
+    valueBreakdown: [
+      { label: "Per Month", value: "£10,000" },
+      { label: "Per Quarter", value: "£30,000" },
+      { label: "Per Week", value: "≈ £2,307" },
+    ],
+    highlightQuote: "The glamorous version of financial peace: twelve perfectly timed deposits so your ambition never has to sprint on fumes.",
+  },
+  {
+    id: "year-of-experiences",
+    title: "Year of Experiences Prize",
+    shortTitle: "12 Luxury Drops",
+    valueGBP: "£120,000",
+    tagline: "A curated calendar of monthly once-in-a-lifetime moments instead of a static cheque.",
+    badge: "Lifestyle Adventure Tier",
+    iconName: "Sparkles",
+    accentColor: "from-fuchsia-400 via-rose-400 to-amber-300",
+    description:
+      "Imagine every month revealing a fresh headline experience: private island escapes, Michelin chef tables, fashion week access, supercar weekends, wellness residencies, or VIP sporting finals. This tier turns winning into a full year of stories, status, and unforgettable access.",
+    emoji: "✨",
+    prizeTier: "alternative",
+    keyDeliverables: [
+      "12 handpicked luxury experiences delivered over 12 months",
+      "White-glove travel, concierge, and itinerary planning included",
+      "A rotating mix of culture, adventure, wellness, dining, and elite events",
+      "Personalized calendar sequencing to match your lifestyle and availability",
+    ],
+    specifications: [
+      { label: "Experiences", value: "12 Curated Headliners" },
+      { label: "Cadence", value: "1 Per Month" },
+      { label: "Format", value: "Travel, Dining, Events & Wellness" },
+      { label: "Concierge", value: "Fully Managed" },
+    ],
+    valueBreakdown: [
+      { label: "Per Experience", value: "≈ £10,000" },
+      { label: "Per Quarter", value: "3 Signature Moments" },
+      { label: "Annual Story Value", value: "12 Months of VIP Access" },
+    ],
+    highlightQuote: "Why win one moment of luxury when you can win a year that looks like a private members' club fantasy itinerary?",
+  },
+  {
+    id: "startup-equity-fund",
+    title: "Startup Equity Fund Prize",
+    shortTitle: "VC Co-Invest Tier",
+    valueGBP: "£150,000",
+    tagline: "Turn your win into a strategic cap-table unlock with investor-calibre backing.",
+    badge: "Founder Leverage Tier",
+    iconName: "Building2",
+    accentColor: "from-emerald-400 via-teal-500 to-cyan-500",
+    description:
+      "This is not just capital — it is access. Receive a co-investment opportunity structured to help you raise smarter, attract aligned strategic backers, and convert momentum into a real funding round narrative that makes future investors pay attention.",
+    emoji: "🚀",
+    prizeTier: "alternative",
+    keyDeliverables: [
+      "Co-investment allocation earmarked for startup equity participation",
+      "Investor readiness support for deck, data room, and capital strategy",
+      "Warm exposure to venture and angel networks for follow-on credibility",
+      "Term-structure guidance so the prize feels catalytic, not confusing",
+    ],
+    specifications: [
+      { label: "Fund Envelope", value: "Up to £150,000" },
+      { label: "Structure", value: "Co-Investment Opportunity" },
+      { label: "Founder Focus", value: "Capital + Credibility" },
+      { label: "Access Layer", value: "VC Network Introductions" },
+    ],
+    valueBreakdown: [
+      { label: "Capital Pool", value: "Up to £150,000" },
+      { label: "Strategic Layer", value: "Investor Access Included" },
+      { label: "Outcome", value: "Funding Round Acceleration" },
+    ],
+    highlightQuote: "It’s the prize tier that says you’re not just launching a company — you’re entering the room where bigger capital gets decided.",
+  },
+  {
+    id: "career-acceleration",
+    title: "Career Acceleration Prize",
+    shortTitle: "Mentorship Year",
+    valueGBP: "£90,000",
+    tagline: "A personal advisory board for a year, built from operators, dealmakers, and brand architects.",
+    badge: "Industry Access Tier",
+    iconName: "Award",
+    accentColor: "from-indigo-400 via-violet-500 to-fuchsia-500",
+    description:
+      "For founders who value access over optics, this tier surrounds you with real decision-makers. Think curated mentorship, monthly strategy calls, selective introductions, and personal brand positioning from people who have already scaled, exited, or built category-defining careers.",
+    emoji: "🧠",
+    prizeTier: "alternative",
+    keyDeliverables: [
+      "12 months of curated mentorship with industry leaders and operators",
+      "Monthly deep-dive strategy sessions across growth, hiring, and positioning",
+      "Selective introductions to partners, clients, and media opportunities",
+      "Career narrative support to elevate authority and founder presence",
+    ],
+    specifications: [
+      { label: "Duration", value: "12 Months" },
+      { label: "Access", value: "Leaders, Mentors & Operators" },
+      { label: "Session Flow", value: "Monthly Strategy Intensives" },
+      { label: "Primary Return", value: "Network + Personal Growth" },
+    ],
+    valueBreakdown: [
+      { label: "Per Month", value: "1 Elite Advisory Cycle" },
+      { label: "Mentor Access", value: "12 Curated Sessions" },
+      { label: "Transformation", value: "Year-Long Career Compounding" },
+    ],
+    highlightQuote: "Some prizes give you money. This one gives you the kind of proximity that changes the speed of your whole career.",
+  },
+  {
+    id: "creative-freedom",
+    title: "Creative Freedom Prize",
+    shortTitle: "Studio + Team",
+    valueGBP: "£110,000",
+    tagline: "An artist-first package with the space, tools, and support to make bold work at full scale.",
+    badge: "Creator Residency Tier",
+    iconName: "Palette",
+    accentColor: "from-pink-400 via-rose-500 to-orange-400",
+    description:
+      "Built for artists, filmmakers, producers, designers, and culture-makers, this prize buys back your attention. Win studio space, upgraded equipment, and team salary support so you can stop piecing projects together and start operating like the creative director of your own movement.",
+    emoji: "🎬",
+    prizeTier: "alternative",
+    keyDeliverables: [
+      "Private studio or production space support for a full year",
+      "Equipment budget for cameras, editing rigs, instruments, or fabrication tools",
+      "Team salary contribution to hire a producer, editor, or assistant",
+      "Creative showcase support to turn output into audience and opportunity",
+    ],
+    specifications: [
+      { label: "Studio Support", value: "12-Month Creative Base" },
+      { label: "Equipment Pool", value: "Premium Gear Included" },
+      { label: "Team Layer", value: "Salary Support" },
+      { label: "Ideal Winner", value: "Artists & Creators" },
+    ],
+    valueBreakdown: [
+      { label: "Studio + Space", value: "≈ £4,000 / Month" },
+      { label: "Equipment Budget", value: "≈ £30,000" },
+      { label: "Team Support", value: "≈ £32,000" },
+    ],
+    highlightQuote: "A prize that funds output, not just ambition — so your next chapter looks more like a residency than a side hustle.",
+  },
+  {
+    id: "global-nomad",
+    title: "Global Nomad Prize",
+    shortTitle: "12-Country Year",
+    valueGBP: "£140,000",
+    tagline: "One country every month with flights, stays, and unforgettable local access handled for you.",
+    badge: "Passport Flex Tier",
+    iconName: "Compass",
+    accentColor: "from-sky-400 via-cyan-500 to-emerald-400",
+    description:
+      "This is luxury freedom in motion: twelve countries in twelve months, designed for founders and dreamers who think best in new places. Expect premium flights, iconic hotels, private local experiences, and a lifestyle narrative that feels cinematic from month one to month twelve.",
+    emoji: "🌍",
+    prizeTier: "alternative",
+    keyDeliverables: [
+      "12 all-expenses-paid international trips across 12 months",
+      "Premium flights, signature hotels, and concierge curation included",
+      "A mix of business capitals, island escapes, and culture-defining cities",
+      "Private local experiences built into every stop",
+    ],
+    specifications: [
+      { label: "Countries", value: "12 Destinations" },
+      { label: "Cadence", value: "1 Trip Every Month" },
+      { label: "Trip Style", value: "Premium Flights + Luxury Stay" },
+      { label: "Vibe", value: "Work From Anywhere in Style" },
+    ],
+    valueBreakdown: [
+      { label: "Per Trip", value: "≈ £11,667" },
+      { label: "Per Month", value: "1 New Country" },
+      { label: "Annual Footprint", value: "12 Stamps, 12 Stories" },
+    ],
+    highlightQuote: "The kind of prize that turns your calendar into a passport flex and your life into content worth envying.",
+  },
+  {
+    id: "tech-stack",
+    title: "Tech Stack Prize",
+    shortTitle: "Full Dev Setup",
+    valueGBP: "£85,000",
+    tagline: "Every serious builder toy you wish someone would expense for the next 12 months.",
+    badge: "Builder Arsenal Tier",
+    iconName: "Smartphone",
+    accentColor: "from-violet-400 via-indigo-500 to-blue-500",
+    description:
+      "For the technical founder, indie hacker, or product studio, this tier assembles a complete build machine: elite laptop and devices, cloud credits, paid dev tools, AI subscriptions, testing services, and operational software so you can ship fast without death by a thousand SaaS invoices.",
+    emoji: "💻",
+    prizeTier: "alternative",
+    keyDeliverables: [
+      "Premium laptop, monitor, mobile devices, and maker hardware bundle",
+      "12 months of cloud credits and managed infrastructure support",
+      "Paid AI tools, design software, CI/CD, observability, and domain stack",
+      "Workspace software and team productivity subscriptions included",
+    ],
+    specifications: [
+      { label: "Hardware", value: "Elite Founder Setup" },
+      { label: "Cloud Credits", value: "12 Months Included" },
+      { label: "Software", value: "AI + Dev + Design Stack" },
+      { label: "Ideal Winner", value: "Builders & Product Teams" },
+    ],
+    valueBreakdown: [
+      { label: "Hardware Bundle", value: "≈ £15,000" },
+      { label: "Cloud + Infra", value: "≈ £40,000" },
+      { label: "Tools + AI", value: "≈ £30,000" },
+    ],
+    highlightQuote: "A dream setup disguised as a prize — so the next year of building feels less like overhead and more like unfair advantage.",
   },
 ];
 
