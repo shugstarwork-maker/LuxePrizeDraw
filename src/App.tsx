@@ -14,6 +14,7 @@ import { AiPitchEvaluator } from "./components/AiPitchEvaluator";
 import { PackageCustomizer } from "./components/PackageCustomizer";
 import { DrawVerificationSection } from "./components/DrawVerificationSection";
 import { DubaiPhotoGallery } from "./components/DubaiPhotoGallery";
+import { SupercarGallery } from "./components/SupercarGallery";
 import { HallOfFameSection } from "./components/HallOfFameSection";
 import { LiveDrawTracker } from "./components/LiveDrawTracker";
 import { EntryModal } from "./components/EntryModal";
@@ -199,6 +200,9 @@ export default function App() {
 
         {/* Dubai Destination & Lifestyle Photo Gallery */}
         <DubaiPhotoGallery onOpenEntry={() => setIsEntryModalOpen(true)} />
+
+        {/* Premium supercar lifestyle gallery */}
+        <SupercarGallery />
 
         {/* £100K+ Hall of Fame for Verified Winners */}
         <HallOfFameSection onOpenEntry={() => setIsEntryModalOpen(true)} />
