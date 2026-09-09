@@ -1,4 +1,5 @@
 import express from "express";
+import rateLimit from "express-rate-limit";
 import path from "path";
 import crypto from "crypto";
 import { createServer as createViteServer } from "vite";
@@ -66,6 +67,13 @@ const drawId = process.env.ENTROPY_DRAW_ID || "2026-10-31-founder-draw";
 const targetBlockHeight = Number(process.env.ENTROPY_BTC_BLOCK_HEIGHT || "0");
 const publicClientSeed = process.env.ENTROPY_CLIENT_SEED || "DUBAI-2026-GRAND-DRAW-COMMITTED";
 const databaseUrl = process.env.ENTROPY_AUDIT_DATABASE_URL;
+const settlementRateLimitMiddleware = rateLimit({
+  windowMs: 60_000,
+  limit: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many draw administration attempts. Try again shortly." },
+});
 
 function getAuditDatabase() {
   if (!databaseUrl) throw new Error("ENTROPY_AUDIT_DATABASE_URL is not configured.");
@@ -138,7 +146,7 @@ app.get("/api/draw/audit", async (_req, res) => {
 });
 
 // API: protected pre-commitment. Call before entries close to publish the server-seed hash.
-app.post("/api/draw/commit", async (req, res) => {
+app.post("/api/draw/commit", settlementRateLimitMiddleware, async (req, res) => {
   try {
     if (!requireSettlementAuthorization(req.header("authorization"))) return res.status(401).json({ error: "Unauthorized commitment request." });
     const serverSeed = process.env.ENTROPY_DRAW_SERVER_SEED;
@@ -158,7 +166,7 @@ app.post("/api/draw/commit", async (req, res) => {
 });
 
 // API: protected, idempotent settlement. Invoke only after the target block has been mined.
-app.post("/api/draw/settle", async (req, res) => {
+app.post("/api/draw/settle", settlementRateLimitMiddleware, async (req, res) => {
   try {
     if (!requireSettlementAuthorization(req.header("authorization"))) return res.status(401).json({ error: "Unauthorized settlement request." });
     const serverSeed = process.env.ENTROPY_DRAW_SERVER_SEED;
@@ -205,6 +213,132 @@ app.post("/api/draw/verify", async (req, res) => {
   } catch (error) {
     console.error("Verification error:", error);
     res.status(503).json({ error: "Draw audit storage is unavailable." });
+  }
+});
+
+// Free-play games: durable, server-authoritative token accounts. Tokens have no monetary value.
+const gameDatabaseUrl = process.env.GAME_DATABASE_URL || databaseUrl;
+const gameSessionSecret = process.env.GAME_SESSION_SECRET;
+const STARTING_GAME_TOKENS = 1000;
+const DAILY_GAME_TOKENS = 150;
+
+type GamePlayer = { id: string; tokenBalance: number; lastDailyClaimAt: string | null };
+
+function getGameDatabase() {
+  if (!gameDatabaseUrl) throw new Error("GAME_DATABASE_URL is not configured.");
+  return neon(gameDatabaseUrl);
+}
+
+function signGameSession(playerId: string) {
+  if (!gameSessionSecret) throw new Error("GAME_SESSION_SECRET is not configured.");
+  const signature = crypto.createHmac("sha256", gameSessionSecret).update(playerId).digest("base64url");
+  return `${playerId}.${signature}`;
+}
+
+function getGamePlayerId(req: express.Request) {
+  const match = req.header("cookie")?.match(/(?:^|;\s*)luxe_game_session=([^;]+)/);
+  if (!match || !gameSessionSecret) return null;
+  const [playerId, signature] = decodeURIComponent(match[1]).split(".");
+  if (!playerId || !signature || !/^[a-f0-9-]{36}$/i.test(playerId)) return null;
+  const expected = signGameSession(playerId).split(".")[1];
+  if (signature.length !== expected.length || !crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) return null;
+  return playerId;
+}
+
+async function ensureGameTables() {
+  const sql = getGameDatabase();
+  await sql`CREATE TABLE IF NOT EXISTS game_players (
+    id UUID PRIMARY KEY,
+    token_balance INTEGER NOT NULL DEFAULT 1000 CHECK (token_balance >= 0),
+    last_daily_claim_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`;
+  await sql`CREATE TABLE IF NOT EXISTS game_token_ledger (
+    id UUID PRIMARY KEY,
+    player_id UUID NOT NULL REFERENCES game_players(id) ON DELETE CASCADE,
+    amount INTEGER NOT NULL,
+    reason TEXT NOT NULL CHECK (reason IN ('welcome', 'daily_grant', 'game_stake', 'game_reward')),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`;
+  await sql`CREATE INDEX IF NOT EXISTS game_token_ledger_player_created_idx ON game_token_ledger (player_id, created_at DESC)`;
+}
+
+async function readGamePlayer(playerId: string): Promise<GamePlayer | null> {
+  const sql = getGameDatabase();
+  const rows = await sql`SELECT id, token_balance, last_daily_claim_at FROM game_players WHERE id = ${playerId}`;
+  if (!rows[0]) return null;
+  return { id: rows[0].id, tokenBalance: rows[0].token_balance, lastDailyClaimAt: rows[0].last_daily_claim_at };
+}
+
+function sendGameConfigError(res: express.Response, error: unknown) {
+  console.error("Game platform error:", error);
+  return res.status(503).json({ error: "The games service is not configured yet." });
+}
+
+app.post("/api/game/session", async (req, res) => {
+  try {
+    await ensureGameTables();
+    let playerId = getGamePlayerId(req);
+    let player = playerId ? await readGamePlayer(playerId) : null;
+    if (!player) {
+      playerId = crypto.randomUUID();
+      const sql = getGameDatabase();
+      await sql`INSERT INTO game_players (id, token_balance) VALUES (${playerId}, ${STARTING_GAME_TOKENS})`;
+      await sql`INSERT INTO game_token_ledger (id, player_id, amount, reason) VALUES (${crypto.randomUUID()}, ${playerId}, ${STARTING_GAME_TOKENS}, 'welcome')`;
+      player = await readGamePlayer(playerId);
+      res.cookie("luxe_game_session", signGameSession(playerId), { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 1000 * 60 * 60 * 24 * 365 });
+    }
+    return res.json({ tokenBalance: player!.tokenBalance, dailyTokens: DAILY_GAME_TOKENS, lastDailyClaimAt: player!.lastDailyClaimAt });
+  } catch (error) {
+    return sendGameConfigError(res, error);
+  }
+});
+
+app.post("/api/game/daily-claim", async (req, res) => {
+  try {
+    await ensureGameTables();
+    const playerId = getGamePlayerId(req);
+    if (!playerId) return res.status(401).json({ error: "Start a game session before claiming tokens." });
+    const sql = getGameDatabase();
+    const rows = await sql`UPDATE game_players
+      SET token_balance = token_balance + ${DAILY_GAME_TOKENS}, last_daily_claim_at = NOW(), updated_at = NOW()
+      WHERE id = ${playerId} AND (last_daily_claim_at IS NULL OR last_daily_claim_at < date_trunc('day', NOW()))
+      RETURNING token_balance, last_daily_claim_at`;
+    if (!rows[0]) return res.status(409).json({ error: "Today's free token grant has already been claimed." });
+    await sql`INSERT INTO game_token_ledger (id, player_id, amount, reason) VALUES (${crypto.randomUUID()}, ${playerId}, ${DAILY_GAME_TOKENS}, 'daily_grant')`;
+    return res.json({ tokenBalance: rows[0].token_balance, dailyTokens: DAILY_GAME_TOKENS, lastDailyClaimAt: rows[0].last_daily_claim_at });
+  } catch (error) {
+    return sendGameConfigError(res, error);
+  }
+});
+
+app.post("/api/game/stake", async (req, res) => {
+  try {
+    await ensureGameTables();
+    const playerId = getGamePlayerId(req);
+    const amount = Number(req.body?.amount);
+    if (!playerId) return res.status(401).json({ error: "Start a game session before playing." });
+    if (!Number.isSafeInteger(amount) || ![25, 100, 250].includes(amount)) return res.status(400).json({ error: "Invalid free-play token amount." });
+    const sql = getGameDatabase();
+    const rows = await sql`UPDATE game_players SET token_balance = token_balance - ${amount}, updated_at = NOW()
+      WHERE id = ${playerId} AND token_balance >= ${amount} RETURNING token_balance`;
+    if (!rows[0]) return res.status(409).json({ error: "You do not have enough free-play tokens." });
+    await sql`INSERT INTO game_token_ledger (id, player_id, amount, reason) VALUES (${crypto.randomUUID()}, ${playerId}, ${-amount}, 'game_stake')`;
+    return res.json({ tokenBalance: rows[0].token_balance });
+  } catch (error) {
+    return sendGameConfigError(res, error);
+  }
+});
+
+app.get("/api/game/leaderboard", async (_req, res) => {
+  try {
+    await ensureGameTables();
+    const sql = getGameDatabase();
+    const rows = await sql`SELECT id, token_balance FROM game_players ORDER BY token_balance DESC, created_at ASC LIMIT 10`;
+    return res.json({ players: rows.map((row, index) => ({ rank: index + 1, handle: `Player ${String(row.id).slice(0, 5).toUpperCase()}`, tokenBalance: row.token_balance })) });
+  } catch (error) {
+    return sendGameConfigError(res, error);
   }
 });
 

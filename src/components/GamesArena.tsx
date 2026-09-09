@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from "react";
-import { BadgeCheck, Crown, Gamepad2, RotateCcw, ShieldCheck, Swords, Trophy, Users, Zap, TrendingUp } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
+import { BadgeCheck, BookOpen, CheckCircle2, Crown, Flame, Gamepad2, RotateCcw, ShieldCheck, Swords, Target, Trophy, TrendingUp, Users, Zap } from "lucide-react";
 
 type GameId = "chess" | "draughts" | "connect-4";
 type PlayerColor = "white" | "black";
@@ -40,10 +40,10 @@ type Connect4State = {
   message: string;
 };
 
-const GAMES: Array<{ id: GameId; name: string; description: string; badge: string; image: string }> = [
-  { id: "chess", name: "Chess", description: "Classic timed 1v1 matches with ranked divisions.", badge: "Strategist", image: "/games/chess.svg" },
-  { id: "draughts", name: "Draughts", description: "Quick tactical 1v1 challenges for every skill level.", badge: "Board Master", image: "/games/draughts.svg" },
-  { id: "connect-4", name: "Connect 4", description: "The classic UK red-and-yellow four-in-a-row game.", badge: "Four in a Row", image: "/games/connect-four.svg" },
+const GAMES: Array<{ id: GameId; name: string; description: string; badge: string; image: string; accent: string; mode: string }> = [
+  { id: "chess", name: "Chess", description: "Train tactics, build your streak, and master the board.", badge: "Strategist", image: "/games/chess.svg", accent: "from-amber-300 via-[#D4AF37] to-orange-600", mode: "Learn & play" },
+  { id: "draughts", name: "Draughts", description: "Fast tactical battles built for sharp decision-making.", badge: "Board Master", image: "/games/draughts.svg", accent: "from-rose-300 via-red-500 to-orange-600", mode: "Quick match" },
+  { id: "connect-4", name: "Connect 4", description: "Drop, block, and connect four before your opponent does.", badge: "Four in a Row", image: "/games/connect-four.svg", accent: "from-sky-300 via-blue-500 to-indigo-700", mode: "Instant play" },
 ];
 
 const STAKES = [25, 100, 250] as const;
@@ -284,7 +284,9 @@ function getConnect4Winner(board: Array<Array<Connect4Disc | null>>, row: number
 }
 
 export const GamesArena: React.FC = () => {
-  const [tokens, setTokens] = useState(1000);
+  const [tokens, setTokens] = useState(0);
+  const [gameServiceReady, setGameServiceReady] = useState(false);
+  const [dailyClaimMessage, setDailyClaimMessage] = useState("Connecting your free-play token wallet…");
   const [selectedGame, setSelectedGame] = useState<GameId>("chess");
   const [selectedStake, setSelectedStake] = useState<(typeof STAKES)[number]>(100);
   const [notice, setNotice] = useState("Choose a game and challenge another player.");
@@ -292,6 +294,11 @@ export const GamesArena: React.FC = () => {
   const [chessState, setChessState] = useState<ChessState>(createChessState);
   const [draughtsState, setDraughtsState] = useState<DraughtsState>(createDraughtsState);
   const [connect4State, setConnect4State] = useState<Connect4State>(createConnect4State);
+  const [chessXp, setChessXp] = useState(120);
+  const [chessStreak, setChessStreak] = useState(3);
+  const [activeLesson, setActiveLesson] = useState(0);
+  const [completedLessons, setCompletedLessons] = useState<number[]>([]);
+  const [puzzleSolved, setPuzzleSolved] = useState(false);
   const [selectedPollId, setSelectedPollId] = useState<(typeof PREDICTION_POLLS)[number]["id"]>("founder-pitch");
   const [selectedPrediction, setSelectedPrediction] = useState(0);
   const [selectedPollStake, setSelectedPollStake] = useState<(typeof POLL_STAKES)[number]>(25);
@@ -299,34 +306,74 @@ export const GamesArena: React.FC = () => {
   const [pollChallenge, setPollChallenge] = useState<{ opponent: string; points: number } | null>(null);
 
   const game = useMemo(() => GAMES.find((item) => item.id === selectedGame)!, [selectedGame]);
+  const chessLessons = [
+    { title: "Open with purpose", detail: "Control the centre, develop a knight, and keep your king safe.", xp: 20 },
+    { title: "Spot the fork", detail: "Use your knight to attack two valuable pieces in one move.", xp: 30 },
+    { title: "Finish the attack", detail: "Coordinate your queen and rook to create a decisive threat.", xp: 40 },
+  ];
 
-  const createChallenge = () => {
-    if (tokens < selectedStake) {
-      setNotice("You need more demo tokens to enter this challenge.");
-      return;
+  const lessonDone = completedLessons.includes(activeLesson);
+
+  const completeLesson = () => {
+    if (lessonDone) return;
+    const lesson = chessLessons[activeLesson];
+    setChessXp((value) => value + lesson.xp);
+    setChessStreak((value) => Math.max(value, 4));
+    setCompletedLessons((value) => [...value, activeLesson]);
+    setActiveLesson((value) => (value + 1) % chessLessons.length);
+  };
+
+  const solvePuzzle = () => {
+    if (!puzzleSolved) {
+      setChessXp((value) => value + 35);
+      setPuzzleSolved(true);
     }
+  };
+
+  useEffect(() => {
+    fetch("/api/game/session", { method: "POST" })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Games service unavailable.");
+        setTokens(data.tokenBalance);
+        setGameServiceReady(true);
+        setDailyClaimMessage(data.lastDailyClaimAt ? "Your daily token grant is ready tomorrow." : `Claim ${data.dailyTokens} free tokens today.`);
+      })
+      .catch((error: Error) => setDailyClaimMessage(error.message));
+  }, []);
+
+  const claimDailyTokens = async () => {
+    const response = await fetch("/api/game/daily-claim", { method: "POST" });
+    const data = await response.json();
+    if (!response.ok) return setDailyClaimMessage(data.error || "Unable to claim daily tokens.");
+    setTokens(data.tokenBalance);
+    setDailyClaimMessage(`Daily grant claimed: +${data.dailyTokens} free tokens.`);
+  };
+
+  const createChallenge = async () => {
+    if (!gameServiceReady) return setNotice("Your free-play token wallet is still connecting.");
+    const response = await fetch("/api/game/stake", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ amount: selectedStake }) });
+    const data = await response.json();
+    if (!response.ok) return setNotice(data.error || "Unable to join this practice challenge.");
     const opponents = DEMO_OPPONENTS[selectedGame];
     const selectedOpponent = opponents[Math.floor(Math.random() * opponents.length)];
-    setTokens((value) => value - selectedStake);
+    setTokens(data.tokenBalance);
     setOpponent(selectedOpponent);
-    setNotice(`${selectedOpponent.name} accepted your ${game.name} demo challenge for ${selectedStake} tokens.`);
+    setNotice(`${selectedOpponent.name} accepted your ${game.name} practice challenge for ${selectedStake} free-play tokens.`);
   };
 
   const selectedPoll = PREDICTION_POLLS.find((poll) => poll.id === selectedPollId)!;
 
-  const createPollChallenge = () => {
-    if (pollChallenge) {
-      setPollNotice("This prediction is already matched. Select another poll to create a new challenge.");
-      return;
-    }
-    if (tokens < selectedPollStake) {
-      setPollNotice("You need more demo tokens to make this free-play prediction.");
-      return;
-    }
+  const createPollChallenge = async () => {
+    if (pollChallenge) return setPollNotice("This prediction is already matched. Select another poll to create a new challenge.");
+    if (!gameServiceReady) return setPollNotice("Your free-play token wallet is still connecting.");
+    const response = await fetch("/api/game/stake", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ amount: selectedPollStake }) });
+    const data = await response.json();
+    if (!response.ok) return setPollNotice(data.error || "Unable to join this free-play prediction.");
     const opponent = ["Jordan P.", "Riley S.", "Taylor K."][Math.floor(Math.random() * 3)];
-    setTokens((value) => value - selectedPollStake);
+    setTokens(data.tokenBalance);
     setPollChallenge({ opponent, points: selectedPollStake });
-    setPollNotice(`${opponent} took the opposite side of “${selectedPoll.options[selectedPrediction]}” for ${selectedPollStake} demo tokens. Results settle when the poll closes.`);
+    setPollNotice(`${opponent} took the opposite side of “${selectedPoll.options[selectedPrediction]}” for ${selectedPollStake} free-play tokens. Results settle when the poll closes.`);
   };
 
   const handleChessCellClick = (row: number, col: number) => {
@@ -542,11 +589,18 @@ export const GamesArena: React.FC = () => {
   };
 
   const renderChessBoard = () => (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="rounded-2xl border border-[#D4AF37]/35 bg-gradient-to-br from-[#2a2110] to-[#110f16] p-5 lg:col-span-2">
+          <div className="flex items-start justify-between gap-4"><div><div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-[#f6d46b]"><BookOpen className="h-4 w-4" /> Guided lesson {activeLesson + 1}</div><h4 className="mt-2 text-xl font-bold text-white">{chessLessons[activeLesson].title}</h4><p className="mt-1 text-sm text-white/60">{chessLessons[activeLesson].detail}</p></div><span className="rounded-full bg-[#D4AF37]/15 px-3 py-1 text-xs font-bold text-[#f6d46b]">+{chessLessons[activeLesson].xp} XP</span></div>
+          <button onClick={completeLesson} disabled={lessonDone} className={`mt-5 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-wider transition ${lessonDone ? "bg-emerald-400/20 text-emerald-200" : "bg-[#D4AF37] text-black hover:bg-[#f6d46b]"}`}><CheckCircle2 className="h-4 w-4" /> {lessonDone ? "Lesson complete" : "Complete lesson"}</button>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5"><div className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/45">Your progress</div><div className="mt-4 flex items-center justify-between"><div><div className="flex items-center gap-1 text-2xl font-black text-white"><Zap className="h-5 w-5 text-[#D4AF37]" />{chessXp}</div><div className="text-xs text-white/45">Chess XP</div></div><div><div className="flex items-center gap-1 text-2xl font-black text-orange-300"><Flame className="h-5 w-5" />{chessStreak}</div><div className="text-xs text-white/45">day streak</div></div></div><div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full w-[60%] rounded-full bg-gradient-to-r from-[#D4AF37] to-orange-400" /></div><p className="mt-2 text-xs text-white/50">80 XP to reach Knight level</p></div>
+      </div>
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h4 className="text-lg font-bold text-white">Playable chess demo</h4>
-          <p className="text-sm text-white/55">Standard piece movement with instant queen promotion and king capture win condition.</p>
+          <h4 className="text-lg font-bold text-white">Practice board</h4>
+          <p className="text-sm text-white/55">Learn by playing: select a piece, choose a legal destination, and take turns locally.</p>
         </div>
         <button
           onClick={() => setChessState(createChessState())}
@@ -575,6 +629,10 @@ export const GamesArena: React.FC = () => {
         )}
       </div>
       <p className="text-sm text-emerald-300">{chessState.message}</p>
+      <div className="rounded-2xl border border-indigo-400/25 bg-indigo-500/[0.08] p-5">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center"><div><div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-indigo-200"><Target className="h-4 w-4" /> Daily puzzle</div><h4 className="mt-2 text-lg font-bold text-white">Win the queen in two moves</h4><p className="mt-1 text-sm text-white/60">Train your eye for a knight fork. Find the forcing move, then reveal the solution.</p></div><button onClick={solvePuzzle} className={`shrink-0 rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-wider transition ${puzzleSolved ? "bg-emerald-400/20 text-emerald-200" : "bg-white/10 text-white hover:bg-white/20"}`}>{puzzleSolved ? "Solved · +35 XP" : "Reveal solution"}</button></div>
+        {puzzleSolved && <p className="mt-4 rounded-xl border border-emerald-400/20 bg-emerald-400/10 p-3 text-sm text-emerald-200">Look for the knight jump that attacks both the queen and rook. Great tactics begin with forcing moves.</p>}
+      </div>
     </div>
   );
 
@@ -678,26 +736,27 @@ export const GamesArena: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-10">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-400/30 text-indigo-200 text-[10px] uppercase tracking-[0.2em] font-bold">
+            <div className="interactive-badge inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-400/30 text-indigo-200 text-[10px] uppercase tracking-[0.2em] font-bold">
               <Gamepad2 className="w-3.5 h-3.5" />
-              Games & Challenges
+              Playable games
             </div>
             <h2 className="mt-4 text-3xl sm:text-5xl font-light text-white tracking-tight">Head-to-head <span className="font-bold text-[#D4AF37]">skill games</span></h2>
             <p className="mt-3 text-white/60">Play 1v1 Chess, Draughts, and Connect 4 in the demo arena. Tokens are non-redeemable, have no cash value, and cannot be bought or withdrawn.</p>
           </div>
           <div className="rounded-2xl bg-white/5 border border-[#D4AF37]/30 px-5 py-4 min-w-56">
-            <div className="text-[10px] uppercase tracking-widest text-white/45">Demo token balance</div>
+            <div className="text-[10px] uppercase tracking-widest text-white/45">Free-play token balance</div>
             <div className="mt-1 flex items-center gap-2 text-2xl font-bold text-[#D4AF37]"><Crown className="w-5 h-5" /> {tokens.toLocaleString()} tokens</div>
+            <button type="button" onClick={claimDailyTokens} disabled={!gameServiceReady} className="mt-3 text-left text-[10px] font-bold uppercase tracking-wider text-emerald-300 hover:text-emerald-200 disabled:text-white/40">{dailyClaimMessage}</button>
           </div>
         </div>
 
         <div className="mb-8 rounded-3xl border border-violet-400/30 bg-gradient-to-br from-violet-500/15 via-indigo-500/10 to-slate-950 p-5 sm:p-6">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div className="max-w-2xl">
-              <div className="flex flex-wrap items-center gap-2"><h3 className="text-lg font-bold text-white">1v1 prediction polls</h3><span className="rounded-full border border-violet-300/40 bg-violet-400/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-violet-100">Free-play only</span></div>
+              <div className="flex flex-wrap items-center gap-2"><h3 className="text-lg font-bold text-white">1v1 prediction polls</h3><span className="interactive-badge rounded-full border border-violet-300/40 bg-violet-400/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-violet-100">Free-play only</span></div>
               <p className="mt-1 text-sm text-white/60">Choose an outcome, challenge a player on the opposite side, and compete for demo tokens. No deposits, withdrawals, or cash prizes.</p>
             </div>
-            <span className="w-fit rounded-xl border border-violet-300/30 bg-violet-400/15 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-violet-100">Virtual points only</span>
+            <span className="interactive-badge w-fit rounded-xl border border-violet-300/30 bg-violet-400/15 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-violet-100">Virtual points only</span>
           </div>
           <div className="mt-6 grid gap-4 lg:grid-cols-2">
             {PREDICTION_POLLS.map((poll) => <button key={poll.id} type="button" onClick={() => { setSelectedPollId(poll.id); setSelectedPrediction(0); setPollChallenge(null); setPollNotice(`Selected poll: ${poll.question}`); }} className={`rounded-2xl border p-5 text-left transition-all ${selectedPollId === poll.id ? "border-violet-300 bg-violet-400/15" : "border-white/10 bg-white/[0.03] hover:border-white/30"}`}><div className="flex items-center justify-between gap-3"><span className="text-[10px] font-bold uppercase tracking-widest text-violet-200">{poll.closes}</span><span className="text-[10px] text-white/40">1v1 poll</span></div><h4 className="mt-3 font-bold text-white">{poll.question}</h4></button>)}
@@ -719,12 +778,15 @@ export const GamesArena: React.FC = () => {
                 setOpponent(null);
                 setNotice(`Selected ${item.name}. Choose a demo-token stake or start the live board preview below.`);
               }}
-              className={`text-left rounded-3xl p-6 border transition-all ${selectedGame === item.id ? "border-[#D4AF37] bg-white/10 shadow-xl shadow-amber-500/10" : "border-white/10 bg-white/[0.03] hover:border-white/30"}`}
+              className={`group relative overflow-hidden text-left rounded-3xl border transition-all duration-300 ${selectedGame === item.id ? "border-[#D4AF37] bg-white/10 shadow-2xl shadow-amber-500/20 -translate-y-1" : "border-white/10 bg-white/[0.03] hover:border-white/30 hover:-translate-y-1"}`}
             >
-              <img src={item.image} alt="" className="h-40 w-full rounded-2xl border border-white/10 object-cover shadow-lg" />
-              <div className="mt-5 flex items-start justify-between gap-3"><h3 className="text-xl font-bold text-white">{item.name}</h3><span className="text-[10px] px-2 py-1 rounded-full bg-white/10 text-white/70">1v1</span></div>
-              <p className="mt-2 text-sm text-white/55 leading-relaxed">{item.description}</p>
-              <div className="mt-5 pt-4 border-t border-white/10 flex items-center justify-between text-xs"><span className="flex items-center gap-1.5 text-emerald-300"><Users className="w-3.5 h-3.5" /> Live demo board</span><span className="flex items-center gap-1.5 text-[#D4AF37]"><BadgeCheck className="w-3.5 h-3.5" /> {item.badge}</span></div>
+              <div className="relative h-52 overflow-hidden">
+                <img src={item.image} alt={`${item.name} game artwork`} className="h-full w-full object-cover transition duration-700 group-hover:scale-110" />
+                <div className={`absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t ${item.accent} opacity-55 mix-blend-color`} />
+                <div className="absolute left-4 top-4 flex items-center gap-2"><span className="interactive-badge rounded-full border border-white/25 bg-black/60 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-white backdrop-blur"><Gamepad2 className="mr-1 inline h-3.5 w-3.5" /> {item.mode}</span></div>
+                <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between gap-3"><h3 className="text-2xl font-black tracking-tight text-white drop-shadow-lg">{item.name}</h3><span className={`interactive-badge rounded-full bg-gradient-to-r ${item.accent} px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-950 shadow-lg`}>{item.badge}</span></div>
+              </div>
+              <div className="p-5"><p className="text-sm leading-relaxed text-white/65">{item.description}</p><div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4 text-xs"><span className="flex items-center gap-1.5 text-emerald-300"><span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(74,222,128,0.9)]" /> Playable now</span><span className="interactive-badge flex items-center gap-1.5 rounded-full border border-[#D4AF37]/35 bg-[#D4AF37]/10 px-2.5 py-1 text-[#f6d46b]"><BadgeCheck className="h-3.5 w-3.5" /> Select game</span></div></div>
             </button>
           ))}
         </div>

@@ -206,6 +206,30 @@
  transform: scale(0.96);
 }
 
+.interactive-badge {
+  display: inline-flex;
+  transform: perspective(420px) translateZ(0);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, filter 180ms ease;
+  will-change: transform;
+}
+
+.interactive-badge:hover,
+.interactive-badge:focus-visible {
+  transform: perspective(420px) translateY(-3px) translateZ(18px) scale(1.06);
+  border-color: rgba(248, 215, 120, 0.9) !important;
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.75), 0 0 30px rgba(212, 175, 55, 0.38);
+  filter: brightness(1.16);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .interactive-badge,
+  .interactive-badge:hover,
+  .interactive-badge:focus-visible {
+    transform: none;
+    transition: none;
+  }
+}
+
 .competition-ticker__group button:hover,
 .competition-ticker__group button:focus-visible {
  color: #fff7d6;

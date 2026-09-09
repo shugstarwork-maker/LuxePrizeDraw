@@ -1,3 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" role="img" aria-label="Chess pieces on a gold chessboard">
-<defs><linearGradient id="a" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#171026"/><stop offset="1" stop-color="#5a3510"/></linearGradient><filter id="s"><feDropShadow dx="0" dy="16" stdDeviation="12" flood-opacity=".5"/></filter></defs>
-<rect width="800" height="480" rx="36" fill="url(#a)"/><g transform="translate(220 42) rotate(-8 180 180)" filter="url(#s)"><path fill="#d4af37" d="M10 10h90v90H10zm180 0h90v90h-90zm180 0h90v90h-90zM100 100h90v90h-90zm180 0h90v90h-90zm180 0h90v90h-90zM10 190h90v90H10zm180 0h90v90h-90zm180 0h90v90h-90zM100 280h90v90h-90v-90zm180 0h90v90h-90v-90zm180 0h90v90h-90v-90z" opacity=".7"/><path d="M267 55h36v45h35l-18 46v46h32v25h-70v-25h32v-46l-18-46h35z" fill="#fff6d6"/><path d="M120 170h42l17 42-16 75h-45l-15-75z" fill="#171026"/></g><text x="55" y="90" fill="#fff" font-family="Arial,sans-serif" font-size="36" font-weight="700">CHESS</text><text x="55" y="128" fill="#d4af37" font-family="Arial,sans-serif" font-size="19" letter-spacing="4">THINK THREE MOVES AHEAD</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-label="Luxury chess board with gold king">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#080b17"/><stop offset=".52" stop-color="#1d1a35"/><stop offset="1" stop-color="#8b5718"/></linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#fff0a1"/><stop offset=".45" stop-color="#d4af37"/><stop offset="1" stop-color="#8d5715"/></linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="24"/></filter><filter id="shadow"><feDropShadow dx="0" dy="20" stdDeviation="16" flood-opacity=".55"/></filter>
+  </defs>
+  <rect width="1200" height="720" fill="url(#bg)"/><circle cx="860" cy="220" r="230" fill="#d4af37" opacity=".16" filter="url(#glow)"/>
+  <g transform="translate(555 116) rotate(-9 240 240)" filter="url(#shadow)">
+    <rect x="0" y="0" width="480" height="480" rx="24" fill="#29190e" stroke="#d4af37" stroke-width="10"/>
+    <g fill="#f5d98a"><path d="M0 0h60v60H0zm120 0h60v60h-60zm120 0h60v60h-60zm120 0h60v60h-60zM60 60h60v60H60zm120 0h60v60h-60zm120 0h60v60h-60zm120 0h60v60h-60zM0 120h60v60H0zm120 0h60v60h-60zm120 0h60v60h-60zm120 0h60v60h-60zM60 180h60v60H60zm120 0h60v60h-60zm120 0h60v60h-60zm120 0h60v60h-60zM0 240h60v60H0zm120 0h60v60h-60zm120 0h60v60h-60zm120 0h60v60h-60zm120 0h60v60h-60zM60 300h60v60H60zm120 0h60v60h-60zm120 0h60v60h-60zm120 0h60v60h-60zM0 360h60v60H0zm120 0h60v60h-60zm120 0h60v60h-60zm120 0h60v60h-60zm120 0h60v60h-60zM60 420h60v60H60zm120 0h60v60h-60zm120 0h60v60h-60zm120 0h60v60h-60z" opacity=".72"/></g>
+    <path d="M220 74h42v52h40l-21 50v53h38v31h-92v-31h38v-53l-21-50h40v-52h42zM210 272h115l25 70-27 90H196l-28-90zM170 432h185v26H170z" fill="url(#gold)" stroke="#fff3b0" stroke-opacity=".4" stroke-width="3"/>
+    <path d="M69 286h45l25 45-23 82H67l-22-82z" fill="#0b0b14" stroke="#8b98c7" stroke-width="3"/>
+  </g>
+  <text x="72" y="124" fill="#fff" font-family="Georgia,serif" font-size="70" font-weight="700">CHESS</text><text x="76" y="170" fill="#f6d46b" font-family="Arial,sans-serif" font-size="21" letter-spacing="7">THE STRATEGIST'S ARENA</text>
+  <path d="M76 214h275" stroke="#d4af37" stroke-width="3"/><text x="76" y="640" fill="#fff" font-family="Arial,sans-serif" font-size="25" opacity=".72">Classic 1v1 · Tactical play</text>
+</svg>

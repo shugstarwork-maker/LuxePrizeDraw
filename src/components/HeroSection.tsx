@@ -1,7 +1,8 @@
 import React from "react";
-import { Sparkles, Trophy, ArrowRight, ShieldCheck, CheckCircle2, Zap, Smartphone, Coins, Building2, Palette, Landmark, Star, ExternalLink, Palmtree, Camera, Gift, Flame, Lock } from "lucide-react";
+import { Sparkles, ArrowRight, ShieldCheck, CheckCircle2, Zap, Smartphone, Coins, Building2, Palette, Landmark, Star, ExternalLink, Palmtree, Camera } from "lucide-react";
 import { CompetitionStats } from "../types";
 import dubaiSkylineNight from "../assets/images/dubai_skyline_night_1787855491978.jpg";
+import { DrawPromoTiles } from "./DrawPromoTiles";
 
 interface HeroSectionProps {
   onOpenEntry: () => void;
@@ -139,87 +140,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <span>100% Free Entry &middot; Zero Purchase Required &middot; Global Draw</span>
             </div>
 
-            {/* Community Perk Unlock Milestone Progress Bar */}
-            {(() => {
-              const currentEntries = stats.totalEntries || 38450;
-              const nextMilestone = 50000;
-              const prevMilestone = 25000;
-              const progressPct = Math.min(
-                100,
-                Math.max(0, Math.round(((currentEntries - prevMilestone) / (nextMilestone - prevMilestone)) * 100))
-              );
-              const remaining = Math.max(0, nextMilestone - currentEntries);
-
-              return (
-                <div className="mt-4 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-neutral-900/90 via-black/80 to-neutral-900/90 border border-[#D4AF37]/30 shadow-xl backdrop-blur-md space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-lg bg-[#D4AF37]/15 text-[#D4AF37]">
-                        <Gift className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[11px] font-bold uppercase tracking-wider text-white">
-                            Community Perk Milestone
-                          </span>
-                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                            <Flame className="w-2.5 h-2.5" />
-                            Level 2
-                          </span>
-                        </div>
-                        <p className="text-[10px] text-white/50">
-                          Next unlock: <strong className="text-amber-300 font-medium">+£10,000 Cash Booster & 5 VIP Flight Upgrades</strong>
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="text-right shrink-0">
-                      <span className="text-xs font-mono font-extrabold text-[#D4AF37]">
-                        {progressPct}%
-                      </span>
-                      <span className="text-[9px] text-white/40 block font-mono">
-                        {remaining.toLocaleString()} left
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Progress Bar Track */}
-                  <div className="relative w-full h-3 rounded-full bg-white/10 overflow-hidden p-0.5 border border-white/10">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-amber-500 via-[#D4AF37] to-emerald-400 transition-all duration-1000 shadow-[0_0_12px_rgba(212,175,55,0.6)] relative overflow-hidden"
-                      style={{ width: `${progressPct}%` }}
-                    >
-                      <div className="absolute inset-0 bg-white/25 animate-pulse" />
-                    </div>
-                  </div>
-
-                  {/* Milestone Markers */}
-                  <div className="grid grid-cols-3 gap-2 text-[9px] pt-1">
-                    <div className="text-left">
-                      <span className="text-emerald-400 font-bold flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3" />
-                        25K: Unlocked
-                      </span>
-                      <span className="text-white/40 block truncate">Marina Yacht Party</span>
-                    </div>
-                    <div className="text-center">
-                      <span className="text-[#D4AF37] font-bold flex items-center justify-center gap-1">
-                        <Flame className="w-3 h-3" />
-                        50K: Target
-                      </span>
-                      <span className="text-white/60 block truncate">+£10K Booster</span>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-white/40 font-bold flex items-center justify-end gap-1">
-                        <Lock className="w-2.5 h-2.5" />
-                        75K: Tier 3
-                      </span>
-                      <span className="text-white/30 block truncate">Supercar Month</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
+            <DrawPromoTiles />
           </div>
 
           {/* Right Column: Immersive Glass Metric Cards */}
@@ -313,7 +234,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                     <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-[#D4AF37] group-hover:border-[#D4AF37]/40 transition-colors">
                       <IconComp className="w-6 h-6" />
                     </div>
-                    <span className="text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full bg-white/5 text-white/70 border border-white/10">
+                    <span className="interactive-badge text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full bg-white/5 text-white/70 border border-white/10">
                       {prize.badge}
                     </span>
                   </div>

@@ -256,7 +256,7 @@ export const EntryModal: React.FC<EntryModalProps> = ({
                         }`}
                       >
                         {plan.popular && (
-                          <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-[#D4AF37] text-black font-extrabold text-[8px] uppercase tracking-widest">
+                          <span className="interactive-badge absolute -top-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-[#D4AF37] text-black font-extrabold text-[8px] uppercase tracking-widest">
                             {plan.badge}
                           </span>
                         )}
