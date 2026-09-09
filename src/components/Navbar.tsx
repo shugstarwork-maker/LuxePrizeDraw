@@ -130,14 +130,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
 
             {/* Desktop Nav links with Immersive UI typography */}
-            <div className="hidden lg:flex items-center gap-5 xl:gap-6 text-xs font-medium tracking-widest uppercase text-white/60">
+            <div className="nav-tabs hidden lg:flex max-w-[36rem] xl:max-w-[46rem] items-center gap-1 overflow-x-auto rounded-2xl border border-white/10 bg-black/35 p-1.5 shadow-inner shadow-black/40">
               {navItems.map((item) => (
                 <button
                   key={item.id}
                   id={`nav-link-${item.id}`}
                   onClick={() => scrollTo(item.id)}
-                  className={`hover:text-[#D4AF37] transition-colors py-1 ${
-                    activeSection === item.id ? "text-[#D4AF37] font-bold border-b border-[#D4AF37]" : ""
+                  className={`nav-tab shrink-0 rounded-xl px-3 py-2 text-[10px] font-bold uppercase tracking-[0.11em] transition-all xl:px-3.5 ${
+                    activeSection === item.id ? "nav-tab--active" : "text-white/55 hover:bg-white/10 hover:text-white"
                   }`}
                 >
                   {item.label}
@@ -221,7 +221,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <button
                     key={item.id}
                     onClick={() => scrollTo(item.id)}
-                    className="w-full text-left px-3 py-2 rounded-lg text-sm text-slate-200 hover:bg-slate-800 font-medium"
+                    className={`w-full text-left rounded-xl border px-3 py-2.5 text-sm font-medium transition-colors ${activeSection === item.id ? "border-[#D4AF37]/40 bg-[#D4AF37]/10 text-[#F8D778]" : "border-transparent text-slate-200 hover:border-white/10 hover:bg-white/5"}` }
                   >
                     {item.label}
                   </button>

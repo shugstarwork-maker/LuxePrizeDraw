@@ -175,3 +175,22 @@
   }
   .competition-ticker__group[aria-hidden="true"] { display: none; }
 }
+
+.nav-tabs {
+  scrollbar-width: none;
+}
+
+.nav-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.nav-tab--active {
+  background: linear-gradient(135deg, #f4cf5c, #b88a1c);
+  color: #160e02;
+  box-shadow: 0 6px 18px rgba(212, 175, 55, 0.28), inset 0 1px rgba(255, 255, 255, 0.38);
+}
+
+.nav-tab:focus-visible {
+  outline: 2px solid #f8d778;
+  outline-offset: 2px;
+}
