@@ -54,6 +54,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const navItems = [
     { id: "competition-hub", label: "Prize Draws" },
+    { id: "free-draws", label: "Free Draws" },
     { id: "games", label: "Games" },
     { id: "poker-league", label: "Poker League" },
     { id: "leaderboards", label: "Leaderboards" },
