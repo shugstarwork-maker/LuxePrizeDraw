@@ -175,3 +175,26 @@
   }
   .competition-ticker__group[aria-hidden="true"] { display: none; }
 }
+
+.nav-tab:not(.nav-tab--active):hover {
+  color: #fff7d6;
+  box-shadow: inset 0 0 0 1px rgba(248, 215, 120, 0.3), 0 0 18px rgba(212, 175, 55, 0.14);
+  text-shadow: 0 0 12px rgba(248, 215, 120, 0.65);
+}
+
+.nav-tab:active,
+.competition-ticker__group button:active {
+  transform: scale(0.96);
+}
+
+.competition-ticker__group button:hover,
+.competition-ticker__group button:focus-visible {
+  color: #fff7d6;
+  text-shadow: 0 0 12px rgba(248, 215, 120, 0.85);
+}
+
+.competition-ticker__group button:focus-visible {
+  outline: 2px solid #f8d778;
+  outline-offset: 3px;
+  border-radius: 2px;
+}
