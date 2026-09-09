@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { BadgeCheck, BookOpen, CheckCircle2, Crown, Flame, Gamepad2, RotateCcw, ShieldCheck, Swords, Target, Trophy, TrendingUp, Users, Zap } from "lucide-react";
 
 type GameId = "chess" | "draughts" | "connect-4";
@@ -284,7 +284,9 @@ function getConnect4Winner(board: Array<Array<Connect4Disc | null>>, row: number
 }
 
 export const GamesArena: React.FC = () => {
-  const [tokens, setTokens] = useState(1000);
+  const [tokens, setTokens] = useState(0);
+  const [gameServiceReady, setGameServiceReady] = useState(false);
+  const [dailyClaimMessage, setDailyClaimMessage] = useState("Connecting your free-play token wallet…");
   const [selectedGame, setSelectedGame] = useState<GameId>("chess");
   const [selectedStake, setSelectedStake] = useState<(typeof STAKES)[number]>(100);
   const [notice, setNotice] = useState("Choose a game and challenge another player.");
@@ -328,33 +330,50 @@ export const GamesArena: React.FC = () => {
     }
   };
 
-  const createChallenge = () => {
-    if (tokens < selectedStake) {
-      setNotice("You need more demo tokens to enter this challenge.");
-      return;
-    }
+  useEffect(() => {
+    fetch("/api/game/session", { method: "POST" })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Games service unavailable.");
+        setTokens(data.tokenBalance);
+        setGameServiceReady(true);
+        setDailyClaimMessage(data.lastDailyClaimAt ? "Your daily token grant is ready tomorrow." : `Claim ${data.dailyTokens} free tokens today.`);
+      })
+      .catch((error: Error) => setDailyClaimMessage(error.message));
+  }, []);
+
+  const claimDailyTokens = async () => {
+    const response = await fetch("/api/game/daily-claim", { method: "POST" });
+    const data = await response.json();
+    if (!response.ok) return setDailyClaimMessage(data.error || "Unable to claim daily tokens.");
+    setTokens(data.tokenBalance);
+    setDailyClaimMessage(`Daily grant claimed: +${data.dailyTokens} free tokens.`);
+  };
+
+  const createChallenge = async () => {
+    if (!gameServiceReady) return setNotice("Your free-play token wallet is still connecting.");
+    const response = await fetch("/api/game/stake", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ amount: selectedStake }) });
+    const data = await response.json();
+    if (!response.ok) return setNotice(data.error || "Unable to join this practice challenge.");
     const opponents = DEMO_OPPONENTS[selectedGame];
     const selectedOpponent = opponents[Math.floor(Math.random() * opponents.length)];
-    setTokens((value) => value - selectedStake);
+    setTokens(data.tokenBalance);
     setOpponent(selectedOpponent);
-    setNotice(`${selectedOpponent.name} accepted your ${game.name} demo challenge for ${selectedStake} tokens.`);
+    setNotice(`${selectedOpponent.name} accepted your ${game.name} practice challenge for ${selectedStake} free-play tokens.`);
   };
 
   const selectedPoll = PREDICTION_POLLS.find((poll) => poll.id === selectedPollId)!;
 
-  const createPollChallenge = () => {
-    if (pollChallenge) {
-      setPollNotice("This prediction is already matched. Select another poll to create a new challenge.");
-      return;
-    }
-    if (tokens < selectedPollStake) {
-      setPollNotice("You need more demo tokens to make this free-play prediction.");
-      return;
-    }
+  const createPollChallenge = async () => {
+    if (pollChallenge) return setPollNotice("This prediction is already matched. Select another poll to create a new challenge.");
+    if (!gameServiceReady) return setPollNotice("Your free-play token wallet is still connecting.");
+    const response = await fetch("/api/game/stake", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ amount: selectedPollStake }) });
+    const data = await response.json();
+    if (!response.ok) return setPollNotice(data.error || "Unable to join this free-play prediction.");
     const opponent = ["Jordan P.", "Riley S.", "Taylor K."][Math.floor(Math.random() * 3)];
-    setTokens((value) => value - selectedPollStake);
+    setTokens(data.tokenBalance);
     setPollChallenge({ opponent, points: selectedPollStake });
-    setPollNotice(`${opponent} took the opposite side of “${selectedPoll.options[selectedPrediction]}” for ${selectedPollStake} demo tokens. Results settle when the poll closes.`);
+    setPollNotice(`${opponent} took the opposite side of “${selectedPoll.options[selectedPrediction]}” for ${selectedPollStake} free-play tokens. Results settle when the poll closes.`);
   };
 
   const handleChessCellClick = (row: number, col: number) => {
@@ -725,8 +744,9 @@ export const GamesArena: React.FC = () => {
             <p className="mt-3 text-white/60">Play 1v1 Chess, Draughts, and Connect 4 in the demo arena. Tokens are non-redeemable, have no cash value, and cannot be bought or withdrawn.</p>
           </div>
           <div className="rounded-2xl bg-white/5 border border-[#D4AF37]/30 px-5 py-4 min-w-56">
-            <div className="text-[10px] uppercase tracking-widest text-white/45">Demo token balance</div>
+            <div className="text-[10px] uppercase tracking-widest text-white/45">Free-play token balance</div>
             <div className="mt-1 flex items-center gap-2 text-2xl font-bold text-[#D4AF37]"><Crown className="w-5 h-5" /> {tokens.toLocaleString()} tokens</div>
+            <button type="button" onClick={claimDailyTokens} disabled={!gameServiceReady} className="mt-3 text-left text-[10px] font-bold uppercase tracking-wider text-emerald-300 hover:text-emerald-200 disabled:text-white/40">{dailyClaimMessage}</button>
           </div>
         </div>
 
