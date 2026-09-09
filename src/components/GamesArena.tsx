@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { BadgeCheck, Crown, Gamepad2, RotateCcw, ShieldCheck, Swords, Trophy, Users, Zap } from "lucide-react";
+import { Crown, Gamepad2, RotateCcw, ShieldCheck, Swords, Trophy, Zap } from "lucide-react";
 
 type GameId = "chess" | "draughts" | "connect-4";
 type PlayerColor = "white" | "black";
@@ -677,7 +677,10 @@ export const GamesArena: React.FC = () => {
               <img src={item.image} alt="" className="h-40 w-full rounded-2xl border border-white/10 object-cover shadow-lg" />
               <div className="mt-5 flex items-start justify-between gap-3"><h3 className="text-xl font-bold text-white">{item.name}</h3><span className="text-[10px] px-2 py-1 rounded-full bg-white/10 text-white/70">1v1</span></div>
               <p className="mt-2 text-sm text-white/55 leading-relaxed">{item.description}</p>
-              <div className="mt-5 pt-4 border-t border-white/10 flex items-center justify-between text-xs"><span className="flex items-center gap-1.5 text-emerald-300"><Users className="w-3.5 h-3.5" /> Live demo board</span><span className="flex items-center gap-1.5 text-[#D4AF37]"><BadgeCheck className="w-3.5 h-3.5" /> {item.badge}</span></div>
+              <div className="mt-5 flex items-center justify-between gap-3 border-t border-white/10 pt-4 text-xs">
+                <span className="inline-flex items-center gap-2 text-emerald-300"><img src={item.image} alt="" className="h-6 w-6 rounded-lg object-cover ring-1 ring-emerald-300/30" /> Playable demo</span>
+                <span className="inline-flex items-center gap-2 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/10 py-1 pl-1 pr-2 text-[#F8D778]"><img src={item.image} alt="" className="h-5 w-5 rounded-full object-cover" /> {item.badge}</span>
+              </div>
             </button>
           ))}
         </div>
