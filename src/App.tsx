@@ -20,6 +20,7 @@ import { EntryModal } from "./components/EntryModal";
 import { TicketWalletModal } from "./components/TicketWalletModal";
 import { AiAdvisorDrawer } from "./components/AiAdvisorDrawer";
 import { Footer } from "./components/Footer";
+import { LuxeHost } from "./components/LuxeHost";
 import { CompetitionTicket, CompetitionStats } from "./types";
 import { Sparkles, Ticket, Heart } from "lucide-react";
 
@@ -183,6 +184,8 @@ export default function App() {
 
         {/* Demo-only 1v1 games and token challenges */}
         <GamesArena />
+
+        <LuxeHost />
 
         {/* Special Feature #2: AI Business Pitch & Feasibility Evaluator (Gemini 3.7) */}
         <AiPitchEvaluator onApplyIdeaToEntry={handleApplyIdeaToEntry} />
