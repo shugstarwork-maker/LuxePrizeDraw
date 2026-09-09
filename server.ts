@@ -1,4 +1,4 @@
-import express, { type Request, type Response } from "express";
+import express, { type NextFunction, type Request, type Response } from "express";
 import path from "path";
 import crypto from "crypto";
 import { createServer as createViteServer } from "vite";
@@ -155,6 +155,11 @@ function applySettlementRateLimit(req: Request, res: Response) {
   return false;
 }
 
+function settlementRateLimitMiddleware(req: Request, res: Response, next: NextFunction) {
+  if (applySettlementRateLimit(req, res)) return;
+  next();
+}
+
 // API: durable public audit record. Pending state carries no fake entropy values.
 app.get("/api/draw/audit", async (_req, res) => {
   try {
@@ -167,9 +172,8 @@ app.get("/api/draw/audit", async (_req, res) => {
 });
 
 // API: protected pre-commitment. Call before entries close to publish the server-seed hash.
-app.post("/api/draw/commit", async (req, res) => {
+app.post("/api/draw/commit", settlementRateLimitMiddleware, async (req, res) => {
   try {
-    if (applySettlementRateLimit(req, res)) return;
     if (!requireSettlementAuthorization(req.header("authorization"))) return res.status(401).json({ error: "Unauthorized commitment request." });
     const serverSeed = process.env.ENTROPY_DRAW_SERVER_SEED;
     if (!serverSeed || !Number.isSafeInteger(targetBlockHeight) || targetBlockHeight < 1) return res.status(503).json({ error: "Entropy draw configuration is incomplete." });
@@ -188,9 +192,8 @@ app.post("/api/draw/commit", async (req, res) => {
 });
 
 // API: protected, idempotent settlement. Invoke only after the target block has been mined.
-app.post("/api/draw/settle", async (req, res) => {
+app.post("/api/draw/settle", settlementRateLimitMiddleware, async (req, res) => {
   try {
-    if (applySettlementRateLimit(req, res)) return;
     if (!requireSettlementAuthorization(req.header("authorization"))) return res.status(401).json({ error: "Unauthorized settlement request." });
     const serverSeed = process.env.ENTROPY_DRAW_SERVER_SEED;
     if (!serverSeed || !Number.isSafeInteger(targetBlockHeight) || targetBlockHeight < 1) return res.status(503).json({ error: "Entropy draw configuration is incomplete." });
