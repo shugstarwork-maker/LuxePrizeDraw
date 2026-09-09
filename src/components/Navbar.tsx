@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Sparkles, Ticket, Globe, ShieldCheck, Zap, Menu, X, ArrowRight, Heart } from "lucide-react";
+import { Sparkles, Ticket, Globe, ShieldCheck, Zap, Menu, X, ArrowRight } from "lucide-react";
 
 interface NavbarProps {
   onOpenEntry: () => void;
@@ -43,6 +43,15 @@ export const Navbar: React.FC<NavbarProps> = ({
     return () => clearInterval(timer);
   }, []);
 
+  const tickerItems = [
+    { label: "Featured competitions" },
+    { label: "Explore the latest prize experiences" },
+    { label: "Play skill-game demos", sectionId: "games", ariaLabel: "Jump to the games section" },
+    { label: "Discover the prize package", sectionId: "prizes", ariaLabel: "Jump to the prize package section" },
+    { label: "Competition updates and draw information" },
+    { label: "Our ambition: build the world's most valuable app-launch prize" },
+  ];
+
   const navItems = [
     { id: "prizes", label: "The £220K Package" },
     { id: "dubai-gallery", label: "Dubai Gallery" },
@@ -67,18 +76,28 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <header className="fixed top-0 left-0 right-0 z-40">
-      {/* Top Philanthropic & Subscription Announcement Ribbon */}
-      <div className="bg-gradient-to-r from-rose-950/80 via-neutral-900 to-amber-950/80 border-b border-white/10 py-1.5 px-4 text-center text-[10px] sm:text-xs text-white/90 backdrop-blur-md flex items-center justify-center gap-2">
-        <Heart className="w-3.5 h-3.5 text-rose-400 fill-rose-400 animate-pulse" />
-        <span>
-          <strong className="text-rose-300 font-semibold">25% of all ticket & subscription proceeds</strong> go directly to global education & youth enterprise charities
-        </span>
-        <button
-          onClick={() => scrollTo("charity-impact")}
-          className="hidden sm:inline text-[#D4AF37] hover:underline font-bold ml-1 uppercase tracking-wider text-[9px]"
-        >
-          View Impact &rarr;
-        </button>
+      <div className="competition-ticker border-b border-white/10 bg-gradient-to-r from-[#4c0a18] via-[#8d0f42] to-[#4c0a18] text-white" aria-label="Competition updates">
+        <div className="competition-ticker__track">
+          {[0, 1].map((repeat) => (
+            <div className="competition-ticker__group" key={repeat} aria-hidden={repeat === 1}>
+              {tickerItems.map((item, index) => (
+                <React.Fragment key={item.label}>
+                  {index > 0 && <span className="competition-ticker__dot" aria-hidden="true">•</span>}
+                  {item.sectionId ? (
+                    <button
+                      type="button"
+                      aria-label={item.ariaLabel}
+                      onClick={() => scrollTo(item.sectionId!)}
+                      tabIndex={repeat ? -1 : undefined}
+                    >
+                      {item.label}
+                    </button>
+                  ) : <span>{item.label}</span>}
+                </React.Fragment>
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
 
       <nav
