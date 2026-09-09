@@ -147,25 +147,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* Right Action buttons */}
             <div className="hidden sm:flex items-center gap-3">
-              {/* Draw Countdown Pill */}
-              <div className="hidden xl:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] tracking-wider uppercase text-white/70">
-                <span className="text-white/40">Draw:</span>
-                <span className="font-mono font-bold text-[#D4AF37]">
-                  {timeLeft.days}D {timeLeft.hours}H {timeLeft.mins}M
-                </span>
-              </div>
-
-              {/* AI Advisor Button */}
-              <button
-                id="navbar-ai-advisor-btn"
-                onClick={onOpenAiAdvisor}
-                className="flex items-center gap-1.5 px-3.5 py-2 border border-white/20 rounded-full text-xs uppercase tracking-widest text-white/80 hover:bg-white/10 hover:border-white/40 transition-all"
-                title="Ask AI Business Advisor"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
-                <span>AI Advisor</span>
-              </button>
-
               {/* Ticket Wallet Button */}
               <button
                 id="navbar-ticket-wallet-btn"
