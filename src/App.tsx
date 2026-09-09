@@ -9,6 +9,7 @@ import { HeroSection } from "./components/HeroSection";
 import { PrizeShowcase } from "./components/PrizeShowcase";
 import { ExperiencePrizes } from "./components/ExperiencePrizes";
 import { KnockoutTournament } from "./components/KnockoutTournament";
+import { QuickDraws } from "./components/QuickDraws";
 import { CharityImpactSection } from "./components/CharityImpactSection";
 import { OneClickBookDemo } from "./components/OneClickBookDemo";
 import { GamesArena } from "./components/GamesArena";
@@ -178,6 +179,7 @@ export default function App() {
         />
 
         <ExperiencePrizes />
+        <QuickDraws />
 
         {/* 25% Charity Contribution & Monthly Membership Subscriptions */}
         <CharityImpactSection
