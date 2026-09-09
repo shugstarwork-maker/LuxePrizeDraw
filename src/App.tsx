@@ -7,12 +7,12 @@ import React, { useState, useEffect } from "react";
 import { Navbar } from "./components/Navbar";
 import { HeroSection } from "./components/HeroSection";
 import { CompetitionHub } from "./components/CompetitionHub";
+import { FreeDraws } from "./components/FreeDraws";
+import { AdminTickets } from "./components/AdminTickets";
 import { PrizeShowcase } from "./components/PrizeShowcase";
 import { CharityImpactSection } from "./components/CharityImpactSection";
 import { OneClickBookDemo } from "./components/OneClickBookDemo";
 import { GamesArena } from "./components/GamesArena";
-import { LuxePokerLeague } from "./components/LuxePokerLeague";
-import { FreeDraws } from "./components/FreeDraws";
 import { AiPitchEvaluator } from "./components/AiPitchEvaluator";
 import { PackageCustomizer } from "./components/PackageCustomizer";
 import { DrawVerificationSection } from "./components/DrawVerificationSection";
@@ -126,6 +126,10 @@ export default function App() {
     setIsEntryModalOpen(true);
   };
 
+  if (typeof window !== "undefined" && window.location.pathname === "/admin/tickets") {
+    return <div className="min-h-screen bg-[#050505] text-white font-sans pt-10"><AdminTickets /></div>;
+  }
+
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-[#D4AF37] selection:text-black relative overflow-x-hidden pt-7">
       {/* Immersive UI ambient radial glow backdrop */}
@@ -170,10 +174,7 @@ export default function App() {
 
         <CompetitionHub />
 
-        <FreeDraws onEnter={() => {
-          setPrefilledIdea("");
-          setIsEntryModalOpen(true);
-        }} />
+        <FreeDraws />
 
         {/* 6 Prize Pillars Detailed Breakdown */}
         <PrizeShowcase
@@ -194,8 +195,6 @@ export default function App() {
 
         {/* Demo-only 1v1 games and token challenges */}
         <GamesArena />
-
-        <LuxePokerLeague />
 
         <LuxeHost />
 

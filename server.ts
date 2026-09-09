@@ -208,6 +208,67 @@ app.post("/api/draw/verify", async (req, res) => {
   }
 });
 
+function requireAdminPassword(password?: string) {
+  const expected = process.env.ADMIN_PASSWORD;
+  if (!expected) throw new Error("ADMIN_PASSWORD is not configured.");
+  const actual = password || "";
+  return actual.length === expected.length && crypto.timingSafeEqual(Buffer.from(actual), Buffer.from(expected));
+}
+
+async function ensureFreeDrawTicketsTable() {
+  const sql = getAuditDatabase();
+  await sql`CREATE TABLE IF NOT EXISTS free_draw_tickets (
+    id TEXT PRIMARY KEY,
+    email TEXT NOT NULL,
+    draw_name TEXT NOT NULL,
+    redemption_code_hash TEXT NOT NULL UNIQUE,
+    issued_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    redeemed_at TIMESTAMPTZ,
+    entry_ticket_id TEXT UNIQUE
+  )`;
+}
+
+// API: administrator issues a one-time Free Draw ticket for a specific email.
+app.post("/api/admin/free-draw-tickets", async (req, res) => {
+  try {
+    if (!requireAdminPassword(req.header("x-admin-password"))) return res.status(401).json({ error: "Unauthorized." });
+    const email = String(req.body?.email || "").trim().toLowerCase();
+    const drawName = String(req.body?.drawName || "").trim();
+    if (!/^\S+@\S+\.\S+$/.test(email) || !drawName) return res.status(400).json({ error: "A valid email and draw are required." });
+    await ensureFreeDrawTicketsTable();
+    const redemptionCode = crypto.randomBytes(12).toString("base64url").toUpperCase();
+    const codeHash = crypto.createHash("sha256").update(redemptionCode).digest("hex");
+    const sql = getAuditDatabase();
+    await sql`INSERT INTO free_draw_tickets (id, email, draw_name, redemption_code_hash) VALUES (${crypto.randomUUID()}, ${email}, ${drawName}, ${codeHash})`;
+    return res.status(201).json({ success: true, email, drawName, redemptionCode });
+  } catch (error) {
+    console.error("Admin ticket issue error:", error);
+    return res.status(503).json({ error: "Ticket storage is unavailable. Check the ticket database and administrator configuration." });
+  }
+});
+
+// API: atomically redeems only an administrator-issued code belonging to the submitted email.
+app.post("/api/free-draws/redeem", async (req, res) => {
+  try {
+    const email = String(req.body?.email || "").trim().toLowerCase();
+    const redemptionCode = String(req.body?.redemptionCode || "").trim().toUpperCase();
+    if (!/^\S+@\S+\.\S+$/.test(email) || !redemptionCode) return res.status(400).json({ error: "Enter the email that received the ticket and its redemption code." });
+    await ensureFreeDrawTicketsTable();
+    const codeHash = crypto.createHash("sha256").update(redemptionCode).digest("hex");
+    const ticketId = `FREE-${crypto.randomUUID().split("-")[0].toUpperCase()}`;
+    const sql = getAuditDatabase();
+    const rows = await sql`UPDATE free_draw_tickets SET redeemed_at = NOW(), entry_ticket_id = ${ticketId}
+      WHERE email = ${email} AND redemption_code_hash = ${codeHash} AND redeemed_at IS NULL
+      RETURNING draw_name`;
+    if (!rows[0]) return res.status(404).json({ error: "That ticket is invalid, belongs to a different email, or has already been redeemed." });
+    totalEntriesCount += 1;
+    return res.json({ success: true, drawName: rows[0].draw_name, ticketId });
+  } catch (error) {
+    console.error("Free Draw redemption error:", error);
+    return res.status(503).json({ error: "Ticket storage is unavailable. Please try again later." });
+  }
+});
+
 // API: Competition Entry Submission & Subscriptions
 app.post("/api/competition/enter", (req, res) => {
   try {
@@ -227,6 +288,9 @@ app.post("/api/competition/enter", (req, res) => {
 
     if (!fullName || !email) {
       return res.status(400).json({ error: "Full name and email are required to generate an official entry ticket." });
+    }
+    if (!demo) {
+      return res.status(403).json({ error: "Public entry issuance is disabled. Free Draw entries require an administrator-issued ticket." });
     }
 
     const count = Number(ticketsCount) || 1;
