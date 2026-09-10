@@ -15,6 +15,7 @@ import { PrizeShowcase } from "./components/PrizeShowcase";
 import { CharityImpactSection } from "./components/CharityImpactSection";
 import { OneClickBookDemo } from "./components/OneClickBookDemo";
 import { GamesArena } from "./components/GamesArena";
+import { LuxePokerLeague } from "./components/LuxePokerLeague";
 import { AiPitchEvaluator } from "./components/AiPitchEvaluator";
 import { PackageCustomizer } from "./components/PackageCustomizer";
 import { DrawVerificationSection } from "./components/DrawVerificationSection";
@@ -203,6 +204,8 @@ export default function App() {
 
         {/* Demo-only 1v1 games and token challenges */}
         <GamesArena />
+
+        <LuxePokerLeague />
 
         <LuxeHost />
 
