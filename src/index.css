@@ -176,6 +176,25 @@
   .competition-ticker__group[aria-hidden="true"] { display: none; }
 }
 
+.competition-card {
+  transform: perspective(900px) translateZ(0);
+  transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1), border-color 280ms ease, box-shadow 280ms ease, background-color 280ms ease;
+}
+
+.competition-card:hover,
+.competition-card:focus-visible {
+  transform: perspective(900px) rotateX(5deg) rotateY(-4deg) translateY(-8px) scale(1.025);
+  border-color: rgba(248, 215, 120, 0.8);
+  background-color: rgba(212, 175, 55, 0.11);
+  box-shadow: 0 0 18px rgba(248, 215, 120, 0.72), 0 20px 48px rgba(0, 0, 0, 0.48), inset 0 0 35px rgba(212, 175, 55, 0.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .competition-card,
+  .competition-card:hover,
+  .competition-card:focus-visible { transform: none; transition: none; }
+}
+
 .nav-tabs {
   scrollbar-width: none;
 }
@@ -241,3 +260,43 @@
  outline-offset: 3px;
  border-radius: 2px;
 }
+
+.game-arena-stage {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-image: linear-gradient(180deg, rgba(4, 7, 15, 0.14), rgba(4, 7, 15, 0.88)), url('/games/arena-panorama.svg');
+  background-size: cover;
+  background-position: center;
+}
+.game-arena-stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(ellipse at 50% 72%, rgba(212, 175, 55, 0.18), transparent 48%);
+  pointer-events: none;
+}
+.game-arena-stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.5;
+  background: repeating-linear-gradient(100deg, transparent 0 110px, rgba(255, 255, 255, 0.028) 112px 114px, transparent 116px 240px);
+  pointer-events: none;
+}
+.game-arena-stage .arena-surface {
+  backdrop-filter: blur(7px);
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.48), inset 0 1px rgba(255, 255, 255, 0.12);
+}
+.game-arena-stage button:not(:disabled) { transition: transform .18s ease, box-shadow .18s ease, filter .18s ease; }
+.game-arena-stage button:not(:disabled):hover { transform: translateY(-2px); filter: brightness(1.08); }
+.game-arena-stage button:not(:disabled):active { transform: translateY(0) scale(.98); }
+@media (prefers-reduced-motion: reduce) { .game-arena-stage button:not(:disabled) { transition: none; } }
+
+.poker-card-row > div { animation: cardDeal .36s cubic-bezier(.2,.9,.25,1) both; }
+.poker-card-row > div:nth-child(2) { animation-delay: .08s; }
+@keyframes cardDeal { from { opacity: 0; transform: translateY(-16px) rotate(-4deg) scale(.92); } to { opacity: 1; transform: translateY(0) rotate(0) scale(1); } }
+.game-arena-stage [aria-live] { box-shadow: inset 3px 0 0 rgba(212,175,55,.65); }
+@media (prefers-reduced-motion: reduce) { .poker-card-row > div { animation: none; } }

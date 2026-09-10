@@ -6,6 +6,11 @@
 import React, { useState, useEffect } from "react";
 import { Navbar } from "./components/Navbar";
 import { HeroSection } from "./components/HeroSection";
+import { CompetitionHub } from "./components/CompetitionHub";
+import { FreeDraws } from "./components/FreeDraws";
+import { AdminTickets } from "./components/AdminTickets";
+import { ComplianceDashboard } from "./components/ComplianceDashboard";
+import { WelcomePage } from "./components/WelcomePage";
 import { PrizeShowcase } from "./components/PrizeShowcase";
 import { ExperiencePrizes } from "./components/ExperiencePrizes";
 import { KnockoutTournament } from "./components/KnockoutTournament";
@@ -13,6 +18,9 @@ import { QuickDraws } from "./components/QuickDraws";
 import { CharityImpactSection } from "./components/CharityImpactSection";
 import { OneClickBookDemo } from "./components/OneClickBookDemo";
 import { GamesArena } from "./components/GamesArena";
+import { PredictionMarket } from "./components/PredictionMarket";
+import { LuxePokerLeague } from "./components/LuxePokerLeague";
+import { LuxeFightArena } from "./components/LuxeFightArena";
 import { AiPitchEvaluator } from "./components/AiPitchEvaluator";
 import { PackageCustomizer } from "./components/PackageCustomizer";
 import { DrawVerificationSection } from "./components/DrawVerificationSection";
@@ -127,6 +135,16 @@ export default function App() {
     setIsEntryModalOpen(true);
   };
 
+  if (typeof window !== "undefined" && window.location.pathname === "/admin/tickets") {
+    return <div className="min-h-screen bg-[#050505] text-white font-sans pt-10"><AdminTickets /></div>;
+  }
+  if (typeof window !== "undefined" && window.location.pathname === "/admin/compliance") {
+    return <ComplianceDashboard />;
+  }
+  if (typeof window !== "undefined" && window.location.pathname === "/welcome") {
+    return <WelcomePage />;
+  }
+
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-[#D4AF37] selection:text-black relative overflow-x-hidden pt-7">
       {/* Immersive UI ambient radial glow backdrop */}
@@ -169,6 +187,10 @@ export default function App() {
           stats={stats}
         />
 
+        <CompetitionHub />
+
+        <FreeDraws />
+
         {/* 6 Prize Pillars Detailed Breakdown */}
         <PrizeShowcase
           onOpenEntry={() => setIsEntryModalOpen(true)}
@@ -189,6 +211,8 @@ export default function App() {
         {/* Special Feature #1: One-Click Book & AI Interactive Sandbox */}
         <OneClickBookDemo onOpenEntry={() => setIsEntryModalOpen(true)} />
 
+        <PredictionMarket />
+        
         {/* Games hub and free-play elimination tournament */}
         <GamesArena />
         <KnockoutTournament />
@@ -199,6 +223,9 @@ export default function App() {
           totalEntriesCount={stats.totalEntries}
           onOpenEntry={() => setIsEntryModalOpen(true)}
         />
+        <LuxePokerLeague />
+
+        <LuxeFightArena />
         <LuxeHost />
 
         {/* Special Feature #2: AI Business Pitch & Feasibility Evaluator (Gemini 3.7) */}

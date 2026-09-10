@@ -53,6 +53,12 @@ export const Navbar: React.FC<NavbarProps> = ({
   ];
 
   const navItems = [
+    { id: "competition-hub", label: "Prize Draws" },
+    { id: "free-draws", label: "Free Draws" },
+    { id: "prediction-market", label: "Forecasts" },
+    { id: "games", label: "Games" },
+    { id: "poker-league", label: "Poker League" },
+    { id: "leaderboards", label: "Leaderboards" },
     { id: "prizes", label: "The £220K Package" },
     { id: "experience-prizes", label: "Experiences" },
     { id: "quick-draws", label: "Quick Draws" },

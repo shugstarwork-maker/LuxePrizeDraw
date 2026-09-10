@@ -342,6 +342,171 @@ app.get("/api/game/leaderboard", async (_req, res) => {
   }
 });
 
+type JurisdictionStatus = "NOT_REVIEWED" | "ALLOWED" | "RESTRICTED" | "BLOCKED";
+
+async function ensureComplianceTables() {
+  const sql = getAuditDatabase();
+  await sql`CREATE TABLE IF NOT EXISTS jurisdiction_compliance (
+    country_code TEXT NOT NULL, subdivision_code TEXT NOT NULL DEFAULT '', status TEXT NOT NULL DEFAULT 'NOT_REVIEWED',
+    legal_approval_reference TEXT, minimum_age INTEGER NOT NULL DEFAULT 18,
+    registrations_enabled BOOLEAN NOT NULL DEFAULT FALSE, entries_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+    deposits_enabled BOOLEAN NOT NULL DEFAULT FALSE, prizes_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+    crypto_enabled BOOLEAN NOT NULL DEFAULT FALSE, referrals_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+    kyc_required BOOLEAN NOT NULL DEFAULT FALSE, aml_required BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (country_code, subdivision_code)
+  )`;
+  await sql`CREATE TABLE IF NOT EXISTS competitions (
+    id TEXT PRIMARY KEY, status TEXT NOT NULL DEFAULT 'DRAFT', official_rules_url TEXT, official_rules_version TEXT,
+    entry_enabled BOOLEAN NOT NULL DEFAULT FALSE, prize_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+    opens_at TIMESTAMPTZ, closes_at TIMESTAMPTZ, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`;
+  await sql`CREATE TABLE IF NOT EXISTS compliance_audit_log (
+    id TEXT PRIMARY KEY, occurred_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), actor_type TEXT NOT NULL,
+    event_type TEXT NOT NULL, country_code TEXT, subdivision_code TEXT, competition_id TEXT, outcome TEXT NOT NULL, details JSONB NOT NULL DEFAULT '{}'::jsonb
+  )`;
+  await sql`CREATE TABLE IF NOT EXISTS consent_records (
+    id TEXT PRIMARY KEY, user_email TEXT NOT NULL, consent_type TEXT NOT NULL, document_version TEXT NOT NULL,
+    accepted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), revoked_at TIMESTAMPTZ, jurisdiction_country TEXT NOT NULL, jurisdiction_subdivision TEXT NOT NULL DEFAULT ''
+  )`;
+  await sql`CREATE TABLE IF NOT EXISTS fiat_ledger (id TEXT PRIMARY KEY, account_id TEXT NOT NULL, amount_minor BIGINT NOT NULL, currency TEXT NOT NULL, entry_type TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`;
+  await sql`CREATE TABLE IF NOT EXISTS prize_liability_ledger (id TEXT PRIMARY KEY, competition_id TEXT NOT NULL, amount_minor BIGINT NOT NULL, currency TEXT NOT NULL, entry_type TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`;
+  await sql`CREATE TABLE IF NOT EXISTS karma_coinz_ledger (id TEXT PRIMARY KEY, account_id TEXT NOT NULL, amount BIGINT NOT NULL, entry_type TEXT NOT NULL, expires_at TIMESTAMPTZ, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`;
+}
+
+async function writeComplianceAudit(eventType: string, outcome: string, details: object, country?: string, subdivision?: string, competitionId?: string) {
+  const sql = getAuditDatabase();
+  await sql`INSERT INTO compliance_audit_log (id, actor_type, event_type, outcome, details, country_code, subdivision_code, competition_id)
+    VALUES (${crypto.randomUUID()}, 'SYSTEM', ${eventType}, ${outcome}, ${JSON.stringify(details)}::jsonb, ${country || null}, ${subdivision || null}, ${competitionId || null})`;
+}
+
+async function evaluateEntryEligibility(req: express.Request, body: any) {
+  const country = String(req.header("x-vercel-ip-country") || "").trim().toUpperCase();
+  const subdivision = String(req.header("x-vercel-ip-country-region") || "").trim().toUpperCase();
+  const competitionId = String(body?.competitionId || "").trim();
+  const dateOfBirth = new Date(String(body?.dateOfBirth || ""));
+  if (!country || !competitionId || Number.isNaN(dateOfBirth.getTime())) return { allowed: false, reason: "Jurisdiction, competition, and date of birth are required for compliance review." };
+  await ensureComplianceTables();
+  const sql = getAuditDatabase();
+  const rows = await sql`SELECT * FROM jurisdiction_compliance WHERE country_code = ${country} AND subdivision_code IN (${subdivision}, '') ORDER BY subdivision_code DESC LIMIT 1`;
+  const rule = rows[0];
+  const competitions = await sql`SELECT * FROM competitions WHERE id = ${competitionId} LIMIT 1`;
+  const competition = competitions[0];
+  const email = String(body?.email || "").trim().toLowerCase();
+  const consents = email && competition?.official_rules_version ? await sql`SELECT id FROM consent_records WHERE user_email = ${email} AND consent_type = 'TERMS' AND document_version = ${competition.official_rules_version} AND revoked_at IS NULL LIMIT 1` : [];
+  const age = new Date().getUTCFullYear() - dateOfBirth.getUTCFullYear() - (new Date().getUTCMonth() < dateOfBirth.getUTCMonth() || (new Date().getUTCMonth() === dateOfBirth.getUTCMonth() && new Date().getUTCDate() < dateOfBirth.getUTCDate()) ? 1 : 0);
+  const allowed = !!rule && rule.status === "ALLOWED" && !!rule.legal_approval_reference && rule.registrations_enabled && rule.entries_enabled && age >= rule.minimum_age && !!competition && competition.status === "OPEN" && competition.entry_enabled && !!competition.official_rules_url && !!competition.official_rules_version && !!consents[0];
+  await writeComplianceAudit("ENTRY_ELIGIBILITY_CHECK", allowed ? "ALLOWED" : "DENIED", { age, hasCounselReference: !!rule?.legal_approval_reference, competitionRulesConfigured: !!competition?.official_rules_url && !!competition?.official_rules_version, termsAccepted: !!consents[0] }, country, subdivision, competitionId);
+  return { allowed, reason: allowed ? "Eligible" : "This jurisdiction or competition is not approved for entry." };
+}
+
+app.post("/api/compliance/entry-check", async (req, res) => {
+  try { const result = await evaluateEntryEligibility(req, req.body); return res.status(result.allowed ? 200 : 403).json(result); }
+  catch { return res.status(503).json({ allowed: false, reason: "Compliance service unavailable." }); }
+});
+
+app.post("/api/compliance/consents", async (req, res) => {
+  try {
+    const email = String(req.body?.email || "").trim().toLowerCase(); const documentVersion = String(req.body?.documentVersion || "").trim();
+    const country = String(req.header("x-vercel-ip-country") || "").trim().toUpperCase(); const subdivision = String(req.header("x-vercel-ip-country-region") || "").trim().toUpperCase();
+    if (!/^\S+@\S+\.\S+$/.test(email) || !documentVersion || !country) return res.status(400).json({ error: "Email, document version, and resolved jurisdiction are required." });
+    await ensureComplianceTables(); const sql = getAuditDatabase();
+    await sql`INSERT INTO consent_records (id, user_email, consent_type, document_version, jurisdiction_country, jurisdiction_subdivision) VALUES (${crypto.randomUUID()}, ${email}, 'TERMS', ${documentVersion}, ${country}, ${subdivision})`;
+    await writeComplianceAudit("TERMS_CONSENT", "RECORDED", { documentVersion }, country, subdivision);
+    return res.status(201).json({ recorded: true });
+  } catch { return res.status(503).json({ error: "Consent storage is unavailable." }); }
+});
+
+app.put("/api/admin/compliance/jurisdictions", async (req, res) => {
+  try {
+    if (!requireAdminPassword(req.header("x-admin-password"))) return res.status(401).json({ error: "Unauthorized." });
+    const country = String(req.body?.country || "").trim().toUpperCase(); const subdivision = String(req.body?.subdivision || "").trim().toUpperCase();
+    const status = String(req.body?.status || "NOT_REVIEWED") as JurisdictionStatus; const reference = String(req.body?.legalApprovalReference || "").trim();
+    if (!/^[A-Z]{2}$/.test(country) || !["NOT_REVIEWED", "ALLOWED", "RESTRICTED", "BLOCKED"].includes(status)) return res.status(400).json({ error: "Use a two-letter country code and a valid review status." });
+    if (status === "ALLOWED" && !reference) return res.status(400).json({ error: "LEGAL REVIEW REQUIRED: an approval reference is mandatory for allowed jurisdictions." });
+    await ensureComplianceTables(); const sql = getAuditDatabase();
+    await sql`INSERT INTO jurisdiction_compliance (country_code, subdivision_code, status, legal_approval_reference, minimum_age, registrations_enabled, entries_enabled, prizes_enabled)
+      VALUES (${country}, ${subdivision}, ${status}, ${reference || null}, ${Number(req.body?.minimumAge) || 18}, ${!!req.body?.registrationsEnabled}, ${!!req.body?.entriesEnabled}, ${!!req.body?.prizesEnabled})
+      ON CONFLICT (country_code, subdivision_code) DO UPDATE SET status = EXCLUDED.status, legal_approval_reference = EXCLUDED.legal_approval_reference, minimum_age = EXCLUDED.minimum_age, registrations_enabled = EXCLUDED.registrations_enabled, entries_enabled = EXCLUDED.entries_enabled, prizes_enabled = EXCLUDED.prizes_enabled, updated_at = NOW()`;
+    await writeComplianceAudit("JURISDICTION_CONFIGURATION", "RECORDED", { status, legalApprovalReference: reference }, country, subdivision);
+    return res.json({ country, subdivision: subdivision || null, status });
+  } catch { return res.status(503).json({ error: "Compliance storage is unavailable." }); }
+});
+
+app.put("/api/admin/compliance/competitions/:competitionId", async (req, res) => {
+  try {
+    if (!requireAdminPassword(req.header("x-admin-password"))) return res.status(401).json({ error: "Unauthorized." });
+    const id = String(req.params.competitionId || "").trim(); const rulesUrl = String(req.body?.officialRulesUrl || "").trim(); const rulesVersion = String(req.body?.officialRulesVersion || "").trim();
+    if (!id || !/^https:\/\//.test(rulesUrl) || !rulesVersion) return res.status(400).json({ error: "LEGAL REVIEW REQUIRED: competition ID, HTTPS official rules URL, and rules version are required." });
+    await ensureComplianceTables(); const sql = getAuditDatabase();
+    await sql`INSERT INTO competitions (id, status, official_rules_url, official_rules_version, entry_enabled, prize_enabled) VALUES (${id}, 'DRAFT', ${rulesUrl}, ${rulesVersion}, FALSE, FALSE)
+      ON CONFLICT (id) DO UPDATE SET official_rules_url = EXCLUDED.official_rules_url, official_rules_version = EXCLUDED.official_rules_version`;
+    await writeComplianceAudit("COMPETITION_RULES_CONFIGURATION", "RECORDED", { officialRulesUrl: rulesUrl, officialRulesVersion: rulesVersion }, undefined, undefined, id);
+    return res.json({ id, status: "DRAFT", entryEnabled: false, prizeEnabled: false });
+  } catch { return res.status(503).json({ error: "Compliance storage is unavailable." }); }
+});
+
+function requireAdminPassword(password?: string) {
+  const expected = process.env.ADMIN_PASSWORD;
+  if (!expected) throw new Error("ADMIN_PASSWORD is not configured.");
+  const actual = password || "";
+  return actual.length === expected.length && crypto.timingSafeEqual(Buffer.from(actual), Buffer.from(expected));
+}
+
+async function ensureFreeDrawTicketsTable() {
+  const sql = getAuditDatabase();
+  await sql`CREATE TABLE IF NOT EXISTS free_draw_tickets (
+    id TEXT PRIMARY KEY,
+    email TEXT NOT NULL,
+    draw_name TEXT NOT NULL,
+    redemption_code_hash TEXT NOT NULL UNIQUE,
+    issued_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    redeemed_at TIMESTAMPTZ,
+    entry_ticket_id TEXT UNIQUE
+  )`;
+}
+
+// API: administrator issues a one-time Free Draw ticket for a specific email.
+app.post("/api/admin/free-draw-tickets", async (req, res) => {
+  try {
+    if (!requireAdminPassword(req.header("x-admin-password"))) return res.status(401).json({ error: "Unauthorized." });
+    const email = String(req.body?.email || "").trim().toLowerCase();
+    const drawName = String(req.body?.drawName || "").trim();
+    if (!/^\S+@\S+\.\S+$/.test(email) || !drawName) return res.status(400).json({ error: "A valid email and draw are required." });
+    await ensureFreeDrawTicketsTable();
+    const redemptionCode = crypto.randomBytes(12).toString("base64url").toUpperCase();
+    const codeHash = crypto.createHash("sha256").update(redemptionCode).digest("hex");
+    const sql = getAuditDatabase();
+    await sql`INSERT INTO free_draw_tickets (id, email, draw_name, redemption_code_hash) VALUES (${crypto.randomUUID()}, ${email}, ${drawName}, ${codeHash})`;
+    return res.status(201).json({ success: true, email, drawName, redemptionCode });
+  } catch (error) {
+    console.error("Admin ticket issue error:", error);
+    return res.status(503).json({ error: "Ticket storage is unavailable. Check the ticket database and administrator configuration." });
+  }
+});
+
+// API: atomically redeems only an administrator-issued code belonging to the submitted email.
+app.post("/api/free-draws/redeem", async (req, res) => {
+  try {
+    const email = String(req.body?.email || "").trim().toLowerCase();
+    const redemptionCode = String(req.body?.redemptionCode || "").trim().toUpperCase();
+    if (!/^\S+@\S+\.\S+$/.test(email) || !redemptionCode) return res.status(400).json({ error: "Enter the email that received the ticket and its redemption code." });
+    await ensureFreeDrawTicketsTable();
+    const codeHash = crypto.createHash("sha256").update(redemptionCode).digest("hex");
+    const ticketId = `FREE-${crypto.randomUUID().split("-")[0].toUpperCase()}`;
+    const sql = getAuditDatabase();
+    const rows = await sql`UPDATE free_draw_tickets SET redeemed_at = NOW(), entry_ticket_id = ${ticketId}
+      WHERE email = ${email} AND redemption_code_hash = ${codeHash} AND redeemed_at IS NULL
+      RETURNING draw_name`;
+    if (!rows[0]) return res.status(404).json({ error: "That ticket is invalid, belongs to a different email, or has already been redeemed." });
+    totalEntriesCount += 1;
+    return res.json({ success: true, drawName: rows[0].draw_name, ticketId });
+  } catch (error) {
+    console.error("Free Draw redemption error:", error);
+    return res.status(503).json({ error: "Ticket storage is unavailable. Please try again later." });
+  }
+});
+
 // API: Competition Entry Submission & Subscriptions
 app.post("/api/competition/enter", (req, res) => {
   try {
@@ -361,6 +526,9 @@ app.post("/api/competition/enter", (req, res) => {
 
     if (!fullName || !email) {
       return res.status(400).json({ error: "Full name and email are required to generate an official entry ticket." });
+    }
+    if (!demo) {
+      return res.status(403).json({ error: "Public entry issuance is disabled. Free Draw entries require an administrator-issued ticket." });
     }
 
     const count = Number(ticketsCount) || 1;

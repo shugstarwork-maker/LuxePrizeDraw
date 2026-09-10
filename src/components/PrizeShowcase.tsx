@@ -33,8 +33,16 @@ export const PrizeShowcase: React.FC<PrizeShowcaseProps> = ({
     }
   };
 
+  const pillarArt: Record<string, string> = {
+    Coins: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=900&q=85",
+    Palmtree: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=900&q=85",
+    ShieldCheck: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=85",
+    Building2: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=900&q=85",
+    Smartphone: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=900&q=85",
+    Palette: "https://images.unsplash.com/photo-1545235617-9465d2a55698?auto=format&fit=crop&w=900&q=85",
+    Landmark: "https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=900&q=85",
+  };
   const activePillar = PRIZE_PILLARS.find((p) => p.id === selectedPillarId) || PRIZE_PILLARS[0];
-  const ActiveIcon = getPillarIcon(activePillar.iconName);
 
   return (
     <section id="prizes" className="py-24 relative">
@@ -59,7 +67,6 @@ export const PrizeShowcase: React.FC<PrizeShowcaseProps> = ({
         {/* Pillar Selection Tabs - 7 Pillars */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-2.5 mb-8">
           {PRIZE_PILLARS.map((pillar) => {
-            const Icon = getPillarIcon(pillar.iconName);
             const isSelected = pillar.id === selectedPillarId;
             return (
               <button
@@ -73,9 +80,7 @@ export const PrizeShowcase: React.FC<PrizeShowcaseProps> = ({
                 }`}
               >
                 <div className="flex items-center justify-between mb-2.5">
-                  <div className={`p-2 rounded-xl ${isSelected ? "bg-[#D4AF37] text-black" : "bg-white/5 text-white/70"}`}>
-                    <Icon className="w-4 h-4" />
-                  </div>
+                  <img src={pillarArt[pillar.iconName] || pillarArt.Coins} alt="" className={`h-9 w-9 rounded-xl object-cover ring-1 ${isSelected ? "ring-[#D4AF37]" : "ring-white/15"}`} />
                   <span className={`text-[10px] font-mono font-bold ${isSelected ? "text-[#D4AF37]" : "text-white/40"}`}>
                     {pillar.emoji ? `${pillar.emoji} ${pillar.valueGBP}` : pillar.valueGBP}
                   </span>
