@@ -309,6 +309,8 @@ export const GamesArena: React.FC = () => {
   const [chessState, setChessState] = useState<ChessState>(createChessState);
   const [chessThinking, setChessThinking] = useState(false);
   const [chessMoves, setChessMoves] = useState<string[]>([]);
+  const [chessTheme, setChessTheme] = useState<"walnut" | "onyx">("walnut");
+  const [chessClock, setChessClock] = useState({ white: 600, black: 600 });
   const [draughtsState, setDraughtsState] = useState<DraughtsState>(createDraughtsState);
   const [connect4State, setConnect4State] = useState<Connect4State>(createConnect4State);
   const [selectedPollId, setSelectedPollId] = useState<(typeof PREDICTION_POLLS)[number]["id"]>("founder-pitch");
@@ -352,6 +354,12 @@ export const GamesArena: React.FC = () => {
     setPollChallenge({ opponent, points: selectedPollStake });
     setPollNotice(`${opponent} took the opposite side of “${selectedPoll.options[selectedPrediction]}” for ${selectedPollStake} demo tokens. Results settle when the poll closes.`);
   };
+
+  React.useEffect(() => {
+    if (chessState.winner) return;
+    const timer = window.setInterval(() => setChessClock((clock) => ({ ...clock, [chessState.current]: Math.max(0, clock[chessState.current] - 1) })), 1000);
+    return () => window.clearInterval(timer);
+  }, [chessState.current, chessState.winner]);
 
   React.useEffect(() => {
     if (chessState.current !== "black" || chessState.winner) return;
@@ -589,22 +597,26 @@ export const GamesArena: React.FC = () => {
     });
   };
 
+  const formatClock = (seconds: number) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+
   const renderChessBoard = () => (
-    <div className="space-y-4">
+    <div className="space-y-5 chess-premium-board">
       <div className="flex items-center justify-between gap-4">
         <div>
           <h4 className="text-lg font-bold text-white">Playable chess demo</h4>
           <p className="text-sm text-white/55">Standard piece movement with instant queen promotion and king capture win condition.</p>
         </div>
+        <div className="flex items-center gap-2"><button type="button" onClick={() => setChessTheme((theme) => theme === "walnut" ? "onyx" : "walnut")} className="rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-white/80 hover:bg-white/10">{chessTheme === "walnut" ? "Onyx board" : "Walnut board"}</button>
         <button
-          onClick={() => { setChessState(createChessState()); setChessMoves([]); setChessThinking(false); }}
+          onClick={() => { setChessState(createChessState()); setChessMoves([]); setChessThinking(false); setChessClock({ white: 600, black: 600 }); }}
           className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-wider text-white/80 hover:bg-white/10"
         >
           <RotateCcw className="h-3.5 w-3.5" />
           Reset board
-        </button>
+        </button></div>
       </div>
-      <div className="grid grid-cols-8 gap-1 rounded-3xl bg-[#221707] p-3 shadow-inner shadow-black/40">
+      <div className="grid grid-cols-2 gap-3"><div className={`rounded-2xl border p-3 ${chessState.current === "black" ? "border-[#D4AF37] bg-[#D4AF37]/10" : "border-white/10 bg-black/20"}`}><span className="text-[10px] font-bold uppercase tracking-widest text-white/50">Luxe Host · 1482</span><strong className="mt-1 block font-mono text-2xl text-white">{formatClock(chessClock.black)}</strong></div><div className={`rounded-2xl border p-3 text-right ${chessState.current === "white" ? "border-[#D4AF37] bg-[#D4AF37]/10" : "border-white/10 bg-black/20"}`}><span className="text-[10px] font-bold uppercase tracking-widest text-white/50">You · 1420</span><strong className="mt-1 block font-mono text-2xl text-white">{formatClock(chessClock.white)}</strong></div></div>
+      <div className={`chess-board-frame ${chessTheme === "walnut" ? "chess-board-walnut" : "chess-board-onyx"}`}><div className="grid grid-cols-8 gap-0.5 rounded-xl p-2 shadow-inner">
         {chessState.board.map((boardRow, rowIndex) =>
           boardRow.map((piece, colIndex) => {
             const isDark = (rowIndex + colIndex) % 2 === 1;
@@ -614,15 +626,17 @@ export const GamesArena: React.FC = () => {
               <button
                 key={`chess-${rowIndex}-${colIndex}`}
                 onClick={() => handleChessCellClick(rowIndex, colIndex)}
-                className={`aspect-square rounded-xl text-2xl transition-all sm:text-3xl ${isDark ? "bg-slate-900/90 text-white" : "bg-[#f0d9b5] text-black"} ${isSelected ? "ring-2 ring-[#D4AF37] scale-[1.03]" : isLegal ? "ring-2 ring-emerald-300/80 shadow-[inset_0_0_0_4px_rgba(110,231,183,.25)]" : "hover:scale-[1.02]"}`}
-                aria-label={`Chess ${rowIndex}-${colIndex}`}
+                className={`relative aspect-square text-3xl transition-all sm:text-5xl ${isDark ? "chess-square-dark text-[#1b120c]" : "chess-square-light text-[#fff4d5]"} ${isSelected ? "z-10 ring-2 ring-[#f8d778] scale-[1.04]" : isLegal ? "z-10 ring-2 ring-emerald-300/80 shadow-[inset_0_0_0_5px_rgba(110,231,183,.28)]" : "hover:z-10 hover:brightness-110"}`}
+                aria-label={`Chess ${String.fromCharCode(97 + colIndex)}${8 - rowIndex}`}
               >
-                {piece ? getChessSymbol(piece) : ""}
+                {piece ? <span className="chess-piece drop-shadow-[0_5px_2px_rgba(0,0,0,.5)]">{getChessSymbol(piece)}</span> : ""}
+                {colIndex === 0 && <span className="absolute left-1 top-0.5 text-[8px] font-bold opacity-50">{8 - rowIndex}</span>}
+                {rowIndex === 7 && <span className="absolute bottom-0.5 right-1 text-[8px] font-bold opacity-50">{String.fromCharCode(97 + colIndex)}</span>}
               </button>
             );
           }),
         )}
-      </div>
+      </div></div>
       <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-sm text-emerald-300">{chessThinking ? "Luxe Host is considering a move…" : chessState.message}</p><span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white/60">You: 1420 ELO · Host: 1482</span></div>
       {chessMoves.length > 0 && <div className="rounded-xl border border-white/10 bg-black/20 p-3 text-xs text-white/60"><span className="mr-2 font-bold uppercase tracking-wider text-[#f8d778]">Move feed</span>{chessMoves.join(" · ")}</div>}
     </div>
