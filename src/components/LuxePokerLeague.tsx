@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Cards, ChevronRight, CircleDollarSign, Crown, ShieldCheck, Trophy, Users } from "lucide-react";
+import { ChevronRight, CircleDollarSign, Crown, ShieldCheck, Trophy, Users } from "lucide-react";
 
 const tournaments = [
   { name: "Midnight Gold Sit & Go", players: "6 / 9", start: "Starts in 12 min", buyIn: 250 },
@@ -29,8 +29,9 @@ export const LuxePokerLeague: React.FC = () => {
         <div className="rounded-[2rem] overflow-hidden border border-[#D4AF37]/30 bg-gradient-to-br from-[#241504] via-[#100b04] to-black p-6 sm:p-10 shadow-[0_0_70px_rgba(212,175,55,0.12)]">
           <div className="grid lg:grid-cols-[1.1fr_.9fr] gap-10 items-start">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-[#F8D778]"><Cards className="w-3.5 h-3.5" /> Free-play only</div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-[#F8D778]"><img src="/games/poker-league.svg" alt="" className="h-5 w-5 rounded-md object-cover" /> Free-play only</div>
               <h2 className="mt-5 text-4xl sm:text-5xl font-bold tracking-tight">Luxe Poker League</h2>
+              <img src="/games/poker-league.svg" alt="Premium poker-table artwork" className="mt-6 h-48 w-full max-w-xl rounded-3xl border border-[#D4AF37]/25 object-cover shadow-[0_16px_38px_rgba(0,0,0,0.35)]" />
               <p className="mt-4 max-w-xl text-white/60 leading-relaxed">An original, virtual-chip tournament lobby for the Luxe community. Join tables, climb the standings and earn in-app bragging rights—no cash wagering or purchasable chips.</p>
               <div className="mt-7 grid grid-cols-3 gap-3 max-w-lg">
                 <div className="rounded-2xl border border-white/10 bg-black/30 p-4"><Users className="w-4 h-4 text-[#D4AF37]" /><p className="mt-3 text-lg font-black">1,248</p><p className="text-[10px] uppercase tracking-wider text-white/45">Players</p></div>
