@@ -380,6 +380,12 @@ async function writeComplianceAudit(eventType: string, outcome: string, details:
     VALUES (${crypto.randomUUID()}, 'SYSTEM', ${eventType}, ${outcome}, ${JSON.stringify(details)}::jsonb, ${country || null}, ${subdivision || null}, ${competitionId || null})`;
 }
 
+function isValidEmailAddress(value: string) {
+  const atIndex = value.indexOf("@");
+  const lastDotIndex = value.lastIndexOf(".");
+  return atIndex > 0 && lastDotIndex > atIndex + 1 && lastDotIndex < value.length - 1 && !/\s/.test(value);
+}
+
 async function evaluateEntryEligibility(req: express.Request, body: any) {
   const country = String(req.header("x-vercel-ip-country") || "").trim().toUpperCase();
   const subdivision = String(req.header("x-vercel-ip-country-region") || "").trim().toUpperCase();
@@ -409,7 +415,7 @@ app.post("/api/compliance/consents", async (req, res) => {
   try {
     const email = String(req.body?.email || "").trim().toLowerCase(); const documentVersion = String(req.body?.documentVersion || "").trim();
     const country = String(req.header("x-vercel-ip-country") || "").trim().toUpperCase(); const subdivision = String(req.header("x-vercel-ip-country-region") || "").trim().toUpperCase();
-    if (!/^\S+@\S+\.\S+$/.test(email) || !documentVersion || !country) return res.status(400).json({ error: "Email, document version, and resolved jurisdiction are required." });
+    if (!isValidEmailAddress(email) || !documentVersion || !country) return res.status(400).json({ error: "Email, document version, and resolved jurisdiction are required." });
     await ensureComplianceTables(); const sql = getAuditDatabase();
     await sql`INSERT INTO consent_records (id, user_email, consent_type, document_version, jurisdiction_country, jurisdiction_subdivision) VALUES (${crypto.randomUUID()}, ${email}, 'TERMS', ${documentVersion}, ${country}, ${subdivision})`;
     await writeComplianceAudit("TERMS_CONSENT", "RECORDED", { documentVersion }, country, subdivision);
@@ -472,7 +478,7 @@ app.post("/api/admin/free-draw-tickets", async (req, res) => {
     if (!requireAdminPassword(req.header("x-admin-password"))) return res.status(401).json({ error: "Unauthorized." });
     const email = String(req.body?.email || "").trim().toLowerCase();
     const drawName = String(req.body?.drawName || "").trim();
-    if (!/^\S+@\S+\.\S+$/.test(email) || !drawName) return res.status(400).json({ error: "A valid email and draw are required." });
+    if (!isValidEmailAddress(email) || !drawName) return res.status(400).json({ error: "A valid email and draw are required." });
     await ensureFreeDrawTicketsTable();
     const redemptionCode = crypto.randomBytes(12).toString("base64url").toUpperCase();
     const codeHash = crypto.createHash("sha256").update(redemptionCode).digest("hex");
@@ -490,7 +496,7 @@ app.post("/api/free-draws/redeem", async (req, res) => {
   try {
     const email = String(req.body?.email || "").trim().toLowerCase();
     const redemptionCode = String(req.body?.redemptionCode || "").trim().toUpperCase();
-    if (!/^\S+@\S+\.\S+$/.test(email) || !redemptionCode) return res.status(400).json({ error: "Enter the email that received the ticket and its redemption code." });
+    if (!isValidEmailAddress(email) || !redemptionCode) return res.status(400).json({ error: "Enter the email that received the ticket and its redemption code." });
     await ensureFreeDrawTicketsTable();
     const codeHash = crypto.createHash("sha256").update(redemptionCode).digest("hex");
     const ticketId = `FREE-${crypto.randomUUID().split("-")[0].toUpperCase()}`;
