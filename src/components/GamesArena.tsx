@@ -299,6 +299,11 @@ export const GamesArena: React.FC = () => {
   const [pollChallenge, setPollChallenge] = useState<{ opponent: string; points: number } | null>(null);
 
   const game = useMemo(() => GAMES.find((item) => item.id === selectedGame)!, [selectedGame]);
+  const gameGuide: Record<GameId, string> = {
+    chess: "White moves first. Select a white piece, then select a highlighted legal destination.",
+    draughts: "White moves first. Move diagonally; captures and chained captures are handled on the board.",
+    "connect-4": "Red moves first. Choose a column and connect four discs horizontally, vertically, or diagonally.",
+  };
 
   const createChallenge = () => {
     if (tokens < selectedStake) {
@@ -674,7 +679,7 @@ export const GamesArena: React.FC = () => {
   };
 
   return (
-    <section id="games" className="py-20 sm:py-28 border-y border-white/10 bg-gradient-to-b from-slate-950 via-[#0b1020] to-slate-950">
+    <section id="games" className="game-arena-stage py-20 sm:py-28 border-y border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-10">
           <div className="max-w-3xl">
@@ -710,7 +715,7 @@ export const GamesArena: React.FC = () => {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 rounded-3xl border border-white/10 bg-black/30 p-6 sm:p-8">
+        <div className="arena-surface grid grid-cols-1 lg:grid-cols-5 gap-6 rounded-3xl border border-white/15 bg-black/45 p-6 sm:p-8">
           <div className="lg:col-span-3">
             <div className="flex items-center gap-2 text-[#D4AF37] text-xs uppercase tracking-widest font-bold"><Trophy className="w-4 h-4" /> Weekly demo tournament</div>
             <h3 className="mt-3 text-2xl font-bold text-white">{game.name} 1v1 challenge</h3>
@@ -745,7 +750,8 @@ export const GamesArena: React.FC = () => {
           </aside>
         </div>
 
-        <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
+        <div className="arena-surface mt-8 rounded-3xl border border-white/15 bg-black/40 p-6 sm:p-8">
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4"><span className="rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-[#f8d778]">Live board · {game.name}</span><p className="max-w-2xl text-xs text-white/60">{gameGuide[selectedGame]}</p></div>
           {renderPlayableDemo()}
         </div>
       </div>
