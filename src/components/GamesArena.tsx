@@ -208,6 +208,23 @@ function isValidChessMove(board: Array<Array<ChessPiece | null>>, from: Cell, to
   }
 }
 
+function getLegalChessMoves(board: Array<Array<ChessPiece | null>>, from: Cell, color: PlayerColor): Cell[] {
+  const moves: Cell[] = [];
+  for (let row = 0; row < 8; row += 1) for (let col = 0; col < 8; col += 1) {
+    if (isValidChessMove(board, from, [row, col], color)) moves.push([row, col]);
+  }
+  return moves;
+}
+
+function getAllChessMoves(board: Array<Array<ChessPiece | null>>, color: PlayerColor): Array<{ from: Cell; to: Cell }> {
+  const moves: Array<{ from: Cell; to: Cell }> = [];
+  for (let row = 0; row < 8; row += 1) for (let col = 0; col < 8; col += 1) {
+    const piece = board[row][col];
+    if (piece?.color === color) getLegalChessMoves(board, [row, col], color).forEach((to) => moves.push({ from: [row, col], to }));
+  }
+  return moves;
+}
+
 function getChessSymbol(piece: ChessPiece): string {
   const symbols: Record<PlayerColor, Record<ChessPiece["kind"], string>> = {
     white: {
@@ -290,6 +307,8 @@ export const GamesArena: React.FC = () => {
   const [notice, setNotice] = useState("Choose a game and challenge another player.");
   const [opponent, setOpponent] = useState<DemoOpponent | null>(null);
   const [chessState, setChessState] = useState<ChessState>(createChessState);
+  const [chessThinking, setChessThinking] = useState(false);
+  const [chessMoves, setChessMoves] = useState<string[]>([]);
   const [draughtsState, setDraughtsState] = useState<DraughtsState>(createDraughtsState);
   const [connect4State, setConnect4State] = useState<Connect4State>(createConnect4State);
   const [selectedPollId, setSelectedPollId] = useState<(typeof PREDICTION_POLLS)[number]["id"]>("founder-pitch");
@@ -334,10 +353,33 @@ export const GamesArena: React.FC = () => {
     setPollNotice(`${opponent} took the opposite side of “${selectedPoll.options[selectedPrediction]}” for ${selectedPollStake} demo tokens. Results settle when the poll closes.`);
   };
 
+  React.useEffect(() => {
+    if (chessState.current !== "black" || chessState.winner) return;
+    setChessThinking(true);
+    const timer = window.setTimeout(() => {
+      setChessState((currentState) => {
+        const moves = getAllChessMoves(currentState.board, "black");
+        if (!moves.length) return { ...currentState, winner: "white", message: "Luxe Host has no move. You win the match." };
+        const captures = moves.filter(({ to }) => currentState.board[to[0]][to[1]]);
+        const choice = (captures.length ? captures : moves)[Math.floor(Math.random() * (captures.length ? captures.length : moves.length))];
+        const board = cloneChessBoard(currentState.board);
+        const moved = board[choice.from[0]][choice.from[1]]!;
+        const captured = board[choice.to[0]][choice.to[1]];
+        board[choice.to[0]][choice.to[1]] = moved;
+        board[choice.from[0]][choice.from[1]] = null;
+        setChessMoves((history) => [...history.slice(-7), `Host: ${moved.kind} ${String.fromCharCode(97 + choice.from[1])}${8 - choice.from[0]}–${String.fromCharCode(97 + choice.to[1])}${8 - choice.to[0]}`]);
+        return captured?.kind === "king" ? { board, current: "black", selected: null, winner: "black", message: "Luxe Host captures the king. Rematch?" } : { board, current: "white", selected: null, winner: null, message: "Your move. Select a white piece." };
+      });
+      setChessThinking(false);
+    }, 650);
+    return () => window.clearTimeout(timer);
+  }, [chessState.current, chessState.winner]);
+
   const handleChessCellClick = (row: number, col: number) => {
     setChessState((currentState) => {
       const piece = currentState.board[row][col];
 
+      if (currentState.current !== "white") return currentState;
       if (currentState.winner) {
         return { ...currentState, message: `${currentState.winner === "white" ? "White" : "Black"} already won. Reset to play again.` };
       }
@@ -379,6 +421,7 @@ export const GamesArena: React.FC = () => {
       }
 
       const winner = captured?.kind === "king" ? currentState.current : null;
+      setChessMoves((history) => [...history.slice(-7), `You: ${selectedPiece.kind} ${String.fromCharCode(97 + selectedCol)}${8 - selectedRow}–${String.fromCharCode(97 + col)}${8 - row}`]);
       const nextPlayer = currentState.current === "white" ? "black" : "white";
 
       return {
@@ -554,7 +597,7 @@ export const GamesArena: React.FC = () => {
           <p className="text-sm text-white/55">Standard piece movement with instant queen promotion and king capture win condition.</p>
         </div>
         <button
-          onClick={() => setChessState(createChessState())}
+          onClick={() => { setChessState(createChessState()); setChessMoves([]); setChessThinking(false); }}
           className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-wider text-white/80 hover:bg-white/10"
         >
           <RotateCcw className="h-3.5 w-3.5" />
@@ -566,11 +609,12 @@ export const GamesArena: React.FC = () => {
           boardRow.map((piece, colIndex) => {
             const isDark = (rowIndex + colIndex) % 2 === 1;
             const isSelected = chessState.selected?.[0] === rowIndex && chessState.selected?.[1] === colIndex;
+            const isLegal = chessState.selected ? getLegalChessMoves(chessState.board, chessState.selected, "white").some(([row, col]) => row === rowIndex && col === colIndex) : false;
             return (
               <button
                 key={`chess-${rowIndex}-${colIndex}`}
                 onClick={() => handleChessCellClick(rowIndex, colIndex)}
-                className={`aspect-square rounded-xl text-2xl transition-all sm:text-3xl ${isDark ? "bg-slate-900/90 text-white" : "bg-[#f0d9b5] text-black"} ${isSelected ? "ring-2 ring-[#D4AF37] scale-[1.03]" : "hover:scale-[1.02]"}`}
+                className={`aspect-square rounded-xl text-2xl transition-all sm:text-3xl ${isDark ? "bg-slate-900/90 text-white" : "bg-[#f0d9b5] text-black"} ${isSelected ? "ring-2 ring-[#D4AF37] scale-[1.03]" : isLegal ? "ring-2 ring-emerald-300/80 shadow-[inset_0_0_0_4px_rgba(110,231,183,.25)]" : "hover:scale-[1.02]"}`}
                 aria-label={`Chess ${rowIndex}-${colIndex}`}
               >
                 {piece ? getChessSymbol(piece) : ""}
@@ -579,7 +623,8 @@ export const GamesArena: React.FC = () => {
           }),
         )}
       </div>
-      <p className="text-sm text-emerald-300">{chessState.message}</p>
+      <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-sm text-emerald-300">{chessThinking ? "Luxe Host is considering a move…" : chessState.message}</p><span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white/60">You: 1420 ELO · Host: 1482</span></div>
+      {chessMoves.length > 0 && <div className="rounded-xl border border-white/10 bg-black/20 p-3 text-xs text-white/60"><span className="mr-2 font-bold uppercase tracking-wider text-[#f8d778]">Move feed</span>{chessMoves.join(" · ")}</div>}
     </div>
   );
 
