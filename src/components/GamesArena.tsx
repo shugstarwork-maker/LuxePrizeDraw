@@ -674,7 +674,7 @@ export const GamesArena: React.FC = () => {
   };
 
   return (
-    <section id="games" className="py-20 sm:py-28 border-y border-white/10 bg-gradient-to-b from-slate-950 via-[#0b1020] to-slate-950">
+    <section id="games" className="game-arena-stage py-20 sm:py-28 border-y border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-10">
           <div className="max-w-3xl">
@@ -710,7 +710,7 @@ export const GamesArena: React.FC = () => {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 rounded-3xl border border-white/10 bg-black/30 p-6 sm:p-8">
+        <div className="arena-surface grid grid-cols-1 lg:grid-cols-5 gap-6 rounded-3xl border border-white/15 bg-black/45 p-6 sm:p-8">
           <div className="lg:col-span-3">
             <div className="flex items-center gap-2 text-[#D4AF37] text-xs uppercase tracking-widest font-bold"><Trophy className="w-4 h-4" /> Weekly demo tournament</div>
             <h3 className="mt-3 text-2xl font-bold text-white">{game.name} 1v1 challenge</h3>
@@ -745,7 +745,7 @@ export const GamesArena: React.FC = () => {
           </aside>
         </div>
 
-        <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
+        <div className="arena-surface mt-8 rounded-3xl border border-white/15 bg-black/40 p-6 sm:p-8">
           {renderPlayableDemo()}
         </div>
       </div>
