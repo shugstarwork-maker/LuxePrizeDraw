@@ -10,6 +10,7 @@ import { CompetitionHub } from "./components/CompetitionHub";
 import { FreeDraws } from "./components/FreeDraws";
 import { AdminTickets } from "./components/AdminTickets";
 import { ComplianceDashboard } from "./components/ComplianceDashboard";
+import { WelcomePage } from "./components/WelcomePage";
 import { PrizeShowcase } from "./components/PrizeShowcase";
 import { CharityImpactSection } from "./components/CharityImpactSection";
 import { OneClickBookDemo } from "./components/OneClickBookDemo";
@@ -132,6 +133,9 @@ export default function App() {
   }
   if (typeof window !== "undefined" && window.location.pathname === "/admin/compliance") {
     return <ComplianceDashboard />;
+  }
+  if (typeof window !== "undefined" && window.location.pathname === "/welcome") {
+    return <WelcomePage />;
   }
 
   return (
