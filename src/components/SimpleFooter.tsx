@@ -1,0 +1,2 @@
+import React from "react";
+export const SimpleFooter: React.FC = () => <footer className="border-t border-white/10 bg-black px-4 py-10 text-center text-xs text-white/45"><p className="font-bold uppercase tracking-widest text-white/70">Luxe Prize Draws</p><p className="mx-auto mt-3 max-w-xl">Prototype experience for cash-prize previews and free-play games. No payments, entries, cash prizes, or wagering are available.</p><p className="mt-4">© 2026 Luxe Prize Draws</p></footer>;
