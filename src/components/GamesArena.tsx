@@ -302,7 +302,10 @@ function getConnect4Winner(board: Array<Array<Connect4Disc | null>>, row: number
 
 export const GamesArena: React.FC = () => {
   const [tokens, setTokens] = useState(1000);
-  const [selectedGame, setSelectedGame] = useState<GameId>("chess");
+  const [selectedGame, setSelectedGame] = useState<GameId>(() => {
+    const requested = typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("game");
+    return requested === "chess" || requested === "draughts" || requested === "connect-4" ? requested : "chess";
+  });
   const [selectedStake, setSelectedStake] = useState<(typeof STAKES)[number]>(100);
   const [notice, setNotice] = useState("Choose a game and challenge another player.");
   const [opponent, setOpponent] = useState<DemoOpponent | null>(null);

@@ -6,7 +6,8 @@
 import React, { useState, useEffect } from "react";
 import { Navbar } from "./components/Navbar";
 import { HeroSection } from "./components/HeroSection";
-import { CompetitionHub } from "./components/CompetitionHub";
+import { SimpleCompetitionHub } from "./components/SimpleCompetitionHub";
+import { GameLobby } from "./components/GameLobby";
 import { FreeDraws } from "./components/FreeDraws";
 import { AdminTickets } from "./components/AdminTickets";
 import { ComplianceDashboard } from "./components/ComplianceDashboard";
@@ -140,6 +141,9 @@ export default function App() {
   if (typeof window !== "undefined" && window.location.pathname === "/welcome") {
     return <WelcomePage />;
   }
+  if (typeof window !== "undefined" && window.location.pathname === "/games") {
+    return <GameLobby />;
+  }
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-[#D4AF37] selection:text-black relative overflow-x-hidden pt-7">
@@ -183,59 +187,10 @@ export default function App() {
           stats={stats}
         />
 
-        <CompetitionHub />
-
-        <FreeDraws />
-
-        {/* 6 Prize Pillars Detailed Breakdown */}
-        <PrizeShowcase
-          onOpenEntry={() => setIsEntryModalOpen(true)}
-          onTestOneClick={() => {
-            const el = document.getElementById("one-click-demo");
-            if (el) el.scrollIntoView({ behavior: "smooth" });
-          }}
-        />
-
-        {/* 25% Charity Contribution & Monthly Membership Subscriptions */}
-        <CharityImpactSection
-          onOpenEntry={() => setIsEntryModalOpen(true)}
-        />
-
-        {/* Special Feature #1: One-Click Book & AI Interactive Sandbox */}
-        <OneClickBookDemo onOpenEntry={() => setIsEntryModalOpen(true)} />
-
-        <PredictionMarket />
-
-        {/* Demo-only 1v1 games and token challenges */}
+        <SimpleCompetitionHub onOpenEntry={() => setIsEntryModalOpen(true)} />
         <GamesArena />
-
         <LuxePokerLeague />
-
         <LuxeFightArena />
-
-        <LuxeHost />
-
-        {/* Special Feature #2: AI Business Pitch & Feasibility Evaluator (Gemini 3.7) */}
-        <AiPitchEvaluator onApplyIdeaToEntry={handleApplyIdeaToEntry} />
-
-        {/* Interactive Prize Customizer / Simulator */}
-        <PackageCustomizer onOpenEntry={() => setIsEntryModalOpen(true)} />
-
-        {/* Verifiably Random & Auditable Drawing System (Provably Fair CSPRNG & Certified Physical Blower) */}
-        <DrawVerificationSection
-          userTickets={tickets}
-          totalEntriesCount={stats.totalEntries}
-          onOpenEntry={() => setIsEntryModalOpen(true)}
-        />
-
-        {/* Dubai Destination & Lifestyle Photo Gallery */}
-        <DubaiPhotoGallery onOpenEntry={() => setIsEntryModalOpen(true)} />
-
-        {/* £100K+ Hall of Fame for Verified Winners */}
-        <HallOfFameSection onOpenEntry={() => setIsEntryModalOpen(true)} />
-
-        {/* Live Draw Transparency & Countdown */}
-        <LiveDrawTracker onOpenEntry={() => setIsEntryModalOpen(true)} />
       </main>
 
       {/* Floating Bottom Quick Action Trigger Bar */}
