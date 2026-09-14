@@ -18,7 +18,6 @@ import { OneClickBookDemo } from "./components/OneClickBookDemo";
 import { GamesArena } from "./components/GamesArena";
 import { PredictionMarket } from "./components/PredictionMarket";
 import { LuxePokerLeague } from "./components/LuxePokerLeague";
-import { LuxeFightArena } from "./components/LuxeFightArena";
 import { AiPitchEvaluator } from "./components/AiPitchEvaluator";
 import { PackageCustomizer } from "./components/PackageCustomizer";
 import { DrawVerificationSection } from "./components/DrawVerificationSection";
@@ -190,7 +189,6 @@ export default function App() {
         <SimpleCompetitionHub onOpenEntry={() => setIsEntryModalOpen(true)} />
         <GamesArena />
         <LuxePokerLeague />
-        <LuxeFightArena />
       </main>
 
       {/* Floating Bottom Quick Action Trigger Bar */}
