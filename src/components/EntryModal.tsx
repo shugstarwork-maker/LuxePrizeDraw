@@ -119,27 +119,8 @@ export const EntryModal: React.FC<EntryModalProps> = ({
 
       // Trigger grand celebratory confetti explosion
       triggerGoldConfetti();
-    } catch (err: any) {
-      console.error(err);
-      // Fallback ticket creation
-      const fallbackTicket: CompetitionTicket = {
-        ticketId: `UAE-${Math.floor(100000 + Math.random() * 900000)}-${country.slice(0, 3).toUpperCase()}`,
-        fullName,
-        email,
-        country,
-        phone,
-        businessIdea,
-        targetIndustry,
-        entryTimestamp: new Date().toISOString(),
-        ticketStatus: "PREVIEW_ONLY",
-        drawDate: "October 31, 2026 at 18:00 GST",
-        bonusEntriesAwarded: ticketsToMint > 1 ? ticketsToMint - 1 : 1,
-        totalTickets: ticketsToMint,
-      };
-      setGeneratedTicket(fallbackTicket);
-      setGeneratedBatchCount(ticketsToMint);
-      onTicketGenerated(fallbackTicket);
-      triggerGoldConfetti();
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : "The entry preview is unavailable. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
