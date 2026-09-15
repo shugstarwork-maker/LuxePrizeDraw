@@ -205,6 +205,27 @@ app.post("/api/draw/settle", async (req, res) => {
   }
 });
 
+// API: public readiness status. It never asserts legal approval or safeguarding without recorded evidence.
+app.get("/api/launch-readiness", (_req, res) => {
+  const requiredEvidence = {
+    counselApproval: Boolean(process.env.LEGAL_REVIEW_APPROVAL_REFERENCE),
+    officialRules: Boolean(process.env.OFFICIAL_RULES_URL && process.env.OFFICIAL_RULES_VERSION),
+    prizeFunding: Boolean(process.env.PRIZE_FUND_ATTESTATION_REFERENCE),
+    safeguarding: Boolean(process.env.FUNDS_SAFEGUARDING_PROVIDER && process.env.FUNDS_SAFEGUARDING_ACCOUNT_REFERENCE),
+    paymentProvider: Boolean(process.env.PAYMENT_PROVIDER_REFERENCE),
+  };
+  res.set("Cache-Control", "no-store");
+  res.json({
+    mode: "PRE_LAUNCH",
+    paidEntriesEnabled: false,
+    prizeIssuanceEnabled: false,
+    safeguardingClaimPermitted: false,
+    requiredEvidence,
+    launchReady: false,
+    message: "Counsel approval and independently evidenced controls are required before launch.",
+  });
+});
+
 // API: competition stats expose a pending audit state only; settled inputs are read from durable storage.
 app.get("/api/competition/stats", async (_req, res) => {
   res.set("Cache-Control", "public, s-maxage=15, stale-while-revalidate=60");
