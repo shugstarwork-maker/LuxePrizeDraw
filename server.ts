@@ -1,6 +1,7 @@
 import express from "express";
 import path from "path";
 import crypto from "crypto";
+import { fileURLToPath } from "url";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import { neon } from "@neondatabase/serverless";
@@ -680,9 +681,25 @@ async function startServer() {
   });
 }
 
+function isDirectExecution() {
+  if (typeof require !== "undefined" && typeof module !== "undefined") {
+    return require.main === module;
+  }
+
+  if (!process.argv[1]) {
+    return false;
+  }
+
+  try {
+    return path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+  } catch {
+    return false;
+  }
+}
+
 export { app, startServer };
 export default app;
 
-if (process.env.VERCEL !== "1") {
+if (isDirectExecution()) {
   void startServer();
 }
