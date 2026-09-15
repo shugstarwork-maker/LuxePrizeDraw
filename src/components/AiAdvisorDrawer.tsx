@@ -31,8 +31,8 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
   ];
 
   const handleSendMessage = async (queryText?: string) => {
-    const textToSend = queryText || inputQuery;
-    if (!textToSend.trim()) return;
+    const textToSend = (queryText || inputQuery).trim();
+    if (!textToSend || isLoading) return;
 
     setMessages((prev) => [...prev, { role: "user", text: textToSend }]);
     setInputQuery("");
@@ -46,15 +46,10 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
       });
 
       const data = await response.json();
-      setMessages((prev) => [...prev, { role: "ai", text: data.answer || "Luxe Prize Draws covers 100% of the legal, technical, and financial setup." }]);
+      if (!response.ok) throw new Error(data.error || "The advisor is unavailable.");
+      setMessages((prev) => [...prev, { role: "ai", text: data.answer }]);
     } catch (err) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "ai",
-          text: "Luxe Prize Draws is designed to give the winner an unfair advantage: £100,000 GBP clean seed cash, an all-inclusive 2-week 5-star luxury holiday to Dubai, 3-year investor visa, 100% foreign-owned UAE company, and a custom web/mobile app with One-Click Book & AI automation.",
-        },
-      ]);
+      setMessages((prev) => [...prev, { role: "ai", text: err instanceof Error ? err.message : "The advisor is unavailable. Please try again." }]);
     } finally {
       setIsLoading(false);
     }
@@ -89,6 +84,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
               <button
                 key={i}
                 onClick={() => handleSendMessage(q)}
+                disabled={isLoading}
                 className="text-[10px] px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white/70 hover:text-[#D4AF37] hover:border-[#D4AF37]/50 transition-all text-left"
               >
                 {q}

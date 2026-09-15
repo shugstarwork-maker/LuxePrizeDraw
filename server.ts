@@ -10,8 +10,24 @@ dotenv.config();
 
 const app = express();
 const PORT = 3000;
+const MAX_AI_REQUESTS_PER_INSTANCE = 8;
+let activeAiRequests = 0;
 
-app.use(express.json());
+function limitedText(value: unknown, maximumLength: number) {
+  return typeof value === "string" ? value.trim().slice(0, maximumLength) : "";
+}
+
+async function withAiCapacity<T>(work: () => Promise<T>) {
+  if (activeAiRequests >= MAX_AI_REQUESTS_PER_INSTANCE) {
+    const error = new Error("AI_SERVICE_BUSY");
+    (error as Error & { statusCode?: number }).statusCode = 429;
+    throw error;
+  }
+  activeAiRequests += 1;
+  try { return await work(); } finally { activeAiRequests -= 1; }
+}
+
+app.use(express.json({ limit: "32kb" }));
 app.set("query parser", "simple");
 
 // Lazy / safe Gemini initialization
@@ -72,7 +88,10 @@ function getAuditDatabase() {
   return neon(databaseUrl);
 }
 
+let entropyAuditTableReady: Promise<void> | undefined;
+
 async function ensureEntropyAuditTable() {
+  if (!entropyAuditTableReady) entropyAuditTableReady = (async () => {
   const sql = getAuditDatabase();
   await sql`CREATE TABLE IF NOT EXISTS entropy_draw_audits (
     draw_id TEXT PRIMARY KEY,
@@ -87,6 +106,8 @@ async function ensureEntropyAuditTable() {
     total_entries INTEGER,
     settled_at TIMESTAMPTZ
   )`;
+  })();
+  try { await entropyAuditTableReady; } catch (error) { entropyAuditTableReady = undefined; throw error; }
 }
 
 async function getEntropyAudit(): Promise<EntropyAudit | null> {
@@ -184,8 +205,30 @@ app.post("/api/draw/settle", async (req, res) => {
   }
 });
 
+// API: public readiness status. It never asserts legal approval or safeguarding without recorded evidence.
+app.get("/api/launch-readiness", (_req, res) => {
+  const requiredEvidence = {
+    counselApproval: Boolean(process.env.LEGAL_REVIEW_APPROVAL_REFERENCE),
+    officialRules: Boolean(process.env.OFFICIAL_RULES_URL && process.env.OFFICIAL_RULES_VERSION),
+    prizeFunding: Boolean(process.env.PRIZE_FUND_ATTESTATION_REFERENCE),
+    safeguarding: Boolean(process.env.FUNDS_SAFEGUARDING_PROVIDER && process.env.FUNDS_SAFEGUARDING_ACCOUNT_REFERENCE),
+    paymentProvider: Boolean(process.env.PAYMENT_PROVIDER_REFERENCE),
+  };
+  res.set("Cache-Control", "no-store");
+  res.json({
+    mode: "PRE_LAUNCH",
+    paidEntriesEnabled: false,
+    prizeIssuanceEnabled: false,
+    safeguardingClaimPermitted: false,
+    requiredEvidence,
+    launchReady: false,
+    message: "Counsel approval and independently evidenced controls are required before launch.",
+  });
+});
+
 // API: competition stats expose a pending audit state only; settled inputs are read from durable storage.
 app.get("/api/competition/stats", async (_req, res) => {
+  res.set("Cache-Control", "public, s-maxage=15, stale-while-revalidate=60");
   const audit = await getEntropyAudit().catch(() => null);
   res.json({
     totalEntries: totalEntriesCount, prizePoolValueGBP: 220000, cashPrizeGBP: 100000, visaYears: 3,
@@ -210,7 +253,10 @@ app.post("/api/draw/verify", async (req, res) => {
 
 type JurisdictionStatus = "NOT_REVIEWED" | "ALLOWED" | "RESTRICTED" | "BLOCKED";
 
+let complianceTablesReady: Promise<void> | undefined;
+
 async function ensureComplianceTables() {
+  if (!complianceTablesReady) complianceTablesReady = (async () => {
   const sql = getAuditDatabase();
   await sql`CREATE TABLE IF NOT EXISTS jurisdiction_compliance (
     country_code TEXT NOT NULL, subdivision_code TEXT NOT NULL DEFAULT '', status TEXT NOT NULL DEFAULT 'NOT_REVIEWED',
@@ -238,6 +284,8 @@ async function ensureComplianceTables() {
   await sql`CREATE TABLE IF NOT EXISTS fiat_ledger (id TEXT PRIMARY KEY, account_id TEXT NOT NULL, amount_minor BIGINT NOT NULL, currency TEXT NOT NULL, entry_type TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`;
   await sql`CREATE TABLE IF NOT EXISTS prize_liability_ledger (id TEXT PRIMARY KEY, competition_id TEXT NOT NULL, amount_minor BIGINT NOT NULL, currency TEXT NOT NULL, entry_type TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`;
   await sql`CREATE TABLE IF NOT EXISTS karma_coinz_ledger (id TEXT PRIMARY KEY, account_id TEXT NOT NULL, amount BIGINT NOT NULL, entry_type TEXT NOT NULL, expires_at TIMESTAMPTZ, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`;
+  })();
+  try { await complianceTablesReady; } catch (error) { complianceTablesReady = undefined; throw error; }
 }
 
 async function writeComplianceAudit(eventType: string, outcome: string, details: object, country?: string, subdivision?: string, competitionId?: string) {
@@ -319,7 +367,10 @@ function requireAdminPassword(password?: string) {
   return actual.length === expected.length && crypto.timingSafeEqual(Buffer.from(actual), Buffer.from(expected));
 }
 
+let freeDrawTicketsTableReady: Promise<void> | undefined;
+
 async function ensureFreeDrawTicketsTable() {
+  if (!freeDrawTicketsTableReady) freeDrawTicketsTableReady = (async () => {
   const sql = getAuditDatabase();
   await sql`CREATE TABLE IF NOT EXISTS free_draw_tickets (
     id TEXT PRIMARY KEY,
@@ -330,6 +381,8 @@ async function ensureFreeDrawTicketsTable() {
     redeemed_at TIMESTAMPTZ,
     entry_ticket_id TEXT UNIQUE
   )`;
+  })();
+  try { await freeDrawTicketsTableReady; } catch (error) { freeDrawTicketsTableReady = undefined; throw error; }
 }
 
 // API: administrator issues a one-time Free Draw ticket for a specific email.
@@ -397,7 +450,7 @@ app.post("/api/competition/enter", (req, res) => {
       return res.status(403).json({ error: "Public entry issuance is disabled. Free Draw entries require an administrator-issued ticket." });
     }
 
-    const count = Number(ticketsCount) || 1;
+    const count = Math.min(100, Math.max(1, Math.floor(Number(ticketsCount) || 1)));
     if (!demo) {
       totalEntriesCount += count;
       if (charityAmount && Number(charityAmount) > 0) {
@@ -448,7 +501,10 @@ app.post("/api/competition/enter", (req, res) => {
 // API: AI Business Feasibility & Pitch Evaluator
 app.post("/api/gemini/pitch-evaluate", async (req, res) => {
   try {
-    const { businessIdea, industry, targetMarket, dreamFeatures } = req.body;
+    const businessIdea = limitedText(req.body?.businessIdea, 2_000);
+    const industry = limitedText(req.body?.industry, 200);
+    const targetMarket = limitedText(req.body?.targetMarket, 200);
+    const dreamFeatures = limitedText(req.body?.dreamFeatures, 1_000);
 
     if (!businessIdea) {
       return res.status(400).json({ error: "Please provide a business idea or concept." });
@@ -513,14 +569,11 @@ Return a valid JSON object with the following fields:
       });
     }
 
-    const response = await ai.models.generateContent({
+    const response = await withAiCapacity(() => ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        temperature: 0.7,
-      },
-    });
+      config: { responseMimeType: "application/json", temperature: 0.7 },
+    }));
 
     const text = response.text;
     if (!text) {
@@ -531,6 +584,7 @@ Return a valid JSON object with the following fields:
     return res.json(parsed);
   } catch (error: any) {
     console.error("AI Pitch evaluation error:", error);
+    if (error?.statusCode === 429) return res.status(429).json({ error: "The advisor is busy. Please try again shortly." });
     // Return friendly resilient fallback
     return res.json({
       feasibilityScore: 92,
@@ -559,7 +613,8 @@ Return a valid JSON object with the following fields:
 // API: AI Live UAE Business Advisor Chat
 app.post("/api/gemini/ask-advisor", async (req, res) => {
   try {
-    const { question, userBusinessContext } = req.body;
+    const question = limitedText(req.body?.question, 1_000);
+    const userBusinessContext = limitedText(req.body?.userBusinessContext, 2_000);
     if (!question) {
       return res.status(400).json({ error: "Question is required." });
     }
@@ -586,19 +641,18 @@ Provide a concise, direct, helpful, and inspiring response (2-3 paragraphs max) 
       });
     }
 
-    const response = await ai.models.generateContent({
+    const response = await withAiCapacity(() => ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: prompt,
-      config: {
-        temperature: 0.7,
-      }
-    });
+      config: { temperature: 0.7 },
+    }));
 
     return res.json({
       answer: response.text || "Our dedicated UAE setup team ensures every step of your holiday, company formation, 3-year visa, branding, and £100,000 grant transfer is executed seamlessly within 14 business days.",
     });
   } catch (error: any) {
     console.error("AI Advisor error:", error);
+    if (error?.statusCode === 429) return res.status(429).json({ error: "The advisor is busy. Please try again shortly." });
     return res.json({
       answer: "Luxe Prize Draws is designed for maximum speed and zero friction. From company licensing, 5-Star luxury holiday, and 3-Year Residency to corporate bank setup and transferring your £100,000 cash grant, everything is orchestrated so you can focus entirely on growing your business with your custom app and One-Click booking system.",
     });
