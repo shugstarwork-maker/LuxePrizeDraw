@@ -1,14 +1,22 @@
-import React from "react";
-import { CompetitiveHub } from "./components/CompetitiveHub";
+import React, { useEffect, useState } from "react";
 import { CommunityLeaderboards } from "./components/CommunityLeaderboards";
 import { CommunityTicker } from "./components/CommunityTicker";
+import { CompetitiveHub } from "./components/CompetitiveHub";
+import { ExperienceNav } from "./components/ExperienceNav";
+import { GamesArena } from "./components/GamesArena";
+import { LegalReadinessNotice } from "./components/LegalReadinessNotice";
+import { LuxePokerLeague } from "./components/LuxePokerLeague";
+import { LuxeHost } from "./components/LuxeHost";
 import { PrizeExperience } from "./components/PrizeExperience";
 import { PrizePlatform } from "./components/PrizePlatform";
-import { LuxeHost } from "./components/LuxeHost";
-import { LuxePokerLeague } from "./components/LuxePokerLeague";
-import { LegalReadinessNotice } from "./components/LegalReadinessNotice";
-import { GamesArena } from "./components/GamesArena";
+import { WelcomePage } from "./components/WelcomePage";
+
+const go = (path: string) => { window.history.pushState({}, "", path); window.dispatchEvent(new PopStateEvent("popstate")); };
 
 export default function App() {
-  return <><LegalReadinessNotice /><CommunityTicker /><PrizePlatform /><PrizeExperience /><CommunityLeaderboards /><CompetitiveHub /><LuxePokerLeague /><GamesArena /><LuxeHost /></>;
+  const [path, setPath] = useState(() => window.location.pathname);
+  useEffect(() => { const sync = () => setPath(window.location.pathname); window.addEventListener("popstate", sync); return () => window.removeEventListener("popstate", sync); }, []);
+  if (path === "/welcome") return <WelcomePage onEnter={() => go("/")} />;
+  const content = path === "/draws" ? <><PrizePlatform /><PrizeExperience /></> : path === "/community" ? <CommunityLeaderboards /> : path === "/play" ? <><CompetitiveHub /><LuxePokerLeague /><GamesArena /></> : <><PrizePlatform /><PrizeExperience /><CommunityLeaderboards /><CompetitiveHub /><LuxePokerLeague /><GamesArena /><LuxeHost /></>;
+  return <><LegalReadinessNotice /><ExperienceNav /><CommunityTicker /><main className="animate-page-enter">{content}</main></>;
 }
