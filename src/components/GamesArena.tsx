@@ -304,6 +304,7 @@ export const GamesArena: React.FC = () => {
   const [tokens, setTokens] = useState(1000);
   const [selectedGame, setSelectedGame] = useState<GameId>("chess");
   const [selectedStake, setSelectedStake] = useState<(typeof STAKES)[number]>(100);
+  const [matchMode, setMatchMode] = useState<"random" | "friend">("random");
   const [notice, setNotice] = useState("Choose a game and challenge another player.");
   const [opponent, setOpponent] = useState<DemoOpponent | null>(null);
   const [chessState, setChessState] = useState<ChessState>(createChessState);
@@ -333,6 +334,11 @@ export const GamesArena: React.FC = () => {
     }
     const opponents = DEMO_OPPONENTS[selectedGame];
     const selectedOpponent = opponents[Math.floor(Math.random() * opponents.length)];
+    if (matchMode === "friend") {
+      setOpponent(selectedOpponent);
+      setNotice(`Friend challenge created for ${game.name}. Share-ready local preview; real invitations require authenticated multiplayer rooms.`);
+      return;
+    }
     setTokens((value) => value - selectedStake);
     setOpponent(selectedOpponent);
     setNotice(`${selectedOpponent.name} accepted your ${game.name} demo challenge for ${selectedStake} tokens.`);
@@ -746,8 +752,8 @@ export const GamesArena: React.FC = () => {
               <Gamepad2 className="w-3.5 h-3.5" />
               Games & Challenges
             </div>
-            <h2 className="mt-4 text-3xl sm:text-5xl font-light text-white tracking-tight">Head-to-head <span className="font-bold text-[#D4AF37]">skill games</span></h2>
-            <p className="mt-3 text-white/60">Play 1v1 Chess, Draughts, and Connect 4 in the demo arena. Tokens are non-redeemable, have no cash value, and cannot be bought or withdrawn.</p>
+            <h2 className="mt-4 text-3xl sm:text-5xl font-light text-white tracking-tight">Competitive <span className="font-bold text-[#D4AF37]">skill games</span></h2>
+            <p className="mt-3 text-white/60">Play original free-play Chess, Draughts, and Connect 4 in the demo arena. Chess includes legal movement, clocks, opponent matching previews, and ELO-based matchmaking display. Tokens are non-redeemable, have no cash value, and cannot be bought or withdrawn.</p>
           </div>
           <div className="rounded-2xl bg-white/5 border border-[#D4AF37]/30 px-5 py-4 min-w-56">
             <div className="text-[10px] uppercase tracking-widest text-white/45">Demo token balance</div>
@@ -779,10 +785,11 @@ export const GamesArena: React.FC = () => {
             <div className="flex items-center gap-2 text-[#D4AF37] text-xs uppercase tracking-widest font-bold"><Trophy className="w-4 h-4" /> Weekly demo tournament</div>
             <h3 className="mt-3 text-2xl font-bold text-white">{game.name} 1v1 challenge</h3>
             <p className="mt-2 text-sm text-white/55">Select a demo-token entry amount. The flow is a non-monetary preview only; no payment, prize, cash-out, or account balance is created.</p>
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-5 flex rounded-xl border border-white/10 bg-black/20 p-1 text-xs font-bold"><button onClick={() => setMatchMode("random")} className={`flex-1 rounded-lg px-3 py-2 ${matchMode === "random" ? "bg-white text-black" : "text-white/55"}`}>Random match</button><button onClick={() => setMatchMode("friend")} className={`flex-1 rounded-lg px-3 py-2 ${matchMode === "friend" ? "bg-white text-black" : "text-white/55"}`}>Challenge a friend</button></div>
+            <div className="mt-4 flex flex-wrap gap-3">
               {STAKES.map((stake) => <button key={stake} onClick={() => setSelectedStake(stake)} className={`px-5 py-3 rounded-xl text-sm font-bold border ${selectedStake === stake ? "border-[#D4AF37] bg-[#D4AF37] text-black" : "border-white/15 bg-white/5 text-white hover:bg-white/10"}`}>{stake} tokens</button>)}
             </div>
-            <button onClick={createChallenge} className="mt-6 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#D4AF37] hover:bg-[#e6c352] text-black font-bold text-sm uppercase tracking-wider transition-colors"><Swords className="w-4 h-4" /> Find demo opponent</button>
+            <button onClick={createChallenge} className="mt-6 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#D4AF37] hover:bg-[#e6c352] text-black font-bold text-sm uppercase tracking-wider transition-colors"><Swords className="w-4 h-4" /> {matchMode === "random" ? "Find random opponent" : "Create friend challenge"}</button>
             <p aria-live="polite" className="mt-4 text-sm text-emerald-300">{notice}</p>
             {opponent && (
               <div className="mt-6 overflow-hidden rounded-2xl border border-[#D4AF37]/40 bg-gradient-to-br from-white/10 to-white/[0.03]">
