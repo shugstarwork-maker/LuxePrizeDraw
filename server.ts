@@ -681,8 +681,8 @@ async function startServer() {
 }
 
 function isDirectExecution() {
-  const entrypoint = path.basename(process.argv[1] || "");
-  return ["server.ts", "server.js", "server.cjs", "server.mjs"].includes(entrypoint);
+  const entrypoint = process.argv[1] || "";
+  return /(^|[\\/])server\.(ts|js|cjs|mjs)$/.test(entrypoint);
 }
 
 export { app, startServer };
