@@ -9,7 +9,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT || "3000");
 const MAX_AI_REQUESTS_PER_INSTANCE = 8;
 let activeAiRequests = 0;
 
@@ -680,4 +680,9 @@ async function startServer() {
   });
 }
 
-startServer();
+export { app, startServer };
+export default app;
+
+if (process.env.VERCEL !== "1") {
+  void startServer();
+}
