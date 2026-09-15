@@ -208,6 +208,23 @@ function isValidChessMove(board: Array<Array<ChessPiece | null>>, from: Cell, to
   }
 }
 
+function getLegalChessMoves(board: Array<Array<ChessPiece | null>>, from: Cell, color: PlayerColor): Cell[] {
+  const moves: Cell[] = [];
+  for (let row = 0; row < 8; row += 1) for (let col = 0; col < 8; col += 1) {
+    if (isValidChessMove(board, from, [row, col], color)) moves.push([row, col]);
+  }
+  return moves;
+}
+
+function getAllChessMoves(board: Array<Array<ChessPiece | null>>, color: PlayerColor): Array<{ from: Cell; to: Cell }> {
+  const moves: Array<{ from: Cell; to: Cell }> = [];
+  for (let row = 0; row < 8; row += 1) for (let col = 0; col < 8; col += 1) {
+    const piece = board[row][col];
+    if (piece?.color === color) getLegalChessMoves(board, [row, col], color).forEach((to) => moves.push({ from: [row, col], to }));
+  }
+  return moves;
+}
+
 function getChessSymbol(piece: ChessPiece): string {
   const symbols: Record<PlayerColor, Record<ChessPiece["kind"], string>> = {
     white: {
@@ -289,9 +306,14 @@ export const GamesArena: React.FC = () => {
   const [dailyClaimMessage, setDailyClaimMessage] = useState("Connecting your free-play token wallet…");
   const [selectedGame, setSelectedGame] = useState<GameId>("chess");
   const [selectedStake, setSelectedStake] = useState<(typeof STAKES)[number]>(100);
+  const [matchMode, setMatchMode] = useState<"random" | "friend">("random");
   const [notice, setNotice] = useState("Choose a game and challenge another player.");
   const [opponent, setOpponent] = useState<DemoOpponent | null>(null);
   const [chessState, setChessState] = useState<ChessState>(createChessState);
+  const [chessThinking, setChessThinking] = useState(false);
+  const [chessMoves, setChessMoves] = useState<string[]>([]);
+  const [chessTheme, setChessTheme] = useState<"walnut" | "onyx">("walnut");
+  const [chessClock, setChessClock] = useState({ white: 600, black: 600 });
   const [draughtsState, setDraughtsState] = useState<DraughtsState>(createDraughtsState);
   const [connect4State, setConnect4State] = useState<Connect4State>(createConnect4State);
   const [chessXp, setChessXp] = useState(120);
@@ -363,6 +385,11 @@ export const GamesArena: React.FC = () => {
     const opponents = DEMO_OPPONENTS[selectedGame];
     const selectedOpponent = opponents[Math.floor(Math.random() * opponents.length)];
     setTokens(data.tokenBalance);
+    if (matchMode === "friend") {
+      setOpponent(selectedOpponent);
+      setNotice(`Friend challenge created for ${game.name}. Share-ready local preview; real invitations require authenticated multiplayer rooms.`);
+      return;
+    }
     setOpponent(selectedOpponent);
     setNotice(`${selectedOpponent.name} accepted your ${game.name} practice challenge for ${selectedStake} free-play tokens.`);
   };
@@ -381,10 +408,39 @@ export const GamesArena: React.FC = () => {
     setPollNotice(`${opponent} took the opposite side of “${selectedPoll.options[selectedPrediction]}” for ${selectedPollStake} free-play tokens. Results settle when the poll closes.`);
   };
 
+  React.useEffect(() => {
+    if (chessState.winner) return;
+    const timer = window.setInterval(() => setChessClock((clock) => ({ ...clock, [chessState.current]: Math.max(0, clock[chessState.current] - 1) })), 1000);
+    return () => window.clearInterval(timer);
+  }, [chessState.current, chessState.winner]);
+
+  React.useEffect(() => {
+    if (chessState.current !== "black" || chessState.winner) return;
+    setChessThinking(true);
+    const timer = window.setTimeout(() => {
+      setChessState((currentState) => {
+        const moves = getAllChessMoves(currentState.board, "black");
+        if (!moves.length) return { ...currentState, winner: "white", message: "Luxe Host has no move. You win the match." };
+        const captures = moves.filter(({ to }) => currentState.board[to[0]][to[1]]);
+        const choice = (captures.length ? captures : moves)[Math.floor(Math.random() * (captures.length ? captures.length : moves.length))];
+        const board = cloneChessBoard(currentState.board);
+        const moved = board[choice.from[0]][choice.from[1]]!;
+        const captured = board[choice.to[0]][choice.to[1]];
+        board[choice.to[0]][choice.to[1]] = moved;
+        board[choice.from[0]][choice.from[1]] = null;
+        setChessMoves((history) => [...history.slice(-7), `Host: ${moved.kind} ${String.fromCharCode(97 + choice.from[1])}${8 - choice.from[0]}–${String.fromCharCode(97 + choice.to[1])}${8 - choice.to[0]}`]);
+        return captured?.kind === "king" ? { board, current: "black", selected: null, winner: "black", message: "Luxe Host captures the king. Rematch?" } : { board, current: "white", selected: null, winner: null, message: "Your move. Select a white piece." };
+      });
+      setChessThinking(false);
+    }, 650);
+    return () => window.clearTimeout(timer);
+  }, [chessState.current, chessState.winner]);
+
   const handleChessCellClick = (row: number, col: number) => {
     setChessState((currentState) => {
       const piece = currentState.board[row][col];
 
+      if (currentState.current !== "white") return currentState;
       if (currentState.winner) {
         return { ...currentState, message: `${currentState.winner === "white" ? "White" : "Black"} already won. Reset to play again.` };
       }
@@ -426,6 +482,7 @@ export const GamesArena: React.FC = () => {
       }
 
       const winner = captured?.kind === "king" ? currentState.current : null;
+      setChessMoves((history) => [...history.slice(-7), `You: ${selectedPiece.kind} ${String.fromCharCode(97 + selectedCol)}${8 - selectedRow}–${String.fromCharCode(97 + col)}${8 - row}`]);
       const nextPlayer = currentState.current === "white" ? "black" : "white";
 
       return {
@@ -593,8 +650,10 @@ export const GamesArena: React.FC = () => {
     });
   };
 
+  const formatClock = (seconds: number) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+
   const renderChessBoard = () => (
-    <div className="space-y-6">
+    <div className="space-y-6 chess-premium-board">
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="rounded-2xl border border-[#D4AF37]/35 bg-gradient-to-br from-[#2a2110] to-[#110f16] p-5 lg:col-span-2">
           <div className="flex items-start justify-between gap-4"><div><div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-[#f6d46b]"><BookOpen className="h-4 w-4" /> Guided lesson {activeLesson + 1}</div><h4 className="mt-2 text-xl font-bold text-white">{chessLessons[activeLesson].title}</h4><p className="mt-1 text-sm text-white/60">{chessLessons[activeLesson].detail}</p></div><span className="rounded-full bg-[#D4AF37]/15 px-3 py-1 text-xs font-bold text-[#f6d46b]">+{chessLessons[activeLesson].xp} XP</span></div>
@@ -607,33 +666,40 @@ export const GamesArena: React.FC = () => {
           <h4 className="text-lg font-bold text-white">Practice board</h4>
           <p className="text-sm text-white/55">Learn by playing: select a piece, choose a legal destination, and take turns locally.</p>
         </div>
+        <div className="flex items-center gap-2"><button type="button" onClick={() => setChessTheme((theme) => theme === "walnut" ? "onyx" : "walnut")} className="rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-white/80 hover:bg-white/10">{chessTheme === "walnut" ? "Onyx board" : "Walnut board"}</button>
         <button
-          onClick={() => setChessState(createChessState())}
+          onClick={() => { setChessState(createChessState()); setChessMoves([]); setChessThinking(false); setChessClock({ white: 600, black: 600 }); }}
           className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-wider text-white/80 hover:bg-white/10"
         >
           <RotateCcw className="h-3.5 w-3.5" />
           Reset board
-        </button>
+        </button></div>
       </div>
-      <div className="grid grid-cols-8 gap-1 rounded-3xl bg-[#221707] p-3 shadow-inner shadow-black/40">
+      <div className="grid grid-cols-2 gap-3"><div className={`rounded-2xl border p-3 ${chessState.current === "black" ? "border-[#D4AF37] bg-[#D4AF37]/10" : "border-white/10 bg-black/20"}`}><span className="text-[10px] font-bold uppercase tracking-widest text-white/50">Luxe Host · 1482</span><strong className="mt-1 block font-mono text-2xl text-white">{formatClock(chessClock.black)}</strong></div><div className={`rounded-2xl border p-3 text-right ${chessState.current === "white" ? "border-[#D4AF37] bg-[#D4AF37]/10" : "border-white/10 bg-black/20"}`}><span className="text-[10px] font-bold uppercase tracking-widest text-white/50">You · 1420</span><strong className="mt-1 block font-mono text-2xl text-white">{formatClock(chessClock.white)}</strong></div></div>
+      <div className={`chess-board-frame ${chessTheme === "walnut" ? "chess-board-walnut" : "chess-board-onyx"}`}><div className="grid grid-cols-8 gap-0.5 rounded-xl p-2 shadow-inner">
         {chessState.board.map((boardRow, rowIndex) =>
           boardRow.map((piece, colIndex) => {
             const isDark = (rowIndex + colIndex) % 2 === 1;
             const isSelected = chessState.selected?.[0] === rowIndex && chessState.selected?.[1] === colIndex;
+            const isLegal = chessState.selected ? getLegalChessMoves(chessState.board, chessState.selected, "white").some(([row, col]) => row === rowIndex && col === colIndex) : false;
             return (
               <button
                 key={`chess-${rowIndex}-${colIndex}`}
                 onClick={() => handleChessCellClick(rowIndex, colIndex)}
-                className={`aspect-square rounded-xl text-2xl transition-all sm:text-3xl ${isDark ? "bg-slate-900/90 text-white" : "bg-[#f0d9b5] text-black"} ${isSelected ? "ring-2 ring-[#D4AF37] scale-[1.03]" : "hover:scale-[1.02]"}`}
-                aria-label={`Chess ${rowIndex}-${colIndex}`}
+                className={`relative aspect-square text-3xl transition-all sm:text-5xl ${isDark ? "chess-square-dark text-[#1b120c]" : "chess-square-light text-[#fff4d5]"} ${isSelected ? "z-10 ring-2 ring-[#f8d778] scale-[1.04]" : isLegal ? "z-10 ring-2 ring-emerald-300/80 shadow-[inset_0_0_0_5px_rgba(110,231,183,.28)]" : "hover:z-10 hover:brightness-110"}`}
+                aria-label={`Chess ${String.fromCharCode(97 + colIndex)}${8 - rowIndex}`}
               >
-                {piece ? getChessSymbol(piece) : ""}
+                {piece ? <span className="chess-piece drop-shadow-[0_5px_2px_rgba(0,0,0,.5)]">{getChessSymbol(piece)}</span> : ""}
+                {colIndex === 0 && <span className="absolute left-1 top-0.5 text-[8px] font-bold opacity-50">{8 - rowIndex}</span>}
+                {rowIndex === 7 && <span className="absolute bottom-0.5 right-1 text-[8px] font-bold opacity-50">{String.fromCharCode(97 + colIndex)}</span>}
               </button>
             );
           }),
         )}
       </div>
-      <p className="text-sm text-emerald-300">{chessState.message}</p>
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-sm text-emerald-300">{chessThinking ? "Luxe Host is considering a move…" : chessState.message}</p><span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white/60">You: 1420 ELO · Host: 1482</span></div>
+      {chessMoves.length > 0 && <div className="rounded-xl border border-white/10 bg-black/20 p-3 text-xs text-white/60"><span className="mr-2 font-bold uppercase tracking-wider text-[#f8d778]">Move feed</span>{chessMoves.join(" · ")}</div>}
       <div className="rounded-2xl border border-indigo-400/25 bg-indigo-500/[0.08] p-5">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center"><div><div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-indigo-200"><Target className="h-4 w-4" /> Daily puzzle</div><h4 className="mt-2 text-lg font-bold text-white">Win the queen in two moves</h4><p className="mt-1 text-sm text-white/60">Train your eye for a knight fork. Find the forcing move, then reveal the solution.</p></div><button onClick={solvePuzzle} className={`shrink-0 rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-wider transition ${puzzleSolved ? "bg-emerald-400/20 text-emerald-200" : "bg-white/10 text-white hover:bg-white/20"}`}>{puzzleSolved ? "Solved · +35 XP" : "Reveal solution"}</button></div>
         {puzzleSolved && <p className="mt-4 rounded-xl border border-emerald-400/20 bg-emerald-400/10 p-3 text-sm text-emerald-200">Look for the knight jump that attacks both the queen and rook. Great tactics begin with forcing moves.</p>}
@@ -745,8 +811,8 @@ export const GamesArena: React.FC = () => {
               <Gamepad2 className="w-3.5 h-3.5" />
               Playable games
             </div>
-            <h2 className="mt-4 text-3xl sm:text-5xl font-light text-white tracking-tight">Head-to-head <span className="font-bold text-[#D4AF37]">skill games</span></h2>
-            <p className="mt-3 text-white/60">Play 1v1 Chess, Draughts, and Connect 4 in the demo arena. Tokens are non-redeemable, have no cash value, and cannot be bought or withdrawn.</p>
+            <h2 className="mt-4 text-3xl sm:text-5xl font-light text-white tracking-tight">Competitive <span className="font-bold text-[#D4AF37]">skill games</span></h2>
+            <p className="mt-3 text-white/60">Play original free-play Chess, Draughts, and Connect 4 in the demo arena. Chess includes legal movement, clocks, opponent matching previews, and ELO-based matchmaking display. Tokens are non-redeemable, have no cash value, and cannot be bought or withdrawn.</p>
           </div>
           <div className="rounded-2xl bg-white/5 border border-[#D4AF37]/30 px-5 py-4 min-w-56">
             <div className="text-[10px] uppercase tracking-widest text-white/45">Free-play token balance</div>
@@ -800,10 +866,11 @@ export const GamesArena: React.FC = () => {
             <div className="flex items-center gap-2 text-[#D4AF37] text-xs uppercase tracking-widest font-bold"><Trophy className="w-4 h-4" /> Weekly demo tournament</div>
             <h3 className="mt-3 text-2xl font-bold text-white">{game.name} 1v1 challenge</h3>
             <p className="mt-2 text-sm text-white/55">Select a demo-token entry amount. The flow is a non-monetary preview only; no payment, prize, cash-out, or account balance is created.</p>
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-5 flex rounded-xl border border-white/10 bg-black/20 p-1 text-xs font-bold"><button onClick={() => setMatchMode("random")} className={`flex-1 rounded-lg px-3 py-2 ${matchMode === "random" ? "bg-white text-black" : "text-white/55"}`}>Random match</button><button onClick={() => setMatchMode("friend")} className={`flex-1 rounded-lg px-3 py-2 ${matchMode === "friend" ? "bg-white text-black" : "text-white/55"}`}>Challenge a friend</button></div>
+            <div className="mt-4 flex flex-wrap gap-3">
               {STAKES.map((stake) => <button key={stake} onClick={() => setSelectedStake(stake)} className={`px-5 py-3 rounded-xl text-sm font-bold border ${selectedStake === stake ? "border-[#D4AF37] bg-[#D4AF37] text-black" : "border-white/15 bg-white/5 text-white hover:bg-white/10"}`}>{stake} tokens</button>)}
             </div>
-            <button onClick={createChallenge} className="mt-6 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#D4AF37] hover:bg-[#e6c352] text-black font-bold text-sm uppercase tracking-wider transition-colors"><Swords className="w-4 h-4" /> Find demo opponent</button>
+            <button onClick={createChallenge} className="mt-6 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#D4AF37] hover:bg-[#e6c352] text-black font-bold text-sm uppercase tracking-wider transition-colors"><Swords className="w-4 h-4" /> {matchMode === "random" ? "Find random opponent" : "Create friend challenge"}</button>
             <p aria-live="polite" className="mt-4 text-sm text-emerald-300">{notice}</p>
             {opponent && (
               <div className="mt-6 overflow-hidden rounded-2xl border border-[#D4AF37]/40 bg-gradient-to-br from-white/10 to-white/[0.03]">
