@@ -47,13 +47,6 @@ const GAMES: Array<{ id: GameId; name: string; description: string; badge: strin
 ];
 
 const STAKES = [25, 100, 250] as const;
-const POLL_STAKES = [10, 25, 50] as const;
-
-const PREDICTION_POLLS = [
-  { id: "founder-pitch", question: "Which finalist will top the community pitch vote?", options: ["Amina's Green Packaging", "Marcus's Logistics SaaS"], closes: "Closes Friday" },
-  { id: "game-night", question: "Who wins this week's Connect 4 community showdown?", options: ["Mia Carter", "Leo Foster"], closes: "Closes Sunday" },
-] as const;
-
 type DemoOpponent = {
   name: string;
   initials: string;
@@ -302,7 +295,10 @@ function getConnect4Winner(board: Array<Array<Connect4Disc | null>>, row: number
 
 export const GamesArena: React.FC = () => {
   const [tokens, setTokens] = useState(1000);
-  const [selectedGame, setSelectedGame] = useState<GameId>("chess");
+  const [selectedGame, setSelectedGame] = useState<GameId>(() => {
+    const requested = typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("game");
+    return requested === "chess" || requested === "draughts" || requested === "connect-4" ? requested : "chess";
+  });
   const [selectedStake, setSelectedStake] = useState<(typeof STAKES)[number]>(100);
   const [notice, setNotice] = useState("Choose a game and challenge another player.");
   const [opponent, setOpponent] = useState<DemoOpponent | null>(null);
@@ -313,11 +309,7 @@ export const GamesArena: React.FC = () => {
   const [chessClock, setChessClock] = useState({ white: 600, black: 600 });
   const [draughtsState, setDraughtsState] = useState<DraughtsState>(createDraughtsState);
   const [connect4State, setConnect4State] = useState<Connect4State>(createConnect4State);
-  const [selectedPollId, setSelectedPollId] = useState<(typeof PREDICTION_POLLS)[number]["id"]>("founder-pitch");
-  const [selectedPrediction, setSelectedPrediction] = useState(0);
-  const [selectedPollStake, setSelectedPollStake] = useState<(typeof POLL_STAKES)[number]>(25);
-  const [pollNotice, setPollNotice] = useState("Choose an outcome to start a free-play 1v1 prediction.");
-  const [pollChallenge, setPollChallenge] = useState<{ opponent: string; points: number } | null>(null);
+
 
   const game = useMemo(() => GAMES.find((item) => item.id === selectedGame)!, [selectedGame]);
   const gameGuide: Record<GameId, string> = {
@@ -338,22 +330,7 @@ export const GamesArena: React.FC = () => {
     setNotice(`${selectedOpponent.name} accepted your ${game.name} demo challenge for ${selectedStake} tokens.`);
   };
 
-  const selectedPoll = PREDICTION_POLLS.find((poll) => poll.id === selectedPollId)!;
 
-  const createPollChallenge = () => {
-    if (pollChallenge) {
-      setPollNotice("This prediction is already matched. Select another poll to create a new challenge.");
-      return;
-    }
-    if (tokens < selectedPollStake) {
-      setPollNotice("You need more demo tokens to make this free-play prediction.");
-      return;
-    }
-    const opponent = ["Jordan P.", "Riley S.", "Taylor K."][Math.floor(Math.random() * 3)];
-    setTokens((value) => value - selectedPollStake);
-    setPollChallenge({ opponent, points: selectedPollStake });
-    setPollNotice(`${opponent} took the opposite side of “${selectedPoll.options[selectedPrediction]}” for ${selectedPollStake} demo tokens. Results settle when the poll closes.`);
-  };
 
   React.useEffect(() => {
     if (chessState.winner) return;
