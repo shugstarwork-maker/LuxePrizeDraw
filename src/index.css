@@ -337,3 +337,11 @@
 .neon-game-card { transform: translateZ(0); transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; }
 .neon-game-card:hover { transform: translateY(-5px) scale(1.01); border-color: rgba(103,232,249,.65); box-shadow: 0 20px 50px rgba(8,145,178,.2), 0 0 35px rgba(217,70,239,.12); }
 @media (prefers-reduced-motion: reduce) { .neon-game-card, .neon-game-card:hover { transform: none; transition: none; } }
+
+@media (max-width: 639px) {
+  .competition-ticker__group { font-size: .62rem; gap: .55rem; padding-block: .35rem; }
+  .competition-ticker__track { animation-duration: 36s; }
+  .neon-game-card { min-height: 13.5rem; }
+  .neon-game-card:active { transform: scale(.98); border-color: rgba(103,232,249,.8); }
+  .game-arena-stage { padding-bottom: 6rem; }
+}
