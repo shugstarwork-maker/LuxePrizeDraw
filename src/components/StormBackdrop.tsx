@@ -9,13 +9,13 @@ export function StormBackdrop() {
       </div>
       <div className="storm-backdrop__flash storm-backdrop__flash--one" />
       <div className="storm-backdrop__flash storm-backdrop__flash--two" />
-      <svg className="storm-backdrop__bolt storm-backdrop__bolt--left" viewBox="0 0 220 430" preserveAspectRatio="none">
-        <path className="storm-backdrop__bolt-core" d="M101 0 75 70l27 12-43 86 34 9-57 137 68-83-25-12 60-105-32-14Z" />
-        <path className="storm-backdrop__bolt-branch" d="m62 165-51 54 44-13M78 216 137 255l-39-7" />
+      <svg className="storm-backdrop__bolt storm-backdrop__bolt--left" viewBox="0 0 240 460" preserveAspectRatio="none">
+        <path className="storm-backdrop__bolt-core" d="M118 0 102 49l17 18-34 56 20 19-43 82 25 16-49 122 60-91-19-16 43-75-17-18 37-61-16-16Z" />
+        <path className="storm-backdrop__bolt-branch" d="m87 143-46 40 32 5-42 46m52 21 48 32-26 4 38 38m-69-184 33 18-16 24" />
       </svg>
-      <svg className="storm-backdrop__bolt storm-backdrop__bolt--right" viewBox="0 0 220 430" preserveAspectRatio="none">
-        <path className="storm-backdrop__bolt-core" d="M101 0 75 70l27 12-43 86 34 9-57 137 68-83-25-12 60-105-32-14Z" />
-        <path className="storm-backdrop__bolt-branch" d="m62 165-51 54 44-13M78 216 137 255l-39-7" />
+      <svg className="storm-backdrop__bolt storm-backdrop__bolt--right" viewBox="0 0 240 460" preserveAspectRatio="none">
+        <path className="storm-backdrop__bolt-core" d="M118 0 102 49l17 18-34 56 20 19-43 82 25 16-49 122 60-91-19-16 43-75-17-18 37-61-16-16Z" />
+        <path className="storm-backdrop__bolt-branch" d="m87 143-46 40 32 5-42 46m52 21 48 32-26 4 38 38m-69-184 33 18-16 24" />
       </svg>
     </div>
   );

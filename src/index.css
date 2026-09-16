@@ -28,9 +28,9 @@
 .storm-backdrop__flash { position: absolute; inset: 0; opacity: 0; background: radial-gradient(ellipse at 18% 14%, rgba(207, 225, 255, .52), transparent 24%), radial-gradient(ellipse at 62% 28%, rgba(119, 159, 255, .2), transparent 44%); mix-blend-mode: screen; }
 .storm-backdrop__flash--one { animation: storm-flash-a 13s linear infinite; }
 .storm-backdrop__flash--two { animation: storm-flash-b 19s 4.7s linear infinite; transform: scaleX(-1); }
-.storm-backdrop__bolt { position: absolute; width: clamp(7rem, 15vw, 13rem); height: clamp(15rem, 36vw, 28rem); overflow: visible; opacity: 0; filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 15px #a8caff) drop-shadow(0 0 38px rgba(113, 164, 255, .76)); }
+.storm-backdrop__bolt { position: absolute; width: clamp(5rem, 10vw, 8.5rem); height: clamp(13rem, 30vw, 24rem); overflow: visible; opacity: 0; filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 7px #b9d6ff) drop-shadow(0 0 20px rgba(113, 164, 255, .6)); }
 .storm-backdrop__bolt-core { fill: #f7fbff; }
-.storm-backdrop__bolt-branch { fill: none; stroke: #dcecff; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+.storm-backdrop__bolt-branch { fill: none; stroke: #e6f1ff; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .storm-backdrop__bolt--left { top: -2%; left: 7%; animation: bolt-strike-a 13s linear infinite; }
 .storm-backdrop__bolt--right { top: 10%; right: 9%; transform: rotate(16deg) scale(.82); animation: bolt-strike-b 19s 4.7s linear infinite; }
 @keyframes storm-drift { to { transform: translate3d(3%, -2%, 0) scale(1.04); } }
