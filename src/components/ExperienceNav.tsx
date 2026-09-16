@@ -1,5 +1,5 @@
 import React from "react";
-import { Gamepad2, Heart, Home, Sparkles, Trophy } from "lucide-react";
+import { Gamepad2, Heart, Home, Sparkles, Swords, Trophy } from "lucide-react";
 
 type Link = { href: string; label: string; icon: React.ElementType };
 const links: Link[] = [
@@ -7,6 +7,7 @@ const links: Link[] = [
   { href: "/draws", label: "Prize draws", icon: Trophy },
   { href: "/community", label: "Community", icon: Heart },
   { href: "/play", label: "Play", icon: Gamepad2 },
+  { href: "/duel", label: "1v1 Duel", icon: Swords },
 ];
 
 const navigate = (href: string) => {
