@@ -5,6 +5,7 @@ import confetti from "canvas-confetti";
  * when a user successfully enters the competition or purchases tickets.
  */
 export const triggerCompetitionEntryConfetti = (isVipSubscriber: boolean = false) => {
+  if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   // Main center burst
   confetti({
     particleCount: isVipSubscriber ? 180 : 120,
