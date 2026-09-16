@@ -21,7 +21,7 @@ const navigate = (href: string) => {
 export const ExperienceNav: React.FC = () => (
   <nav className="sticky top-0 z-50 border-b border-amber-200/15 bg-[#080705]/90 px-4 py-3 backdrop-blur-xl">
     <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
-      <button onClick={() => navigate("/")} className="inline-flex items-center gap-2 font-black text-white"><span className="grid h-8 w-8 place-items-center rounded-lg bg-amber-300 text-lg text-black">£</span><span className="hidden sm:inline">LUXE PRIZE DRAWS</span></button>
+      <button onClick={() => navigate("/")} className="inline-flex items-center gap-2 font-black text-white"><span className="logo-pound-spin grid h-8 w-8 place-items-center rounded-lg bg-amber-300 text-lg text-black" aria-hidden="true">£</span><span className="sr-only">Luxe Prize Draws</span><span className="hidden sm:inline">LUXE PRIZE DRAWS</span></button>
       <div className="flex items-center gap-1">{links.map(({ href, label, icon: Icon }) => <button key={href} onClick={() => navigate(href)} className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-[10px] font-black uppercase tracking-wider text-white/65 transition hover:bg-white/10 hover:text-amber-100 sm:px-3"><Icon className="h-3.5 w-3.5" />{label}</button>)}</div>
       <button onClick={() => navigate("/welcome")} className="hidden items-center gap-1.5 rounded-lg border border-amber-200/25 bg-amber-300/10 px-3 py-2 text-[10px] font-black uppercase tracking-wider text-amber-100 sm:inline-flex"><Sparkles className="h-3.5 w-3.5" /> Welcome</button>
     </div>

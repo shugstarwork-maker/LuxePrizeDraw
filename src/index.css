@@ -349,3 +349,11 @@
 .neon-game-card::before { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(110deg, transparent 22%, rgba(255,255,255,.22) 47%, transparent 70%); transform: translateX(-130%); transition: transform .65s ease; pointer-events: none; }
 .neon-game-card:hover::before { transform: translateX(130%); }
 .neon-game-card > * { z-index: 2; }
+
+@keyframes logoPoundSpin {
+  0%, 72% { transform: rotate(0deg) scale(1); }
+  84% { transform: rotate(360deg) scale(1.12); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+.logo-pound-spin { animation: logoPoundSpin 5s cubic-bezier(.3,.8,.3,1) infinite; box-shadow: 0 0 18px rgba(251,191,36,.38); }
+@media (prefers-reduced-motion: reduce) { .logo-pound-spin { animation: none; } }
