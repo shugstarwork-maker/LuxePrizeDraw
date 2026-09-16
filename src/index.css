@@ -345,3 +345,7 @@
   .neon-game-card:active { transform: scale(.98); border-color: rgba(103,232,249,.8); }
   .game-arena-stage { padding-bottom: 6rem; }
 }
+
+.neon-game-card::before { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(110deg, transparent 22%, rgba(255,255,255,.22) 47%, transparent 70%); transform: translateX(-130%); transition: transform .65s ease; pointer-events: none; }
+.neon-game-card:hover::before { transform: translateX(130%); }
+.neon-game-card > * { z-index: 2; }
