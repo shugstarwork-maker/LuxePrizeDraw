@@ -205,24 +205,26 @@ app.post("/api/draw/settle", async (req, res) => {
   }
 });
 
-// API: public readiness status. It never asserts legal approval or safeguarding without recorded evidence.
+// API: fail-closed cash launch gate. Set CASH_LAUNCH_ENABLED=true only after every evidence record has been independently verified.
 app.get("/api/launch-readiness", (_req, res) => {
   const requiredEvidence = {
     counselApproval: Boolean(process.env.LEGAL_REVIEW_APPROVAL_REFERENCE),
     officialRules: Boolean(process.env.OFFICIAL_RULES_URL && process.env.OFFICIAL_RULES_VERSION),
     prizeFunding: Boolean(process.env.PRIZE_FUND_ATTESTATION_REFERENCE),
     safeguarding: Boolean(process.env.FUNDS_SAFEGUARDING_PROVIDER && process.env.FUNDS_SAFEGUARDING_ACCOUNT_REFERENCE),
-    paymentProvider: Boolean(process.env.PAYMENT_PROVIDER_REFERENCE),
+    paymentProvider: Boolean(process.env.PAYMENT_PROVIDER_REFERENCE && process.env.PAYMENT_WEBHOOK_SECRET),
   };
+  const evidenceComplete = Object.values(requiredEvidence).every(Boolean);
+  const launchReady = process.env.CASH_LAUNCH_ENABLED === "true" && evidenceComplete;
   res.set("Cache-Control", "no-store");
   res.json({
-    mode: "PRE_LAUNCH",
-    paidEntriesEnabled: false,
-    prizeIssuanceEnabled: false,
-    safeguardingClaimPermitted: false,
+    mode: launchReady ? "CASH_READY" : "PRE_LAUNCH",
+    paidEntriesEnabled: launchReady,
+    prizeIssuanceEnabled: launchReady,
+    safeguardingClaimPermitted: launchReady,
     requiredEvidence,
-    launchReady: false,
-    message: "Counsel approval and independently evidenced controls are required before launch.",
+    launchReady,
+    message: launchReady ? "Cash launch controls are enabled." : "Cash entry is locked until the server-side switch and all independently evidenced controls are configured.",
   });
 });
 

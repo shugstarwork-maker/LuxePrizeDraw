@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { CashLaunchReadiness } from "./components/CashLaunchReadiness";
 import { CommunityLeaderboards } from "./components/CommunityLeaderboards";
 import { CommunitySuggestionBoard } from "./components/CommunitySuggestionBoard";
 import { CommunityTicker } from "./components/CommunityTicker";
@@ -30,6 +31,6 @@ export default function App() {
   if (path === "/duel") return <><DuelRoom /><ScottishHost /><MobileDock /></>;
   if (path === "/lobby") return <><NeonGameLobby /><ScottishHost /><MobileDock /></>;
   if (path === "/custom-draw") return <><CustomDrawGallery /><ScottishHost /><MobileDock /></>;
-  const content = path === "/draws" ? <><PrizePicker /><PrizeExperience /><PrizeStandings /><MembershipPreview /></> : path === "/community" ? <><LaunchCommitment /><CommunitySuggestionBoard /><CommunityLeaderboards /></> : path === "/play" ? <><CompetitiveHub /><LuxePokerLeague /><GamesArena /></> : <><PrizePlatform /><LaunchCommitment /></>;
+  const content = path === "/draws" ? <><PrizePicker /><PrizeExperience /><PrizeStandings /><MembershipPreview /></> : path === "/community" ? <><LaunchCommitment /><CommunitySuggestionBoard /><CommunityLeaderboards /></> : path === "/play" ? <><CompetitiveHub /><LuxePokerLeague /><GamesArena /></> : <><PrizePlatform /><CashLaunchReadiness /><LaunchCommitment /></>;
   return <><LegalReadinessNotice /><ExperienceNav /><CommunityTicker /><main className="animate-page-enter pb-24 sm:pb-0">{content}</main><ScottishHost /><MobileDock /></>;
 }
