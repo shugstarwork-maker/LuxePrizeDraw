@@ -23,6 +23,7 @@ import { ScottishHost } from "./components/ScottishHost";
 import { WelcomePage } from "./components/WelcomePage";
 import { StormBackdrop } from "./components/StormBackdrop";
 
+
 const go = (path: string) => { window.history.pushState({}, "", path); window.dispatchEvent(new PopStateEvent("popstate")); };
 
 export default function App() {
