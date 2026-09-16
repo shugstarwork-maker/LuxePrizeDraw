@@ -3,9 +3,9 @@ import { ArrowRight, CheckCircle2, Clock3, Heart, ShieldCheck, Sparkles, Ticket,
 
 type Draw = { id: string; title: string; prize: string; entry: string; close: string; sold: number; capacity: number; image: string; bullets: string[]; impact: string };
 const draws: Draw[] = [
-  { id: "cash", title: "£20,000 Cash Drop", prize: "£20,000", entry: "From 10p", close: "Sunday 20:00", sold: 84520, capacity: 120000, image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=1200&q=85", bullets: ["One headline cash prize", "Instant ticket confirmation", "Transparent draw timeline"], impact: "Mental-health community fund" },
-  { id: "garage", title: "Porsche Weekend", prize: "Porsche 911 weekend", entry: "From 50p", close: "9 days remaining", sold: 45340, capacity: 75000, image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=85", bullets: ["Two-night driving experience", "Travel allowance included", "Winner story feature"], impact: "Renovating Scotland fund" },
-  { id: "vault", title: "Dream Tech Vault", prize: "£10,000 tech vault", entry: "From 25p", close: "Friday 21:00", sold: 61240, capacity: 90000, image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1200&q=85", bullets: ["Build your own prize list", "Prize protection included", "Tracked winner fulfilment"], impact: "Youth opportunity fund" },
+  { id: "cash", title: "£20,000 Cash Drop", prize: "£20,000", entry: "From 10p", close: "Sunday 20:00", sold: 84520, capacity: 120000, image: "/prizes/cash-vault.svg", bullets: ["One headline cash prize", "Instant ticket confirmation", "Transparent draw timeline"], impact: "Mental-health community fund" },
+  { id: "garage", title: "Porsche Weekend", prize: "Porsche 911 weekend", entry: "From 50p", close: "9 days remaining", sold: 45340, capacity: 75000, image: "/prizes/velocity.svg", bullets: ["Two-night driving experience", "Travel allowance included", "Winner story feature"], impact: "Renovating Scotland fund" },
+  { id: "vault", title: "Dream Tech Vault", prize: "£10,000 tech vault", entry: "From 25p", close: "Friday 21:00", sold: 61240, capacity: 90000, image: "/prizes/future-tech.svg", bullets: ["Build your own prize list", "Prize protection included", "Tracked winner fulfilment"], impact: "Youth opportunity fund" },
 ];
 
 export const PrizeExperience: React.FC = () => {
