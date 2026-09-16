@@ -15,6 +15,7 @@ import { MobileDock } from "./components/MobileDock";
 import { NeonGameLobby } from "./components/NeonGameLobby";
 import { PrizeExperience } from "./components/PrizeExperience";
 import { PrizePlatform } from "./components/PrizePlatform";
+import { PrizeStandings } from "./components/PrizeStandings";
 import { WelcomePage } from "./components/WelcomePage";
 
 const go = (path: string) => { window.history.pushState({}, "", path); window.dispatchEvent(new PopStateEvent("popstate")); };
@@ -25,6 +26,6 @@ export default function App() {
   if (path === "/welcome") return <WelcomePage onEnter={() => go("/")} />;
   if (path === "/duel") return <><DuelRoom /><MobileDock /></>;
   if (path === "/lobby") return <><NeonGameLobby /><MobileDock /></>;
-  const content = path === "/draws" ? <><PrizePlatform /><PrizeExperience /><LaunchCommitment /><MembershipPreview /></> : path === "/community" ? <><LaunchCommitment /><CommunitySuggestionBoard /><CommunityLeaderboards /></> : path === "/play" ? <><CompetitiveHub /><LuxePokerLeague /><GamesArena /></> : <><PrizePlatform /><PrizeExperience /><LaunchCommitment /><MembershipPreview /><CommunitySuggestionBoard /><CommunityLeaderboards /><CompetitiveHub /><LuxePokerLeague /><GamesArena /><LuxeHost /></>;
+  const content = path === "/draws" ? <><PrizePlatform /><PrizeExperience /><PrizeStandings /><LaunchCommitment /><MembershipPreview /></> : path === "/community" ? <><LaunchCommitment /><CommunitySuggestionBoard /><CommunityLeaderboards /></> : path === "/play" ? <><CompetitiveHub /><LuxePokerLeague /><GamesArena /></> : <><PrizePlatform /><PrizeExperience /><PrizeStandings /><LaunchCommitment /><MembershipPreview /><CommunitySuggestionBoard /><CommunityLeaderboards /><CompetitiveHub /><LuxePokerLeague /><GamesArena /><LuxeHost /></>;
   return <><LegalReadinessNotice /><ExperienceNav /><CommunityTicker /><main className="animate-page-enter pb-24 sm:pb-0">{content}</main><MobileDock /></>;
 }
