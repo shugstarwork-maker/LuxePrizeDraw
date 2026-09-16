@@ -8,6 +8,7 @@ const links: Link[] = [
   { href: "/community", label: "Community", icon: Heart },
   { href: "/play", label: "Play", icon: Gamepad2 },
   { href: "/duel", label: "1v1 Duel", icon: Swords },
+  { href: "/lobby", label: "Game Lobby", icon: Sparkles },
 ];
 
 const navigate = (href: string) => {
