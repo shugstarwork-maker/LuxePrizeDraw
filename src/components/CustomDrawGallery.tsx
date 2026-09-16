@@ -3,11 +3,11 @@ import { CarFront, Gem, Plane, Smartphone, Watch } from "lucide-react";
 import { PrizePicker } from "./PrizePicker";
 
 const categories = [
-  { name: "Watches", image: "/prizes/luxury-watch.svg", icon: Watch, detail: "Timepieces and collector editions" },
-  { name: "Cars", image: "/prizes/supercar.svg", icon: CarFront, detail: "Supercars, grand tourers and 4x4s" },
-  { name: "Holidays", image: "/prizes/island-villa.svg", icon: Plane, detail: "Private villas and five-star escapes" },
-  { name: "Phones & Tech", image: "/prizes/luxury-phone.svg", icon: Smartphone, detail: "Flagship devices and future-tech" },
-  { name: "Cash Choice", image: "/prizes/pound-notes.svg", icon: Gem, detail: "Cash-equivalent route where approved" },
+  { name: "Watches", image: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=1200&q=90", icon: Watch, detail: "Timepieces and collector editions" },
+  { name: "Cars", image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=90", icon: CarFront, detail: "Supercars, grand tourers and 4x4s" },
+  { name: "Holidays", image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=90", icon: Plane, detail: "Private villas and five-star escapes" },
+  { name: "Phones & Tech", image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1200&q=90", icon: Smartphone, detail: "Flagship devices and future-tech" },
+  { name: "Cash Choice", image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=1200&q=90", icon: Gem, detail: "Cash-equivalent route where approved" },
 ];
 
 export const CustomDrawGallery: React.FC = () => {
