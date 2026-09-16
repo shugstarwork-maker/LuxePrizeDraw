@@ -2,10 +2,10 @@ import React from "react";
 import { Heart, Mail, ShieldCheck, Trophy } from "lucide-react";
 
 const items = [
-  { icon: ShieldCheck, text: "Pre-launch review in progress" },
-  { icon: Trophy, text: "Prize and winner records publish only after verified launch" },
+  { icon: Trophy, text: "£500K headline-prize target — subject to funded prize evidence and approved rules" },
+  { icon: ShieldCheck, text: "Safeguarding status publishes only after independent evidence is recorded" },
+  { icon: Heart, text: "Charity donations publish only after partner confirmation and reconciliation" },
   { icon: Mail, text: "Postal-entry route: counsel-approved rules required" },
-  { icon: Heart, text: "Charity totals display only from reconciled donations" },
 ];
 
 export const CommunityTicker: React.FC = () => (
