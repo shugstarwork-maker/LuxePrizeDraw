@@ -22,6 +22,9 @@
 .storm-page__content { position: relative; z-index: 1; }
 .storm-backdrop { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: linear-gradient(180deg, #020610 0%, #07101e 44%, #050505 100%); }
 .storm-backdrop__clouds { position: absolute; inset: -12%; opacity: .72; background: radial-gradient(ellipse at 18% 18%, rgba(69, 88, 125, .24), transparent 24%), radial-gradient(ellipse at 74% 10%, rgba(73, 86, 120, .2), transparent 30%), radial-gradient(ellipse at 50% 55%, rgba(12, 27, 50, .85), transparent 44%); filter: blur(24px); animation: storm-drift 22s ease-in-out infinite alternate; }
+.storm-backdrop__money-rain { position: absolute; inset: 0; overflow: hidden; opacity: .38; }
+.storm-backdrop__note { position: absolute; top: -4rem; display: grid; width: 2.7rem; height: 1.55rem; place-items: center; border: 1px solid rgba(255, 230, 136, .65); border-radius: .18rem; background: linear-gradient(135deg, #fae994, #bd8c21); color: #171003; font: 900 1.1rem/1 Georgia, serif; box-shadow: 0 0 14px rgba(245, 203, 78, .28); animation: money-fall var(--fall-duration) linear infinite; animation-delay: var(--fall-delay); }
+.storm-backdrop__note--1 { left: 4%; --fall-duration: 13s; --fall-delay: -2s; }.storm-backdrop__note--2 { left: 12%; --fall-duration: 17s; --fall-delay: -11s; }.storm-backdrop__note--3 { left: 19%; --fall-duration: 15s; --fall-delay: -6s; }.storm-backdrop__note--4 { left: 26%; --fall-duration: 20s; --fall-delay: -16s; }.storm-backdrop__note--5 { left: 33%; --fall-duration: 14s; --fall-delay: -9s; }.storm-backdrop__note--6 { left: 40%; --fall-duration: 18s; --fall-delay: -4s; }.storm-backdrop__note--7 { left: 47%; --fall-duration: 16s; --fall-delay: -12s; }.storm-backdrop__note--8 { left: 54%; --fall-duration: 21s; --fall-delay: -7s; }.storm-backdrop__note--9 { left: 61%; --fall-duration: 14s; --fall-delay: -13s; }.storm-backdrop__note--10 { left: 68%; --fall-duration: 19s; --fall-delay: -3s; }.storm-backdrop__note--11 { left: 74%; --fall-duration: 16s; --fall-delay: -10s; }.storm-backdrop__note--12 { left: 80%; --fall-duration: 22s; --fall-delay: -15s; }.storm-backdrop__note--13 { left: 86%; --fall-duration: 15s; --fall-delay: -5s; }.storm-backdrop__note--14 { left: 92%; --fall-duration: 18s; --fall-delay: -8s; }.storm-backdrop__note--15 { left: 8%; --fall-duration: 23s; --fall-delay: -18s; }.storm-backdrop__note--16 { left: 37%; --fall-duration: 20s; --fall-delay: -14s; }.storm-backdrop__note--17 { left: 57%; --fall-duration: 17s; --fall-delay: -1s; }.storm-backdrop__note--18 { left: 77%; --fall-duration: 24s; --fall-delay: -20s; }
 .storm-backdrop__flash { position: absolute; inset: 0; opacity: 0; background: radial-gradient(circle at 18% 20%, rgba(196, 220, 255, .36), transparent 30%), linear-gradient(180deg, rgba(118, 159, 255, .16), transparent 55%); mix-blend-mode: screen; }
 .storm-backdrop__flash--one { animation: storm-flash 12s linear infinite; }
 .storm-backdrop__flash--two { animation: storm-flash 17s 5.5s linear infinite; transform: scaleX(-1); }
@@ -29,9 +32,10 @@
 .storm-backdrop__bolt--left { top: 4%; left: 8%; animation: bolt-strike 12s linear infinite; }
 .storm-backdrop__bolt--right { top: 16%; right: 12%; transform: rotate(12deg); animation: bolt-strike 17s 5.5s linear infinite; }
 @keyframes storm-drift { to { transform: translate3d(3%, -2%, 0) scale(1.04); } }
+@keyframes money-fall { to { transform: translate3d(2rem, 112vh, 0) rotate(300deg); } }
 @keyframes storm-flash { 0%, 6%, 100% { opacity: 0; } 6.15%, 6.45% { opacity: 1; } 6.8% { opacity: .18; } }
 @keyframes bolt-strike { 0%, 6%, 100% { opacity: 0; } 6.15%, 6.5% { opacity: .92; } 6.8% { opacity: .16; } }
-@media (prefers-reduced-motion: reduce) { .storm-backdrop__clouds, .storm-backdrop__flash, .storm-backdrop__bolt { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .storm-backdrop__clouds, .storm-backdrop__flash, .storm-backdrop__bolt, .storm-backdrop__note { animation: none; } .storm-backdrop__note { display: none; } }
 
 /* Immersive background glow ambient layers */
 .immersive-bg-glow {
