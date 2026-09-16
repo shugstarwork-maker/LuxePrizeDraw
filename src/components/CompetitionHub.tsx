@@ -2,11 +2,11 @@ import React from "react";
 import { Heart, Star, Trophy, Users, Crown } from "lucide-react";
 
 const categories = [
-  { title: "Games", subtitle: "Play, compete and unlock bonus entries", image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=900&q=85", accent: "from-violet-500 to-fuchsia-500", id: "games", draws: ["Golden Goal", "Luxe Quiz", "Match Predictor"] },
-  { title: "Prize Draw", subtitle: "Explore every live Luxe prize experience", image: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=900&q=85", accent: "from-amber-400 to-orange-500", id: "prizes", draws: ["£100K Cash", "Dubai Lifestyle", "Founder Package"] },
-  { title: "Sports Car Draw", subtitle: "Your next dream drive is one entry away", image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=900&q=85", accent: "from-sky-400 to-blue-600", id: "prizes", draws: ["Supercar Weekend", "Track Day VIP", "Dream Car Cash"] },
-  { title: "Dream Lads Holiday", subtitle: "A once-in-a-lifetime escape with your crew", image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=85", accent: "from-emerald-400 to-teal-500", id: "dubai-gallery", draws: ["Dubai Lads Trip", "Ibiza Escape", "Las Vegas Weekend"] },
-  { title: "Ladies Shopping Holiday", subtitle: "Fashion, five-star stays and unforgettable city moments", image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=900&q=85", accent: "from-pink-400 to-rose-500", id: "dubai-gallery", draws: ["Dubai Shopping", "Paris Style Trip", "Milan Fashion Week"] },
+  { title: "Games", subtitle: "Play, compete and unlock bonus entries", image: "/games/duel-neon.svg", accent: "from-violet-500 to-fuchsia-500", id: "games", draws: ["Golden Goal", "Luxe Quiz", "Match Predictor"] },
+  { title: "Prize Draw", subtitle: "Explore every live Luxe prize experience", image: "/prizes/cash-vault.svg", accent: "from-amber-400 to-orange-500", id: "prizes", draws: ["£100K Cash", "Dubai Lifestyle", "Founder Package"] },
+  { title: "Sports Car Draw", subtitle: "Your next dream drive is one entry away", image: "/prizes/velocity.svg", accent: "from-sky-400 to-blue-600", id: "prizes", draws: ["Supercar Weekend", "Track Day VIP", "Dream Car Cash"] },
+  { title: "Dream Lads Holiday", subtitle: "A once-in-a-lifetime escape with your crew", image: "/prizes/escape.svg", accent: "from-emerald-400 to-teal-500", id: "dubai-gallery", draws: ["Dubai Lads Trip", "Ibiza Escape", "Las Vegas Weekend"] },
+  { title: "Ladies Shopping Holiday", subtitle: "Fashion, five-star stays and unforgettable city moments", image: "/prizes/future-tech.svg", accent: "from-pink-400 to-rose-500", id: "dubai-gallery", draws: ["Dubai Shopping", "Paris Style Trip", "Milan Fashion Week"] },
 ];
 
 const leaderboards = [
