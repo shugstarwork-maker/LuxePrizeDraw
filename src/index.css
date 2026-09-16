@@ -25,16 +25,20 @@
 .storm-backdrop__money-rain { position: absolute; inset: 0; overflow: hidden; opacity: .88; }
 .storm-backdrop__note { position: absolute; top: -4rem; display: grid; width: 3.1rem; height: 1.8rem; place-items: center; border: 1px solid rgba(199, 255, 181, .9); border-radius: .18rem; background: linear-gradient(135deg, #bdff7e, #20b958 58%, #087532); color: #021d0a; font: 900 1.3rem/1 Georgia, serif; box-shadow: 0 0 18px rgba(80, 255, 119, .72); animation: money-fall var(--fall-duration) linear infinite; animation-delay: var(--fall-delay); }
 .storm-backdrop__note--1 { left: 4%; --fall-duration: 13s; --fall-delay: -2s; }.storm-backdrop__note--2 { left: 12%; --fall-duration: 17s; --fall-delay: -11s; }.storm-backdrop__note--3 { left: 19%; --fall-duration: 15s; --fall-delay: -6s; }.storm-backdrop__note--4 { left: 26%; --fall-duration: 20s; --fall-delay: -16s; }.storm-backdrop__note--5 { left: 33%; --fall-duration: 14s; --fall-delay: -9s; }.storm-backdrop__note--6 { left: 40%; --fall-duration: 18s; --fall-delay: -4s; }.storm-backdrop__note--7 { left: 47%; --fall-duration: 16s; --fall-delay: -12s; }.storm-backdrop__note--8 { left: 54%; --fall-duration: 21s; --fall-delay: -7s; }.storm-backdrop__note--9 { left: 61%; --fall-duration: 14s; --fall-delay: -13s; }.storm-backdrop__note--10 { left: 68%; --fall-duration: 19s; --fall-delay: -3s; }.storm-backdrop__note--11 { left: 74%; --fall-duration: 16s; --fall-delay: -10s; }.storm-backdrop__note--12 { left: 80%; --fall-duration: 22s; --fall-delay: -15s; }.storm-backdrop__note--13 { left: 86%; --fall-duration: 15s; --fall-delay: -5s; }.storm-backdrop__note--14 { left: 92%; --fall-duration: 18s; --fall-delay: -8s; }.storm-backdrop__note--15 { left: 8%; --fall-duration: 23s; --fall-delay: -18s; }.storm-backdrop__note--16 { left: 37%; --fall-duration: 20s; --fall-delay: -14s; }.storm-backdrop__note--17 { left: 57%; --fall-duration: 17s; --fall-delay: -1s; }.storm-backdrop__note--18 { left: 77%; --fall-duration: 24s; --fall-delay: -20s; }
-.storm-backdrop__flash { position: absolute; inset: 0; opacity: 0; background: radial-gradient(circle at 18% 20%, rgba(196, 220, 255, .36), transparent 30%), linear-gradient(180deg, rgba(118, 159, 255, .16), transparent 55%); mix-blend-mode: screen; }
-.storm-backdrop__flash--one { animation: storm-flash 12s linear infinite; }
-.storm-backdrop__flash--two { animation: storm-flash 17s 5.5s linear infinite; transform: scaleX(-1); }
-.storm-backdrop__bolt { position: absolute; width: clamp(5rem, 12vw, 10rem); height: clamp(12rem, 30vw, 22rem); overflow: visible; fill: #d9ebff; filter: drop-shadow(0 0 8px #a8caff) drop-shadow(0 0 28px rgba(113, 164, 255, .9)); opacity: 0; }
-.storm-backdrop__bolt--left { top: 4%; left: 8%; animation: bolt-strike 12s linear infinite; }
-.storm-backdrop__bolt--right { top: 16%; right: 12%; transform: rotate(12deg); animation: bolt-strike 17s 5.5s linear infinite; }
+.storm-backdrop__flash { position: absolute; inset: 0; opacity: 0; background: radial-gradient(ellipse at 18% 14%, rgba(207, 225, 255, .52), transparent 24%), radial-gradient(ellipse at 62% 28%, rgba(119, 159, 255, .2), transparent 44%); mix-blend-mode: screen; }
+.storm-backdrop__flash--one { animation: storm-flash-a 13s linear infinite; }
+.storm-backdrop__flash--two { animation: storm-flash-b 19s 4.7s linear infinite; transform: scaleX(-1); }
+.storm-backdrop__bolt { position: absolute; width: clamp(7rem, 15vw, 13rem); height: clamp(15rem, 36vw, 28rem); overflow: visible; opacity: 0; filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 15px #a8caff) drop-shadow(0 0 38px rgba(113, 164, 255, .76)); }
+.storm-backdrop__bolt-core { fill: #f7fbff; }
+.storm-backdrop__bolt-branch { fill: none; stroke: #dcecff; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+.storm-backdrop__bolt--left { top: -2%; left: 7%; animation: bolt-strike-a 13s linear infinite; }
+.storm-backdrop__bolt--right { top: 10%; right: 9%; transform: rotate(16deg) scale(.82); animation: bolt-strike-b 19s 4.7s linear infinite; }
 @keyframes storm-drift { to { transform: translate3d(3%, -2%, 0) scale(1.04); } }
 @keyframes money-fall { to { transform: translate3d(2rem, 112vh, 0) rotate(300deg); } }
-@keyframes storm-flash { 0%, 6%, 100% { opacity: 0; } 6.15%, 6.45% { opacity: 1; } 6.8% { opacity: .18; } }
-@keyframes bolt-strike { 0%, 6%, 100% { opacity: 0; } 6.15%, 6.5% { opacity: .92; } 6.8% { opacity: .16; } }
+@keyframes storm-flash-a { 0%, 8.1%, 100% { opacity: 0; } 8.25% { opacity: .75; } 8.45% { opacity: .12; } 8.62% { opacity: .48; } 8.95% { opacity: 0; } }
+@keyframes storm-flash-b { 0%, 5.4%, 100% { opacity: 0; } 5.55% { opacity: .62; } 5.76% { opacity: .08; } 6.08% { opacity: .32; } 6.35% { opacity: 0; } }
+@keyframes bolt-strike-a { 0%, 8.1%, 100% { opacity: 0; } 8.25% { opacity: 1; } 8.45% { opacity: .22; } 8.62% { opacity: .72; } 8.95% { opacity: 0; } }
+@keyframes bolt-strike-b { 0%, 5.4%, 100% { opacity: 0; } 5.55% { opacity: .9; } 5.76% { opacity: .15; } 6.08% { opacity: .48; } 6.35% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .storm-backdrop__clouds, .storm-backdrop__flash, .storm-backdrop__bolt, .storm-backdrop__note { animation: none; } .storm-backdrop__note { display: none; } }
 
 /* Immersive background glow ambient layers */
