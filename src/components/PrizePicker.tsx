@@ -1,13 +1,15 @@
 import React, { useMemo, useState } from "react";
-import { ArrowRight, Banknote, CarFront, CheckCircle2, CircleDollarSign, Gem, Plane, ShieldCheck, Smartphone, Watch } from "lucide-react";
+import { ArrowRight, Banknote, BriefcaseBusiness, CarFront, CheckCircle2, CircleDollarSign, Gem, Plane, ShieldCheck, Smartphone, Watch } from "lucide-react";
 
-type Category = "Watches" | "Cars" | "Cash" | "Holidays" | "Phones" | "Technology";
+type Category = "Watches" | "Cars" | "Leather Goods" | "Cash" | "Holidays" | "Phones" | "Technology";
 type Pick = { id: string; category: Category; name: string; value: number; image: string; icon: React.ElementType; detail: string };
 const picks: Pick[] = [
-  { id: "watch-10", category: "Watches", name: "Midnight Chronograph", value: 10000, image: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=1200&q=90", icon: Watch, detail: "Choose a timepiece up to your target value." },
-  { id: "watch-25", category: "Watches", name: "Heritage Gold Timepiece", value: 25000, image: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=1200&q=90", icon: Gem, detail: "A statement watch collection at your chosen band." },
-  { id: "car-50", category: "Cars", name: "Performance Supercar", value: 50000, image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=90", icon: CarFront, detail: "A high-performance car at the matched value." },
-  { id: "car-100", category: "Cars", name: "Grand Tour Collection", value: 100000, image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=90", icon: CarFront, detail: "Configure a grand tour selection by value." },
+  { id: "watch-10", category: "Watches", name: "Midnight Chronograph", value: 10000, image: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=1200&q=90", icon: Watch, detail: "A brushed-metal mechanical watch with a dark dial." },
+  { id: "watch-25", category: "Watches", name: "Heritage Gold Timepiece", value: 25000, image: "https://images.unsplash.com/photo-1523274809965-2a10d1d4e1b7?auto=format&fit=crop&w=1200&q=90", icon: Gem, detail: "An elegant collector timepiece at your chosen band." },
+  { id: "car-50", category: "Cars", name: "Performance Supercar", value: 50000, image: "https://images.unsplash.com/photo-1494905998402-395d579af36f?auto=format&fit=crop&w=1200&q=90", icon: CarFront, detail: "Anonymous exotic-car bodywork and performance detail." },
+  { id: "car-100", category: "Cars", name: "Grand Tour Collection", value: 100000, image: "https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&w=1200&q=90", icon: CarFront, detail: "A dramatic grand-tour selection by target value." },
+  { id: "leather-5", category: "Leather Goods", name: "Leather Weekender", value: 5000, image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=1200&q=90", icon: BriefcaseBusiness, detail: "Premium leather craftsmanship and travel detail." },
+  { id: "leather-10", category: "Leather Goods", name: "Signature Travel Set", value: 10000, image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=1600&q=90", icon: BriefcaseBusiness, detail: "A luxury luggage and accessories collection." },
   { id: "cash-5", category: "Cash", name: "Cash equivalent", value: 5000, image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=1200&q=90", icon: Banknote, detail: "The cash-choice route at the selected band." },
   { id: "cash-25", category: "Cash", name: "Cash equivalent", value: 25000, image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=1200&q=90", icon: CircleDollarSign, detail: "A direct-value alternative, where rules permit." },
   { id: "holiday-10", category: "Holidays", name: "Five-Star Island Escape", value: 10000, image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=90", icon: Plane, detail: "Design a luxury break around your chosen value." },
@@ -17,7 +19,7 @@ const picks: Pick[] = [
   { id: "tech-10", category: "Technology", name: "Future-Tech Studio", value: 10000, image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1200&q=90", icon: Smartphone, detail: "Build a tailored technology collection." },
   { id: "tech-25", category: "Technology", name: "Home Innovation Suite", value: 25000, image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1200&q=90", icon: Gem, detail: "A high-value technology package." },
 ];
-const categories: Category[] = ["Watches", "Cars", "Cash", "Holidays", "Phones", "Technology"];
+const categories: Category[] = ["Watches", "Cars", "Leather Goods", "Cash", "Holidays", "Phones", "Technology"];
 const bands = [{ max: 5000, label: "Starter draw" }, { max: 10000, label: "Signature draw" }, { max: 25000, label: "Premier draw" }, { max: 50000, label: "Elite draw" }, { max: Infinity, label: "Grand draw" }];
 
 export const PrizePicker: React.FC = () => {

@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { CarFront, Gem, Plane, Smartphone, Watch } from "lucide-react";
+import { BriefcaseBusiness, CarFront, Gem, Plane, Smartphone, Watch } from "lucide-react";
 import { PrizePicker } from "./PrizePicker";
 
 const categories = [
-  { name: "Watches", image: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=1200&q=90", icon: Watch, detail: "Timepieces and collector editions" },
-  { name: "Cars", image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=90", icon: CarFront, detail: "Supercars, grand tourers and 4x4s" },
+  { name: "Watches", image: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=1200&q=90", icon: Watch, detail: "Mechanical watches and collector editions" },
+  { name: "Cars", image: "https://images.unsplash.com/photo-1494905998402-395d579af36f?auto=format&fit=crop&w=1200&q=90", icon: CarFront, detail: "Exotic-car details, grand tourers and 4x4s" },
+  { name: "Leather Goods", image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=1200&q=90", icon: BriefcaseBusiness, detail: "Premium leather bags and travel pieces" },
   { name: "Holidays", image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=90", icon: Plane, detail: "Private villas and five-star escapes" },
   { name: "Phones & Tech", image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1200&q=90", icon: Smartphone, detail: "Flagship devices and future-tech" },
   { name: "Cash Choice", image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=1200&q=90", icon: Gem, detail: "Cash-equivalent route where approved" },
