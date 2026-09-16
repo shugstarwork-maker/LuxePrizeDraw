@@ -17,6 +17,22 @@
   }
 }
 
+/* Full-page storm atmosphere, kept behind interactive content. */
+.storm-page { position: relative; isolation: isolate; min-height: 100vh; }
+.storm-page__content { position: relative; z-index: 1; }
+.storm-backdrop { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: linear-gradient(180deg, #020610 0%, #07101e 44%, #050505 100%); }
+.storm-backdrop__clouds { position: absolute; inset: -12%; opacity: .72; background: radial-gradient(ellipse at 18% 18%, rgba(69, 88, 125, .24), transparent 24%), radial-gradient(ellipse at 74% 10%, rgba(73, 86, 120, .2), transparent 30%), radial-gradient(ellipse at 50% 55%, rgba(12, 27, 50, .85), transparent 44%); filter: blur(24px); animation: storm-drift 22s ease-in-out infinite alternate; }
+.storm-backdrop__flash { position: absolute; inset: 0; opacity: 0; background: radial-gradient(circle at 18% 20%, rgba(196, 220, 255, .36), transparent 30%), linear-gradient(180deg, rgba(118, 159, 255, .16), transparent 55%); mix-blend-mode: screen; }
+.storm-backdrop__flash--one { animation: storm-flash 12s linear infinite; }
+.storm-backdrop__flash--two { animation: storm-flash 17s 5.5s linear infinite; transform: scaleX(-1); }
+.storm-backdrop__bolt { position: absolute; width: clamp(5rem, 12vw, 10rem); height: clamp(12rem, 30vw, 22rem); overflow: visible; fill: #d9ebff; filter: drop-shadow(0 0 8px #a8caff) drop-shadow(0 0 28px rgba(113, 164, 255, .9)); opacity: 0; }
+.storm-backdrop__bolt--left { top: 4%; left: 8%; animation: bolt-strike 12s linear infinite; }
+.storm-backdrop__bolt--right { top: 16%; right: 12%; transform: rotate(12deg); animation: bolt-strike 17s 5.5s linear infinite; }
+@keyframes storm-drift { to { transform: translate3d(3%, -2%, 0) scale(1.04); } }
+@keyframes storm-flash { 0%, 6%, 100% { opacity: 0; } 6.15%, 6.45% { opacity: 1; } 6.8% { opacity: .18; } }
+@keyframes bolt-strike { 0%, 6%, 100% { opacity: 0; } 6.15%, 6.5% { opacity: .92; } 6.8% { opacity: .16; } }
+@media (prefers-reduced-motion: reduce) { .storm-backdrop__clouds, .storm-backdrop__flash, .storm-backdrop__bolt { animation: none; } }
+
 /* Immersive background glow ambient layers */
 .immersive-bg-glow {
   background: radial-gradient(circle at 70% 20%, rgba(212, 175, 55, 0.15) 0%, transparent 45%),

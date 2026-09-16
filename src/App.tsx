@@ -21,16 +21,23 @@ import { PrizePicker } from "./components/PrizePicker";
 import { PrizeStandings } from "./components/PrizeStandings";
 import { ScottishHost } from "./components/ScottishHost";
 import { WelcomePage } from "./components/WelcomePage";
+import { StormBackdrop } from "./components/StormBackdrop";
 
 const go = (path: string) => { window.history.pushState({}, "", path); window.dispatchEvent(new PopStateEvent("popstate")); };
 
 export default function App() {
   const [path, setPath] = useState(() => window.location.pathname);
   useEffect(() => { const sync = () => setPath(window.location.pathname); window.addEventListener("popstate", sync); return () => window.removeEventListener("popstate", sync); }, []);
-  if (path === "/welcome") return <WelcomePage onEnter={() => go("/")} />;
-  if (path === "/duel") return <><DuelRoom /><ScottishHost /><MobileDock /></>;
-  if (path === "/lobby") return <><NeonGameLobby /><ScottishHost /><MobileDock /></>;
-  if (path === "/custom-draw") return <><CustomDrawGallery /><ScottishHost /><MobileDock /></>;
+  const page = path === "/welcome" ? <WelcomePage onEnter={() => go("/")} />
+    : path === "/duel" ? <><DuelRoom /><ScottishHost /><MobileDock /></>
+    : path === "/lobby" ? <><NeonGameLobby /><ScottishHost /><MobileDock /></>
+    : path === "/custom-draw" ? <><CustomDrawGallery /><ScottishHost /><MobileDock /></>
+    : <SiteContent path={path} />;
+
+  return <div className="storm-page"><StormBackdrop /><div className="storm-page__content">{page}</div></div>;
+}
+
+function SiteContent({ path }: { path: string }) {
   const content = path === "/draws" ? <><PrizePicker /><PrizeExperience /><PrizeStandings /><MembershipPreview /></> : path === "/community" ? <><LaunchCommitment /><CommunitySuggestionBoard /><CommunityLeaderboards /></> : path === "/play" ? <><CompetitiveHub /><LuxePokerLeague /><GamesArena /></> : <><PrizePlatform /><CashLaunchReadiness /><LaunchCommitment /></>;
   return <><LegalReadinessNotice /><ExperienceNav /><CommunityTicker /><main className="animate-page-enter pb-24 sm:pb-0">{content}</main><ScottishHost /><MobileDock /></>;
 }
