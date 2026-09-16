@@ -364,3 +364,12 @@
 }
 .nav-tab, .nav-tab--active { animation: navGlow 3.5s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .nav-tab, .nav-tab--active { animation: none; } }
+
+.arcade-rail { background: linear-gradient(180deg, rgba(9,25,46,.98), rgba(5,10,24,.98)); }
+.arcade-hero { background: #061223; min-height: 18rem; box-shadow: 0 0 50px rgba(14,165,233,.1), inset 0 1px rgba(255,255,255,.08); }
+.arcade-cabinet { background: #071326; transform: translateZ(0); transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+.arcade-cabinet:hover { transform: translateY(-7px) rotateX(2deg); border-color: rgba(103,232,249,.8); box-shadow: 0 22px 50px rgba(0,0,0,.45), 0 0 28px rgba(34,211,238,.18); }
+.arcade-play-button { box-shadow: 0 0 28px rgba(103,232,249,.45); transition: transform .2s ease, box-shadow .2s ease; }
+.arcade-play-button:hover { transform: scale(1.04); box-shadow: 0 0 42px rgba(103,232,249,.65); }
+@media (max-width: 1023px) { .arcade-rail { display: none; } }
+@media (prefers-reduced-motion: reduce) { .arcade-cabinet, .arcade-cabinet:hover, .arcade-play-button, .arcade-play-button:hover { transform: none; transition: none; } }
