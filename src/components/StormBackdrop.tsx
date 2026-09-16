@@ -5,7 +5,7 @@ export function StormBackdrop() {
     <div className="storm-backdrop" aria-hidden="true">
       <div className="storm-backdrop__clouds" />
       <div className="storm-backdrop__money-rain">
-        {notes.map((note) => <span className={`storm-backdrop__note storm-backdrop__note--${note + 1}`} key={note}>£</span>)}
+        {notes.map((note) => <span className={`storm-backdrop__note storm-backdrop__note--${note + 1}`} key={note}>$</span>)}
       </div>
       <div className="storm-backdrop__flash storm-backdrop__flash--one" />
       <div className="storm-backdrop__flash storm-backdrop__flash--two" />
