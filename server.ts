@@ -27,7 +27,7 @@ async function withAiCapacity<T>(work: () => Promise<T>) {
   try { return await work(); } finally { activeAiRequests -= 1; }
 }
 
-app.use(express.json({ limit: "32kb" }));
+app.use(express.json({ limit: "32kb", verify: (req, _res, buffer) => { (req as express.Request & { rawBody?: Buffer }).rawBody = Buffer.from(buffer); } }));
 app.set("query parser", "simple");
 
 // Lazy / safe Gemini initialization
@@ -205,27 +205,79 @@ app.post("/api/draw/settle", async (req, res) => {
   }
 });
 
-// API: fail-closed cash launch gate. Set CASH_LAUNCH_ENABLED=true only after every evidence record has been independently verified.
-app.get("/api/launch-readiness", (_req, res) => {
+type CashLaunchReadiness = { requiredEvidence: Record<string, boolean>; launchReady: boolean };
+
+function cashLaunchReadiness(): CashLaunchReadiness {
   const requiredEvidence = {
     counselApproval: Boolean(process.env.LEGAL_REVIEW_APPROVAL_REFERENCE),
     officialRules: Boolean(process.env.OFFICIAL_RULES_URL && process.env.OFFICIAL_RULES_VERSION),
     prizeFunding: Boolean(process.env.PRIZE_FUND_ATTESTATION_REFERENCE),
     safeguarding: Boolean(process.env.FUNDS_SAFEGUARDING_PROVIDER && process.env.FUNDS_SAFEGUARDING_ACCOUNT_REFERENCE),
-    paymentProvider: Boolean(process.env.PAYMENT_PROVIDER_REFERENCE && process.env.PAYMENT_WEBHOOK_SECRET),
+    paymentProvider: Boolean(process.env.STRIPE_SECRET_KEY && process.env.STRIPE_WEBHOOK_SECRET && process.env.STRIPE_MEMBERSHIP_PRICE_ID),
   };
-  const evidenceComplete = Object.values(requiredEvidence).every(Boolean);
-  const launchReady = process.env.CASH_LAUNCH_ENABLED === "true" && evidenceComplete;
+  return { requiredEvidence, launchReady: process.env.CASH_LAUNCH_ENABLED === "true" && Object.values(requiredEvidence).every(Boolean) };
+}
+
+function requiredAppUrl() {
+  const appUrl = process.env.APP_URL;
+  if (!appUrl || !/^https:\/\//.test(appUrl)) throw new Error("APP_URL must be an HTTPS URL.");
+  return appUrl.endsWith("/") ? appUrl.slice(0, -1) : appUrl;
+}
+
+async function stripeRequest(path: string, form: URLSearchParams) {
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  if (!secretKey) throw new Error("Stripe is not configured.");
+  const response = await fetch(`https://api.stripe.com/v1/${path}`, { method: "POST", headers: { Authorization: `Basic ${Buffer.from(`${secretKey}:`).toString("base64")}`, "Content-Type": "application/x-www-form-urlencoded" }, body: form.toString() });
+  const payload = await response.json() as { url?: string; error?: { message?: string } };
+  if (!response.ok || !payload.url) throw new Error(payload.error?.message || "Stripe Checkout could not be created.");
+  return payload.url;
+}
+
+function verifyStripeSignature(payload: Buffer, signature: string | undefined) {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!secret || !signature) return false;
+  const parts = Object.fromEntries(signature.split(",").map(item => item.split("=", 2)));
+  const timestamp = Number(parts.t);
+  const candidate = parts.v1;
+  if (!Number.isSafeInteger(timestamp) || !candidate || Math.abs(Date.now() / 1000 - timestamp) > 300) return false;
+  const expected = crypto.createHmac("sha256", secret).update(`${timestamp}.${payload.toString("utf8")}`).digest("hex");
+  return expected.length === candidate.length && crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(candidate));
+}
+
+async function ensureStripeWebhookEventsTable() {
+  const sql = getAuditDatabase();
+  await sql`CREATE TABLE IF NOT EXISTS stripe_webhook_events (event_id TEXT PRIMARY KEY, event_type TEXT NOT NULL, received_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`;
+}
+
+// API: fail-closed cash launch gate. Set CASH_LAUNCH_ENABLED=true only after every evidence record has been independently verified.
+app.get("/api/launch-readiness", (_req, res) => {
+  const { requiredEvidence, launchReady } = cashLaunchReadiness();
   res.set("Cache-Control", "no-store");
-  res.json({
-    mode: launchReady ? "CASH_READY" : "PRE_LAUNCH",
-    paidEntriesEnabled: launchReady,
-    prizeIssuanceEnabled: launchReady,
-    safeguardingClaimPermitted: launchReady,
-    requiredEvidence,
-    launchReady,
-    message: launchReady ? "Cash launch controls are enabled." : "Cash entry is locked until the server-side switch and all independently evidenced controls are configured.",
-  });
+  res.json({ mode: launchReady ? "CASH_READY" : "PRE_LAUNCH", paidEntriesEnabled: launchReady, prizeIssuanceEnabled: launchReady, safeguardingClaimPermitted: launchReady, requiredEvidence, launchReady, message: launchReady ? "Cash launch controls are enabled." : "Cash entry is locked until the server-side switch and all independently evidenced controls are configured." });
+});
+
+// API: membership-only Stripe Checkout. It never creates a draw entry or prize entitlement.
+app.post("/api/payments/membership-checkout", async (_req, res) => {
+  try {
+    if (!cashLaunchReadiness().launchReady) return res.status(423).json({ error: "Cash launch controls are locked." });
+    const form = new URLSearchParams({ mode: "subscription", success_url: `${requiredAppUrl()}/?checkout=success`, cancel_url: `${requiredAppUrl()}/?checkout=cancel`, "line_items[0][price]": process.env.STRIPE_MEMBERSHIP_PRICE_ID!, "line_items[0][quantity]": "1", "metadata[product]": "luxe-membership" });
+    const checkoutUrl = await stripeRequest("checkout/sessions", form);
+    res.json({ checkoutUrl });
+  } catch (error) { console.error("Stripe checkout error:", error); res.status(503).json({ error: "Checkout is unavailable." }); }
+});
+
+// API: verifies Stripe's signed payload, records each event once, and intentionally does not issue any draw entry.
+app.post("/api/stripe/webhook", async (req, res) => {
+  const rawBody = (req as express.Request & { rawBody?: Buffer }).rawBody;
+  if (!rawBody || !verifyStripeSignature(rawBody, req.header("stripe-signature"))) return res.status(400).json({ error: "Invalid Stripe signature." });
+  try {
+    const event = JSON.parse(rawBody.toString("utf8")) as { id?: string; type?: string };
+    if (!event.id || !event.type) return res.status(400).json({ error: "Invalid Stripe event." });
+    await ensureStripeWebhookEventsTable();
+    const sql = getAuditDatabase();
+    await sql`INSERT INTO stripe_webhook_events (event_id, event_type) VALUES (${event.id}, ${event.type}) ON CONFLICT (event_id) DO NOTHING`;
+    res.json({ received: true });
+  } catch (error) { console.error("Stripe webhook error:", error); res.status(503).json({ error: "Webhook storage is unavailable." }); }
 });
 
 // API: competition stats expose a pending audit state only; settled inputs are read from durable storage.
