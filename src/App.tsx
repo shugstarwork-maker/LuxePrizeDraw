@@ -18,6 +18,7 @@ import { PrizeExperience } from "./components/PrizeExperience";
 import { PrizePlatform } from "./components/PrizePlatform";
 import { PrizePicker } from "./components/PrizePicker";
 import { PrizeStandings } from "./components/PrizeStandings";
+import { ScottishHost } from "./components/ScottishHost";
 import { WelcomePage } from "./components/WelcomePage";
 
 const go = (path: string) => { window.history.pushState({}, "", path); window.dispatchEvent(new PopStateEvent("popstate")); };
@@ -26,9 +27,9 @@ export default function App() {
   const [path, setPath] = useState(() => window.location.pathname);
   useEffect(() => { const sync = () => setPath(window.location.pathname); window.addEventListener("popstate", sync); return () => window.removeEventListener("popstate", sync); }, []);
   if (path === "/welcome") return <WelcomePage onEnter={() => go("/")} />;
-  if (path === "/duel") return <><DuelRoom /><MobileDock /></>;
-  if (path === "/lobby") return <><NeonGameLobby /><MobileDock /></>;
-  if (path === "/custom-draw") return <><CustomDrawGallery /><MobileDock /></>;
-  const content = path === "/draws" ? <><PrizePlatform /><PrizePicker /><PrizeExperience /><PrizeStandings /><LaunchCommitment /><MembershipPreview /></> : path === "/community" ? <><LaunchCommitment /><CommunitySuggestionBoard /><CommunityLeaderboards /></> : path === "/play" ? <><CompetitiveHub /><LuxePokerLeague /><GamesArena /></> : <><PrizePlatform /><PrizePicker /><PrizeExperience /><PrizeStandings /><LaunchCommitment /><MembershipPreview /><CommunitySuggestionBoard /><CommunityLeaderboards /><CompetitiveHub /><LuxePokerLeague /><GamesArena /><LuxeHost /></>;
-  return <><LegalReadinessNotice /><ExperienceNav /><CommunityTicker /><main className="animate-page-enter pb-24 sm:pb-0">{content}</main><MobileDock /></>;
+  if (path === "/duel") return <><DuelRoom /><ScottishHost /><MobileDock /></>;
+  if (path === "/lobby") return <><NeonGameLobby /><ScottishHost /><MobileDock /></>;
+  if (path === "/custom-draw") return <><CustomDrawGallery /><ScottishHost /><MobileDock /></>;
+  const content = path === "/draws" ? <><PrizePicker /><PrizeExperience /><PrizeStandings /><MembershipPreview /></> : path === "/community" ? <><LaunchCommitment /><CommunitySuggestionBoard /><CommunityLeaderboards /></> : path === "/play" ? <><CompetitiveHub /><LuxePokerLeague /><GamesArena /></> : <><PrizePlatform /><LaunchCommitment /></>;
+  return <><LegalReadinessNotice /><ExperienceNav /><CommunityTicker /><main className="animate-page-enter pb-24 sm:pb-0">{content}</main><ScottishHost /><MobileDock /></>;
 }
