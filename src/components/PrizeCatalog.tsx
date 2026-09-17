@@ -1,0 +1,29 @@
+import React, { useMemo, useState } from "react";
+import { CarFront, ChevronDown, Gamepad2, Gem, Plane, Sparkles, Trophy, WalletCards } from "lucide-react";
+
+type Category = "Cash" | "Cars" | "Holidays" | "Motorhomes" | "Gaming Bundles" | "Lifestyle";
+const categories: { name: Category; icon: React.ElementType }[] = [
+  { name: "Cash", icon: WalletCards }, { name: "Cars", icon: CarFront }, { name: "Holidays", icon: Plane },
+  { name: "Motorhomes", icon: Gem }, { name: "Gaming Bundles", icon: Gamepad2 }, { name: "Lifestyle", icon: Sparkles },
+];
+const amounts = ["1p", "2p", "10p", "20p", "25p", "30p", "50p", "£1", "£5", "£10"];
+const themes: Record<Category, { image: string; title: string; description: string }> = {
+  Cash: { image: "/prizes/cash-vault.svg", title: "Cash draw previews", description: "Browse planned cash-prize draw cards by selected entry band." },
+  Cars: { image: "/prizes/supercar.svg", title: "Car draw previews", description: "Explore upcoming partner vehicle draw concepts and specifications." },
+  Holidays: { image: "/prizes/escape.svg", title: "Holiday draw previews", description: "Explore travel and stay concepts before official prize terms are published." },
+  Motorhomes: { image: "/prizes/all-terrain.svg", title: "Motorhome draw previews", description: "Browse touring and adventure vehicle concepts for future draw planning." },
+  "Gaming Bundles": { image: "/prizes/future-tech.svg", title: "Gaming bundle previews", description: "Explore console, PC and streaming setup concepts for future prize draws." },
+  Lifestyle: { image: "/prizes/luxury-watch.svg", title: "Lifestyle draw previews", description: "Explore premium lifestyle bundle concepts by category." },
+};
+
+export function PrizeCatalog() {
+  const [category, setCategory] = useState<Category>("Cash");
+  const [amount, setAmount] = useState("1p");
+  const [open, setOpen] = useState(true);
+  const theme = themes[category];
+  const cards = useMemo(() => Array.from({ length: 3 }, (_, index) => ({ title: `${amount} ${category} draw ${index + 1}`, progress: 28 + index * 19 })), [amount, category]);
+  return <section id="prize-catalog" className="bg-[#08090f] py-16 sm:py-24"><div className="mx-auto grid max-w-7xl gap-7 px-4 sm:px-6 lg:grid-cols-[17rem_1fr]">
+    <aside className="h-fit rounded-[2rem] border border-amber-200/20 bg-black/45 p-4 shadow-2xl lg:sticky lg:top-24"><p className="px-2 text-[10px] font-black uppercase tracking-[.2em] text-amber-200">Prize draws</p><button onClick={() => setOpen(value => !value)} className="mt-3 flex w-full items-center justify-between rounded-xl bg-amber-300 px-4 py-3 text-left text-xs font-black text-black">Browse categories <ChevronDown className={`h-4 w-4 transition ${open ? "rotate-180" : ""}`} /></button>{open && <div className="mt-2 space-y-1">{categories.map(({ name, icon: Icon }) => <button key={name} onClick={() => setCategory(name)} className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-xs font-black transition ${category === name ? "bg-white/12 text-amber-100" : "text-white/60 hover:bg-white/5 hover:text-white"}`}><Icon className="h-4 w-4" />{name}</button>)}</div>}{category === "Cash" && <div className="mt-5 border-t border-white/10 pt-4"><p className="px-2 text-[10px] font-black uppercase tracking-[.16em] text-white/40">Cash draw bands</p><div className="mt-3 grid grid-cols-2 gap-2">{amounts.map(value => <button key={value} onClick={() => setAmount(value)} className={`rounded-lg px-3 py-2 text-xs font-black transition ${amount === value ? "bg-fuchsia-300 text-black" : "bg-white/5 text-white/65 hover:bg-white/10"}`}>{value}</button>)}</div></div>}</aside>
+    <div><div className="rounded-[2rem] border border-white/10 bg-gradient-to-br from-white/[.07] to-white/[.015] p-6 sm:p-9"><p className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[.2em] text-amber-200"><Trophy className="h-4 w-4" /> {category} category</p><h2 className="mt-3 text-4xl font-black sm:text-5xl">{theme.title}</h2><p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/60">{theme.description} All cards are catalogue previews only—no paid entry, prize entitlement, draw date, funding claim or cash alternative is created here.</p></div><div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">{cards.map((card, index) => <article key={card.title} className="prize-catalog-card group overflow-hidden rounded-[2rem] border border-white/10 bg-black/45"><div className="relative h-44 overflow-hidden"><img src={theme.image} alt="" className="h-full w-full object-cover opacity-75 transition duration-500 group-hover:scale-110" /><div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" /><span className="absolute left-4 top-4 rounded-full border border-amber-200/30 bg-black/60 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-amber-100">Preview</span></div><div className="p-5"><p className="text-[10px] font-black uppercase tracking-[.18em] text-white/40">Planned prize draw</p><h3 className="mt-2 text-xl font-black">{card.title}</h3><p className="mt-2 text-sm text-white/55">Draw information and official terms publish after independent review.</p><div className="mt-5 flex items-center justify-between text-xs text-white/50"><span>Planning progress</span><b className="text-amber-200">{card.progress}%</b></div><div className="mt-2 h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-fuchsia-400 to-amber-300" style={{ width: `${card.progress}%` }} /></div></div></article>)}</div></div>
+  </div></section>;
+}

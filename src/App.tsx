@@ -18,7 +18,7 @@ import { NeonGameLobby } from "./components/NeonGameLobby";
 import { PrizeExperience } from "./components/PrizeExperience";
 import { PrestigeCarsDraws } from "./components/PrestigeCarsDraws";
 import { PrizePlatform } from "./components/PrizePlatform";
-import { PrizePicker } from "./components/PrizePicker";
+import { PrizeCatalog } from "./components/PrizeCatalog";
 import { PrizeStandings } from "./components/PrizeStandings";
 import { ScottishHost } from "./components/ScottishHost";
 import { WelcomePage } from "./components/WelcomePage";
@@ -40,6 +40,6 @@ export default function App() {
 }
 
 function SiteContent({ path }: { path: string }) {
-  const content = path === "/draws" ? <><PrizePicker /><PrestigeCarsDraws /><PrizeExperience /><PrizeStandings /><MembershipPreview /></> : path === "/community" ? <><LaunchCommitment /><CommunitySuggestionBoard /><CommunityLeaderboards /></> : path === "/play" ? <><CompetitiveHub /><LuxePokerLeague /><GamesArena /></> : <><PrizePlatform /><CashLaunchReadiness /><LaunchCommitment /></>;
+  const content = path === "/draws" ? <><PrizeCatalog /><PrestigeCarsDraws /><PrizeExperience /><PrizeStandings /><MembershipPreview /></> : path === "/community" ? <><LaunchCommitment /><CommunitySuggestionBoard /><CommunityLeaderboards /></> : path === "/play" ? <><CompetitiveHub /><LuxePokerLeague /><GamesArena /></> : <><PrizePlatform /><CashLaunchReadiness /><LaunchCommitment /></>;
   return <><LegalReadinessNotice /><ExperienceNav /><CommunityTicker /><main className="animate-page-enter pb-24 sm:pb-0">{content}</main><ScottishHost /><MobileDock /></>;
 }
