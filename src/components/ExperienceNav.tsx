@@ -7,6 +7,7 @@ const links: Link[] = [
   { href: "/draws", label: "Prize draws", icon: Trophy },
   { href: "/custom-draw", label: "Custom Draw", icon: Gem },
   { href: "/community", label: "Community", icon: Heart },
+  { href: "/serenity", label: "Serenity", icon: Heart },
   { href: "/play", label: "Play", icon: Gamepad2 },
   { href: "/duel", label: "1v1 Duel", icon: Swords },
   { href: "/lobby", label: "Game Lobby", icon: Sparkles },
