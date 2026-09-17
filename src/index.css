@@ -27,7 +27,8 @@
 .storm-page__content { position: relative; z-index: 1; }
 .storm-backdrop { position: fixed; inset: 0; z-index: 2; overflow: hidden; pointer-events: none; }
 .storm-backdrop__clouds { position: absolute; inset: -12%; opacity: .32; background: radial-gradient(ellipse at 18% 18%, rgba(34, 68, 44, .32), transparent 24%), radial-gradient(ellipse at 74% 10%, rgba(30, 61, 41, .28), transparent 30%), radial-gradient(ellipse at 50% 55%, rgba(8, 13, 9, .7), transparent 44%); filter: blur(24px); animation: storm-drift 22s ease-in-out infinite alternate; }
-.storm-backdrop__money-rain { position: absolute; inset: 0; overflow: hidden; opacity: .88; }
+.storm-backdrop__money-rain { position: absolute; inset: 0; overflow: hidden; opacity: .88; animation: money-rain-fade 15s linear forwards; }
+@keyframes money-rain-fade { 0%, 70% { opacity: .88; } 100% { opacity: 0; } }
 .storm-backdrop__note { position: absolute; top: -4rem; display: grid; width: 4.4rem; height: 2.4rem; place-items: center; overflow: hidden; border: 2px solid #f5c968; border-radius: .8rem .2rem .8rem .2rem; background: repeating-linear-gradient(45deg, rgba(255,255,255,.08) 0 3px, transparent 3px 8px), linear-gradient(135deg, #21132f, #5d2770 55%, #d17955); color: #ffe7a5; box-shadow: 0 0 18px rgba(238, 151, 106, .58); animation: money-fall var(--fall-duration) linear infinite; animation-delay: var(--fall-delay); }
 .storm-backdrop__note::before { content: ''; position: absolute; inset: .18rem; border: 1px dashed rgba(255, 237, 178, .7); border-radius: .6rem .08rem .6rem .08rem; }
 .storm-backdrop__note b, .storm-backdrop__note small, .storm-backdrop__note strong, .storm-backdrop__note i { position: relative; z-index: 1; }

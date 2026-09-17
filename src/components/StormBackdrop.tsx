@@ -1,12 +1,21 @@
+import { useEffect, useState } from "react";
+
 const notes = Array.from({ length: 18 }, (_, index) => index);
 
 export function StormBackdrop() {
+  const [showMoneyRain, setShowMoneyRain] = useState(true);
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => setShowMoneyRain(false), 15_000);
+    return () => window.clearTimeout(timeout);
+  }, []);
+
   return (
     <div className="storm-backdrop" aria-hidden="true">
       <div className="storm-backdrop__clouds" />
-      <div className="storm-backdrop__money-rain">
+      {showMoneyRain && <div className="storm-backdrop__money-rain">
         {notes.map((note) => <span className={`storm-backdrop__note storm-backdrop__note--${note + 1}`} key={note}><small>BANK OF</small><strong>LUXE PRIZE DRAW</strong><b>£50</b><i>REWARD VOUCHER</i></span>)}
-      </div>
+      </div>}
       <div className="storm-backdrop__flash storm-backdrop__flash--one" />
       <div className="storm-backdrop__flash storm-backdrop__flash--two" />
       <svg className="storm-backdrop__bolt storm-backdrop__bolt--left" viewBox="0 0 240 460" preserveAspectRatio="none">
