@@ -21,6 +21,7 @@ import { PrizePlatform } from "./components/PrizePlatform";
 import { PrizeCatalog } from "./components/PrizeCatalog";
 import { PrizeStandings } from "./components/PrizeStandings";
 import { ScottishHost } from "./components/ScottishHost";
+import { SerenityCharityPage } from "./components/SerenityCharityPage";
 import { WelcomePage } from "./components/WelcomePage";
 import { StormBackdrop } from "./components/StormBackdrop";
 
@@ -31,6 +32,7 @@ export default function App() {
   const [path, setPath] = useState(() => window.location.pathname);
   useEffect(() => { const sync = () => setPath(window.location.pathname); window.addEventListener("popstate", sync); return () => window.removeEventListener("popstate", sync); }, []);
   const page = path === "/welcome" ? <WelcomePage onEnter={() => go("/")} />
+    : path === "/serenity" ? <SerenityCharityPage />
     : path === "/duel" ? <><DuelRoom /><ScottishHost /><MobileDock /></>
     : path === "/lobby" ? <><NeonGameLobby /><ScottishHost /><MobileDock /></>
     : path === "/custom-draw" ? <><CustomDrawGallery /><ScottishHost /><MobileDock /></>
