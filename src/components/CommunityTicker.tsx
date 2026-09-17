@@ -9,10 +9,10 @@ const items = [
 ];
 
 export const CommunityTicker: React.FC = () => (
-  <section className="competition-ticker border-y border-amber-300/20 bg-[#120e06] text-amber-100" aria-label="Launch status">
+  <section className="competition-ticker border-y border-amber-200/35 bg-gradient-to-r from-[#160c23] via-[#35122c] to-[#160c23] text-amber-100 shadow-[0_0_22px_rgba(232,121,249,.18)]" aria-label="Launch status">
     <div className="competition-ticker__track">
       {[0, 1].map(group => <div key={group} className="competition-ticker__group" aria-hidden={group === 1}>
-        {items.map(({ icon: Icon, text }) => <React.Fragment key={text}><span className="inline-flex items-center gap-2"><Icon className="h-3.5 w-3.5 text-amber-300" />{text}</span><span className="competition-ticker__dot">•</span></React.Fragment>)}
+        {items.map(({ icon: Icon, text }) => <React.Fragment key={text}><span className="inline-flex items-center gap-2"><span className="competition-ticker__alert-dot" aria-hidden="true" /><Icon className="h-3.5 w-3.5 text-amber-300" />{text}</span><span className="competition-ticker__dot">•</span></React.Fragment>)}
       </div>)}
     </div>
   </section>
