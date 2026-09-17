@@ -36,7 +36,7 @@ export default function App() {
     : path === "/custom-draw" ? <><CustomDrawGallery /><ScottishHost /><MobileDock /></>
     : <SiteContent path={path} />;
 
-  return <div className="storm-page"><div className="storm-page__content">{page}</div><StormBackdrop /></div>;
+  return <div className="storm-page"><div className="storm-page__content">{page}</div><StormBackdrop key={path} /></div>;
 }
 
 function SiteContent({ path }: { path: string }) {
