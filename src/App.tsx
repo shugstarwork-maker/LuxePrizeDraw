@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { CashLaunchReadiness } from "./components/CashLaunchReadiness";
+import { CategoryDrawCarousel } from "./components/CategoryDrawCarousel";
 import { CommunityLeaderboards } from "./components/CommunityLeaderboards";
 import { CommunitySuggestionBoard } from "./components/CommunitySuggestionBoard";
 import { CommunityTicker } from "./components/CommunityTicker";
@@ -22,7 +23,6 @@ import { PartnerShowcase } from "./components/PartnerShowcase";
 import { PrizeCatalog } from "./components/PrizeCatalog";
 import { PrizeStandings } from "./components/PrizeStandings";
 import { ScottishHost } from "./components/ScottishHost";
-import { SportsCarDraws } from "./components/SportsCarDraws";
 import { SerenityCharityPage } from "./components/SerenityCharityPage";
 import { WelcomePage } from "./components/WelcomePage";
 import { StormBackdrop } from "./components/StormBackdrop";
@@ -38,7 +38,8 @@ export default function App() {
     : path === "/duel" ? <><DuelRoom /><ScottishHost /><MobileDock /></>
     : path === "/lobby" ? <><NeonGameLobby /><ScottishHost /><MobileDock /></>
     : path === "/custom-draw" ? <><CustomDrawGallery /><ScottishHost /><MobileDock /></>
-    : path === "/sports-cars" ? <><SportsCarDraws /><ScottishHost /><MobileDock /></>
+    : path === "/sports-cars" ? <><CategoryDrawCarousel category="Cars" /><ScottishHost /><MobileDock /></>
+    : path === "/category" ? <><CategoryDrawCarousel category={new URLSearchParams(window.location.search).get("name") || "Cash"} /><ScottishHost /><MobileDock /></>
     : <SiteContent path={path} />;
 
   return <div className="storm-page"><div className="storm-page__content">{page}</div><StormBackdrop key={path} /></div>;
