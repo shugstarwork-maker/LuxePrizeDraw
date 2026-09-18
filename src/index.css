@@ -44,6 +44,18 @@
 @keyframes rain-sweep { to { background-position: 0 44px; } }
 @media (prefers-reduced-motion: reduce) { .lightning-backdrop__bolt, .lightning-backdrop__cloud, .lightning-backdrop__rain { animation: none; } .lightning-backdrop__bolt { opacity: .18; } }
 
+/* Bright cash-rain atmosphere is reserved for the homepage. */
+.storm-page--money { background: #e8c65b; }
+.money-backdrop { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: #e8c65b; }
+.money-backdrop__sky { position: absolute; inset: 0; background: radial-gradient(circle at 75% 12%, rgba(255, 249, 187, .94), transparent 23%), linear-gradient(160deg, #8ed3f4 0%, #d2ebcf 46%, #f7d96e 100%); }
+.money-backdrop__glow { position: absolute; inset: 0; background: linear-gradient(110deg, transparent 0 32%, rgba(255,255,255,.22) 48%, transparent 63%); animation: money-shine 8s linear infinite; }
+.money-backdrop__notes { position: absolute; inset: -20% 0 0; }
+.money-backdrop__note { position: absolute; top: -12%; left: var(--note-left); display: grid; width: 2.1rem; height: 1.25rem; place-items: center; border: 1px solid rgba(20, 75, 34, .5); border-radius: .14rem; color: #dff8ba; background: linear-gradient(135deg, #2f9853, #125e36); box-shadow: 0 5px 11px rgba(8, 48, 22, .26); font: 900 .8rem/1 Arial, sans-serif; animation: money-fall var(--note-speed) linear infinite; animation-delay: var(--note-delay); }
+.money-backdrop__note--1 { --note-left: 4%; --note-speed: 9s; --note-delay: -7s; }.money-backdrop__note--2 { --note-left: 11%; --note-speed: 12s; --note-delay: -1s; }.money-backdrop__note--3 { --note-left: 18%; --note-speed: 8s; --note-delay: -4s; }.money-backdrop__note--4 { --note-left: 25%; --note-speed: 14s; --note-delay: -10s; }.money-backdrop__note--5 { --note-left: 32%; --note-speed: 10s; --note-delay: -2s; }.money-backdrop__note--6 { --note-left: 39%; --note-speed: 13s; --note-delay: -8s; }.money-backdrop__note--7 { --note-left: 46%; --note-speed: 9s; --note-delay: -5s; }.money-backdrop__note--8 { --note-left: 53%; --note-speed: 11s; --note-delay: -9s; }.money-backdrop__note--9 { --note-left: 60%; --note-speed: 8s; --note-delay: -3s; }.money-backdrop__note--10 { --note-left: 67%; --note-speed: 15s; --note-delay: -11s; }.money-backdrop__note--11 { --note-left: 74%; --note-speed: 10s; --note-delay: -6s; }.money-backdrop__note--12 { --note-left: 81%; --note-speed: 12s; --note-delay: -2s; }.money-backdrop__note--13 { --note-left: 88%; --note-speed: 9s; --note-delay: -8s; }.money-backdrop__note--14 { --note-left: 95%; --note-speed: 13s; --note-delay: -4s; }.money-backdrop__note--15 { --note-left: 7%; --note-speed: 16s; --note-delay: -12s; }.money-backdrop__note--16 { --note-left: 56%; --note-speed: 14s; --note-delay: -7s; }.money-backdrop__note--17 { --note-left: 86%; --note-speed: 11s; --note-delay: -5s; }.money-backdrop__note--18 { --note-left: 29%; --note-speed: 15s; --note-delay: -13s; }
+@keyframes money-fall { to { transform: translate3d(8vw, 130vh, 0) rotate(510deg); } }
+@keyframes money-shine { from { transform: translateX(-110%); } to { transform: translateX(110%); } }
+@media (prefers-reduced-motion: reduce) { .money-backdrop__glow, .money-backdrop__note { animation: none; } .money-backdrop__note { opacity: .3; } }
+
 /* Immersive background glow ambient layers */
 .immersive-bg-glow {
   background: radial-gradient(circle at 70% 20%, rgba(212, 175, 55, 0.15) 0%, transparent 45%),

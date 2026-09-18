@@ -41,7 +41,7 @@ export default function App() {
     : path === "/sports-cars" ? <><SportsCarDraws /><ScottishHost /><MobileDock /></>
     : <SiteContent path={path} />;
 
-  return <div className="storm-page"><div className="storm-page__content">{page}</div><StormBackdrop key={path} /></div>;
+  return <div className={`storm-page ${path === "/" ? "storm-page--money" : ""}`}><div className="storm-page__content">{page}</div><StormBackdrop bright={path === "/"} /></div>;
 }
 
 function SiteContent({ path }: { path: string }) {
