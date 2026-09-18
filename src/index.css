@@ -28,19 +28,21 @@
 .serenity-card h2 { margin-top: 1.2rem; font-size: 1.15rem; font-weight: 900; }
 .serenity-card p { margin-top: .65rem; font-size: .875rem; line-height: 1.6; color: rgba(255,255,255,.62); }
 
-/* Full-page sunny atmosphere, kept behind interactive content. */
-.storm-page { position: relative; isolation: isolate; min-height: 100vh; background: #f3c866; }
+/* Full-page storm atmosphere, kept behind interactive content. */
+.storm-page { position: relative; isolation: isolate; min-height: 100vh; background: #050914; }
 .storm-page__content { position: relative; z-index: 1; }
-.sunny-backdrop { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
-.sunny-backdrop__sky { position: absolute; inset: 0; background: linear-gradient(180deg, #5fc9ff 0%, #a9e5ff 39%, #f9d982 100%); }
-.sunny-backdrop__sun { position: absolute; top: -10rem; right: -8rem; width: 29rem; height: 29rem; border-radius: 50%; background: radial-gradient(circle, #fffbd4 0 8%, #ffe272 30%, rgba(255, 210, 66, .54) 48%, rgba(255, 210, 66, 0) 72%); filter: blur(2px); animation: sun-glow 5s ease-in-out infinite alternate; }
-.sunny-backdrop__haze { position: absolute; inset: 38% -10% -15%; background: radial-gradient(ellipse at 15% 92%, rgba(93, 157, 76, .35), transparent 43%), radial-gradient(ellipse at 78% 87%, rgba(41, 117, 76, .24), transparent 45%), linear-gradient(180deg, transparent, rgba(255, 244, 198, .26)); }
-.sunny-backdrop__birds { position: absolute; inset: 0; overflow: hidden; }
-.sunny-backdrop__bird { position: absolute; top: var(--bird-top); left: -4rem; color: rgba(20, 50, 68, .82); font: 900 var(--bird-size)/1 Arial, sans-serif; transform: rotate(180deg); text-shadow: 0 1px rgba(255,255,255,.35); animation: bird-flight var(--bird-duration) linear infinite; animation-delay: var(--bird-delay); }
-.sunny-backdrop__bird--1 { --bird-top: 17%; --bird-size: 2rem; --bird-duration: 18s; --bird-delay: -3s; }.sunny-backdrop__bird--2 { --bird-top: 25%; --bird-size: 1.4rem; --bird-duration: 23s; --bird-delay: -12s; }.sunny-backdrop__bird--3 { --bird-top: 12%; --bird-size: 1.1rem; --bird-duration: 16s; --bird-delay: -7s; }.sunny-backdrop__bird--4 { --bird-top: 34%; --bird-size: 1.65rem; --bird-duration: 28s; --bird-delay: -20s; }.sunny-backdrop__bird--5 { --bird-top: 20%; --bird-size: .9rem; --bird-duration: 19s; --bird-delay: -9s; }.sunny-backdrop__bird--6 { --bird-top: 8%; --bird-size: 1.3rem; --bird-duration: 25s; --bird-delay: -16s; }.sunny-backdrop__bird--7 { --bird-top: 30%; --bird-size: 1rem; --bird-duration: 21s; --bird-delay: -5s; }
-@keyframes bird-flight { 0% { transform: translate3d(-5vw, 1rem, 0) rotate(180deg) scaleX(1); } 47% { transform: translate3d(53vw, -1.5rem, 0) rotate(174deg) scaleX(.72); } 52% { transform: translate3d(59vw, -2rem, 0) rotate(187deg) scaleX(.72); } 100% { transform: translate3d(115vw, .4rem, 0) rotate(180deg) scaleX(1); } }
-@keyframes sun-glow { to { transform: scale(1.06); filter: blur(4px); } }
-@media (prefers-reduced-motion: reduce) { .sunny-backdrop__sun, .sunny-backdrop__bird { animation: none; } .sunny-backdrop__bird { display: none; } }
+.lightning-backdrop { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: #050914; }
+.lightning-backdrop__sky { position: absolute; inset: 0; background: radial-gradient(ellipse at 72% 8%, rgba(54, 93, 174, .52), transparent 37%), linear-gradient(180deg, #121a38 0%, #080c1d 49%, #03050c 100%); }
+.lightning-backdrop__cloud { position: absolute; width: 70vw; height: 25vw; border-radius: 50%; filter: blur(45px); opacity: .64; background: radial-gradient(ellipse, rgba(69, 79, 117, .8), rgba(17, 21, 43, 0) 70%); }
+.lightning-backdrop__cloud--one { top: 2%; left: -24%; animation: storm-drift 19s ease-in-out infinite alternate; }
+.lightning-backdrop__cloud--two { top: 19%; right: -30%; animation: storm-drift 24s ease-in-out infinite alternate-reverse; }
+.lightning-backdrop__rain { position: absolute; inset: 0; opacity: .22; background-image: repeating-linear-gradient(112deg, transparent 0 22px, rgba(188, 220, 255, .42) 23px 24px, transparent 25px 43px); animation: rain-sweep 1.35s linear infinite; }
+.lightning-backdrop__bolt { position: absolute; top: -10%; width: 18px; height: 76%; opacity: 0; transform: rotate(18deg); clip-path: polygon(44% 0, 100% 0, 63% 39%, 98% 39%, 17% 100%, 44% 54%, 0 54%); background: linear-gradient(90deg, rgba(229, 246, 255, .4), #f7fbff 48%, rgba(125, 202, 255, .45)); filter: drop-shadow(0 0 14px #dff4ff) drop-shadow(0 0 38px #6c9cff); animation: lightning-flash var(--flash, 8s) steps(1, end) infinite; animation-delay: var(--delay, 0s); }
+.lightning-backdrop__bolt--1 { left: 16%; --flash: 9s; --delay: -2s; }.lightning-backdrop__bolt--2 { left: 37%; --flash: 13s; --delay: -6s; transform: rotate(-12deg) scale(.72); }.lightning-backdrop__bolt--3 { left: 61%; --flash: 11s; --delay: -4s; transform: rotate(9deg) scale(.94); }.lightning-backdrop__bolt--4 { left: 82%; --flash: 16s; --delay: -10s; transform: rotate(-19deg) scale(.66); }.lightning-backdrop__bolt--5 { left: 48%; --flash: 19s; --delay: -12s; transform: rotate(25deg) scale(.55); }
+@keyframes lightning-flash { 0%, 6%, 8%, 100% { opacity: 0; } 6.5%, 7.2% { opacity: .92; } }
+@keyframes storm-drift { to { transform: translate3d(13vw, 2vw, 0) scale(1.1); } }
+@keyframes rain-sweep { to { background-position: 0 44px; } }
+@media (prefers-reduced-motion: reduce) { .lightning-backdrop__bolt, .lightning-backdrop__cloud, .lightning-backdrop__rain { animation: none; } .lightning-backdrop__bolt { opacity: .18; } }
 
 /* Immersive background glow ambient layers */
 .immersive-bg-glow {
