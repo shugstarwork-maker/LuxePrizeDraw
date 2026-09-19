@@ -736,8 +736,6 @@ async function startServer() {
   });
 }
 
-startServer();
-
 // Arcade matches are persisted and validated server-side. Browser game state is never a source of truth.
 type ArcadeGame = "chess" | "connect4" | "draughts";
 async function ensureArcadeTables() {
@@ -797,3 +795,5 @@ app.post("/api/arcade/connect4/rooms", async (req, res) => { try { const id = re
 app.post("/api/arcade/connect4/rooms/:roomId/join", async (req, res) => { try { const id = requireArcadeSession(req, res); if (!id) return; const room = await getRoom(req.params.roomId); const player = await getArcadeProfile(id); if (!room || !player) return res.status(404).json({ error: "Room or player was not found." }); if (room.players.red.id === id) return res.json(publicRoom(room)); if (room.players.yellow && room.players.yellow.id !== id) return res.status(409).json({ error: "This room is full." }); room.players.yellow = player; room.version += 1; await arcadeRedis().set(`arcade:room:${room.id}`, room, { ex: 3600 }); return res.json(publicRoom(room)); } catch { return res.status(503).json({ error: "Unable to join the room." }); } });
 app.get("/api/arcade/connect4/rooms/:roomId", async (req, res) => { try { const id = requireArcadeSession(req, res); if (!id) return; const room = await getRoom(req.params.roomId); if (!room || (room.players.red.id !== id && room.players.yellow?.id !== id)) return res.status(404).json({ error: "Room was not found." }); return res.json(publicRoom(room)); } catch { return res.status(503).json({ error: "Unable to load room state." }); } });
 app.post("/api/arcade/connect4/rooms/:roomId/moves", async (req, res) => { try { const id = requireArcadeSession(req, res); if (!id) return; const room = await getRoom(req.params.roomId); const column = Number(req.body?.column); if (!room || !room.players.yellow) return res.status(409).json({ error: "Waiting for an opponent." }); const required = room.state.turn === "red" ? room.players.red.id : room.players.yellow.id; if (id !== required) return res.status(403).json({ error: "It is not your turn." }); const version = Number(req.body?.version); if (!Number.isInteger(version) || version !== room.version) return res.status(409).json({ error: "Room changed. Reload the board." }); room.state = playConnectFour(room.state, column); room.version += 1; await settleConnectFour(room); await arcadeRedis().set(`arcade:room:${room.id}`, room, { ex: 3600 }); return res.json(publicRoom(room)); } catch (error) { return res.status(400).json({ error: error instanceof Error ? error.message : "Move rejected." }); } });
+
+startServer();
