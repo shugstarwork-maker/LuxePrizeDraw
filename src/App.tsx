@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { CashLaunchReadiness } from "./components/CashLaunchReadiness";
+import { CashGiveawaysPage } from "./components/CashGiveawaysPage";
 import { AudioControls } from "./components/AudioControls";
 import { CategoryDrawCarousel } from "./components/CategoryDrawCarousel";
 import { CommunityLeaderboards } from "./components/CommunityLeaderboards";
@@ -37,6 +38,7 @@ export default function App() {
   useEffect(() => { const sync = () => setPath(window.location.pathname); window.addEventListener("popstate", sync); return () => window.removeEventListener("popstate", sync); }, []);
   const page = path === "/welcome" ? <WelcomePage onEnter={() => go("/")} />
     : path === "/serenity" ? <SerenityCharityPage />
+    : path === "/cash-giveaways" ? <CashGiveawaysPage />
     : path === "/duel" ? <><DuelRoom /><ScottishHost /><MobileDock /></>
     : path === "/lobby" ? <><NeonGameLobby /><ScottishHost /><MobileDock /></>
     : path === "/custom-draw" ? <><CustomDrawGallery /><ScottishHost /><MobileDock /></>
