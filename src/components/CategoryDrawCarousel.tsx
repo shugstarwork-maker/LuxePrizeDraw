@@ -26,14 +26,22 @@ const data: Record<string, { title: string; draws: Draw[] }> = {
     { name: "Premium Tech Collection", image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1400&q=85", details: [["Category", "Consumer tech"], ["Contents", "To be confirmed"], ["Documentation", "At launch"], ["Status", "Preview"]], cashAlternative: "Published with official draw rules" },
   ] },
   Cash: { title: "Cash draws", draws: [
-    { name: "£5,000 Cash Draw", image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=1400&q=85", details: [["Prize", "Cash"], ["Value", "£5,000"], ["Route", "Official rules"], ["Status", "Preview"]] },
-    { name: "£10,000 Cash Draw", image: "https://images.unsplash.com/photo-1579621970795-87facc2f976d?auto=format&fit=crop&w=1400&q=85", details: [["Prize", "Cash"], ["Value", "£10,000"], ["Route", "Official rules"], ["Status", "Preview"]] },
+    { name: "1p Cash Draw", image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=1400&q=85", details: [["Entry band", "1p"], ["Prize", "Cash"], ["Route", "Official rules"], ["Status", "Preview"]] },
+    { name: "2p Cash Draw", image: "https://images.unsplash.com/photo-1579621970795-87facc2f976d?auto=format&fit=crop&w=1400&q=85", details: [["Entry band", "2p"], ["Prize", "Cash"], ["Route", "Official rules"], ["Status", "Preview"]] },
+    { name: "10p Cash Draw", image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=1400&q=85", details: [["Entry band", "10p"], ["Prize", "Cash"], ["Route", "Official rules"], ["Status", "Preview"]] },
+    { name: "20p Cash Draw", image: "https://images.unsplash.com/photo-1579621970795-87facc2f976d?auto=format&fit=crop&w=1400&q=85", details: [["Entry band", "20p"], ["Prize", "Cash"], ["Route", "Official rules"], ["Status", "Preview"]] },
+    { name: "25p Cash Draw", image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=1400&q=85", details: [["Entry band", "25p"], ["Prize", "Cash"], ["Route", "Official rules"], ["Status", "Preview"]] },
+    { name: "30p Cash Draw", image: "https://images.unsplash.com/photo-1579621970795-87facc2f976d?auto=format&fit=crop&w=1400&q=85", details: [["Entry band", "30p"], ["Prize", "Cash"], ["Route", "Official rules"], ["Status", "Preview"]] },
+    { name: "50p Cash Draw", image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=1400&q=85", details: [["Entry band", "50p"], ["Prize", "Cash"], ["Route", "Official rules"], ["Status", "Preview"]] },
+    { name: "£1 Cash Draw", image: "https://images.unsplash.com/photo-1579621970795-87facc2f976d?auto=format&fit=crop&w=1400&q=85", details: [["Entry band", "£1"], ["Prize", "Cash"], ["Route", "Official rules"], ["Status", "Preview"]] },
+    { name: "£5 Cash Draw", image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=1400&q=85", details: [["Entry band", "£5"], ["Prize", "Cash"], ["Route", "Official rules"], ["Status", "Preview"]] },
+    { name: "£10 Cash Draw", image: "https://images.unsplash.com/photo-1579621970795-87facc2f976d?auto=format&fit=crop&w=1400&q=85", details: [["Entry band", "£10"], ["Prize", "Cash"], ["Route", "Official rules"], ["Status", "Preview"]] },
   ] },
 };
 
-export function CategoryDrawCarousel({ category }: { category: string }) {
+export function CategoryDrawCarousel({ category, entryBand }: { category: string; entryBand?: string }) {
   const group = data[category] || data.Cash;
-  const [current, setCurrent] = useState(0);
+  const [current, setCurrent] = useState(() => entryBand ? Math.max(0, group.draws.findIndex((draw) => draw.name.startsWith(entryBand))) : 0);
   const startX = useRef<number | null>(null);
   const next = () => setCurrent((value) => (value + 1) % group.draws.length);
   const previous = () => setCurrent((value) => (value - 1 + group.draws.length) % group.draws.length);
