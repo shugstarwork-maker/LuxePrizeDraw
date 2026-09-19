@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { CashLaunchReadiness } from "./components/CashLaunchReadiness";
+import { TermsPage } from "./components/TermsPage";
 import { CashGiveawaysPage } from "./components/CashGiveawaysPage";
 import { AudioControls } from "./components/AudioControls";
 import { CategoryDrawCarousel } from "./components/CategoryDrawCarousel";
@@ -39,6 +40,7 @@ export default function App() {
   const page = path === "/welcome" ? <WelcomePage onEnter={() => go("/")} />
     : path === "/serenity" ? <SerenityCharityPage />
     : path === "/cash-giveaways" ? <CashGiveawaysPage />
+    : path === "/terms" ? <TermsPage />
     : path === "/duel" ? <><DuelRoom /><ScottishHost /><MobileDock /></>
     : path === "/lobby" ? <><NeonGameLobby /><ScottishHost /><MobileDock /></>
     : path === "/custom-draw" ? <><CustomDrawGallery /><ScottishHost /><MobileDock /></>
