@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ArrowUpRight, ChevronDown, Gamepad2, Gem, Heart, Plane, PlayCircle, ShieldCheck, Trophy, WalletCards } from "lucide-react";
+import { ArrowUpRight, ChevronDown, Gamepad2, Gem, Heart, House, Plane, PlayCircle, ShieldCheck, Trophy, WalletCards } from "lucide-react";
 import { useAudio } from "../audio/AudioProvider";
 
 const categories = [
@@ -7,6 +7,7 @@ const categories = [
   { label: "Sports Cars", icon: Trophy, path: "/sports-cars", image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=900&q=85" },
   { label: "Holidays", icon: Plane, path: "/category?name=Holidays", image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=85" },
   { label: "Gaming Bundles", icon: Gamepad2, path: "/category?name=Gaming%20Bundles", image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=900&q=85" },
+  { label: "Luxury Homes", icon: House, path: "/category?name=Luxury%20homes", image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=85" },
   { label: "Lifestyle", icon: Gem, path: "/category?name=Lifestyle", image: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=900&q=85" },
 ];
 
