@@ -4,7 +4,7 @@ import { useAudio } from "../audio/AudioProvider";
 
 const draws = [
   { title: "Ferrari 488 GTB", category: "Sports car", image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1400&q=85", path: "/sports-cars" },
-  { title: "£10,000 Cash Draw", category: "Cash prize", image: "https://images.unsplash.com/photo-1579621970795-87facc2f976d?auto=format&fit=crop&w=1400&q=85", path: "/category?name=Cash" },
+  { title: "1p Prize Collection", category: "Approx. £500 prizes", image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1400&q=85", path: "/category?name=Cash" },
   { title: "Maldives Escape", category: "Holiday", image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=85", path: "/category?name=Holidays" },
   { title: "Luxury Timepiece", category: "Lifestyle", image: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=1400&q=85", path: "/category?name=Lifestyle" },
 ];
