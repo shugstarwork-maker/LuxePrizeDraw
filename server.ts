@@ -4,6 +4,8 @@ import crypto from "crypto";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import { neon } from "@neondatabase/serverless";
+import { Redis } from "@upstash/redis";
+import { newConnectFour, playConnectFour, type ConnectFourState } from "./src/games/connectFour";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -758,3 +760,40 @@ app.get("/api/arcade/profile", async (req, res) => {
   try { await ensureArcadeTables(); const sql = getAuditDatabase(); await sql`INSERT INTO arcade_players (id) VALUES (${playerId}) ON CONFLICT (id) DO NOTHING`; const rows = await sql`SELECT * FROM arcade_players WHERE id = ${playerId}`; return res.json(rows[0]); } catch { return res.status(503).json({ error: "Arcade profile storage is unavailable." }); }
 });
 app.get("/api/arcade/readiness", (_req, res) => res.json({ onlinePlayEnabled: Boolean(process.env.ARCADE_PLAYER_AUTH_HMAC_SECRET && process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN), requirements: ["authenticated player identity", "Neon match storage", "Upstash Redis room coordination"] }));
+
+
+type ArcadeProfile = { id: string; displayName: string; elo: number; gamesPlayed: number; wins: number; losses: number; draws: number; winStreak: number; highestElo: number; tournamentWins: number };
+type ConnectFourRoom = { id: string; players: { red: ArcadeProfile; yellow?: ArcadeProfile }; state: ConnectFourState; version: number; createdAt: number; finishedAt?: number };
+const arcadeRedis = () => {
+  const url = process.env.KV_REST_API_URL; const token = process.env.KV_REST_API_TOKEN;
+  if (!url || !token) throw new Error("Redis is not connected.");
+  return new Redis({ url, token });
+};
+const arcadeCookie = "luxe_arcade_session";
+function signedArcadeId(req: express.Request) {
+  const secret = process.env.ARCADE_SESSION_SECRET;
+  const cookie = req.header("cookie")?.split(";").map((item) => item.trim()).find((item) => item.startsWith(`${arcadeCookie}=`))?.slice(arcadeCookie.length + 1);
+  if (!secret || !cookie) return null; const [id, signature] = cookie.split("."); if (!id || !signature) return null;
+  const expected = crypto.createHmac("sha256", secret).update(id).digest("base64url");
+  return expected.length === signature.length && crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature)) ? id : null;
+}
+function baseProfile(id: string, displayName: string): ArcadeProfile { return { id, displayName: displayName.slice(0, 32), elo: 1200, gamesPlayed: 0, wins: 0, losses: 0, draws: 0, winStreak: 0, highestElo: 1200, tournamentWins: 0 }; }
+async function getArcadeProfile(id: string) { const redis = arcadeRedis(); return (await redis.get<ArcadeProfile>(`arcade:player:${id}`)) || null; }
+async function putArcadeProfile(profile: ArcadeProfile) { await arcadeRedis().set(`arcade:player:${profile.id}`, profile); }
+async function getRoom(id: string) { return arcadeRedis().get<ConnectFourRoom>(`arcade:room:${id}`); }
+function requireArcadeSession(req: express.Request, res: express.Response) { const id = signedArcadeId(req); if (!id) { res.status(401).json({ error: "Sign in to the Arcade first." }); return null; } return id; }
+function publicRoom(room: ConnectFourRoom) { return { id: room.id, players: { red: { displayName: room.players.red.displayName, elo: room.players.red.elo }, yellow: room.players.yellow && { displayName: room.players.yellow.displayName, elo: room.players.yellow.elo } }, state: room.state, version: room.version, finishedAt: room.finishedAt }; }
+function eloDelta(actual: number, own: number, opponent: number) { const expected = 1 / (1 + 10 ** ((opponent - own) / 400)); return Math.round(32 * (actual - expected)); }
+async function settleConnectFour(room: ConnectFourRoom) {
+  if (room.state.status === "playing" || !room.players.yellow) return; const red = room.players.red; const yellow = room.players.yellow; const result = room.state.status === "red_won" ? 1 : room.state.status === "yellow_won" ? 0 : .5; const redDelta = eloDelta(result, red.elo, yellow.elo); const yellowDelta = eloDelta(1 - result, yellow.elo, red.elo);
+  const update = (profile: ArcadeProfile, outcome: number, delta: number): ArcadeProfile => { const elo = profile.elo + delta; return { ...profile, elo, gamesPlayed: profile.gamesPlayed + 1, wins: profile.wins + (outcome === 1 ? 1 : 0), losses: profile.losses + (outcome === 0 ? 1 : 0), draws: profile.draws + (outcome === .5 ? 1 : 0), winStreak: outcome === 1 ? profile.winStreak + 1 : 0, highestElo: Math.max(profile.highestElo, elo) }; };
+  await Promise.all([putArcadeProfile(update(red, result, redDelta)), putArcadeProfile(update(yellow, 1 - result, yellowDelta))]); room.finishedAt = Date.now();
+}
+app.post("/api/arcade/session", async (req, res) => {
+  try { const displayName = limitedText(req.body?.displayName, 32); if (!displayName) return res.status(400).json({ error: "Choose a display name." }); const secret = process.env.ARCADE_SESSION_SECRET; if (!secret) return res.status(503).json({ error: "Arcade sessions are not configured." }); const id = crypto.randomUUID(); const signature = crypto.createHmac("sha256", secret).update(id).digest("base64url"); const profile = baseProfile(id, displayName); await putArcadeProfile(profile); res.setHeader("Set-Cookie", `${arcadeCookie}=${id}.${signature}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=2592000`); return res.status(201).json(profile); } catch { return res.status(503).json({ error: "Arcade session storage is unavailable." }); }
+});
+app.get("/api/arcade/session", async (req, res) => { try { const id = requireArcadeSession(req, res); if (!id) return; const profile = await getArcadeProfile(id); return profile ? res.json(profile) : res.status(401).json({ error: "Session expired." }); } catch { return res.status(503).json({ error: "Arcade session storage is unavailable." }); } });
+app.post("/api/arcade/connect4/rooms", async (req, res) => { try { const id = requireArcadeSession(req, res); if (!id) return; const player = await getArcadeProfile(id); if (!player) return res.status(401).json({ error: "Session expired." }); const room: ConnectFourRoom = { id: crypto.randomUUID().slice(0, 8).toUpperCase(), players: { red: player }, state: newConnectFour(), version: 1, createdAt: Date.now() }; await arcadeRedis().set(`arcade:room:${room.id}`, room, { ex: 3600 }); return res.status(201).json(publicRoom(room)); } catch { return res.status(503).json({ error: "Unable to create an online room." }); } });
+app.post("/api/arcade/connect4/rooms/:roomId/join", async (req, res) => { try { const id = requireArcadeSession(req, res); if (!id) return; const room = await getRoom(req.params.roomId); const player = await getArcadeProfile(id); if (!room || !player) return res.status(404).json({ error: "Room or player was not found." }); if (room.players.red.id === id) return res.json(publicRoom(room)); if (room.players.yellow && room.players.yellow.id !== id) return res.status(409).json({ error: "This room is full." }); room.players.yellow = player; room.version += 1; await arcadeRedis().set(`arcade:room:${room.id}`, room, { ex: 3600 }); return res.json(publicRoom(room)); } catch { return res.status(503).json({ error: "Unable to join the room." }); } });
+app.get("/api/arcade/connect4/rooms/:roomId", async (req, res) => { try { const id = requireArcadeSession(req, res); if (!id) return; const room = await getRoom(req.params.roomId); if (!room || (room.players.red.id !== id && room.players.yellow?.id !== id)) return res.status(404).json({ error: "Room was not found." }); return res.json(publicRoom(room)); } catch { return res.status(503).json({ error: "Unable to load room state." }); } });
+app.post("/api/arcade/connect4/rooms/:roomId/moves", async (req, res) => { try { const id = requireArcadeSession(req, res); if (!id) return; const room = await getRoom(req.params.roomId); const column = Number(req.body?.column); if (!room || !room.players.yellow) return res.status(409).json({ error: "Waiting for an opponent." }); const required = room.state.turn === "red" ? room.players.red.id : room.players.yellow.id; if (id !== required) return res.status(403).json({ error: "It is not your turn." }); const version = Number(req.body?.version); if (!Number.isInteger(version) || version !== room.version) return res.status(409).json({ error: "Room changed. Reload the board." }); room.state = playConnectFour(room.state, column); room.version += 1; await settleConnectFour(room); await arcadeRedis().set(`arcade:room:${room.id}`, room, { ex: 3600 }); return res.json(publicRoom(room)); } catch (error) { return res.status(400).json({ error: error instanceof Error ? error.message : "Move rejected." }); } });
