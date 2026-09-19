@@ -451,3 +451,6 @@
 .luxury-destination-card img { display:block; image-rendering:auto; backface-visibility:hidden; -webkit-backface-visibility:hidden; }
 .luxury-destination-card::after { content:""; position:absolute; inset:0; z-index:-1; border:1px solid rgba(255,255,255,.08); border-radius:inherit; pointer-events:none; }
 @media (max-width: 639px) { .luxury-note { width:7rem; height:3.25rem; font-size:1.35rem; opacity:.55; } .luxury-note--one { right:-1.5rem; } .luxury-note--two { left:-2rem; } .luxury-destination-card { min-height:23rem; } }
+
+.money-rain--cars .money-rain__note, .money-rain--heels .money-rain__note, .money-rain--ties .money-rain__note { width: 1rem; height: 1rem; border: 0; background: transparent; box-shadow: none; font-size: .72rem; filter: drop-shadow(0 2px 3px rgba(0,0,0,.45)); }
+.money-rain--cars .money-rain__note { filter: saturate(1.25) drop-shadow(0 2px 3px rgba(0,0,0,.45)); }
