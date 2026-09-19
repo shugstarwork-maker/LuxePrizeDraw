@@ -12,8 +12,6 @@ const links: Link[] = [
   { href: "/cash-giveaways", label: "Cash Giveaways", icon: Video },
   { href: "/terms", label: "Terms", icon: FileText },
   { href: "/play", label: "Play", icon: Gamepad2 },
-  { href: "/duel", label: "1v1 Duel", icon: Swords },
-  { href: "/lobby", label: "Game Lobby", icon: Sparkles },
 ];
 
 const navigate = (href: string) => {
