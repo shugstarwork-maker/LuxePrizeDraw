@@ -1,12 +1,11 @@
 import React from "react";
-import { FileText, Gamepad2, Gem, Heart, Home, Sparkles, Swords, Trophy, Video } from "lucide-react";
+import { FileText, Gamepad2, Heart, Home, Sparkles, Trophy, Video } from "lucide-react";
 import { useAudio } from "../audio/AudioProvider";
 
 type Link = { href: string; label: string; icon: React.ElementType };
 const links: Link[] = [
   { href: "/", label: "Discover", icon: Home },
   { href: "/draws", label: "Prize draws", icon: Trophy },
-  { href: "/custom-draw", label: "Custom Draw", icon: Gem },
   { href: "/community", label: "Community", icon: Heart },
   { href: "/serenity", label: "Serenity", icon: Heart },
   { href: "/cash-giveaways", label: "Cash Giveaways", icon: Video },

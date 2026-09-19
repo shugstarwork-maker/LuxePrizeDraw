@@ -8,7 +8,6 @@ import { CommunityLeaderboards } from "./components/CommunityLeaderboards";
 import { CommunitySuggestionBoard } from "./components/CommunitySuggestionBoard";
 import { CommunityTicker } from "./components/CommunityTicker";
 import { CompetitiveHub } from "./components/CompetitiveHub";
-import { CustomDrawGallery } from "./components/CustomDrawGallery";
 import { DuelRoom } from "./components/DuelRoom";
 import { ExperienceNav } from "./components/ExperienceNav";
 import { FeaturedDraws } from "./components/FeaturedDraws";
@@ -43,7 +42,6 @@ export default function App() {
     : path === "/terms" ? <TermsPage />
     : path === "/duel" ? <><DuelRoom /><ScottishHost /><MobileDock /></>
     : path === "/lobby" ? <><NeonGameLobby /><ScottishHost /><MobileDock /></>
-    : path === "/custom-draw" ? <><CustomDrawGallery /><ScottishHost /><MobileDock /></>
     : path === "/sports-cars" ? <><CategoryDrawCarousel category="Cars" /><ScottishHost /><MobileDock /></>
     : path === "/category" ? <><CategoryDrawCarousel category={new URLSearchParams(window.location.search).get("name") || "Cash"} entryBand={new URLSearchParams(window.location.search).get("band") || undefined} /><ScottishHost /><MobileDock /></>
     : <SiteContent path={path} />;
