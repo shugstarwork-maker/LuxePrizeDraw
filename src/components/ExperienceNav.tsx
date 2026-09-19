@@ -6,7 +6,7 @@ type Link = { href: string; label: string; icon: React.ElementType };
 const links: Link[] = [
   { href: "/", label: "Discover", icon: Home },
   { href: "/draws", label: "Prize draws", icon: Trophy },
-  { href: "/play", label: "Play", icon: Gamepad2 },
+  { href: "/play", label: "Luxe Poker", icon: Gamepad2 },
 ];
 
 const navigate = (href: string) => {
