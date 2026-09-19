@@ -6,7 +6,7 @@ type Category = "Women's prizes" | "Men's prizes" | "Cars" | "Luxury holidays" |
 type Draw = { name: string; image: string; details: [string, string][]; cashAlternative: string; inclusions?: string[] };
 
 type Tier = { entry: string; value: string };
-const tiers: Tier[] = [{ entry: "1p", value: "£500" }, { entry: "£1", value: "£5,000" }, { entry: "£5", value: "£25,000" }, { entry: "£10", value: "£50,000" }];
+const tiers: Tier[] = [{ entry: "1p", value: "£500" }, { entry: "2p", value: "£750" }, { entry: "5p", value: "£1,250" }, { entry: "10p", value: "£2,500" }, { entry: "20p", value: "£5,000" }, { entry: "50p", value: "£10,000" }, { entry: "£1", value: "£20,000" }, { entry: "£5", value: "£35,000" }, { entry: "£10", value: "£50,000" }];
 
 const images: Record<Category, string> = {
   "Women's prizes": "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1400&q=85",
@@ -18,12 +18,12 @@ const images: Record<Category, string> = {
 };
 
 const names: Record<Category, string[]> = {
-  "Women's prizes": ["Louis Vuitton handbag", "Designer wardrobe collection", "Fine jewellery package", "Luxury fashion fund"],
-  "Men's prizes": ["Luxury timepiece", "Premium golf collection", "Tailored travel wardrobe", "Collector watch package"],
-  Cars: ["High-end car experience", "Performance coupe", "High-end sports car", "Supercar collection"],
-  "Luxury holidays": ["Paris landmark escape", "Dubai luxury city stay", "New York skyline experience", "Maldives private-island escape"],
-  "Gaming & tech": ["Premium home-tech bundle", "Creator studio setup", "High-end gaming suite", "Future-tech collection"],
-  "Cash alternative": ["£500 cash alternative", "£5,000 cash alternative", "£25,000 cash alternative", "£50,000 cash alternative"],
+  "Women's prizes": ["Louis Vuitton handbag", "Designer accessory set", "Premium beauty collection", "Designer wardrobe collection", "Fine jewellery package", "Luxury handbag collection", "Private styling experience", "Luxury fashion fund", "Ultimate fashion collection"],
+  "Men's prizes": ["Luxury timepiece", "Premium accessories", "Executive travel collection", "Premium golf collection", "Tailored travel wardrobe", "Collector watch", "Luxury driving experience", "Collector watch package", "Ultimate gentlemen's collection"],
+  Cars: ["High-end car experience", "Performance driving day", "Premium city-car experience", "Performance coupe", "High-end sports car", "Luxury GT experience", "Sports-car collection", "Supercar experience", "Supercar collection"],
+  "Luxury holidays": ["Paris landmark escape", "Dubai city stay", "Monaco Riviera escape", "Maldives villa escape", "New York skyline experience", "Milan fashion escape", "London luxury stay", "Santorini clifftop escape", "Mykonos villa escape"],
+  "Gaming & tech": ["Premium home-tech bundle", "Gaming accessory set", "Creator starter kit", "Creator studio setup", "High-end gaming suite", "Home-cinema technology", "Future-tech collection", "Ultimate creator suite", "Smart-home collection"],
+  "Cash alternative": ["£500 cash alternative", "£750 cash alternative", "£1,250 cash alternative", "£2,500 cash alternative", "£5,000 cash alternative", "£10,000 cash alternative", "£20,000 cash alternative", "£35,000 cash alternative", "£50,000 cash alternative"],
 };
 
 const categories: Category[] = ["Women's prizes", "Men's prizes", "Cars", "Luxury holidays", "Gaming & tech", "Cash alternative"];
@@ -37,7 +37,7 @@ export function CategoryDrawCarousel({ category, entryBand }: { category: string
   const startX = useRef<number | null>(null);
   const { play } = useAudio();
   const tier = tiers[tierIndex];
-  const holidayInclusions = [["Landmark-view hotel stay", "Dedicated concierge", "Luxury shopping budget"], ["Five-star suite", "Private airport transfers", "Fine-dining allowance"], ["Luxury hotel package", "Personal concierge", "Premium shopping budget"], ["Five-star villa stay", "Private transfers", "Curated experience budget"]];
+  const holidayInclusions = [["Landmark-view hotel stay", "Dedicated concierge", "Luxury shopping budget"], ["Five-star city hotel", "Private airport transfers", "Spa experience"], ["Riviera hotel stay", "Luxury concierge", "Fine-dining allowance"], ["Private villa stay", "Seaplane transfers", "Wellness experience"], ["Five-star Manhattan hotel", "Personal concierge", "Shopping budget"], ["Fashion district hotel", "Private transfers", "Luxury shopping budget"], ["Five-star Mayfair hotel", "Fine dining", "West End experience"], ["Clifftop suite", "Luxury concierge", "Spa experience"], ["Five-star villa", "Private transfers", "Beach-club experience"]];
   const draw: Draw = { name: names[parsedCategory][tierIndex], image: images[parsedCategory], details: [["Proposed entry", tier.entry], ["Prize value", `Up to ${tier.value}`], ["Category", parsedCategory], ["Status", "Entry not open"]], cashAlternative: `Up to ${tier.value}, subject to approved rules and prize verification`, inclusions: parsedCategory === "Luxury holidays" ? holidayInclusions[tierIndex] : undefined };
   const changeTier = (nextTier: number) => { play("ticketSelect"); setTierIndex(nextTier); };
   const next = () => changeTier((tierIndex + 1) % tiers.length);
