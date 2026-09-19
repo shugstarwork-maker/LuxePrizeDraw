@@ -1,5 +1,5 @@
-const bolts = Array.from({ length: 5 }, (_, index) => index + 1);
-const notes = Array.from({ length: 18 }, (_, index) => index + 1);
+const bolts = Array.from({ length: 7 }, (_, index) => index + 1);
+const notes = Array.from({ length: 42 }, (_, index) => index + 1);
 
 export function StormBackdrop({ moneyRain = false }: { moneyRain?: boolean }) {
   return <div className="lightning-backdrop" aria-hidden="true">
