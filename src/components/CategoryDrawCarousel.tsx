@@ -2,7 +2,7 @@ import { ChevronLeft, ChevronRight, Gift, Heart, LockKeyhole, Ticket } from "luc
 import { useRef, useState } from "react";
 import { useAudio } from "../audio/AudioProvider";
 
-type Category = "Women's prizes" | "Men's prizes" | "Cars" | "Luxury holidays" | "Gaming & tech" | "Cash alternative";
+type Category = "Women's prizes" | "Men's prizes" | "Cars" | "Luxury holidays" | "Gaming & tech" | "Luxury homes" | "Cash alternative";
 type Draw = { name: string; image: string; details: [string, string][]; cashAlternative: string; inclusions?: string[] };
 
 type Tier = { entry: string; value: string };
@@ -25,6 +25,9 @@ const images: Record<Category, string[]> = {
   "Gaming & tech": [
     "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1484704849700-f032a568e944?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=1400&q=85",
   ],
+  "Luxury homes": [
+    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1600585152915-d208bec867a1?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1600573472592-401b489a3cdc?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=1400&q=85",
+  ],
   "Cash alternative": [
     "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1553729459-efe14ef6055d?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1579621970795-87facc2f976d?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1459257868276-5e65389e2722?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1580519542036-c47de6196ba5?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1565514020179-026b92b84bb6?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1580048915913-4f8f5cb481c4?auto=format&fit=crop&w=1400&q=85",
   ],
@@ -36,10 +39,11 @@ const names: Record<Category, string[]> = {
   Cars: ["High-end car experience", "Performance driving day", "Premium city-car experience", "Performance coupe", "High-end sports car", "Luxury GT experience", "Sports-car collection", "Supercar experience", "Supercar collection"],
   "Luxury holidays": ["Paris landmark escape", "Dubai city stay", "Monaco Riviera escape", "Maldives villa escape", "New York skyline experience", "Milan fashion escape", "London luxury stay", "Santorini clifftop escape", "Mykonos villa escape"],
   "Gaming & tech": ["Premium home-tech bundle", "Gaming accessory set", "Creator starter kit", "Creator studio setup", "High-end gaming suite", "Home-cinema technology", "Future-tech collection", "Ultimate creator suite", "Smart-home collection"],
+  "Luxury homes": ["Contemporary luxury home", "Coastal residence", "Hillside villa", "City penthouse", "Private estate", "Waterfront home", "Architectural villa", "Country retreat", "Signature residence"],
   "Cash alternative": ["£500 cash alternative", "£750 cash alternative", "£1,250 cash alternative", "£2,500 cash alternative", "£5,000 cash alternative", "£10,000 cash alternative", "£20,000 cash alternative", "£35,000 cash alternative", "£50,000 cash alternative"],
 };
 
-const categories: Category[] = ["Women's prizes", "Men's prizes", "Cars", "Luxury holidays", "Gaming & tech", "Cash alternative"];
+const categories: Category[] = ["Women's prizes", "Men's prizes", "Cars", "Luxury holidays", "Gaming & tech", "Luxury homes", "Cash alternative"];
 
 export function CategoryDrawCarousel({ category, entryBand }: { category: string; entryBand?: string }) {
   const legacyCategories: Record<string, Category> = { Cash: "Cash alternative", Lifestyle: "Women's prizes", "Gaming Bundles": "Gaming & tech" };
