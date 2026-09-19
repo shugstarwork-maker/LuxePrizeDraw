@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { CarFront, ChevronDown, Gamepad2, Plane, Sparkles, Trophy, UserRound, WalletCards } from "lucide-react";
 
-type Category = "Women's prizes" | "Men's prizes" | "Cars" | "Holidays" | "Gaming & tech" | "Cash alternative";
+type Category = "Women's prizes" | "Men's prizes" | "Cars" | "Luxury holidays" | "Gaming & tech" | "Cash alternative";
 type Tier = { entry: string; value: string; label: string };
 
 const tiers: Tier[] = [
@@ -15,7 +15,7 @@ const categories: { name: Category; icon: React.ElementType }[] = [
   { name: "Women's prizes", icon: Sparkles },
   { name: "Men's prizes", icon: UserRound },
   { name: "Cars", icon: CarFront },
-  { name: "Holidays", icon: Plane },
+  { name: "Luxury holidays", icon: Plane },
   { name: "Gaming & tech", icon: Gamepad2 },
   { name: "Cash alternative", icon: WalletCards },
 ];
@@ -24,7 +24,7 @@ const concepts: Record<Category, string[]> = {
   "Women's prizes": ["Louis Vuitton handbag", "Designer wardrobe collection", "Fine jewellery package", "Luxury fashion fund"],
   "Men's prizes": ["Luxury timepiece", "Premium golf collection", "Tailored travel wardrobe", "Collector watch package"],
   Cars: ["High-end car experience", "Performance coupe", "High-end sports car", "Supercar collection"],
-  Holidays: ["Five-star city escape", "Long-haul luxury holiday", "Private villa experience", "Ultimate world escape"],
+  "Luxury holidays": ["Paris landmark escape", "Dubai luxury city stay", "New York skyline experience", "Maldives private-island escape"],
   "Gaming & tech": ["Premium home-tech bundle", "Creator studio setup", "High-end gaming suite", "Future-tech collection"],
   "Cash alternative": ["£500 cash alternative", "£5,000 cash alternative", "£25,000 cash alternative", "£50,000 cash alternative"],
 };
@@ -33,7 +33,7 @@ const images: Record<Category, string> = {
   "Women's prizes": "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1400&q=85",
   "Men's prizes": "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=1400&q=85",
   Cars: "https://images.unsplash.com/photo-1494905998402-395d579af36f?auto=format&fit=crop&w=1400&q=85",
-  Holidays: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=85",
+  "Luxury holidays": "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1400&q=85",
   "Gaming & tech": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1400&q=85",
   "Cash alternative": "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=1400&q=85",
 };
