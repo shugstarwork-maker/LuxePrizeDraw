@@ -1,0 +1,2 @@
+import crypto from"node:crypto";import{expose,fresh,idFrom,json,profile,putRoom}from"../../shared";
+export async function POST(req:Request){const id=idFrom(req);if(!id)return json({error:"Sign in required"},401);const p=await profile(id);if(!p)return json({error:"Session expired"},401);const room={id:crypto.randomUUID().slice(0,8).toUpperCase(),players:{red:p},state:fresh(),version:1};await putRoom(room);return json(expose(room),201)}
