@@ -735,3 +735,26 @@ async function startServer() {
 }
 
 startServer();
+
+// Arcade matches are persisted and validated server-side. Browser game state is never a source of truth.
+type ArcadeGame = "chess" | "connect4" | "draughts";
+async function ensureArcadeTables() {
+  const sql = getAuditDatabase();
+  await sql`CREATE TABLE IF NOT EXISTS arcade_players (id TEXT PRIMARY KEY, elo INTEGER NOT NULL DEFAULT 1200, games_played INTEGER NOT NULL DEFAULT 0, wins INTEGER NOT NULL DEFAULT 0, losses INTEGER NOT NULL DEFAULT 0, draws INTEGER NOT NULL DEFAULT 0, win_streak INTEGER NOT NULL DEFAULT 0, highest_elo INTEGER NOT NULL DEFAULT 1200, tournament_wins INTEGER NOT NULL DEFAULT 0, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`;
+  await sql`CREATE TABLE IF NOT EXISTS arcade_matches (id TEXT PRIMARY KEY, game_type TEXT NOT NULL, white_player_id TEXT NOT NULL, black_player_id TEXT NOT NULL, state JSONB NOT NULL, status TEXT NOT NULL DEFAULT 'ACTIVE', result TEXT, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`;
+  await sql`CREATE TABLE IF NOT EXISTS arcade_moves (id TEXT PRIMARY KEY, match_id TEXT NOT NULL REFERENCES arcade_matches(id), move_number INTEGER NOT NULL, actor_id TEXT NOT NULL, move JSONB NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), UNIQUE(match_id, move_number))`;
+  await sql`CREATE TABLE IF NOT EXISTS arcade_tournament_bands (id TEXT PRIMARY KEY, min_elo INTEGER NOT NULL, max_elo INTEGER, label TEXT NOT NULL, enabled BOOLEAN NOT NULL DEFAULT TRUE, UNIQUE(min_elo, max_elo))`;
+  await sql`CREATE TABLE IF NOT EXISTS arcade_reward_ledger (id TEXT PRIMARY KEY, player_id TEXT NOT NULL REFERENCES arcade_players(id), match_id TEXT REFERENCES arcade_matches(id), reason TEXT NOT NULL, ticket_count INTEGER NOT NULL CHECK(ticket_count > 0), status TEXT NOT NULL DEFAULT 'PENDING_REVIEW', created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`;
+}
+function arcadeIdentity(req: express.Request) {
+  // Production caller must be an authenticated identity provider integration; arbitrary browser headers are rejected.
+  const playerId = req.header("x-arcade-player-id"); const proof = req.header("x-arcade-auth-proof"); const secret = process.env.ARCADE_PLAYER_AUTH_HMAC_SECRET;
+  if (!playerId || !proof || !secret) return null;
+  const expected = crypto.createHmac("sha256", secret).update(playerId).digest("hex");
+  return expected.length === proof.length && crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(proof)) ? playerId : null;
+}
+app.get("/api/arcade/profile", async (req, res) => {
+  const playerId = arcadeIdentity(req); if (!playerId) return res.status(401).json({ error: "Authenticated arcade identity is required." });
+  try { await ensureArcadeTables(); const sql = getAuditDatabase(); await sql`INSERT INTO arcade_players (id) VALUES (${playerId}) ON CONFLICT (id) DO NOTHING`; const rows = await sql`SELECT * FROM arcade_players WHERE id = ${playerId}`; return res.json(rows[0]); } catch { return res.status(503).json({ error: "Arcade profile storage is unavailable." }); }
+});
+app.get("/api/arcade/readiness", (_req, res) => res.json({ onlinePlayEnabled: Boolean(process.env.ARCADE_PLAYER_AUTH_HMAC_SECRET && process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN), requirements: ["authenticated player identity", "Neon match storage", "Upstash Redis room coordination"] }));
