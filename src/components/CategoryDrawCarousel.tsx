@@ -1,52 +1,46 @@
-import { ChevronLeft, ChevronRight, Gift, Ticket } from "lucide-react";
+import { ChevronLeft, ChevronRight, Gift } from "lucide-react";
 import { useRef, useState } from "react";
 import { useAudio } from "../audio/AudioProvider";
 
-type Draw = { name: string; image: string; details: [string, string][]; cashAlternative?: string };
+type Category = "Women's prizes" | "Men's prizes" | "Cars" | "Holidays" | "Gaming & tech" | "Cash alternative";
+type Draw = { name: string; image: string; details: [string, string][]; cashAlternative: string };
 
-const data: Record<string, { title: string; draws: Draw[] }> = {
-  Cars: { title: "Sports car draws", draws: [
-    { name: "Ferrari 488 GTB", image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1400&q=85", details: [["Engine", "3.9L twin-turbo V8"], ["Power", "670 PS"], ["0–62 mph", "3.0 sec"], ["Drive", "7-speed dual-clutch"]], cashAlternative: "Published with official draw rules" },
-    { name: "Audi R8 V10 Performance", image: "https://images.unsplash.com/photo-1504215680853-026ed2a45def?auto=format&fit=crop&w=1400&q=85", details: [["Engine", "5.2L V10"], ["Power", "620 PS"], ["0–62 mph", "3.1 sec"], ["Drive", "7-speed S tronic"]], cashAlternative: "Published with official draw rules" },
-    { name: "Porsche 911 Carrera S", image: "https://images.unsplash.com/photo-1502489597346-dad15683d4a9?auto=format&fit=crop&w=1400&q=85", details: [["Engine", "3.0L twin-turbo flat-six"], ["Power", "450 PS"], ["0–62 mph", "3.7 sec"], ["Drive", "8-speed PDK"]], cashAlternative: "Published with official draw rules" },
-  ] },
-  Holidays: { title: "Holiday draws", draws: [
-    { name: "Maldives Escape", image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=85", details: [["Stay", "7 nights"], ["Setting", "Indian Ocean"], ["Travel", "Flights subject to rules"], ["Includes", "Details at launch"]], cashAlternative: "Published with official draw rules" },
-    { name: "Dubai City Break", image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1400&q=85", details: [["Stay", "5 nights"], ["Setting", "Dubai"], ["Travel", "Flights subject to rules"], ["Includes", "Details at launch"]], cashAlternative: "Published with official draw rules" },
-  ] },
-  "Gaming Bundles": { title: "Gaming bundle draws", draws: [
-    { name: "Ultimate Gaming Setup", image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1400&q=85", details: [["Platform", "PC & console"], ["Display", "High-refresh setup"], ["Extras", "Streaming kit"], ["Status", "Preview"]], cashAlternative: "Published with official draw rules" },
-    { name: "Creator Battle Station", image: "https://images.unsplash.com/photo-1593640408182-31c70c8268f5?auto=format&fit=crop&w=1400&q=85", details: [["Platform", "Desktop setup"], ["Display", "Dual monitor"], ["Extras", "Creator audio"], ["Status", "Preview"]], cashAlternative: "Published with official draw rules" },
-  ] },
-  Motorhomes: { title: "Motorhome draws", draws: [
-    { name: "Adventure Motorhome", image: "https://images.unsplash.com/photo-1530789253388-582c481c54b0?auto=format&fit=crop&w=1400&q=85", details: [["Type", "Touring motorhome"], ["Berths", "To be confirmed"], ["Travel", "Road-ready concept"], ["Status", "Preview"]], cashAlternative: "Published with official draw rules" },
-    { name: "Luxury Camper Collection", image: "https://images.unsplash.com/photo-1501700493788-fa1a4fc9fe62?auto=format&fit=crop&w=1400&q=85", details: [["Type", "Premium camper"], ["Layout", "To be confirmed"], ["Travel", "Adventure ready"], ["Status", "Preview"]], cashAlternative: "Published with official draw rules" },
-  ] },
-  Lifestyle: { title: "Lifestyle draws", draws: [
-    { name: "Luxury Timepiece", image: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=1400&q=85", details: [["Style", "Luxury watch"], ["Finish", "To be confirmed"], ["Documentation", "At launch"], ["Status", "Preview"]], cashAlternative: "Published with official draw rules" },
-    { name: "Premium Tech Collection", image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1400&q=85", details: [["Category", "Consumer tech"], ["Contents", "To be confirmed"], ["Documentation", "At launch"], ["Status", "Preview"]], cashAlternative: "Published with official draw rules" },
-  ] },
-  Cash: { title: "Cash draws", draws: [
-    { name: "1p Cash Draw", image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=1400&q=85", details: [["Entry band", "1p"], ["Prize", "Cash"], ["Route", "Official rules"], ["Status", "Preview"]] },
-    { name: "2p Cash Draw", image: "https://images.unsplash.com/photo-1579621970795-87facc2f976d?auto=format&fit=crop&w=1400&q=85", details: [["Entry band", "2p"], ["Prize", "Cash"], ["Route", "Official rules"], ["Status", "Preview"]] },
-    { name: "10p Cash Draw", image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=1400&q=85", details: [["Entry band", "10p"], ["Prize", "Cash"], ["Route", "Official rules"], ["Status", "Preview"]] },
-    { name: "20p Cash Draw", image: "https://images.unsplash.com/photo-1579621970795-87facc2f976d?auto=format&fit=crop&w=1400&q=85", details: [["Entry band", "20p"], ["Prize", "Cash"], ["Route", "Official rules"], ["Status", "Preview"]] },
-    { name: "25p Cash Draw", image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=1400&q=85", details: [["Entry band", "25p"], ["Prize", "Cash"], ["Route", "Official rules"], ["Status", "Preview"]] },
-    { name: "30p Cash Draw", image: "https://images.unsplash.com/photo-1579621970795-87facc2f976d?auto=format&fit=crop&w=1400&q=85", details: [["Entry band", "30p"], ["Prize", "Cash"], ["Route", "Official rules"], ["Status", "Preview"]] },
-    { name: "50p Cash Draw", image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=1400&q=85", details: [["Entry band", "50p"], ["Prize", "Cash"], ["Route", "Official rules"], ["Status", "Preview"]] },
-    { name: "£1 Cash Draw", image: "https://images.unsplash.com/photo-1579621970795-87facc2f976d?auto=format&fit=crop&w=1400&q=85", details: [["Entry band", "£1"], ["Prize", "Cash"], ["Route", "Official rules"], ["Status", "Preview"]] },
-    { name: "£5 Cash Draw", image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=1400&q=85", details: [["Entry band", "£5"], ["Prize", "Cash"], ["Route", "Official rules"], ["Status", "Preview"]] },
-    { name: "£10 Cash Draw", image: "https://images.unsplash.com/photo-1579621970795-87facc2f976d?auto=format&fit=crop&w=1400&q=85", details: [["Entry band", "£10"], ["Prize", "Cash"], ["Route", "Official rules"], ["Status", "Preview"]] },
-  ] },
+type Tier = { entry: string; value: string };
+const tiers: Tier[] = [{ entry: "1p", value: "£500" }, { entry: "£1", value: "£5,000" }, { entry: "£5", value: "£25,000" }, { entry: "£10", value: "£50,000" }];
+
+const images: Record<Category, string> = {
+  "Women's prizes": "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=1400&q=85",
+  "Men's prizes": "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=1400&q=85",
+  Cars: "https://images.unsplash.com/photo-1494905998402-395d579af36f?auto=format&fit=crop&w=1400&q=85",
+  Holidays: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=85",
+  "Gaming & tech": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1400&q=85",
+  "Cash alternative": "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=1400&q=85",
 };
 
+const names: Record<Category, string[]> = {
+  "Women's prizes": ["Louis Vuitton handbag", "Designer wardrobe collection", "Fine jewellery package", "Luxury fashion fund"],
+  "Men's prizes": ["Luxury timepiece", "Premium golf collection", "Tailored travel wardrobe", "Collector watch package"],
+  Cars: ["High-end car experience", "Performance coupe", "High-end sports car", "Supercar collection"],
+  Holidays: ["Five-star city escape", "Long-haul luxury holiday", "Private villa experience", "Ultimate world escape"],
+  "Gaming & tech": ["Premium home-tech bundle", "Creator studio setup", "High-end gaming suite", "Future-tech collection"],
+  "Cash alternative": ["£500 cash alternative", "£5,000 cash alternative", "£25,000 cash alternative", "£50,000 cash alternative"],
+};
+
+const categories: Category[] = ["Women's prizes", "Men's prizes", "Cars", "Holidays", "Gaming & tech", "Cash alternative"];
+
 export function CategoryDrawCarousel({ category, entryBand }: { category: string; entryBand?: string }) {
-  const group = data[category] || data.Cash;
-  const [current, setCurrent] = useState(() => entryBand ? Math.max(0, group.draws.findIndex((draw) => draw.name.startsWith(entryBand))) : 0);
+  const legacyCategories: Record<string, Category> = { Cash: "Cash alternative", Lifestyle: "Women's prizes", "Gaming Bundles": "Gaming & tech" };
+  const parsedCategory = categories.includes(category as Category) ? category as Category : legacyCategories[category] || "Women's prizes";
+  const tierFromQuery = Number(new URLSearchParams(window.location.search).get("tier"));
+  const initialTier = Number.isInteger(tierFromQuery) && tierFromQuery >= 0 && tierFromQuery < tiers.length ? tierFromQuery : Math.max(0, tiers.findIndex((tier) => tier.entry === entryBand));
+  const [tierIndex, setTierIndex] = useState(initialTier);
   const startX = useRef<number | null>(null);
   const { play } = useAudio();
-  const next = () => { play("ticketSelect"); setCurrent((value) => (value + 1) % group.draws.length); };
-  const previous = () => { play("ticketSelect"); setCurrent((value) => (value - 1 + group.draws.length) % group.draws.length); };
-  const draw = group.draws[current];
-  return <section className="min-h-screen bg-[#08090f] py-12 sm:py-20"><div className="mx-auto max-w-3xl px-4 sm:px-6"><button onClick={() => { window.history.pushState({}, "", "/draws"); window.dispatchEvent(new PopStateEvent("popstate")); }} className="text-xs font-black uppercase tracking-wider text-amber-200">All categories</button><p className="mt-8 text-xs font-black uppercase tracking-[.2em] text-amber-200">{group.title}</p><h1 className="mt-3 text-4xl font-black sm:text-6xl">Swipe to explore.</h1><p className="mt-3 text-sm text-white/60">Each card is a draw preview. Vehicle or prize availability and official terms are confirmed at launch.</p><article onTouchStart={(event) => { startX.current = event.touches[0].clientX; }} onTouchEnd={(event) => { if (startX.current === null) return; const movement = event.changedTouches[0].clientX - startX.current; if (movement > 50) previous(); if (movement < -50) next(); startX.current = null; }} className="mt-8 overflow-hidden rounded-[2rem] border border-white/15 bg-black/50 shadow-2xl"><div className="relative h-80 sm:h-96"><img src={draw.image} alt={`${draw.name} draw preview`} className="h-full w-full object-cover" /><div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" /><span className="absolute left-5 top-5 rounded-full bg-black/65 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-amber-100">Draw preview {current + 1} / {group.draws.length}</span></div><div className="p-6 sm:p-8"><h2 className="text-3xl font-black">{draw.name}</h2><div className="mt-6 grid grid-cols-2 gap-3">{draw.details.map(([label, value]) => <div key={label} className="rounded-xl border border-white/10 bg-white/[.04] p-3"><p className="text-[9px] font-black uppercase tracking-wider text-white/45">{label}</p><p className="mt-1 text-sm font-bold text-white/85">{value}</p></div>)}</div>{draw.cashAlternative && <p className="mt-5 rounded-xl border border-amber-200/20 bg-amber-300/10 p-3 text-xs font-bold text-amber-100">Cash alternative: {draw.cashAlternative}</p>}<div className="mt-6 flex items-center justify-between"><button onClick={previous} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-xs font-black"><ChevronLeft className="h-4 w-4" /> Previous</button><button onClick={next} className="inline-flex items-center gap-2 rounded-xl bg-amber-300 px-4 py-3 text-xs font-black text-black">Next <ChevronRight className="h-4 w-4" /></button></div></div></article><p className="mt-5 text-center text-xs text-white/45"><Gift className="mr-1 inline h-3.5 w-3.5" /> Swipe left or right, or use the buttons.</p></div></section>;
+  const tier = tiers[tierIndex];
+  const draw: Draw = { name: names[parsedCategory][tierIndex], image: images[parsedCategory], details: [["Proposed entry", tier.entry], ["Prize value", `Up to ${tier.value}`], ["Category", parsedCategory], ["Status", "Entry not open"]], cashAlternative: `Up to ${tier.value}, subject to approved rules and prize verification` };
+  const changeTier = (nextTier: number) => { play("ticketSelect"); setTierIndex(nextTier); };
+  const next = () => changeTier((tierIndex + 1) % tiers.length);
+  const previous = () => changeTier((tierIndex - 1 + tiers.length) % tiers.length);
+
+  return <section className="min-h-screen bg-[#08090f] py-12 sm:py-20"><div className="mx-auto max-w-3xl px-4 sm:px-6"><button onClick={() => { window.history.pushState({}, "", "/draws"); window.dispatchEvent(new PopStateEvent("popstate")); }} className="text-xs font-black uppercase tracking-wider text-amber-200">All prize collections</button><p className="mt-8 text-xs font-black uppercase tracking-[.2em] text-amber-200">{parsedCategory}</p><h1 className="mt-3 text-4xl font-black sm:text-6xl">Choose your entry tier.</h1><p className="mt-3 text-sm text-white/60">Each tier increases the planned prize value in this collection. Browse every prize choice now; entries and payments remain disabled until launch approval.</p><div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-4">{tiers.map((item, index) => <button key={item.entry} onClick={() => changeTier(index)} className={`rounded-2xl border p-4 text-left ${tierIndex === index ? "border-amber-200 bg-amber-300/10" : "border-white/10 bg-white/[.03]"}`}><p className="text-xs font-black text-amber-100">{item.entry}</p><p className="mt-1 text-[10px] font-bold uppercase tracking-wider text-white/50">Up to {item.value}</p></button>)}</div><article onTouchStart={(event) => { startX.current = event.touches[0].clientX; }} onTouchEnd={(event) => { if (startX.current === null) return; const movement = event.changedTouches[0].clientX - startX.current; if (movement > 50) previous(); if (movement < -50) next(); startX.current = null; }} className="mt-8 overflow-hidden rounded-[2rem] border border-white/15 bg-black/50 shadow-2xl"><div className="relative h-80 sm:h-96"><img src={draw.image} alt={`${draw.name} prize preview`} className="h-full w-full object-cover" /><div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" /><span className="absolute left-5 top-5 rounded-full bg-black/65 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-amber-100">{tier.entry} tier · up to {tier.value}</span></div><div className="p-6 sm:p-8"><h2 className="text-3xl font-black">{draw.name}</h2><div className="mt-6 grid grid-cols-2 gap-3">{draw.details.map(([label, value]) => <div key={label} className="rounded-xl border border-white/10 bg-white/[.04] p-3"><p className="text-[9px] font-black uppercase tracking-wider text-white/45">{label}</p><p className="mt-1 text-sm font-bold text-white/85">{value}</p></div>)}</div><p className="mt-5 rounded-xl border border-amber-200/20 bg-amber-300/10 p-3 text-xs font-bold text-amber-100">Cash alternative: {draw.cashAlternative}</p><div className="mt-6 flex items-center justify-between"><button onClick={previous} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-xs font-black"><ChevronLeft className="h-4 w-4" /> Previous tier</button><button onClick={next} className="inline-flex items-center gap-2 rounded-xl bg-amber-300 px-4 py-3 text-xs font-black text-black">Next tier <ChevronRight className="h-4 w-4" /></button></div></div></article><p className="mt-5 text-center text-xs text-white/45"><Gift className="mr-1 inline h-3.5 w-3.5" /> Swipe or use the controls to move between entry tiers.</p></div></section>;
 }
