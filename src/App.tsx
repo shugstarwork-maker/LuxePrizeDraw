@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { CashLaunchReadiness } from "./components/CashLaunchReadiness";
+import { AudioControls } from "./components/AudioControls";
 import { CategoryDrawCarousel } from "./components/CategoryDrawCarousel";
 import { CommunityLeaderboards } from "./components/CommunityLeaderboards";
 import { CommunitySuggestionBoard } from "./components/CommunitySuggestionBoard";
@@ -43,7 +44,7 @@ export default function App() {
     : path === "/category" ? <><CategoryDrawCarousel category={new URLSearchParams(window.location.search).get("name") || "Cash"} entryBand={new URLSearchParams(window.location.search).get("band") || undefined} /><ScottishHost /><MobileDock /></>
     : <SiteContent path={path} />;
 
-  return <div className="storm-page"><div className="storm-page__content">{page}</div><StormBackdrop moneyRain={path === "/"} /></div>;
+  return <div className="storm-page"><div className="storm-page__content">{page}</div><StormBackdrop moneyRain={path === "/"} /><AudioControls /></div>;
 }
 
 function SiteContent({ path }: { path: string }) {

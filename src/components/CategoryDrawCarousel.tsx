@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight, Gift, Ticket } from "lucide-react";
 import { useRef, useState } from "react";
+import { useAudio } from "../audio/AudioProvider";
 
 type Draw = { name: string; image: string; details: [string, string][]; cashAlternative?: string };
 
@@ -43,8 +44,9 @@ export function CategoryDrawCarousel({ category, entryBand }: { category: string
   const group = data[category] || data.Cash;
   const [current, setCurrent] = useState(() => entryBand ? Math.max(0, group.draws.findIndex((draw) => draw.name.startsWith(entryBand))) : 0);
   const startX = useRef<number | null>(null);
-  const next = () => setCurrent((value) => (value + 1) % group.draws.length);
-  const previous = () => setCurrent((value) => (value - 1 + group.draws.length) % group.draws.length);
+  const { play } = useAudio();
+  const next = () => { play("ticketSelect"); setCurrent((value) => (value + 1) % group.draws.length); };
+  const previous = () => { play("ticketSelect"); setCurrent((value) => (value - 1 + group.draws.length) % group.draws.length); };
   const draw = group.draws[current];
   return <section className="min-h-screen bg-[#08090f] py-12 sm:py-20"><div className="mx-auto max-w-3xl px-4 sm:px-6"><button onClick={() => { window.history.pushState({}, "", "/draws"); window.dispatchEvent(new PopStateEvent("popstate")); }} className="text-xs font-black uppercase tracking-wider text-amber-200">All categories</button><p className="mt-8 text-xs font-black uppercase tracking-[.2em] text-amber-200">{group.title}</p><h1 className="mt-3 text-4xl font-black sm:text-6xl">Swipe to explore.</h1><p className="mt-3 text-sm text-white/60">Each card is a draw preview. Vehicle or prize availability and official terms are confirmed at launch.</p><article onTouchStart={(event) => { startX.current = event.touches[0].clientX; }} onTouchEnd={(event) => { if (startX.current === null) return; const movement = event.changedTouches[0].clientX - startX.current; if (movement > 50) previous(); if (movement < -50) next(); startX.current = null; }} className="mt-8 overflow-hidden rounded-[2rem] border border-white/15 bg-black/50 shadow-2xl"><div className="relative h-80 sm:h-96"><img src={draw.image} alt={`${draw.name} draw preview`} className="h-full w-full object-cover" /><div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" /><span className="absolute left-5 top-5 rounded-full bg-black/65 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-amber-100">Draw preview {current + 1} / {group.draws.length}</span></div><div className="p-6 sm:p-8"><h2 className="text-3xl font-black">{draw.name}</h2><div className="mt-6 grid grid-cols-2 gap-3">{draw.details.map(([label, value]) => <div key={label} className="rounded-xl border border-white/10 bg-white/[.04] p-3"><p className="text-[9px] font-black uppercase tracking-wider text-white/45">{label}</p><p className="mt-1 text-sm font-bold text-white/85">{value}</p></div>)}</div>{draw.cashAlternative && <p className="mt-5 rounded-xl border border-amber-200/20 bg-amber-300/10 p-3 text-xs font-bold text-amber-100">Cash alternative: {draw.cashAlternative}</p>}<div className="mt-6 flex items-center justify-between"><button onClick={previous} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-xs font-black"><ChevronLeft className="h-4 w-4" /> Previous</button><button onClick={next} className="inline-flex items-center gap-2 rounded-xl bg-amber-300 px-4 py-3 text-xs font-black text-black">Next <ChevronRight className="h-4 w-4" /></button></div></div></article><p className="mt-5 text-center text-xs text-white/45"><Gift className="mr-1 inline h-3.5 w-3.5" /> Swipe left or right, or use the buttons.</p></div></section>;
 }
