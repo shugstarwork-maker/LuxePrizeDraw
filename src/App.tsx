@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { CashLaunchReadiness } from "./components/CashLaunchReadiness";
 import { TermsPage } from "./components/TermsPage";
 import { CashGiveawaysPage } from "./components/CashGiveawaysPage";
+import { ArcadeHome } from "./components/ArcadeHome";
 import { AudioControls } from "./components/AudioControls";
 import { CategoryDrawCarousel } from "./components/CategoryDrawCarousel";
 import { CommunityLeaderboards } from "./components/CommunityLeaderboards";
@@ -44,6 +45,7 @@ export default function App() {
     : path === "/terms" ? <TermsPage />
     : path === "/duel" ? <><DuelRoom /><ScottishHost /><MobileDock /></>
     : path === "/lobby" ? <><NeonGameLobby /><ScottishHost /><MobileDock /></>
+    : path === "/arcade" ? <><ArcadeHome /><ScottishHost /><MobileDock /></>
     : path === "/portal" ? <><PlayerPortal /><ScottishHost /><MobileDock /></>
     : path === "/sports-cars" ? <><CategoryDrawCarousel category="Cars" /><ScottishHost /><MobileDock /></>
     : path === "/category" ? <><CategoryDrawCarousel category={new URLSearchParams(window.location.search).get("name") || "Cash"} entryBand={new URLSearchParams(window.location.search).get("band") || undefined} /><ScottishHost /><MobileDock /></>
