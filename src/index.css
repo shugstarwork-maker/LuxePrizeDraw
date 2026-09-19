@@ -454,3 +454,10 @@
 
 .money-rain--cars .money-rain__note, .money-rain--heels .money-rain__note, .money-rain--ties .money-rain__note { width: 1rem; height: 1rem; border: 0; background: transparent; box-shadow: none; font-size: .72rem; filter: drop-shadow(0 2px 3px rgba(0,0,0,.45)); }
 .money-rain--cars .money-rain__note { filter: saturate(1.25) drop-shadow(0 2px 3px rgba(0,0,0,.45)); }
+
+.featured-draw-fire::before { content:""; position:absolute; inset:-3px; z-index:0; border-radius:inherit; padding:3px; background:conic-gradient(from var(--ember-angle,0deg), transparent 0 9%, #ff4d00 13%, #ffd15c 16%, transparent 22% 42%, #ff6b00 48%, #ffe88a 51%, transparent 57% 76%, #ff3d00 82%, #ffc14d 85%, transparent 92%); -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; filter:drop-shadow(0 0 8px rgba(255,101,0,.72)); animation: ember-spin 6s linear infinite, ember-pulse 1.7s ease-in-out infinite alternate; pointer-events:none; }
+.featured-draw-fire::after { content:""; position:absolute; inset:auto 8% -18px; height:70px; z-index:1; background:radial-gradient(ellipse at 10% 100%, rgba(255,74,0,.8), transparent 35%),radial-gradient(ellipse at 30% 100%, rgba(255,190,45,.75), transparent 30%),radial-gradient(ellipse at 55% 100%, rgba(255,78,0,.7), transparent 34%),radial-gradient(ellipse at 82% 100%, rgba(255,200,70,.65), transparent 28%); filter:blur(10px); opacity:.55; animation: ember-pulse 1.2s ease-in-out infinite alternate; pointer-events:none; }
+@keyframes ember-spin { to { --ember-angle:360deg; } }
+@keyframes ember-pulse { to { opacity:.92; filter:drop-shadow(0 0 15px rgba(255,112,0,.9)); } }
+@property --ember-angle { syntax:"<angle>"; initial-value:0deg; inherits:false; }
+@media (prefers-reduced-motion: reduce) { .featured-draw-fire::before,.featured-draw-fire::after { animation:none; opacity:.55; } }
