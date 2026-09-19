@@ -27,6 +27,7 @@
 .serenity-card { border: 1px solid rgba(209, 250, 229, .16); border-radius: 1.5rem; background: rgba(3, 18, 19, .5); padding: 1.5rem; backdrop-filter: blur(16px); }
 .serenity-card h2 { margin-top: 1.2rem; font-size: 1.15rem; font-weight: 900; }
 .serenity-card p { margin-top: .65rem; font-size: .875rem; line-height: 1.6; color: rgba(255,255,255,.62); }
+.save-serenity-heart::before { content: ""; position: absolute; inset: 9px; border: 1px solid rgba(255, 247, 204, .6); border-radius: 46%; }
 
 /* Full-page storm atmosphere, kept behind interactive content. */
 .storm-page { position: relative; isolation: isolate; min-height: 100vh; background: #050914; }
