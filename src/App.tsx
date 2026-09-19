@@ -23,6 +23,7 @@ import { NeonGameLobby } from "./components/NeonGameLobby";
 import { PrizeExperience } from "./components/PrizeExperience";
 import { PrestigeCarsDraws } from "./components/PrestigeCarsDraws";
 import { PrizePlatform } from "./components/PrizePlatform";
+import { PlayerPortal } from "./components/PlayerPortal";
 import { PartnerShowcase } from "./components/PartnerShowcase";
 import { PrizeCatalog } from "./components/PrizeCatalog";
 import { PrizeStandings } from "./components/PrizeStandings";
@@ -43,6 +44,7 @@ export default function App() {
     : path === "/terms" ? <TermsPage />
     : path === "/duel" ? <><DuelRoom /><ScottishHost /><MobileDock /></>
     : path === "/lobby" ? <><NeonGameLobby /><ScottishHost /><MobileDock /></>
+    : path === "/portal" ? <><PlayerPortal /><ScottishHost /><MobileDock /></>
     : path === "/sports-cars" ? <><CategoryDrawCarousel category="Cars" /><ScottishHost /><MobileDock /></>
     : path === "/category" ? <><CategoryDrawCarousel category={new URLSearchParams(window.location.search).get("name") || "Cash"} entryBand={new URLSearchParams(window.location.search).get("band") || undefined} /><ScottishHost /><MobileDock /></>
     : <SiteContent path={path} />;
