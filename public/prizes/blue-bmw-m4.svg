@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Blue BMW M4 Competition Convertible prize preview</title>
+  <desc id="desc">A blue performance convertible shown in a modern showroom.</desc>
+  <defs>
+    <linearGradient id="wall" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#f5f7fb"/><stop offset="1" stop-color="#aeb8c8"/></linearGradient>
+    <linearGradient id="floor" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#dfe5ec"/><stop offset="1" stop-color="#758398"/></linearGradient>
+    <linearGradient id="car" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#59ddff"/><stop offset=".45" stop-color="#00a9ea"/><stop offset="1" stop-color="#00539c"/></linearGradient>
+    <linearGradient id="glass" x1="0" x2="1"><stop stop-color="#d9f6ff"/><stop offset=".55" stop-color="#1b3f65"/><stop offset="1" stop-color="#08192d"/></linearGradient>
+    <filter id="shadow"><feGaussianBlur stdDeviation="16"/></filter>
+  </defs>
+  <rect width="1200" height="430" fill="url(#wall)"/><rect y="430" width="1200" height="245" fill="url(#floor)"/>
+  <g opacity=".2" stroke="#48617a" stroke-width="5"><path d="M0 130h1200M0 280h1200"/><path d="M140 0v430M430 0v430M790 0v430M1080 0v430"/></g>
+  <ellipse cx="607" cy="551" rx="490" ry="72" fill="#15202f" opacity=".45" filter="url(#shadow)"/>
+  <g stroke-linejoin="round">
+    <path d="M159 494c31-87 71-137 164-155l154-75c61-31 172-39 273-19l185 68c70 16 109 55 139 137l-10 65H151z" fill="url(#car)" stroke="#004f87" stroke-width="9"/>
+    <path d="M393 335l101-58c67-21 165-25 234-5l115 54c-121-16-319-12-450 9z" fill="url(#glass)" stroke="#083b65" stroke-width="8"/>
+    <path d="M512 276l-25 61M697 261l18 67" stroke="#a5f4ff" stroke-width="8" opacity=".7"/>
+    <path d="M174 478c98-20 227-25 408-22 201 3 365 18 503 51" fill="none" stroke="#8feeff" stroke-width="9" opacity=".72"/>
+    <path d="M174 491c20-28 55-43 111-43h163l-36 64H160z" fill="#07121e" stroke="#0b385f" stroke-width="8"/>
+    <path d="M760 447h196c61 5 100 26 127 64H758z" fill="#07121e" stroke="#0b385f" stroke-width="8"/>
+    <path d="M440 445h324l-17 96H458z" fill="#060d16" stroke="#003f70" stroke-width="8"/>
+    <path d="M488 459h103v70H476zM610 459h103v70H610z" fill="#0d1118" stroke="#466176" stroke-width="5"/>
+    <path d="M211 453l83-7-41 45-79 2zM1000 456l70 21-41 20-80-10z" fill="#e7fbff" stroke="#4ddfff" stroke-width="6"/>
+    <g fill="#0b111a" stroke="#283b4c" stroke-width="13"><circle cx="317" cy="529" r="82"/><circle cx="899" cy="529" r="82"/></g>
+    <g fill="#c7d1dc" stroke="#101b27" stroke-width="12"><circle cx="317" cy="529" r="46"/><circle cx="899" cy="529" r="46"/></g>
+    <g fill="#00a9ea"><circle cx="317" cy="529" r="16"/><circle cx="899" cy="529" r="16"/></g>
+    <path d="M321 379c118-37 430-45 625 2" fill="none" stroke="#b7f7ff" stroke-width="11" opacity=".65"/>
+    <path d="M182 520h862" stroke="#003b67" stroke-width="12"/>
+  </g>
+  <g font-family="Arial, sans-serif" font-weight="700"><rect x="43" y="38" width="1114" height="75" rx="12" fill="#145ea5"/><text x="600" y="88" text-anchor="middle" fill="white" font-size="40" letter-spacing="8">MOSS PRESTIGE</text><rect x="43" y="584" width="1114" height="52" rx="10" fill="#0c875d"/><text x="600" y="619" text-anchor="middle" fill="white" font-size="26">BMW M4 COMPETITION CONVERTIBLE · PRIZE PREVIEW</text></g>
+</svg>
