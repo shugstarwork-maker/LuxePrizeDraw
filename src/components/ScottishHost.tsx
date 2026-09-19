@@ -6,7 +6,7 @@ type SpeechWindow = Window & { speechSynthesis?: SpeechSynthesis };
 export const ScottishHost: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [supported, setSupported] = useState(false);
-  const message = "Awright, welcome in. Have a wee look through the Custom Draw gallery, pick something that catches your eye, or head over to the game lobby for a bit of free play. We’re still building things properly, so every prize and entry you see is just a preview for now.";
+  const message = "Awright, welcome in. Have a wee look through the prize collections, pick something that catches your eye, or head over to the game lobby for a bit of free play. We’re still building things properly, so every prize and entry you see is just a preview for now.";
 
   useEffect(() => { setSupported("speechSynthesis" in window && "SpeechSynthesisUtterance" in window); }, []);
   const speak = () => {
