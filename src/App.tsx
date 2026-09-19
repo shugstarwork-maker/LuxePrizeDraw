@@ -32,7 +32,9 @@ const go = (path: string) => { window.history.pushState({}, "", path); window.di
 
 export default function App() {
   const [path, setPath] = useState(() => window.location.pathname);
-  useEffect(() => { const sync = () => setPath(window.location.pathname); window.addEventListener("popstate", sync); return () => window.removeEventListener("popstate", sync); }, []);
+  const [showMoneyRain, setShowMoneyRain] = useState(() => window.location.pathname === "/");
+  useEffect(() => { const sync = () => { const nextPath = window.location.pathname; setPath(nextPath); setShowMoneyRain(nextPath === "/"); }; window.addEventListener("popstate", sync); return () => window.removeEventListener("popstate", sync); }, []);
+  useEffect(() => { if (!showMoneyRain) return; const timeout = window.setTimeout(() => setShowMoneyRain(false), 15_000); return () => window.clearTimeout(timeout); }, [showMoneyRain]);
   const page = path === "/welcome" ? <WelcomePage onEnter={() => go("/")} />
     : path === "/serenity" ? <SerenityCharityPage />
     : path === "/duel" ? <><DuelRoom /><ScottishHost /><MobileDock /></>
@@ -42,7 +44,7 @@ export default function App() {
     : path === "/category" ? <><CategoryDrawCarousel category={new URLSearchParams(window.location.search).get("name") || "Cash"} /><ScottishHost /><MobileDock /></>
     : <SiteContent path={path} />;
 
-  return <div className="storm-page"><div className="storm-page__content">{page}</div><StormBackdrop key={path} /></div>;
+  return <div className="storm-page"><div className="storm-page__content">{page}</div><StormBackdrop moneyRain={showMoneyRain} /></div>;
 }
 
 function SiteContent({ path }: { path: string }) {
