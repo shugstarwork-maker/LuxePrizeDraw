@@ -52,7 +52,9 @@ export default function App() {
     : path === "/category" ? <><CategoryDrawCarousel category={new URLSearchParams(window.location.search).get("name") || "Cash"} entryBand={new URLSearchParams(window.location.search).get("band") || undefined} /><ScottishHost /><MobileDock /></>
     : <SiteContent path={path} />;
 
-  return <div className="storm-page"><div className="storm-page__content">{page}</div><StormBackdrop moneyRain={path === "/"} /><AudioControls /></div>;
+  const category = path === "/category" ? new URLSearchParams(window.location.search).get("name") : path === "/sports-cars" ? "Cars" : "";
+  const backdropTheme = path === "/" ? "money" : category === "Cars" ? "cars" : category === "Cash" ? "money" : category === "Women's prizes" ? "heels" : category === "Men's prizes" ? "ties" : undefined;
+  return <div className="storm-page"><div className="storm-page__content">{page}</div><StormBackdrop theme={backdropTheme} /><AudioControls /></div>;
 }
 
 function SiteContent({ path }: { path: string }) {
