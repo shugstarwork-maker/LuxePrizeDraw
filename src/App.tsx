@@ -58,6 +58,6 @@ export default function App() {
 }
 
 function SiteContent({ path }: { path: string }) {
-  const content = path === "/draws" ? <><PrizeCatalog /><LuxuryHolidaysSection /><PrestigeCarsDraws /><PartnerShowcase /><PrizeExperience /><PrizeStandings /><MembershipPreview /></> : path === "/community" ? <><LaunchCommitment /><CommunitySuggestionBoard /><CommunityLeaderboards /></> : path === "/play" ? <><CompetitiveHub /><LuxePokerLeague /><GamesArena /></> : <><FeaturedDraws /><PrizePlatform /><PartnerShowcase /><CashLaunchReadiness /><LaunchCommitment /></>;
+  const content = path === "/draws" ? <><PrizeCatalog /><LuxuryHolidaysSection /><PrestigeCarsDraws /><PartnerShowcase /><PrizeExperience /><PrizeStandings /><MembershipPreview /></> : path === "/community" ? <><LaunchCommitment /><CommunitySuggestionBoard /><CommunityLeaderboards /></> : path === "/play" ? <><CompetitiveHub /><GamesArena /></> : <><FeaturedDraws /><PrizePlatform /><PartnerShowcase /><CashLaunchReadiness /><LaunchCommitment /></>;
   return <><LegalReadinessNotice /><ExperienceNav /><CommunityTicker /><main className="animate-page-enter pb-24 sm:pb-0">{content}</main><ScottishHost /><MobileDock /></>;
 }
