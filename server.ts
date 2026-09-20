@@ -2,7 +2,7 @@ import express from "express";
 import path from "path";
 import crypto from "crypto";
 import { createServer as createViteServer } from "vite";
-import { GoogleGenAI } from "@google/genai";
+import { createGateway, generateText } from "ai";
 import { neon } from "@neondatabase/serverless";
 import { Redis } from "@upstash/redis";
 import { newConnectFour, playConnectFour, type ConnectFourState } from "./src/games/connectFour";
@@ -32,24 +32,21 @@ async function withAiCapacity<T>(work: () => Promise<T>) {
 app.use(express.json({ limit: "32kb", verify: (req, _res, buffer) => { (req as express.Request & { rawBody?: Buffer }).rawBody = Buffer.from(buffer); } }));
 app.set("query parser", "simple");
 
-// Lazy / safe Gemini initialization
-let aiClient: GoogleGenAI | null = null;
-function getAiClient(): GoogleGenAI {
-  if (!aiClient) {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      console.warn("GEMINI_API_KEY is not set in environment. Fallback responses will be used.");
-    }
-    aiClient = new GoogleGenAI({
-      apiKey: apiKey || "dummy-key-fallback",
-      httpOptions: {
-        headers: {
-          "User-Agent": "aistudio-build",
-        },
-      },
-    });
-  }
-  return aiClient;
+// AI Gateway uses the Vercel deployment's OIDC identity. No provider API key is stored in this app.
+const AI_GATEWAY_MODEL = process.env.AI_GATEWAY_MODEL || "openai/gpt-4o-mini";
+
+async function generateGatewayText(req: express.Request, prompt: string) {
+  // Vercel Functions supply a short-lived OIDC token in this request header. Local development can use `vercel env pull` instead.
+  const oidcToken = req.header("x-vercel-oidc-token") || process.env.VERCEL_OIDC_TOKEN;
+  if (!oidcToken) throw new Error("AI Gateway OIDC token is unavailable.");
+  const gateway = createGateway({ apiKey: oidcToken });
+  const result = await withAiCapacity(() => generateText({
+    model: gateway(AI_GATEWAY_MODEL),
+    prompt,
+    temperature: 0.7,
+  }));
+  if (!result.text.trim()) throw new Error("Empty response from AI Gateway.");
+  return result.text;
 }
 
 // In-memory competition state tracking
@@ -555,7 +552,7 @@ app.post("/api/competition/enter", (req, res) => {
 });
 
 // API: AI Business Feasibility & Pitch Evaluator
-app.post("/api/gemini/pitch-evaluate", async (req, res) => {
+app.post("/api/ai/pitch-evaluate", async (req, res) => {
   try {
     const businessIdea = limitedText(req.body?.businessIdea, 2_000);
     const industry = limitedText(req.body?.industry, 200);
@@ -566,7 +563,6 @@ app.post("/api/gemini/pitch-evaluate", async (req, res) => {
       return res.status(400).json({ error: "Please provide a business idea or concept." });
     }
 
-    const ai = getAiClient();
     const prompt = `You are the Lead UAE Commercial Strategy & Free Zone Advisor for the official Luxe Prize Draws competition.
 Evaluate the following business idea that a participant wants to launch in the UAE with their 2-Week 5-Star Dubai Luxury Holiday, £100K Sterling Cash Prize, 3-Year Residency Visa, UAE Limited Company, Custom Branding, and Web/App with One-Click Book & AI.
 
@@ -600,8 +596,8 @@ Return a valid JSON object with the following fields:
   "competitiveAdvantage": "What makes this irresistible in the UAE and international markets"
 }`;
 
-    if (!process.env.GEMINI_API_KEY) {
-      // Fallback high-quality structured response if key is unavailable
+    if (process.env.AI_GATEWAY_ENABLED === "false") {
+      // Fallback high-quality structured response while AI Gateway is intentionally disabled.
       return res.json({
         feasibilityScore: 94,
         executiveSummary: `Your concept "${businessIdea}" has immense growth potential in the UAE ecosystem, capitalizing on the UAE's zero-tax commercial framework and booming digital-first consumer adoption.`,
@@ -625,17 +621,7 @@ Return a valid JSON object with the following fields:
       });
     }
 
-    const response = await withAiCapacity(() => ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-      config: { responseMimeType: "application/json", temperature: 0.7 },
-    }));
-
-    const text = response.text;
-    if (!text) {
-      throw new Error("Empty response from AI");
-    }
-
+    const text = await generateGatewayText(req, `${prompt}\n\nReturn only the requested JSON object, with no Markdown code fence.`);
     const parsed = JSON.parse(text);
     return res.json(parsed);
   } catch (error: any) {
@@ -667,7 +653,7 @@ Return a valid JSON object with the following fields:
 });
 
 // API: AI Live UAE Business Advisor Chat
-app.post("/api/gemini/ask-advisor", async (req, res) => {
+app.post("/api/ai/ask-advisor", async (req, res) => {
   try {
     const question = limitedText(req.body?.question, 1_000);
     const userBusinessContext = limitedText(req.body?.userBusinessContext, 2_000);
@@ -675,7 +661,6 @@ app.post("/api/gemini/ask-advisor", async (req, res) => {
       return res.status(400).json({ error: "Question is required." });
     }
 
-    const ai = getAiClient();
     const prompt = `You are the Luxe Prize Draws Senior Business & Legal Advisor.
 You are helping a prospective winner understand the full prize package:
 1. 2-Week VIP Dubai Holiday & 5-Star Hotel Stay (Business class flights for 2, luxury suite, private chauffeur, £4,000 dining credit)
@@ -691,21 +676,14 @@ User Question: "${question}"
 
 Provide a concise, direct, helpful, and inspiring response (2-3 paragraphs max) packed with accurate UAE business knowledge (0% personal tax, 9% corporate tax on profits above the applicable corporate-tax threshold with qualifying freezone exemptions, family visa sponsorship, fast-track banking, app launch).`;
 
-    if (!process.env.GEMINI_API_KEY) {
+    if (process.env.AI_GATEWAY_ENABLED === "false") {
       return res.json({
         answer: `As a winner of Luxe Prize Draws, your entire journey is 100% covered. We handle the entire company incorporation with 100% foreign ownership, provide your complete brand identity, build and launch your custom iOS/Android app with One-Click Booking & AI features, sponsor your 3-Year UAE Investor Residency Visa, and treat you to a 2-Week 5-Star Dubai VIP Holiday.\n\nYour £100,000 Sterling cash prize is deposited directly into your newly minted UAE corporate bank account at premier institutions like Emirates NBD or Wio Bank. You will benefit from the UAE's world-leading 0% personal income tax and zero capital gains tax, giving you the ultimate launchpad to scale globally.`
       });
     }
 
-    const response = await withAiCapacity(() => ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-      config: { temperature: 0.7 },
-    }));
-
-    return res.json({
-      answer: response.text || "Our dedicated UAE setup team ensures every step of your holiday, company formation, 3-year visa, branding, and £100,000 grant transfer is executed seamlessly within 14 business days.",
-    });
+    const answer = await generateGatewayText(req, prompt);
+    return res.json({ answer });
   } catch (error: any) {
     console.error("AI Advisor error:", error);
     if (error?.statusCode === 429) return res.status(429).json({ error: "The advisor is busy. Please try again shortly." });
