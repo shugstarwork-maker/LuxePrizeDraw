@@ -33,7 +33,7 @@ export const AiPitchEvaluator: React.FC<AiPitchEvaluatorProps> = ({ onApplyIdeaT
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/gemini/pitch-evaluate", {
+      const response = await fetch("/api/ai/pitch-evaluate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

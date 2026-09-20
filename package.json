@@ -15,12 +15,12 @@
     "test": "node --import tsx --test tests/*.test.ts"
   },
   "dependencies": {
-    "@google/genai": "^2.4.0",
     "@neondatabase/serverless": "^1.0.2",
     "@tailwindcss/vite": "^4.1.14",
     "@types/canvas-confetti": "^1.9.0",
     "@upstash/redis": "^1.38.4",
     "@vitejs/plugin-react": "^5.0.4",
+    "ai": "^7.0.107",
     "canvas-confetti": "^1.9.4",
     "chess.js": "^1.4.0",
     "dotenv": "^17.2.3",

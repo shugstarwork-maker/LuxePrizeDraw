@@ -39,7 +39,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/gemini/ask-advisor", {
+      const response = await fetch("/api/ai/ask-advisor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: textToSend }),

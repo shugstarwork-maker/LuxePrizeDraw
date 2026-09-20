@@ -3,6 +3,6 @@
   "description": "Official competition platform to win the ultimate UAE Dream Business Package: 2-Week VIP Luxury Holiday to Dubai with 5-Star Accommodation, £100K Cash Grant, 3-Year Residency Visa, Turnkey Limited Company, Complete Branding, Custom Web/Mobile App with One-Click Book \u0026 AI, and VIP Banking.",
   "requestFramePermissions": [],
   "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+    "MAJOR_CAPABILITY_SERVER_SIDE_AI_GATEWAY"
   ]
 }
