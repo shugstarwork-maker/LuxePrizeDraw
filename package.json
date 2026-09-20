@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "test:games": "node --import tsx --test tests/rules.test.ts"
+    "test:games": "node --import tsx --test tests/rules.test.ts",
+    "test:compliance": "node --import tsx --test tests/prizeDrawCompliance.test.ts",
+    "test": "node --import tsx --test tests/*.test.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
