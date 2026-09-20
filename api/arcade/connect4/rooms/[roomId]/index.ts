@@ -1,0 +1,1 @@
+import{expose,idFrom,json,room}from"../../../shared";export async function GET(req:Request,{params}:{params:{roomId:string}}){const id=idFrom(req),r=await room(params.roomId);if(!id)return json({error:"Sign in required"},401);if(!r||![r.players.red.id,r.players.yellow?.id].includes(id))return json({error:"Room not found"},404);return json(expose(r))}
