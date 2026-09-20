@@ -1,10 +1,10 @@
 import React from "react";
-import { FileText, Heart, HandHeart, Home, Trophy, UserRound, Video, Crown } from "lucide-react";
+import { FileText, Gamepad2, Heart, HandHeart, Home, Trophy, UserRound, Video, Crown } from "lucide-react";
 
 const items = [
   { href: "/", label: "Home", icon: Home },
   { href: "/draws", label: "Draws", icon: Trophy },
-  { href: "/arcade", label: "Arcade", icon: Trophy },
+  { href: "/arcade", label: "Arcade", icon: Gamepad2 },
   { href: "/poker", label: "Poker", icon: Crown },
   { href: "/portal", label: "Portal", icon: UserRound },
   { href: "/community", label: "Community", icon: Heart },
