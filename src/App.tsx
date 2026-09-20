@@ -27,7 +27,6 @@ import { PrestigeCarsDraws } from "./components/PrestigeCarsDraws";
 import { PrizePlatform } from "./components/PrizePlatform";
 import { PlayerPortal } from "./components/PlayerPortal";
 import { PartnerShowcase } from "./components/PartnerShowcase";
-import { PrizeCatalog } from "./components/PrizeCatalog";
 import { PrizeStandings } from "./components/PrizeStandings";
 import { ScottishHost } from "./components/ScottishHost";
 import { SerenityCharityPage } from "./components/SerenityCharityPage";
@@ -60,6 +59,6 @@ export default function App() {
 }
 
 function SiteContent({ path }: { path: string }) {
-  const content = path === "/draws" ? <><PrizeCatalog /><LuxuryHolidaysSection /><PrestigeCarsDraws /><PartnerShowcase /><PrizeExperience /><PrizeStandings /><MembershipPreview /></> : path === "/community" ? <><LaunchCommitment /><CommunitySuggestionBoard /><CommunityLeaderboards /></> : path === "/play" ? <><CompetitiveHub /><GamesArena /></> : <><FeaturedDraws /><PrizePlatform /><PartnerShowcase /><CashLaunchReadiness /><LaunchCommitment /></>;
+  const content = path === "/draws" ? <><LuxuryHolidaysSection /><PrestigeCarsDraws /><PartnerShowcase /><PrizeExperience /><PrizeStandings /><MembershipPreview /></> : path === "/community" ? <><LaunchCommitment /><CommunitySuggestionBoard /><CommunityLeaderboards /></> : path === "/play" ? <><CompetitiveHub /><GamesArena /></> : <><FeaturedDraws /><PrizePlatform /><PartnerShowcase /><CashLaunchReadiness /><LaunchCommitment /></>;
   return <><LegalReadinessNotice /><ExperienceNav /><CommunityTicker /><main className="animate-page-enter pb-24 sm:pb-0">{content}</main><ScottishHost /><MobileDock /></>;
 }
