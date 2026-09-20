@@ -31,7 +31,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenEntry, onOpenWallet }) => 
             </p>
             <div className="flex items-center gap-2 text-xs text-emerald-400 font-medium">
               <ShieldCheck className="w-4 h-4" />
-              <span>Provably Fair &middot; Globally Regulated</span>
+              <span>Pre-launch &middot; participation controls in development</span>
             </div>
           </div>
 
@@ -116,7 +116,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenEntry, onOpenWallet }) => 
           <div className="space-y-1 text-center sm:text-left">
             <p>&copy; 2026 Luxe Prize Draws. All rights reserved.</p>
             <p className="text-[10px] text-white/30">
-              Zero purchase necessary. Open to worldwide residents 18+. Regulated under official UAE promotional guidelines.
+              Pre-launch only. No entries, payments, or prizes are available. Final eligibility and rules will be published for each approved draw.
             </p>
           </div>
 

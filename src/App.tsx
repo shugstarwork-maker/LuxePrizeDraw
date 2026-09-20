@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { CashLaunchReadiness } from "./components/CashLaunchReadiness";
 import { TermsPage } from "./components/TermsPage";
+import { ParticipationStandardsPage } from "./components/ParticipationStandardsPage";
 import { CashGiveawaysPage } from "./components/CashGiveawaysPage";
 import { ArcadeHome } from "./components/ArcadeHome";
 import { AudioControls } from "./components/AudioControls";
@@ -43,6 +44,7 @@ export default function App() {
     : path === "/serenity" ? <SerenityCharityPage />
     : path === "/cash-giveaways" ? <CashGiveawaysPage />
     : path === "/terms" ? <TermsPage />
+    : path === "/standards" ? <ParticipationStandardsPage />
     : path === "/duel" ? <><DuelRoom /><ScottishHost /><MobileDock /></>
     : path === "/lobby" ? <><NeonGameLobby /><ScottishHost /><MobileDock /></>
     : path === "/poker" ? <><LuxePokerLeague /><ScottishHost /><MobileDock /></>
