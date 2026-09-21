@@ -4,5 +4,11 @@
       "path": "/api/supplier-trends/cron",
       "schedule": "0 9 * * *"
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/prizes/northern-supercar-hire",
+      "destination": "/index.html"
+    }
   ]
 }
