@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
 import crypto from "crypto";
 import { createServer as createViteServer } from "vite";
 import { createGateway, generateText } from "ai";
@@ -705,7 +706,16 @@ async function startServer() {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
     app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
+      const index = path.join(distPath, "index.html");
+      if (req.path !== "/prizes/northern-supercar-hire") return res.sendFile(index);
+      const title = "Northern Supercar Hire × LuxePrizeDraw | Luxury Supercar Experience";
+      const description = "Discover the Northern Supercar Hire automotive experience on LuxePrizeDraw and explore premium supercar prizes, luxury experiences and partnership opportunities.";
+      const html = fs.readFileSync(index, "utf8")
+        .replace(/<title>[^<]*<\/title>/, `<title>${title}</title>`)
+        .replace(/(<meta name="description" content=")[^"]*(" \/>)/, `$1${description}$2`)
+        .replace(/(<meta property="og:title" content=")[^"]*(" \/>)/, `$1${title}$2`)
+        .replace(/(<meta property="og:description" content=")[^"]*(" \/>)/, `$1${description}$2`);
+      res.type("html").send(html);
     });
   }
 

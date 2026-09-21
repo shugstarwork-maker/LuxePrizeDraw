@@ -27,6 +27,7 @@ import { PrestigeCarsDraws } from "./components/PrestigeCarsDraws";
 import { PrizePlatform } from "./components/PrizePlatform";
 import { PlayerPortal } from "./components/PlayerPortal";
 import { PartnerShowcase } from "./components/PartnerShowcase";
+import { PartnershipCampaignPage } from "./components/PartnershipCampaignPage";
 import { PrizeStandings } from "./components/PrizeStandings";
 import { ScottishHost } from "./components/ScottishHost";
 import { SerenityCharityPage } from "./components/SerenityCharityPage";
@@ -50,6 +51,7 @@ export default function App() {
     : path === "/arcade" ? <><ArcadeHome /><ScottishHost /><MobileDock /></>
     : path === "/portal" ? <><PlayerPortal /><ScottishHost /><MobileDock /></>
     : path === "/sports-cars" ? <><CategoryDrawCarousel category="Cars" /><ScottishHost /><MobileDock /></>
+    : path === "/prizes/northern-supercar-hire" ? <><ExperienceNav /><PartnershipCampaignPage /><MobileDock /></>
     : path === "/category" ? <><CategoryDrawCarousel category={new URLSearchParams(window.location.search).get("name") || "Cash"} entryBand={new URLSearchParams(window.location.search).get("band") || undefined} /><ScottishHost /><MobileDock /></>
     : <SiteContent path={path} />;
 
