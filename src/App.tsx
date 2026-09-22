@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { CashLaunchReadiness } from "./components/CashLaunchReadiness";
+import { CredentialsPartnershipsPage } from "./components/CredentialsPartnershipsPage";
 import { TermsPage } from "./components/TermsPage";
 import { ParticipationStandardsPage } from "./components/ParticipationStandardsPage";
 import { CashGiveawaysPage } from "./components/CashGiveawaysPage";
@@ -52,6 +53,7 @@ export default function App() {
     : path === "/portal" ? <><PlayerPortal /><ScottishHost /><MobileDock /></>
     : path === "/sports-cars" ? <><CategoryDrawCarousel category="Cars" /><ScottishHost /><MobileDock /></>
     : path === "/prizes/northern-supercar-hire" ? <><ExperienceNav /><PartnershipCampaignPage /><MobileDock /></>
+    : path === "/credentials-partnerships" ? <><ExperienceNav /><CredentialsPartnershipsPage /><MobileDock /></>
     : path === "/category" ? <><CategoryDrawCarousel category={new URLSearchParams(window.location.search).get("name") || "Cash"} entryBand={new URLSearchParams(window.location.search).get("band") || undefined} /><ScottishHost /><MobileDock /></>
     : <SiteContent path={path} />;
 
