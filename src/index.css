@@ -443,8 +443,14 @@
 .luxury-note--two { bottom:6rem; left:2%; transform:rotate(17deg); animation-delay:-4s; }
 .luxury-destination-card { position:relative; min-height:25rem; overflow:hidden; border:1px solid rgba(255,255,255,.15); border-radius:1.75rem; background:#101010; box-shadow:0 18px 48px rgba(0,0,0,.38); isolation:isolate; animation:luxury-card-enter .6s both; transition:transform .35s cubic-bezier(.16,1,.3,1),border-color .35s ease,box-shadow .35s ease; }
 .luxury-destination-card:hover { transform:translateY(-8px); border-color:rgba(246,214,122,.68); box-shadow:0 28px 70px rgba(0,0,0,.58),0 0 30px rgba(212,175,55,.18); }
+.luxury-destination-card--entering { animation:luxury-destination-fade-in .48s cubic-bezier(.16,1,.3,1) both; }
+.luxury-destination-card--leaving { animation:luxury-destination-fade-out .22s ease-in both; pointer-events:none; }
+
 @keyframes luxury-note-float { 0%,100% { translate:0 0; } 50% { translate:0 -14px; } }
 @keyframes luxury-card-enter { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+@keyframes luxury-destination-fade-in { from { opacity:0; filter:brightness(.72) saturate(.8); transform:scale(1.025); } to { opacity:1; filter:brightness(1) saturate(1); transform:scale(1); } }
+@keyframes luxury-destination-fade-out { to { opacity:0; filter:brightness(.7); transform:scale(.985); } }
+
 @media (prefers-reduced-motion: reduce) { .luxury-note,.luxury-destination-card { animation:none; transition:none; } .luxury-destination-card:hover { transform:none; } }
 
 /* Keep luxury photography crisp while preserving fast scrolling and motion accessibility. */
