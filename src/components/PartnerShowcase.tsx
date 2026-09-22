@@ -1,4 +1,5 @@
 import { Building2, CarFront, Gift, ShieldCheck, Sparkles, ArrowRight } from "lucide-react";
+import { RollingCardCarousel } from "./RollingCardCarousel";
 
 const navigate = (path: string) => { window.history.pushState({}, "", path); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); };
 
@@ -21,14 +22,12 @@ export function PartnerShowcase() {
         </div>
         <span className="w-fit rounded-full border border-white/10 bg-white/[.03] px-3 py-2 text-[10px] font-black uppercase tracking-wider text-white/50">Text-only demo marks</span>
       </div>
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {partners.map(({ name, detail, status, icon: Icon, tone, path }) => <article key={name} className={`rounded-[1.75rem] border border-white/10 bg-gradient-to-br ${tone} p-5`}>
-          <span className="grid h-11 w-11 place-items-center rounded-2xl border border-white/15 bg-black/35 text-amber-200"><Icon className="h-5 w-5" /></span>
-          <p className="mt-6 text-[10px] font-black uppercase tracking-[.18em] text-white/45">{status}</p>
-          <h3 className="mt-2 text-2xl font-black leading-tight">{name}</h3>
-          <p className="mt-3 text-sm text-white/60">{detail}</p>{path && <button onClick={() => navigate(path)} className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-amber-200">Explore opportunity <ArrowRight className="h-3.5 w-3.5" /></button>}
-        </article>)}
-      </div>
+      <RollingCardCarousel items={partners} getKey={item => item.name} label="partner showcase" className="mt-8" renderItem={({ name, detail, status, icon: Icon, tone, path }) => <article className={`min-h-64 rounded-[1.75rem] border border-white/10 bg-gradient-to-br ${tone} p-6`}>
+        <span className="grid h-11 w-11 place-items-center rounded-2xl border border-white/15 bg-black/35 text-amber-200"><Icon className="h-5 w-5" /></span>
+        <p className="mt-6 text-[10px] font-black uppercase tracking-[.18em] text-white/45">{status}</p>
+        <h3 className="mt-2 text-2xl font-black leading-tight">{name}</h3>
+        <p className="mt-3 text-sm text-white/60">{detail}</p>{path && <button onClick={() => navigate(path)} className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-amber-200">Explore opportunity <ArrowRight className="h-3.5 w-3.5" /></button>}
+      </article>} />
       <p className="mt-5 text-xs leading-relaxed text-white/40">Demo only. “Prospective partner” identifies an intended relationship, not a confirmed partnership. Official logos, prize offers, terms and partner claims are published only after written approval.</p>
     </div>
   </section>;
