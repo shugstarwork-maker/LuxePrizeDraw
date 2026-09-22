@@ -2,15 +2,17 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Building2, CarFront, ChevronLeft, ChevronRight, CircleAlert, ExternalLink, Heart, Play, ShieldCheck, Sparkles, Ticket, Users } from "lucide-react";
 import { NORTHERN_SUPERCAR_HIRE_CAMPAIGN, type PartnershipCampaign } from "../data/partnershipCampaigns";
 
+// These are illustrative stock images, so labels intentionally describe the vehicle type
+// rather than claiming the pictured car is a specific make or model.
 const vehicleCategories = [
-  { name: "Ferrari", image: "https://images.unsplash.com/photo-1592198084033-aade902d1aae?auto=format&fit=crop&w=1200&q=80", detail: "Italian performance icons and grand touring." },
-  { name: "Lamborghini", image: "https://images.unsplash.com/photo-1544829099-b9a0c07fad1a?auto=format&fit=crop&w=1200&q=80", detail: "Unmistakable design and theatre." },
-  { name: "McLaren", image: "https://images.unsplash.com/photo-1532581140115-3e355d1ed1de?auto=format&fit=crop&w=1200&q=80", detail: "Precision-led British supercar engineering." },
-  { name: "Aston Martin", image: "https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&w=1200&q=80", detail: "Modern British grand touring." },
-  { name: "Bentley", image: "https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=1200&q=80", detail: "Hand-finished luxury for the road." },
-  { name: "Rolls-Royce", image: "https://images.unsplash.com/photo-1621135802920-133df287f89c?auto=format&fit=crop&w=1200&q=80", detail: "A statement in refined travel." },
-  { name: "Porsche", image: "https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=1200&q=80", detail: "Everyday performance, elevated." },
-  { name: "Luxury SUVs", image: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=1200&q=80", detail: "Space, presence and capability." },
+  { name: "Performance Coupés", image: "https://images.unsplash.com/photo-1592198084033-aade902d1aae?auto=format&fit=crop&w=1200&q=80", detail: "High-performance two-door driving." },
+  { name: "Exotic Supercars", image: "https://images.unsplash.com/photo-1544829099-b9a0c07fad1a?auto=format&fit=crop&w=1200&q=80", detail: "Dramatic design and headline performance." },
+  { name: "Track-Focused Supercars", image: "https://images.unsplash.com/photo-1532581140115-3e355d1ed1de?auto=format&fit=crop&w=1200&q=80", detail: "Precision engineering built for the thrill of driving." },
+  { name: "Grand Tourers", image: "https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&w=1200&q=80", detail: "Long-distance comfort with performance to match." },
+  { name: "Luxury Coupés", image: "https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=1200&q=80", detail: "Refined design for the open road." },
+  { name: "Luxury Saloons", image: "https://images.unsplash.com/photo-1621135802920-133df287f89c?auto=format&fit=crop&w=1200&q=80", detail: "Comfort, space and a premium cabin experience." },
+  { name: "Sports Cars", image: "https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=1200&q=80", detail: "Responsive driving with everyday usability." },
+  { name: "SUVs", image: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=1200&q=80", detail: "Versatility, space and all-weather capability." },
 ];
 const benefits = [["Brand exposure", "Put the Northern Supercar Hire brand in front of people exploring luxury experiences."], ["Customer acquisition", "Create opportunities to introduce new audiences to Northern Supercar Hire services."], ["Premium positioning", "Associate the brand with high-end experiences and luxury lifestyle content."], ["Digital engagement", "Build repeat interaction through campaigns, games, loyalty mechanics and future LuxePrizeDraw features."], ["Charity & social impact", "Support agreed charitable causes where applicable."], ["Data & insights", "Provide appropriate campaign analytics and engagement insights, subject to privacy law and agreed terms."]];
 
