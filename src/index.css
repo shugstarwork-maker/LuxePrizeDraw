@@ -504,3 +504,19 @@
 @keyframes tier-light-spin { to { --tier-light-angle:360deg; } }
 @keyframes tier-light-pulse { from { opacity:.38; } to { opacity:.78; } }
 @media (prefers-reduced-motion: reduce) { .carousel-card-stage,.carousel-card-stage::before,.carousel-card-stage::after,.category-draw-fire,.category-draw-fire::before { animation:none; transition:none; } .carousel-card-stage::before { opacity:.42; } .carousel-card-stage::after { opacity:.35; } .category-draw-fire::before { opacity:.5; } }
+
+
+/* Arcade cards share the carousel's depth with neon, game-specific energy. */
+.arcade-card-fx,.arcade-cabinet-fx { position:relative; isolation:isolate; transform:translateZ(0); transition:transform .35s cubic-bezier(.16,1,.3,1),border-color .35s ease,box-shadow .35s ease; }
+.arcade-card-fx::before,.arcade-cabinet-fx::before { content:""; position:absolute; z-index:1; inset:-10px; border-radius:inherit; opacity:.54; filter:blur(13px); pointer-events:none; animation:arcade-pulse 2.9s ease-in-out infinite alternate; }
+.arcade-card-fx::after,.arcade-cabinet-fx::after { content:""; position:absolute; z-index:2; inset:0; border-radius:inherit; padding:1px; background:linear-gradient(115deg,transparent 10%,rgba(255,255,255,.75) 35%,transparent 50%,var(--arcade-bright,#22d3ee) 72%,transparent 90%); background-size:220% 100%; -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; animation:arcade-scan 5.2s linear infinite; pointer-events:none; }
+.arcade-card-fx > *,.arcade-cabinet-fx > * { position:relative; z-index:3; }
+.arcade-card-fx--strategy { --arcade-bright:#a78bfa; }.arcade-card-fx--strategy::before { background:radial-gradient(ellipse at 15% 20%,rgba(139,92,246,.88),transparent 42%),radial-gradient(ellipse at 85% 92%,rgba(59,130,246,.64),transparent 45%); }
+.arcade-card-fx--arcade { --arcade-bright:#fb7185; }.arcade-card-fx--arcade::before { background:radial-gradient(ellipse at 18% 100%,rgba(251,113,133,.86),transparent 42%),radial-gradient(ellipse at 85% 15%,rgba(249,115,22,.66),transparent 45%); }
+.arcade-card-fx--cards { --arcade-bright:#fbbf24; }.arcade-card-fx--cards::before { background:radial-gradient(ellipse at 15% 20%,rgba(251,191,36,.85),transparent 43%),radial-gradient(ellipse at 85% 95%,rgba(244,63,94,.58),transparent 44%); }
+.arcade-card-fx--chess::before { background:radial-gradient(ellipse at 20% 20%,rgba(139,92,246,.82),transparent 46%),radial-gradient(ellipse at 85% 92%,rgba(59,130,246,.6),transparent 46%); }.arcade-card-fx--connect4::before { background:radial-gradient(ellipse at 16% 92%,rgba(251,113,133,.84),transparent 45%),radial-gradient(ellipse at 85% 15%,rgba(251,191,36,.62),transparent 44%); }.arcade-card-fx--draughts::before { background:radial-gradient(ellipse at 18% 18%,rgba(16,185,129,.75),transparent 44%),radial-gradient(ellipse at 84% 92%,rgba(45,212,191,.58),transparent 44%); }
+.arcade-cabinet-fx { --arcade-bright:#e879f9; }.arcade-cabinet-fx::before { background:radial-gradient(ellipse at 12% 90%,rgba(217,70,239,.68),transparent 42%),radial-gradient(ellipse at 88% 12%,rgba(34,211,238,.68),transparent 42%); }
+.arcade-card-fx:hover,.arcade-cabinet-fx:hover { transform:translateY(-5px) perspective(1000px) rotateX(1.5deg); box-shadow:0 24px 58px rgba(0,0,0,.5),0 0 38px rgba(34,211,238,.2); }
+@keyframes arcade-pulse { from { opacity:.3; scale:.97; } to { opacity:.78; scale:1.025; } }
+@keyframes arcade-scan { from { background-position:220% 0; } to { background-position:-20% 0; } }
+@media (prefers-reduced-motion: reduce) { .arcade-card-fx,.arcade-card-fx::before,.arcade-card-fx::after,.arcade-cabinet-fx,.arcade-cabinet-fx::before,.arcade-cabinet-fx::after { animation:none; transition:none; } .arcade-card-fx::before,.arcade-cabinet-fx::before { opacity:.42; } .arcade-card-fx::after,.arcade-cabinet-fx::after { opacity:.35; } }
