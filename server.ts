@@ -203,7 +203,6 @@ function requireSettlementAuthorization(authorization?: string) {
 // API: durable public audit record. Pending state carries no fake entropy values.
 app.get("/api/draw/audit", async (_req, res) => {
   try {
-    if (rejectSensitiveRequest(_req, res)) return;
     const audit = await getEntropyAudit();
     res.json(audit || { drawId, status: "PENDING", blockHeight: targetBlockHeight, publicClientSeed, bitcoinBlockHash: null, nistBeaconOutput: null, nistPulseTime: null, finalSeedHash: null, totalEntries: null, settledAt: null });
   } catch (error) {
@@ -307,7 +306,6 @@ async function ensureStripeWebhookEventsTable() {
 
 // API: fail-closed cash launch gate. Set CASH_LAUNCH_ENABLED=true only after every evidence record has been independently verified.
 app.get("/api/launch-readiness", (_req, res) => {
-  if (rejectSensitiveRequest(_req, res)) return;
   const { requiredEvidence, launchReady } = cashLaunchReadiness();
   res.set("Cache-Control", "no-store");
   res.json({ mode: launchReady ? "CASH_READY" : "PRE_LAUNCH", paidEntriesEnabled: launchReady, prizeIssuanceEnabled: launchReady, safeguardingClaimPermitted: launchReady, requiredEvidence, launchReady, message: launchReady ? "Cash launch controls are enabled." : "Cash entry is locked until the server-side switch and all independently evidenced controls are configured." });
@@ -341,7 +339,6 @@ app.post("/api/stripe/webhook", async (req, res) => {
 
 // API: competition stats expose a pending audit state only; settled inputs are read from durable storage.
 app.get("/api/competition/stats", async (_req, res) => {
-  if (rejectSensitiveRequest(_req, res)) return;
   res.set("Cache-Control", "public, s-maxage=15, stale-while-revalidate=60");
   const audit = await getEntropyAudit().catch(() => null);
   res.json({
