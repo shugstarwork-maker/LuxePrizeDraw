@@ -482,3 +482,25 @@
 @keyframes headline-firelight { from { opacity:.46; scale:.98; } to { opacity:.84; scale:1.035; } }
 @keyframes headline-flames { from { transform:translateY(10px) scaleX(.95) scaleY(.78); opacity:.46; } to { transform:translateY(-4px) scaleX(1.05) scaleY(1.12); opacity:.78; } }
 @media (prefers-reduced-motion: reduce) { .headline-prize-fire,.headline-prize-fire::before,.headline-prize-fire::after { animation:none; transition:none; } .headline-prize-fire::before { opacity:.56; } .headline-prize-fire::after { opacity:.48; } }
+
+
+/* Shared carousel treatments: each active card gets a distinct, subtle live frame. */
+.carousel-card-stage { position:relative; isolation:isolate; border-radius:2rem; transition:transform .45s cubic-bezier(.16,1,.3,1); }
+.carousel-card-stage::before { content:""; position:absolute; z-index:-1; inset:-8px; border-radius:inherit; opacity:.5; filter:blur(12px); pointer-events:none; animation:carousel-aura 3.4s ease-in-out infinite alternate; }
+.carousel-card-stage::after { content:""; position:absolute; z-index:2; inset:0; border-radius:inherit; padding:1px; background:linear-gradient(120deg,transparent 12%,rgba(255,237,158,.76) 35%,transparent 52%,rgba(255,108,22,.74) 74%,transparent 91%); background-size:220% 100%; -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; opacity:.62; animation:carousel-frame-sweep 5.5s linear infinite; pointer-events:none; }
+.carousel-card-stage > * { position:relative; z-index:1; }
+.carousel-card-stage--0::before { background:radial-gradient(ellipse at 20% 100%,rgba(255,79,0,.8),transparent 45%),radial-gradient(ellipse at 86% 15%,rgba(255,203,57,.65),transparent 42%); }
+.carousel-card-stage--1::before { background:radial-gradient(ellipse at 12% 22%,rgba(154,93,255,.68),transparent 45%),radial-gradient(ellipse at 85% 90%,rgba(255,92,142,.56),transparent 45%); animation-delay:-1.1s; }
+.carousel-card-stage--2::before { background:radial-gradient(ellipse at 22% 94%,rgba(16,185,129,.56),transparent 45%),radial-gradient(ellipse at 84% 15%,rgba(45,212,191,.52),transparent 42%); animation-delay:-2.1s; }
+.carousel-card-stage--3::before { background:radial-gradient(ellipse at 18% 18%,rgba(63,151,255,.6),transparent 45%),radial-gradient(ellipse at 85% 90%,rgba(129,104,255,.56),transparent 42%); animation-delay:-.6s; }
+.carousel-card-stage:hover { transform:translateY(-4px) perspective(1000px) rotateX(1deg); }
+.category-draw-fire { position:relative; isolation:isolate; transform:perspective(1100px) rotateX(.7deg); transition:transform .45s cubic-bezier(.16,1,.3,1),box-shadow .45s ease,border-color .45s ease; box-shadow:0 24px 54px rgba(0,0,0,.48),0 0 30px rgba(251,191,36,.16); }
+.category-draw-fire::before { content:""; position:absolute; z-index:0; inset:-7px; border-radius:inherit; background:conic-gradient(from var(--tier-light-angle,0deg),transparent 0 18%,rgba(255,110,25,.78) 27%,rgba(255,225,130,.58) 31%,transparent 39% 64%,rgba(251,191,36,.68) 72%,transparent 80%); filter:blur(10px); opacity:.58; animation:tier-light-spin 8s linear infinite,tier-light-pulse 2.2s ease-in-out infinite alternate; pointer-events:none; }
+.category-draw-fire > * { position:relative; z-index:1; }
+.category-draw-fire:hover { transform:perspective(1100px) translateY(-4px) rotateX(1.4deg); border-color:rgba(255,225,130,.66); box-shadow:0 32px 68px rgba(0,0,0,.58),0 0 45px rgba(251,191,36,.26); }
+@property --tier-light-angle { syntax:"<angle>"; initial-value:0deg; inherits:false; }
+@keyframes carousel-aura { from { opacity:.36; scale:.97; } to { opacity:.72; scale:1.025; } }
+@keyframes carousel-frame-sweep { from { background-position:220% 0; } to { background-position:-20% 0; } }
+@keyframes tier-light-spin { to { --tier-light-angle:360deg; } }
+@keyframes tier-light-pulse { from { opacity:.38; } to { opacity:.78; } }
+@media (prefers-reduced-motion: reduce) { .carousel-card-stage,.carousel-card-stage::before,.carousel-card-stage::after,.category-draw-fire,.category-draw-fire::before { animation:none; transition:none; } .carousel-card-stage::before { opacity:.42; } .carousel-card-stage::after { opacity:.35; } .category-draw-fire::before { opacity:.5; } }
