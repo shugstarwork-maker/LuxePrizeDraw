@@ -469,3 +469,16 @@
 @media (prefers-reduced-motion: reduce) { .featured-draw-fire::before,.featured-draw-fire::after,.featured-draw-fire__flames span { animation:none; opacity:.55; } }
 .featured-draw-fire > img { z-index:0; }
 .featured-draw-fire > div:not(.featured-draw-fire__flames), .featured-draw-fire > button { z-index:2; }
+
+
+/* Headline prize card: warm, dimensional firelight that stays behind the copy. */
+.headline-prize-fire { position:relative; isolation:isolate; transform:perspective(1200px) rotateX(1deg); box-shadow:0 22px 58px rgba(0,0,0,.46),0 0 22px rgba(255,157,30,.24),0 0 52px rgba(255,78,0,.15); transition:transform .45s cubic-bezier(.16,1,.3,1),box-shadow .45s ease,border-color .45s ease; }
+.headline-prize-fire::before { content:""; position:absolute; z-index:0; inset:-10px; border-radius:inherit; background:conic-gradient(from var(--headline-ember-angle,0deg),transparent 0 8%,rgba(255,82,0,.88) 13%,rgba(255,207,73,.66) 17%,transparent 24% 43%,rgba(255,103,0,.82) 49%,rgba(255,232,143,.6) 53%,transparent 60% 77%,rgba(255,61,0,.86) 84%,rgba(255,190,55,.68) 88%,transparent 95%); filter:blur(13px); opacity:.7; animation:headline-ember-spin 8s linear infinite,headline-firelight 2.4s ease-in-out infinite alternate; pointer-events:none; }
+.headline-prize-fire::after { content:""; position:absolute; z-index:0; inset:auto -7% -44px; height:155px; background:radial-gradient(ellipse at 5% 100%,rgba(255,75,0,.9),transparent 22%),radial-gradient(ellipse at 16% 100%,rgba(255,210,64,.75),transparent 18%),radial-gradient(ellipse at 33% 100%,rgba(255,61,0,.95),transparent 24%),radial-gradient(ellipse at 54% 100%,rgba(255,202,54,.7),transparent 19%),radial-gradient(ellipse at 73% 100%,rgba(255,72,0,.92),transparent 25%),radial-gradient(ellipse at 95% 100%,rgba(255,191,43,.68),transparent 20%); filter:blur(8px) saturate(1.2); opacity:.64; transform-origin:center bottom; animation:headline-flames 2.8s ease-in-out infinite alternate; pointer-events:none; }
+.headline-prize-fire > * { position:relative; z-index:1; }
+.headline-prize-fire:hover { transform:perspective(1200px) translateY(-4px) rotateX(2deg); border-color:rgba(255,232,143,.72); box-shadow:0 30px 70px rgba(0,0,0,.55),0 0 30px rgba(255,165,38,.36),0 0 72px rgba(255,70,0,.23); }
+@property --headline-ember-angle { syntax:"<angle>"; initial-value:0deg; inherits:false; }
+@keyframes headline-ember-spin { to { --headline-ember-angle:360deg; } }
+@keyframes headline-firelight { from { opacity:.46; scale:.98; } to { opacity:.84; scale:1.035; } }
+@keyframes headline-flames { from { transform:translateY(10px) scaleX(.95) scaleY(.78); opacity:.46; } to { transform:translateY(-4px) scaleX(1.05) scaleY(1.12); opacity:.78; } }
+@media (prefers-reduced-motion: reduce) { .headline-prize-fire,.headline-prize-fire::before,.headline-prize-fire::after { animation:none; transition:none; } .headline-prize-fire::before { opacity:.56; } .headline-prize-fire::after { opacity:.48; } }
