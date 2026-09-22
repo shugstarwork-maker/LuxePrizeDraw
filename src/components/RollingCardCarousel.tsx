@@ -9,9 +9,10 @@ type RollingCardCarouselProps<T> = {
   className?: string;
   interval?: number;
   compactControls?: boolean;
+  enableArrivalEffects?: boolean;
 };
 
-export function RollingCardCarousel<T>({ items, getKey, renderItem, label, className = "", interval = 5000, compactControls = false }: RollingCardCarouselProps<T>) {
+export function RollingCardCarousel<T>({ items, getKey, renderItem, label, className = "", interval = 5000, compactControls = false, enableArrivalEffects = true }: RollingCardCarouselProps<T>) {
   const [active, setActive] = useState(0);
   const startX = useRef<number | null>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -44,7 +45,7 @@ export function RollingCardCarousel<T>({ items, getKey, renderItem, label, class
       if (distance < -50) next();
       startX.current = null;
     }} className="outline-none focus-visible:ring-2 focus-visible:ring-amber-200">
-      <div key={getKey(items[active])} className={`carousel-card-stage carousel-card-stage--${active % 4} carousel-card-stage--arriving`}><span aria-hidden="true" className="carousel-card-stage__lightning" /><span aria-hidden="true" className="carousel-card-stage__flash" />{renderItem(items[active], active)}</div>
+      <div key={getKey(items[active])} className={`carousel-card-stage carousel-card-stage--${active % 4}${enableArrivalEffects ? " carousel-card-stage--arriving" : ""}`}>{enableArrivalEffects && <><span aria-hidden="true" className="carousel-card-stage__lightning" /><span aria-hidden="true" className="carousel-card-stage__flash" /></>}{renderItem(items[active], active)}</div>
     </div>
     <div className={`mt-5 flex items-center justify-between ${compactControls ? "gap-2" : "gap-3"}`}>
       <button aria-label={`Previous ${label}`} onClick={previous} className={compactControls ? "grid h-10 w-10 place-items-center rounded-full border border-white/15 bg-black/35 text-white sm:inline-flex sm:h-auto sm:w-auto sm:gap-2 sm:rounded-xl sm:px-4 sm:py-3 sm:text-xs sm:font-black" : "inline-flex items-center gap-2 rounded-xl border border-white/15 bg-black/35 px-4 py-3 text-xs font-black text-white"}><ChevronLeft className="h-4 w-4" /><span className="hidden sm:inline">Previous</span></button>
