@@ -8,9 +8,10 @@ type RollingCardCarouselProps<T> = {
   label: string;
   className?: string;
   interval?: number;
+  compactControls?: boolean;
 };
 
-export function RollingCardCarousel<T>({ items, getKey, renderItem, label, className = "", interval = 5000 }: RollingCardCarouselProps<T>) {
+export function RollingCardCarousel<T>({ items, getKey, renderItem, label, className = "", interval = 5000, compactControls = false }: RollingCardCarouselProps<T>) {
   const [active, setActive] = useState(0);
   const startX = useRef<number | null>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -45,10 +46,10 @@ export function RollingCardCarousel<T>({ items, getKey, renderItem, label, class
     }} className="outline-none focus-visible:ring-2 focus-visible:ring-amber-200">
       {renderItem(items[active], active)}
     </div>
-    <div className="mt-5 flex items-center justify-between gap-3">
-      <button aria-label={`Previous ${label}`} onClick={previous} className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-black/35 px-4 py-3 text-xs font-black text-white"><ChevronLeft className="h-4 w-4" /> Previous</button>
+    <div className={`mt-5 flex items-center justify-between ${compactControls ? "gap-2" : "gap-3"}`}>
+      <button aria-label={`Previous ${label}`} onClick={previous} className={compactControls ? "grid h-10 w-10 place-items-center rounded-full border border-white/15 bg-black/35 text-white sm:inline-flex sm:h-auto sm:w-auto sm:gap-2 sm:rounded-xl sm:px-4 sm:py-3 sm:text-xs sm:font-black" : "inline-flex items-center gap-2 rounded-xl border border-white/15 bg-black/35 px-4 py-3 text-xs font-black text-white"}><ChevronLeft className="h-4 w-4" /><span className="hidden sm:inline">Previous</span></button>
       <div className="flex max-w-[45%] flex-wrap justify-center gap-1.5">{items.map((item, index) => <button key={getKey(item)} aria-label={`Show ${getKey(item)}`} onClick={() => setActive(index)} className={`h-2.5 rounded-full transition ${active === index ? "w-7 bg-amber-200" : "w-2.5 bg-white/45"}`} />)}</div>
-      <button aria-label={`Next ${label}`} onClick={next} className="inline-flex items-center gap-2 rounded-xl bg-amber-300 px-4 py-3 text-xs font-black text-black">Next <ChevronRight className="h-4 w-4" /></button>
+      <button aria-label={`Next ${label}`} onClick={next} className={compactControls ? "grid h-10 w-10 place-items-center rounded-full bg-amber-300 text-black sm:inline-flex sm:h-auto sm:w-auto sm:gap-2 sm:rounded-xl sm:px-4 sm:py-3 sm:text-xs sm:font-black" : "inline-flex items-center gap-2 rounded-xl bg-amber-300 px-4 py-3 text-xs font-black text-black"}><span className="hidden sm:inline">Next</span><ChevronRight className="h-4 w-4" /></button>
     </div>
   </div>;
 }
