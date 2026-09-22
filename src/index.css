@@ -485,9 +485,16 @@
 
 
 /* Shared carousel treatments: each active card gets a distinct, subtle live frame. */
-.carousel-card-stage { position:relative; isolation:isolate; border-radius:2rem; transition:transform .45s cubic-bezier(.16,1,.3,1); }
+.carousel-card-stage { position:relative; isolation:isolate; border-radius:2rem; transform-style:preserve-3d; transition:transform .45s cubic-bezier(.16,1,.3,1); }
 .carousel-card-stage::before { content:""; position:absolute; z-index:-1; inset:-8px; border-radius:inherit; opacity:.5; filter:blur(12px); pointer-events:none; animation:carousel-aura 3.4s ease-in-out infinite alternate; }
 .carousel-card-stage::after { content:""; position:absolute; z-index:2; inset:0; border-radius:inherit; padding:1px; background:linear-gradient(120deg,transparent 12%,rgba(255,237,158,.76) 35%,transparent 52%,rgba(255,108,22,.74) 74%,transparent 91%); background-size:220% 100%; -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; opacity:.62; animation:carousel-frame-sweep 5.5s linear infinite; pointer-events:none; }
+.carousel-card-stage--arriving { animation:carousel-card-arrive .72s cubic-bezier(.16,1,.3,1) both; }
+.carousel-card-stage--arriving > :not(.carousel-card-stage__lightning):not(.carousel-card-stage__flash) { animation:carousel-card-content-arrive .72s cubic-bezier(.16,1,.3,1) both; }
+.carousel-card-stage--arriving::before { animation:carousel-aura 3.4s ease-in-out infinite alternate,carousel-bottom-ember .72s cubic-bezier(.16,1,.3,1) both; }
+.carousel-card-stage--arriving.carousel-card-stage--1::before { animation-delay:-1.1s,0s; }.carousel-card-stage--arriving.carousel-card-stage--2::before { animation-delay:-2.1s,0s; }.carousel-card-stage--arriving.carousel-card-stage--3::before { animation-delay:-.6s,0s; }
+.carousel-card-stage__lightning { position:absolute; z-index:4; top:-12%; left:50%; width:20px; height:124%; opacity:0; transform:translateX(-50%) rotate(14deg); clip-path:polygon(44% 0,100% 0,64% 37%,99% 37%,17% 100%,43% 55%,0 55%); background:linear-gradient(90deg,rgba(255,225,130,.12),#fffde8 46%,#ffd15c 52%,rgba(255,124,22,.16)); filter:drop-shadow(0 0 9px #fff8c9) drop-shadow(0 0 28px #ff9f1c); pointer-events:none; animation:carousel-lightning-strike .72s steps(1,end) both; }
+.carousel-card-stage__flash { position:absolute; z-index:3; inset:0; border-radius:inherit; opacity:0; background:radial-gradient(circle at 51% 35%,rgba(255,252,226,.72),rgba(255,190,55,.22) 25%,transparent 62%); mix-blend-mode:screen; pointer-events:none; animation:carousel-impact-flash .72s ease-out both; }
+
 .carousel-card-stage > * { position:relative; z-index:1; }
 .carousel-card-stage--0::before { background:radial-gradient(ellipse at 20% 100%,rgba(255,79,0,.8),transparent 45%),radial-gradient(ellipse at 86% 15%,rgba(255,203,57,.65),transparent 42%); }
 .carousel-card-stage--1::before { background:radial-gradient(ellipse at 12% 22%,rgba(154,93,255,.68),transparent 45%),radial-gradient(ellipse at 85% 90%,rgba(255,92,142,.56),transparent 45%); animation-delay:-1.1s; }
@@ -500,10 +507,16 @@
 .category-draw-fire:hover { transform:perspective(1100px) translateY(-4px) rotateX(1.4deg); border-color:rgba(255,225,130,.66); box-shadow:0 32px 68px rgba(0,0,0,.58),0 0 45px rgba(251,191,36,.26); }
 @property --tier-light-angle { syntax:"<angle>"; initial-value:0deg; inherits:false; }
 @keyframes carousel-aura { from { opacity:.36; scale:.97; } to { opacity:.72; scale:1.025; } }
+@keyframes carousel-card-arrive { 0% { opacity:0; transform:perspective(1100px) translate3d(0,28px,-180px) rotateX(-10deg) scale(.82); filter:brightness(.72); } 58% { opacity:1; transform:perspective(1100px) translate3d(0,-8px,76px) rotateX(3deg) scale(1.035); filter:brightness(1.25); } 100% { opacity:1; transform:perspective(1100px) translate3d(0,0,0) rotateX(0) scale(1); filter:brightness(1); } }
+@keyframes carousel-card-content-arrive { 0% { transform:translateZ(-20px); } 58% { transform:translateZ(48px); } 100% { transform:translateZ(0); } }
+@keyframes carousel-bottom-ember { 0% { opacity:0; filter:blur(18px); transform:translateY(34px) scaleX(.72); } 58% { opacity:1; filter:blur(10px) drop-shadow(0 0 24px rgba(255,94,0,.94)); transform:translateY(-3px) scaleX(1.13); } 100% { opacity:.66; filter:blur(12px); transform:translateY(0) scaleX(1); } }
+@keyframes carousel-lightning-strike { 0%,22%,100% { opacity:0; } 28%,37% { opacity:.92; } 31%,43% { opacity:.28; } }
+@keyframes carousel-impact-flash { 0%,20% { opacity:0; } 31% { opacity:1; } 48% { opacity:.18; } 100% { opacity:0; } }
+
 @keyframes carousel-frame-sweep { from { background-position:220% 0; } to { background-position:-20% 0; } }
 @keyframes tier-light-spin { to { --tier-light-angle:360deg; } }
 @keyframes tier-light-pulse { from { opacity:.38; } to { opacity:.78; } }
-@media (prefers-reduced-motion: reduce) { .carousel-card-stage,.carousel-card-stage::before,.carousel-card-stage::after,.category-draw-fire,.category-draw-fire::before { animation:none; transition:none; } .carousel-card-stage::before { opacity:.42; } .carousel-card-stage::after { opacity:.35; } .category-draw-fire::before { opacity:.5; } }
+@media (prefers-reduced-motion: reduce) { .carousel-card-stage,.carousel-card-stage::before,.carousel-card-stage::after,.carousel-card-stage__lightning,.carousel-card-stage__flash,.category-draw-fire,.category-draw-fire::before { animation:none; transition:none; } .carousel-card-stage::before { opacity:.42; } .carousel-card-stage::after { opacity:.35; } .carousel-card-stage__lightning,.carousel-card-stage__flash { display:none; } .category-draw-fire::before { opacity:.5; } }
 
 
 /* Arcade cards share the carousel's depth with neon, game-specific energy. */
