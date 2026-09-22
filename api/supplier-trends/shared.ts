@@ -94,10 +94,14 @@ function matchesSecret(actual: string, expected: string) {
 
 export function authorized(request: Request) {
   const secret = process.env.CRON_SECRET;
-  return Boolean(secret) && matchesSecret(request.headers.get("authorization") || "", `Bearer ${secret}`);
+  return Boolean(secret) && matchesSecret(request.headers.get("authorization") || "", "Bearer " + secret);
 }
 
 export function writeAuthorized(request: Request) {
   const secret = process.env.TREND_EVENT_WRITE_SECRET;
   return Boolean(secret) && matchesSecret(request.headers.get("x-trend-event-key") || "", secret);
+}
+
+export function previewSensitiveRoutesDisabled() {
+  return process.env.VERCEL_ENV === "preview" && process.env.ALLOW_PREVIEW_SENSITIVE_ROUTES !== "true";
 }

@@ -16,6 +16,8 @@ const PORT = 3000;
 const MAX_AI_REQUESTS_PER_INSTANCE = 8;
 let activeAiRequests = 0;
 
+app.disable("x-powered-by");
+
 function limitedText(value: unknown, maximumLength: number) {
   return typeof value === "string" ? value.trim().slice(0, maximumLength) : "";
 }
@@ -32,6 +34,57 @@ async function withAiCapacity<T>(work: () => Promise<T>) {
 
 app.use(express.json({ limit: "32kb", verify: (req, _res, buffer) => { (req as express.Request & { rawBody?: Buffer }).rawBody = Buffer.from(buffer); } }));
 app.set("query parser", "simple");
+
+function isPreviewDeployment() {
+  return process.env.VERCEL_ENV === "preview";
+}
+
+function previewSensitiveRoutesEnabled() {
+  return process.env.ALLOW_PREVIEW_SENSITIVE_ROUTES === "true";
+}
+
+function sameOrigin(request: express.Request) {
+  const origin = request.header("origin");
+  const host = request.header("x-forwarded-host") || request.header("host");
+  if (!origin || !host) return true;
+  try {
+    return new URL(origin).host === host;
+  } catch {
+    return false;
+  }
+}
+
+function rejectSensitiveRequest(req: express.Request, res: express.Response, options: { allowPreview?: boolean; requireSameOrigin?: boolean } = {}) {
+  if (!options.allowPreview && isPreviewDeployment() && !previewSensitiveRoutesEnabled()) {
+    res.status(404).json({ error: "Unavailable in preview deployments." });
+    return true;
+  }
+  if (options.requireSameOrigin && !sameOrigin(req)) {
+    res.status(403).json({ error: "Cross-origin browser requests are not allowed." });
+    return true;
+  }
+  return false;
+}
+
+function providedAdminSecret(req: express.Request) {
+  const authorization = req.header("authorization");
+  if (authorization?.startsWith("Bearer ")) return authorization.slice("Bearer ".length).trim();
+  return req.header("x-admin-password")?.trim() || "";
+}
+
+app.use((_req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  if (process.env.NODE_ENV === "production") {
+    res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+  }
+  if (isPreviewDeployment()) {
+    res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive, nosnippet");
+  }
+  next();
+});
 
 // AI Gateway uses the Vercel deployment's OIDC identity. No provider API key is stored in this app.
 const AI_GATEWAY_MODEL = process.env.AI_GATEWAY_MODEL || "openai/gpt-4o-mini";
@@ -142,7 +195,7 @@ async function fetchPublicEntropy(blockHeight: number) {
 function requireSettlementAuthorization(authorization?: string) {
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret) throw new Error("CRON_SECRET is not configured.");
-  const expected = `Bearer ${cronSecret}`;
+  const expected = "Bearer " + cronSecret;
   const actual = authorization || "";
   return actual.length === expected.length && crypto.timingSafeEqual(Buffer.from(actual), Buffer.from(expected));
 }
@@ -150,6 +203,7 @@ function requireSettlementAuthorization(authorization?: string) {
 // API: durable public audit record. Pending state carries no fake entropy values.
 app.get("/api/draw/audit", async (_req, res) => {
   try {
+    if (rejectSensitiveRequest(_req, res)) return;
     const audit = await getEntropyAudit();
     res.json(audit || { drawId, status: "PENDING", blockHeight: targetBlockHeight, publicClientSeed, bitcoinBlockHash: null, nistBeaconOutput: null, nistPulseTime: null, finalSeedHash: null, totalEntries: null, settledAt: null });
   } catch (error) {
@@ -161,6 +215,7 @@ app.get("/api/draw/audit", async (_req, res) => {
 // API: protected pre-commitment. Call before entries close to publish the server-seed hash.
 app.post("/api/draw/commit", async (req, res) => {
   try {
+    if (rejectSensitiveRequest(req, res)) return;
     if (!requireSettlementAuthorization(req.header("authorization"))) return res.status(401).json({ error: "Unauthorized commitment request." });
     const serverSeed = process.env.ENTROPY_DRAW_SERVER_SEED;
     if (!serverSeed || !Number.isSafeInteger(targetBlockHeight) || targetBlockHeight < 1) return res.status(503).json({ error: "Entropy draw configuration is incomplete." });
@@ -181,6 +236,7 @@ app.post("/api/draw/commit", async (req, res) => {
 // API: protected, idempotent settlement. Invoke only after the target block has been mined.
 app.post("/api/draw/settle", async (req, res) => {
   try {
+    if (rejectSensitiveRequest(req, res)) return;
     if (!requireSettlementAuthorization(req.header("authorization"))) return res.status(401).json({ error: "Unauthorized settlement request." });
     const serverSeed = process.env.ENTROPY_DRAW_SERVER_SEED;
     if (!serverSeed || !Number.isSafeInteger(targetBlockHeight) || targetBlockHeight < 1) return res.status(503).json({ error: "Entropy draw configuration is incomplete." });
@@ -251,6 +307,7 @@ async function ensureStripeWebhookEventsTable() {
 
 // API: fail-closed cash launch gate. Set CASH_LAUNCH_ENABLED=true only after every evidence record has been independently verified.
 app.get("/api/launch-readiness", (_req, res) => {
+  if (rejectSensitiveRequest(_req, res)) return;
   const { requiredEvidence, launchReady } = cashLaunchReadiness();
   res.set("Cache-Control", "no-store");
   res.json({ mode: launchReady ? "CASH_READY" : "PRE_LAUNCH", paidEntriesEnabled: launchReady, prizeIssuanceEnabled: launchReady, safeguardingClaimPermitted: launchReady, requiredEvidence, launchReady, message: launchReady ? "Cash launch controls are enabled." : "Cash entry is locked until the server-side switch and all independently evidenced controls are configured." });
@@ -259,6 +316,7 @@ app.get("/api/launch-readiness", (_req, res) => {
 // API: membership-only Stripe Checkout. It never creates a draw entry or prize entitlement.
 app.post("/api/payments/membership-checkout", async (_req, res) => {
   try {
+    if (rejectSensitiveRequest(_req, res, { requireSameOrigin: true })) return;
     if (!cashLaunchReadiness().launchReady) return res.status(423).json({ error: "Cash launch controls are locked." });
     const form = new URLSearchParams({ mode: "subscription", success_url: `${requiredAppUrl()}/?checkout=success`, cancel_url: `${requiredAppUrl()}/?checkout=cancel`, "line_items[0][price]": process.env.STRIPE_MEMBERSHIP_PRICE_ID!, "line_items[0][quantity]": "1", "metadata[product]": "luxe-membership" });
     const checkoutUrl = await stripeRequest("checkout/sessions", form);
@@ -268,6 +326,7 @@ app.post("/api/payments/membership-checkout", async (_req, res) => {
 
 // API: verifies Stripe's signed payload, records each event once, and intentionally does not issue any draw entry.
 app.post("/api/stripe/webhook", async (req, res) => {
+  if (rejectSensitiveRequest(req, res)) return;
   const rawBody = (req as express.Request & { rawBody?: Buffer }).rawBody;
   if (!rawBody || !verifyStripeSignature(rawBody, req.header("stripe-signature"))) return res.status(400).json({ error: "Invalid Stripe signature." });
   try {
@@ -282,6 +341,7 @@ app.post("/api/stripe/webhook", async (req, res) => {
 
 // API: competition stats expose a pending audit state only; settled inputs are read from durable storage.
 app.get("/api/competition/stats", async (_req, res) => {
+  if (rejectSensitiveRequest(_req, res)) return;
   res.set("Cache-Control", "public, s-maxage=15, stale-while-revalidate=60");
   const audit = await getEntropyAudit().catch(() => null);
   res.json({
@@ -293,6 +353,7 @@ app.get("/api/competition/stats", async (_req, res) => {
 // API: verifies the settled seed calculation. It never accepts a client-supplied server seed.
 app.post("/api/draw/verify", async (req, res) => {
   try {
+    if (rejectSensitiveRequest(req, res, { requireSameOrigin: true })) return;
     const audit = await getEntropyAudit();
     if (!audit || audit.status !== "SETTLED" || !audit.finalSeedHash || !audit.totalEntries) return res.status(409).json({ error: "The draw has not settled yet." });
     const { ticketId, nonce = 1 } = req.body;
@@ -369,12 +430,13 @@ async function evaluateEntryEligibility(req: express.Request, body: any) {
 }
 
 app.post("/api/compliance/entry-check", async (req, res) => {
-  try { const result = await evaluateEntryEligibility(req, req.body); return res.status(result.allowed ? 200 : 403).json(result); }
+  try { if (rejectSensitiveRequest(req, res, { requireSameOrigin: true })) return; const result = await evaluateEntryEligibility(req, req.body); return res.status(result.allowed ? 200 : 403).json(result); }
   catch { return res.status(503).json({ allowed: false, reason: "Compliance service unavailable." }); }
 });
 
 app.post("/api/compliance/consents", async (req, res) => {
   try {
+    if (rejectSensitiveRequest(req, res, { requireSameOrigin: true })) return;
     const email = String(req.body?.email || "").trim().toLowerCase(); const documentVersion = String(req.body?.documentVersion || "").trim();
     const country = String(req.header("x-vercel-ip-country") || "").trim().toUpperCase(); const subdivision = String(req.header("x-vercel-ip-country-region") || "").trim().toUpperCase();
     if (!/^\S+@\S+\.\S+$/.test(email) || !documentVersion || !country) return res.status(400).json({ error: "Email, document version, and resolved jurisdiction are required." });
@@ -387,7 +449,8 @@ app.post("/api/compliance/consents", async (req, res) => {
 
 app.put("/api/admin/compliance/jurisdictions", async (req, res) => {
   try {
-    if (!requireAdminPassword(req.header("x-admin-password"))) return res.status(401).json({ error: "Unauthorized." });
+    if (rejectSensitiveRequest(req, res)) return;
+    if (!requireAdminPassword(providedAdminSecret(req))) return res.status(401).json({ error: "Unauthorized." });
     const country = String(req.body?.country || "").trim().toUpperCase(); const subdivision = String(req.body?.subdivision || "").trim().toUpperCase();
     const status = String(req.body?.status || "NOT_REVIEWED") as JurisdictionStatus; const reference = String(req.body?.legalApprovalReference || "").trim();
     if (!/^[A-Z]{2}$/.test(country) || !["NOT_REVIEWED", "ALLOWED", "RESTRICTED", "BLOCKED"].includes(status)) return res.status(400).json({ error: "Use a two-letter country code and a valid review status." });
@@ -403,7 +466,8 @@ app.put("/api/admin/compliance/jurisdictions", async (req, res) => {
 
 app.put("/api/admin/compliance/competitions/:competitionId", async (req, res) => {
   try {
-    if (!requireAdminPassword(req.header("x-admin-password"))) return res.status(401).json({ error: "Unauthorized." });
+    if (rejectSensitiveRequest(req, res)) return;
+    if (!requireAdminPassword(providedAdminSecret(req))) return res.status(401).json({ error: "Unauthorized." });
     const id = String(req.params.competitionId || "").trim(); const rulesUrl = String(req.body?.officialRulesUrl || "").trim(); const rulesVersion = String(req.body?.officialRulesVersion || "").trim();
     if (!id || !/^https:\/\//.test(rulesUrl) || !rulesVersion) return res.status(400).json({ error: "LEGAL REVIEW REQUIRED: competition ID, HTTPS official rules URL, and rules version are required." });
     await ensureComplianceTables(); const sql = getAuditDatabase();
@@ -442,7 +506,8 @@ async function ensureFreeDrawTicketsTable() {
 // API: administrator issues a one-time Free Draw ticket for a specific email.
 app.post("/api/admin/free-draw-tickets", async (req, res) => {
   try {
-    if (!requireAdminPassword(req.header("x-admin-password"))) return res.status(401).json({ error: "Unauthorized." });
+    if (rejectSensitiveRequest(req, res)) return;
+    if (!requireAdminPassword(providedAdminSecret(req))) return res.status(401).json({ error: "Unauthorized." });
     const email = String(req.body?.email || "").trim().toLowerCase();
     const drawName = String(req.body?.drawName || "").trim();
     if (!/^\S+@\S+\.\S+$/.test(email) || !drawName) return res.status(400).json({ error: "A valid email and draw are required." });
@@ -461,6 +526,7 @@ app.post("/api/admin/free-draw-tickets", async (req, res) => {
 // API: atomically redeems only an administrator-issued code belonging to the submitted email.
 app.post("/api/free-draws/redeem", async (req, res) => {
   try {
+    if (rejectSensitiveRequest(req, res, { requireSameOrigin: true })) return;
     const email = String(req.body?.email || "").trim().toLowerCase();
     const redemptionCode = String(req.body?.redemptionCode || "").trim().toUpperCase();
     if (!/^\S+@\S+\.\S+$/.test(email) || !redemptionCode) return res.status(400).json({ error: "Enter the email that received the ticket and its redemption code." });
@@ -483,6 +549,7 @@ app.post("/api/free-draws/redeem", async (req, res) => {
 // API: Competition Entry Submission & Subscriptions
 app.post("/api/competition/enter", (req, res) => {
   try {
+    if (rejectSensitiveRequest(req, res, { requireSameOrigin: true })) return;
     const {
       fullName,
       email,
@@ -493,24 +560,19 @@ app.post("/api/competition/enter", (req, res) => {
       entryType = "FREE",
       planId,
       ticketsCount = 1,
-      charityAmount = 0,
-      demo = false
+      charityAmount = 0
     } = req.body;
 
     if (!fullName || !email) {
       return res.status(400).json({ error: "Full name and email are required to generate an official entry ticket." });
     }
-    if (!demo) {
-      return res.status(403).json({ error: "Public entry issuance is disabled. Free Draw entries require an administrator-issued ticket." });
-    }
+    if (process.env.DEMO_MODE_ENABLED !== "true") return res.status(403).json({ error: "Public entry issuance is disabled. Free Draw entries require an administrator-issued ticket." });
 
     const count = Math.min(100, Math.max(1, Math.floor(Number(ticketsCount) || 1)));
-    if (!demo) {
-      totalEntriesCount += count;
-      if (charityAmount && Number(charityAmount) > 0) {
-        totalCharityRaisedGBP += Number(charityAmount);
-        if (Math.random() > 0.5) totalScholarshipsFunded += 1;
-      }
+    totalEntriesCount += count;
+    if (charityAmount && Number(charityAmount) > 0) {
+      totalCharityRaisedGBP += Number(charityAmount);
+      if (Math.random() > 0.5) totalScholarshipsFunded += 1;
     }
 
     const ticketId = `UAE-${Math.floor(100000 + Math.random() * 900000)}-${(country || "GLB").slice(0, 3).toUpperCase()}`;
@@ -523,10 +585,8 @@ app.post("/api/competition/enter", (req, res) => {
       business: businessIdea ? businessIdea.slice(0, 25) + "..." : (entryType === "SUBSCRIBER_VIP" ? "VIP Founder Subscriber" : "Luxe Prize Draw Venture"),
       entryType: entryType as "FREE" | "SUBSCRIBER_VIP" | "POWER_BUNDLE",
     };
-    if (!demo) {
-      verifiedEntrants.unshift(newEntrant);
-      if (verifiedEntrants.length > 20) verifiedEntrants.pop();
-    }
+    verifiedEntrants.unshift(newEntrant);
+    if (verifiedEntrants.length > 20) verifiedEntrants.pop();
 
     return res.json({
       success: true,
@@ -538,7 +598,7 @@ app.post("/api/competition/enter", (req, res) => {
       businessIdea,
       targetIndustry: targetIndustry || "Tech & Innovation",
       entryTimestamp: new Date().toISOString(),
-      ticketStatus: demo ? "PREVIEW_ONLY" : "VERIFIED_ACTIVE",
+      ticketStatus: "PREVIEW_ONLY",
       drawDate: "October 31, 2026 at 18:00 GST (Dubai Time)",
       bonusEntriesAwarded: count > 1 ? count - 1 : 1,
       totalTickets: count,
@@ -555,6 +615,7 @@ app.post("/api/competition/enter", (req, res) => {
 // API: AI Business Feasibility & Pitch Evaluator
 app.post("/api/ai/pitch-evaluate", async (req, res) => {
   try {
+    if (rejectSensitiveRequest(req, res, { requireSameOrigin: true })) return;
     const businessIdea = limitedText(req.body?.businessIdea, 2_000);
     const industry = limitedText(req.body?.industry, 200);
     const targetMarket = limitedText(req.body?.targetMarket, 200);
@@ -656,6 +717,7 @@ Return a valid JSON object with the following fields:
 // API: AI Live UAE Business Advisor Chat
 app.post("/api/ai/ask-advisor", async (req, res) => {
   try {
+    if (rejectSensitiveRequest(req, res, { requireSameOrigin: true })) return;
     const question = limitedText(req.body?.question, 1_000);
     const userBusinessContext = limitedText(req.body?.userBusinessContext, 2_000);
     if (!question) {
@@ -704,6 +766,7 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), "dist");
+    app.get(/\.map$/, (_req, res) => res.status(404).end());
     app.use(express.static(distPath));
     app.get("*", (req, res) => {
       const index = path.join(distPath, "index.html");
@@ -742,6 +805,7 @@ function arcadeIdentity(req: express.Request) {
   return expected.length === proof.length && crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(proof)) ? playerId : null;
 }
 app.get("/api/arcade/profile", async (req, res) => {
+  if (rejectSensitiveRequest(req, res, { requireSameOrigin: true, allowPreview: true })) return;
   const playerId = arcadeIdentity(req); if (!playerId) return res.status(401).json({ error: "Authenticated arcade identity is required." });
   try { await ensureArcadeTables(); const sql = getAuditDatabase(); await sql`INSERT INTO arcade_players (id) VALUES (${playerId}) ON CONFLICT (id) DO NOTHING`; const rows = await sql`SELECT * FROM arcade_players WHERE id = ${playerId}`; return res.json(rows[0]); } catch { return res.status(503).json({ error: "Arcade profile storage is unavailable." }); }
 });
@@ -776,12 +840,13 @@ async function settleConnectFour(room: ConnectFourRoom) {
   await Promise.all([putArcadeProfile(update(red, result, redDelta)), putArcadeProfile(update(yellow, 1 - result, yellowDelta))]); room.finishedAt = Date.now();
 }
 app.post("/api/arcade/session", async (req, res) => {
-  try { const displayName = limitedText(req.body?.displayName, 32); if (!displayName) return res.status(400).json({ error: "Choose a display name." }); const secret = process.env.ARCADE_SESSION_SECRET; if (!secret) return res.status(503).json({ error: "Arcade sessions are not configured." }); const id = crypto.randomUUID(); const signature = crypto.createHmac("sha256", secret).update(id).digest("base64url"); const profile = baseProfile(id, displayName); await putArcadeProfile(profile); res.setHeader("Set-Cookie", `${arcadeCookie}=${id}.${signature}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=2592000`); return res.status(201).json(profile); } catch { return res.status(503).json({ error: "Arcade session storage is unavailable." }); }
+  try {
+    if (rejectSensitiveRequest(req, res, { requireSameOrigin: true, allowPreview: true })) return; const displayName = limitedText(req.body?.displayName, 32); if (!displayName) return res.status(400).json({ error: "Choose a display name." }); const secret = process.env.ARCADE_SESSION_SECRET; if (!secret) return res.status(503).json({ error: "Arcade sessions are not configured." }); const id = crypto.randomUUID(); const signature = crypto.createHmac("sha256", secret).update(id).digest("base64url"); const profile = baseProfile(id, displayName); await putArcadeProfile(profile); res.setHeader("Set-Cookie", `${arcadeCookie}=${id}.${signature}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=2592000`); return res.status(201).json(profile); } catch { return res.status(503).json({ error: "Arcade session storage is unavailable." }); }
 });
-app.get("/api/arcade/session", async (req, res) => { try { const id = requireArcadeSession(req, res); if (!id) return; const profile = await getArcadeProfile(id); return profile ? res.json(profile) : res.status(401).json({ error: "Session expired." }); } catch { return res.status(503).json({ error: "Arcade session storage is unavailable." }); } });
-app.post("/api/arcade/connect4/rooms", async (req, res) => { try { const id = requireArcadeSession(req, res); if (!id) return; const player = await getArcadeProfile(id); if (!player) return res.status(401).json({ error: "Session expired." }); const room: ConnectFourRoom = { id: crypto.randomUUID().slice(0, 8).toUpperCase(), players: { red: player }, state: newConnectFour(), version: 1, createdAt: Date.now() }; await arcadeRedis().set(`arcade:room:${room.id}`, room, { ex: 3600 }); return res.status(201).json(publicRoom(room)); } catch { return res.status(503).json({ error: "Unable to create an online room." }); } });
-app.post("/api/arcade/connect4/rooms/:roomId/join", async (req, res) => { try { const id = requireArcadeSession(req, res); if (!id) return; const room = await getRoom(req.params.roomId); const player = await getArcadeProfile(id); if (!room || !player) return res.status(404).json({ error: "Room or player was not found." }); if (room.players.red.id === id) return res.json(publicRoom(room)); if (room.players.yellow && room.players.yellow.id !== id) return res.status(409).json({ error: "This room is full." }); room.players.yellow = player; room.version += 1; await arcadeRedis().set(`arcade:room:${room.id}`, room, { ex: 3600 }); return res.json(publicRoom(room)); } catch { return res.status(503).json({ error: "Unable to join the room." }); } });
-app.get("/api/arcade/connect4/rooms/:roomId", async (req, res) => { try { const id = requireArcadeSession(req, res); if (!id) return; const room = await getRoom(req.params.roomId); if (!room || (room.players.red.id !== id && room.players.yellow?.id !== id)) return res.status(404).json({ error: "Room was not found." }); return res.json(publicRoom(room)); } catch { return res.status(503).json({ error: "Unable to load room state." }); } });
-app.post("/api/arcade/connect4/rooms/:roomId/moves", async (req, res) => { try { const id = requireArcadeSession(req, res); if (!id) return; const room = await getRoom(req.params.roomId); const column = Number(req.body?.column); if (!room || !room.players.yellow) return res.status(409).json({ error: "Waiting for an opponent." }); const required = room.state.turn === "red" ? room.players.red.id : room.players.yellow.id; if (id !== required) return res.status(403).json({ error: "It is not your turn." }); const version = Number(req.body?.version); if (!Number.isInteger(version) || version !== room.version) return res.status(409).json({ error: "Room changed. Reload the board." }); room.state = playConnectFour(room.state, column); room.version += 1; await settleConnectFour(room); await arcadeRedis().set(`arcade:room:${room.id}`, room, { ex: 3600 }); return res.json(publicRoom(room)); } catch (error) { return res.status(400).json({ error: error instanceof Error ? error.message : "Move rejected." }); } });
+app.get("/api/arcade/session", async (req, res) => { try { if (rejectSensitiveRequest(req, res, { requireSameOrigin: true, allowPreview: true })) return; const id = requireArcadeSession(req, res); if (!id) return; const profile = await getArcadeProfile(id); return profile ? res.json(profile) : res.status(401).json({ error: "Session expired." }); } catch { return res.status(503).json({ error: "Arcade session storage is unavailable." }); } });
+app.post("/api/arcade/connect4/rooms", async (req, res) => { try { if (rejectSensitiveRequest(req, res, { requireSameOrigin: true, allowPreview: true })) return; const id = requireArcadeSession(req, res); if (!id) return; const player = await getArcadeProfile(id); if (!player) return res.status(401).json({ error: "Session expired." }); const room: ConnectFourRoom = { id: crypto.randomUUID().slice(0, 8).toUpperCase(), players: { red: player }, state: newConnectFour(), version: 1, createdAt: Date.now() }; await arcadeRedis().set(`arcade:room:${room.id}`, room, { ex: 3600 }); return res.status(201).json(publicRoom(room)); } catch { return res.status(503).json({ error: "Unable to create an online room." }); } });
+app.post("/api/arcade/connect4/rooms/:roomId/join", async (req, res) => { try { if (rejectSensitiveRequest(req, res, { requireSameOrigin: true, allowPreview: true })) return; const id = requireArcadeSession(req, res); if (!id) return; const room = await getRoom(req.params.roomId); const player = await getArcadeProfile(id); if (!room || !player) return res.status(404).json({ error: "Room or player was not found." }); if (room.players.red.id === id) return res.json(publicRoom(room)); if (room.players.yellow && room.players.yellow.id !== id) return res.status(409).json({ error: "This room is full." }); room.players.yellow = player; room.version += 1; await arcadeRedis().set(`arcade:room:${room.id}`, room, { ex: 3600 }); return res.json(publicRoom(room)); } catch { return res.status(503).json({ error: "Unable to join the room." }); } });
+app.get("/api/arcade/connect4/rooms/:roomId", async (req, res) => { try { if (rejectSensitiveRequest(req, res, { requireSameOrigin: true, allowPreview: true })) return; const id = requireArcadeSession(req, res); if (!id) return; const room = await getRoom(req.params.roomId); if (!room || (room.players.red.id !== id && room.players.yellow?.id !== id)) return res.status(404).json({ error: "Room was not found." }); return res.json(publicRoom(room)); } catch { return res.status(503).json({ error: "Unable to load room state." }); } });
+app.post("/api/arcade/connect4/rooms/:roomId/moves", async (req, res) => { try { if (rejectSensitiveRequest(req, res, { requireSameOrigin: true, allowPreview: true })) return; const id = requireArcadeSession(req, res); if (!id) return; const room = await getRoom(req.params.roomId); const column = Number(req.body?.column); if (!room || !room.players.yellow) return res.status(409).json({ error: "Waiting for an opponent." }); const required = room.state.turn === "red" ? room.players.red.id : room.players.yellow.id; if (id !== required) return res.status(403).json({ error: "It is not your turn." }); const version = Number(req.body?.version); if (!Number.isInteger(version) || version !== room.version) return res.status(409).json({ error: "Room changed. Reload the board." }); room.state = playConnectFour(room.state, column); room.version += 1; await settleConnectFour(room); await arcadeRedis().set(`arcade:room:${room.id}`, room, { ex: 3600 }); return res.json(publicRoom(room)); } catch (error) { return res.status(400).json({ error: error instanceof Error ? error.message : "Move rejected." }); } });
 
 startServer();

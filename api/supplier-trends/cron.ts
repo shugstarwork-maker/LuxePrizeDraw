@@ -1,6 +1,7 @@
-import { authorized, json, prepareDigests } from "./shared";
+import { authorized, json, prepareDigests, previewSensitiveRoutesDisabled } from "./shared";
 
 export async function GET(request: Request) {
+  if (previewSensitiveRoutesDisabled()) return json({ error: "Unavailable in preview deployments." }, 404);
   if (!authorized(request)) return json({ error: "Unauthorized." }, 401);
   try {
     return json(await prepareDigests());

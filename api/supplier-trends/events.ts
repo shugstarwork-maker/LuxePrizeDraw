@@ -1,6 +1,7 @@
-import { json, recordTrendEvent, writeAuthorized } from "./shared";
+import { json, previewSensitiveRoutesDisabled, recordTrendEvent, writeAuthorized } from "./shared";
 
 export async function POST(request: Request) {
+  if (previewSensitiveRoutesDisabled()) return json({ error: "Unavailable in preview deployments." }, 404);
   if (!writeAuthorized(request)) return json({ error: "Unauthorized." }, 401);
   try {
     const input = await request.json();
