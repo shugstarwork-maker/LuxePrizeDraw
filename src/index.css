@@ -456,8 +456,16 @@
 .money-rain--cars .money-rain__note { filter: saturate(1.25) drop-shadow(0 2px 3px rgba(0,0,0,.45)); }
 
 .featured-draw-fire::before { content:""; position:absolute; inset:-3px; z-index:0; border-radius:inherit; padding:3px; background:conic-gradient(from var(--ember-angle,0deg), transparent 0 9%, #ff4d00 13%, #ffd15c 16%, transparent 22% 42%, #ff6b00 48%, #ffe88a 51%, transparent 57% 76%, #ff3d00 82%, #ffc14d 85%, transparent 92%); -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; filter:drop-shadow(0 0 8px rgba(255,101,0,.72)); animation: ember-spin 6s linear infinite, ember-pulse 1.7s ease-in-out infinite alternate; pointer-events:none; }
-.featured-draw-fire::after { content:""; position:absolute; inset:auto 8% -18px; height:70px; z-index:1; background:radial-gradient(ellipse at 10% 100%, rgba(255,74,0,.8), transparent 35%),radial-gradient(ellipse at 30% 100%, rgba(255,190,45,.75), transparent 30%),radial-gradient(ellipse at 55% 100%, rgba(255,78,0,.7), transparent 34%),radial-gradient(ellipse at 82% 100%, rgba(255,200,70,.65), transparent 28%); filter:blur(10px); opacity:.55; animation: ember-pulse 1.2s ease-in-out infinite alternate; pointer-events:none; }
+.featured-draw-fire::after { content:""; position:absolute; inset:auto 4% -22px; height:106px; z-index:1; background:radial-gradient(ellipse at 8% 100%, rgba(255,61,0,.96), transparent 30%),radial-gradient(ellipse at 22% 100%, rgba(255,187,32,.88), transparent 24%),radial-gradient(ellipse at 42% 100%, rgba(255,68,0,.9), transparent 31%),radial-gradient(ellipse at 61% 100%, rgba(255,210,74,.8), transparent 24%),radial-gradient(ellipse at 82% 100%, rgba(255,69,0,.92), transparent 29%); filter:blur(8px); opacity:.72; animation: ember-pulse 1.15s ease-in-out infinite alternate; pointer-events:none; }
+.featured-draw-fire__flames { position:absolute; inset:0; z-index:1; pointer-events:none; overflow:hidden; }
+.featured-draw-fire__flames span { position:absolute; bottom:-13%; width:27%; height:49%; border-radius:52% 48% 40% 60% / 66% 67% 33% 34%; background:radial-gradient(ellipse at 50% 86%, #fff4b7 0 8%, #ffd030 13%, #ff6b00 34%, rgba(255,50,0,.66) 53%, transparent 72%); filter:blur(2px) drop-shadow(0 0 18px rgba(255,85,0,.78)); mix-blend-mode:screen; opacity:.62; transform-origin:center bottom; animation: featured-flame-rise 2.6s ease-in-out infinite alternate; }
+.featured-draw-fire__flames span:nth-child(1) { left:-11%; transform:rotate(-19deg); animation-delay:-.7s; }
+.featured-draw-fire__flames span:nth-child(2) { right:-11%; transform:rotate(19deg); animation-delay:-1.55s; }
+.featured-draw-fire__flames span:nth-child(3) { left:37%; bottom:-28%; width:28%; height:42%; opacity:.44; animation-delay:-2.1s; }
+@keyframes featured-flame-rise { from { scale:.76 .7; opacity:.38; } to { scale:1.06 1.18; opacity:.8; } }
 @keyframes ember-spin { to { --ember-angle:360deg; } }
-@keyframes ember-pulse { to { opacity:.92; filter:drop-shadow(0 0 15px rgba(255,112,0,.9)); } }
+@keyframes ember-pulse { to { opacity:1; filter:blur(8px) drop-shadow(0 0 17px rgba(255,112,0,.94)); } }
 @property --ember-angle { syntax:"<angle>"; initial-value:0deg; inherits:false; }
-@media (prefers-reduced-motion: reduce) { .featured-draw-fire::before,.featured-draw-fire::after { animation:none; opacity:.55; } }
+@media (prefers-reduced-motion: reduce) { .featured-draw-fire::before,.featured-draw-fire::after,.featured-draw-fire__flames span { animation:none; opacity:.55; } }
+.featured-draw-fire > img { z-index:0; }
+.featured-draw-fire > div:not(.featured-draw-fire__flames), .featured-draw-fire > button { z-index:2; }
