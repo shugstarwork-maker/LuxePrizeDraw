@@ -46,7 +46,11 @@ function previewSensitiveRoutesEnabled() {
 function sameOrigin(request: express.Request) {
   const origin = request.header("origin");
   const host = request.header("host");
-  if (!origin || !host) return true;
+  if (!host) return false;
+  if (!origin) {
+    const fetchSite = request.header("sec-fetch-site");
+    return fetchSite === "same-origin" || fetchSite === "same-site" || fetchSite === "none";
+  }
   try {
     return new URL(origin).host === host;
   } catch {
@@ -72,12 +76,12 @@ function providedAdminSecret(req: express.Request) {
   return req.header("x-admin-password")?.trim() || "";
 }
 
-app.use((_req, res, next) => {
+app.use((req, res, next) => {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "DENY");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
   res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.NODE_ENV === "production" && (req.secure || req.header("x-forwarded-proto") === "https")) {
     res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
   }
   if (isPreviewDeployment()) {
