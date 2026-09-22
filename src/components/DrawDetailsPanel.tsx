@@ -1,10 +1,9 @@
 const drawDetails = [
-  ["Entry fee", "Pending approved rules"],
-  ["Free postal route", "Published before any draw opens"],
-  ["Cash alternative", "Pending verified prize valuation"],
-  ["Charity contribution", "Pending approved charity terms"],
+  ["Entry", "Set in approved rules"],
+  ["Cash equivalent", "Verified before the draw opens"],
+  ["Charity from this draw", "Allocated under approved terms"],
 ] as const;
 
 export function DrawDetailsPanel({ className = "" }: { className?: string }) {
-  return <div className={`grid grid-cols-2 gap-2 rounded-2xl border border-amber-100/20 bg-black/55 p-3 backdrop-blur-md sm:grid-cols-4 ${className}`}>{drawDetails.map(([label, value]) => <div key={label} className="min-w-0 rounded-xl border border-white/10 bg-white/[.045] px-3 py-2.5"><p className="text-[9px] font-black uppercase tracking-[.12em] text-amber-100">{label}</p><p className="mt-1 text-[10px] font-bold leading-snug text-white/75 sm:text-[11px]">{value}</p></div>)}</div>;
+  return <div className={`grid grid-cols-3 gap-2 rounded-2xl border border-amber-100/25 bg-black/60 p-2.5 shadow-[0_12px_28px_rgba(0,0,0,.32)] backdrop-blur-md ${className}`}>{drawDetails.map(([label, value]) => <div key={label} className="min-w-0 rounded-xl border border-amber-100/15 bg-[linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.025))] px-2.5 py-2.5 shadow-[inset_0_1px_rgba(255,255,255,.09)]"><p className="text-[8px] font-black uppercase tracking-[.1em] text-amber-100 sm:text-[9px]">{label}</p><p className="mt-1 text-[10px] font-bold leading-snug text-white/80 sm:text-[11px]">{value}</p></div>)}</div>;
 }
