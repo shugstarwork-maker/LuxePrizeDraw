@@ -44,7 +44,7 @@ export function RollingCardCarousel<T>({ items, getKey, renderItem, label, class
       if (distance < -50) next();
       startX.current = null;
     }} className="outline-none focus-visible:ring-2 focus-visible:ring-amber-200">
-      <div className={`carousel-card-stage carousel-card-stage--${active % 4}`}>{renderItem(items[active], active)}</div>
+      <div key={getKey(items[active])} className={`carousel-card-stage carousel-card-stage--${active % 4} carousel-card-stage--arriving`}>{renderItem(items[active], active)}</div>
     </div>
     <div className={`mt-5 flex items-center justify-between ${compactControls ? "gap-2" : "gap-3"}`}>
       <button aria-label={`Previous ${label}`} onClick={previous} className={compactControls ? "grid h-10 w-10 place-items-center rounded-full border border-white/15 bg-black/35 text-white sm:inline-flex sm:h-auto sm:w-auto sm:gap-2 sm:rounded-xl sm:px-4 sm:py-3 sm:text-xs sm:font-black" : "inline-flex items-center gap-2 rounded-xl border border-white/15 bg-black/35 px-4 py-3 text-xs font-black text-white"}><ChevronLeft className="h-4 w-4" /><span className="hidden sm:inline">Previous</span></button>
