@@ -45,7 +45,7 @@ function previewSensitiveRoutesEnabled() {
 
 function sameOrigin(request: express.Request) {
   const origin = request.header("origin");
-  const host = request.header("x-forwarded-host") || request.header("host");
+  const host = request.header("host");
   if (!origin || !host) return true;
   try {
     return new URL(origin).host === host;
