@@ -601,7 +601,7 @@ export const COMPETITION_FAQ = [
   },
   {
     q: "Can I independently verify my ticket ID and the draw mathematics?",
-    a: "Yes! You can use our built-in 'Auditable Draw' interactive verification tool on this site. By entering your Ticket ID, the public seed hash, and the blockchain nonce, the system runs the exact HMAC-SHA256 formula: WinningIndex = (parseInt(HMAC_SHA256(ServerSeed, ClientSeed + ':' + Nonce).slice(0, 8), 16) % TotalEntries) + 1. The source code and raw seed data are also published openly on GitHub for complete third-party auditing.",
+    a: "When a draw is approved and live, the official audit record will publish the verification inputs and outcome evidence required by the applicable rules. Confidential server seeds, security controls, source code and non-public implementation details are not published.",
   },
 ];
 
