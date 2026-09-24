@@ -15,11 +15,12 @@ export const ScottishHost: React.FC = () => {
     synthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(message);
     const voices = synthesis.getVoices();
-    const voice = voices.find(item => /scottish|scotland|fiona|moira/i.test(item.name)) || voices.find(item => item.lang === "en-GB");
+    const maleVoice = /callum|alastair|alex|daniel|george|james|oliver|ryan/i;
+    const voice = voices.find(item => maleVoice.test(item.name) && /scottish|scotland/i.test(item.name)) || voices.find(item => maleVoice.test(item.name) && item.lang === "en-GB") || voices.find(item => maleVoice.test(item.name));
     if (voice) utterance.voice = voice;
     utterance.lang = voice?.lang || "en-GB";
     utterance.rate = .9;
-    utterance.pitch = 1.04;
+    utterance.pitch = .92;
     synthesis.speak(utterance);
   };
 
