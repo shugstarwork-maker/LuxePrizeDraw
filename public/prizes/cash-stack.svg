@@ -1,1 +1,52 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700"><defs><linearGradient id="g" x2="1" y2="1"><stop stop-color="#4ce0a2"/><stop offset=".5" stop-color="#086548"/><stop offset="1" stop-color="#061d24"/></linearGradient></defs><rect width="1200" height="700" fill="url(#g)"/><g transform="translate(260 155) rotate(-8 330 190)"><rect width="650" height="360" rx="26" fill="#dff6c8" stroke="#fcffe7" stroke-width="12"/><rect x="34" y="34" width="582" height="292" rx="18" fill="none" stroke="#2b8058" stroke-width="8"/><text x="325" y="230" text-anchor="middle" font-family="Arial" font-weight="900" font-size="165" fill="#1c6448">£</text><path d="M80 88h120M450 272h120" stroke="#3c9569" stroke-width="20"/></g><g transform="translate(430 220) rotate(10 300 150)" opacity=".78"><rect width="570" height="310" rx="24" fill="#b8e7af" stroke="#efffdc" stroke-width="10"/><text x="285" y="205" text-anchor="middle" font-family="Arial" font-weight="900" font-size="130" fill="#256848">CASH</text></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 760" role="img" aria-labelledby="title desc">
+  <title id="title">Stacked bundles of British pound notes</title>
+  <desc id="desc">A premium illustration of multiple bound stacks of pound notes with a gold one hundred thousand pound prize card.</desc>
+  <defs>
+    <linearGradient id="night" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#07171b"/><stop offset=".54" stop-color="#102d2c"/><stop offset="1" stop-color="#020706"/></linearGradient>
+    <linearGradient id="note" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f0f6d7"/><stop offset=".5" stop-color="#b8d895"/><stop offset="1" stop-color="#5c9c66"/></linearGradient>
+    <linearGradient id="noteDark" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#95c77c"/><stop offset="1" stop-color="#245c47"/></linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff2a8"/><stop offset=".4" stop-color="#e7b64d"/><stop offset="1" stop-color="#8a5314"/></linearGradient>
+    <filter id="shadow" x="-25%" y="-25%" width="150%" height="170%"><feDropShadow dx="0" dy="26" stdDeviation="22" flood-color="#000" flood-opacity=".6"/></filter>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="14" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="1000" height="760" rx="56" fill="url(#night)"/>
+  <path d="M-30 610C160 510 293 672 470 572s332-158 572-18v250H-30Z" fill="#1e704f" opacity=".26"/>
+  <g opacity=".18" stroke="#eac45c"><path d="M75 82h270M675 88h235M105 153h190M720 178h150"/><circle cx="876" cy="470" r="146" fill="none"/></g>
+  <g filter="url(#shadow)">
+    <g transform="translate(99 360) rotate(-9 252 138)">
+      <rect x="0" y="28" width="505" height="228" rx="22" fill="#17483d"/>
+      <rect x="0" y="10" width="505" height="228" rx="22" fill="url(#noteDark)"/>
+      <rect x="28" y="36" width="449" height="175" rx="16" fill="none" stroke="#dff2c7" stroke-width="8" opacity=".7"/>
+      <rect x="192" y="2" width="118" height="242" rx="8" fill="#e0b546"/>
+      <path d="M202 12h98v222h-98z" fill="#fae08a" opacity=".55"/>
+      <text x="76" y="154" fill="#f5f8df" font-family="Arial, sans-serif" font-size="98" font-weight="900">£</text>
+      <text x="432" y="166" fill="#f5f8df" font-family="Arial, sans-serif" font-size="54" font-weight="800" text-anchor="end">50</text>
+    </g>
+    <g transform="translate(360 323) rotate(7 250 138)">
+      <rect x="0" y="28" width="505" height="228" rx="22" fill="#17483d"/>
+      <rect x="0" y="10" width="505" height="228" rx="22" fill="url(#note)"/>
+      <rect x="28" y="36" width="449" height="175" rx="16" fill="none" stroke="#2b7855" stroke-width="8" opacity=".6"/>
+      <rect x="192" y="2" width="118" height="242" rx="8" fill="#d79f30"/>
+      <path d="M202 12h98v222h-98z" fill="#fff0a3" opacity=".5"/>
+      <text x="76" y="154" fill="#1d6548" font-family="Arial, sans-serif" font-size="98" font-weight="900">£</text>
+      <text x="432" y="166" fill="#1d6548" font-family="Arial, sans-serif" font-size="54" font-weight="800" text-anchor="end">50</text>
+    </g>
+    <g transform="translate(230 138) rotate(-2 250 138)">
+      <rect x="0" y="32" width="542" height="242" rx="24" fill="#143e37"/>
+      <rect x="0" y="10" width="542" height="242" rx="24" fill="url(#note)"/>
+      <rect x="31" y="40" width="480" height="181" rx="17" fill="none" stroke="#effbd9" stroke-width="8" opacity=".75"/>
+      <rect x="202" y="0" width="138" height="264" rx="9" fill="#d99c27"/>
+      <path d="M214 12h114v240H214z" fill="#fff1a4" opacity=".46"/>
+      <circle cx="106" cy="131" r="51" fill="#effbd9" opacity=".7"/>
+      <text x="106" y="163" fill="#236a4b" font-family="Arial, sans-serif" font-size="87" font-weight="900" text-anchor="middle">£</text>
+      <text x="473" y="160" fill="#236a4b" font-family="Arial, sans-serif" font-size="60" font-weight="900" text-anchor="end">50</text>
+    </g>
+  </g>
+  <g transform="translate(618 78) rotate(10 154 92)" filter="url(#glow)">
+    <rect width="308" height="184" rx="28" fill="url(#gold)" stroke="#fff0a6" stroke-width="5"/>
+    <rect x="16" y="16" width="276" height="152" rx="19" fill="none" stroke="#5b3814" stroke-opacity=".6" stroke-width="3"/>
+    <text x="154" y="73" fill="#3e240e" font-family="Arial, sans-serif" font-size="25" font-weight="900" text-anchor="middle" letter-spacing="4">HEADLINE PRIZE</text>
+    <text x="154" y="135" fill="#20140a" font-family="Arial, sans-serif" font-size="64" font-weight="900" text-anchor="middle">£100K</text>
+  </g>
+  <g fill="#fff1a3" opacity=".9"><path d="m111 168 8 20 20 8-20 8-8 20-8-20-20-8 20-8z"/><path d="m862 260 6 15 15 6-15 6-6 15-6-15-15-6 15-6z"/><path d="m720 593 7 17 17 7-17 7-7 17-7-17-17-7 17-7z"/></g>
+</svg>
