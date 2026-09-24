@@ -569,11 +569,11 @@ export const FREEZONES_DATA = [
 export const COMPETITION_FAQ = [
   {
     q: "How does the Charity Contribution work from Ticket and Subscription Sales?",
-    a: "We are proud that a strict 25% of all ticket bundle sales and monthly recurring subscription fees are directly donated to accredited non-profit organizations, including Dubai Cares, the Global Youth Enterprise Fund, and the MENA STEM Academy. Every ticket you purchase directly builds classrooms, provides student scholarships, and issues micro-grants to underprivileged founders worldwide.",
+    a: "The platform is pre-launch and does not accept ticket or subscription payments. Any future charity commitment, partner, amount and reporting method will be published only in approved rules and supporting evidence for an open draw.",
   },
   {
     q: "What is the Monthly Entry Subscription and how does it benefit me?",
-    a: "Our Monthly Founder Club Subscriptions (starting at £9.99/mo) provide recurring, automated entry tickets for every single draw and monthly flash draw without needing to re-enter manually. Subscribers also enjoy 2x to 5x multiplier boosts on their winning probability, free AI business feasibility evaluations, and exclusive founder resources. Subscriptions can be paused or cancelled at any time with one click.",
+    a: "No membership or entry subscription is available. Any future membership benefits must be documented separately from draw entry and reviewed against the approved rules before launch.",
   },
   {
     q: "What is included in the 2-Week Holiday and 5-Star Accommodation?",
@@ -581,7 +581,7 @@ export const COMPETITION_FAQ = [
   },
   {
     q: "Is there any cost or purchase required to enter?",
-    a: "No purchase is necessary! We provide a 100% free official entry method via our Business Idea Submission and Eligibility Quiz. You can also purchase additional ticket packs or monthly subscriptions to multiply your entries while supporting global education charities.",
+    a: "No entry route is currently available. Before any draw opens, the company will publish approved rules covering eligibility, any free-entry route, entry treatment and the applicable closing date.",
   },
   {
     q: "How is the £100,000 Cash Prize delivered?",

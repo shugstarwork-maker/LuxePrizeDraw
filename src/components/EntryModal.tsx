@@ -64,66 +64,9 @@ export const EntryModal: React.FC<EntryModalProps> = ({
     charityDonation = 0;
   }
 
-  const handleSubmitEntry = async (e: React.FormEvent) => {
+  const handleSubmitEntry = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName.trim() || !email.trim()) {
-      setErrorMsg("Please provide your name and email address.");
-      return;
-    }
-
-    setErrorMsg("");
-    setIsSubmitting(true);
-
-    try {
-      const res = await fetch("/api/competition/enter", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fullName,
-          email,
-          country,
-          phone,
-          businessIdea,
-          targetIndustry,
-          entryType: entryMode === "subscription" ? "SUBSCRIBER_VIP" : (entryMode === "bundle" ? "POWER_BUNDLE" : "FREE"),
-          planId: entryMode === "subscription" ? selectedPlan.id : (entryMode === "bundle" ? selectedBundle.id : "free"),
-          ticketsCount: ticketsToMint,
-          charityAmount: charityDonation,
-          demo: true,
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to register entry.");
-      }
-
-      const data = await res.json();
-      const ticket: CompetitionTicket = {
-        ticketId: data.ticketId,
-        fullName: data.fullName,
-        email: data.email,
-        country: data.country,
-        phone: data.phone,
-        businessIdea: data.businessIdea,
-        targetIndustry: data.targetIndustry,
-        entryTimestamp: data.entryTimestamp,
-        ticketStatus: "PREVIEW_ONLY",
-        drawDate: data.drawDate,
-        bonusEntriesAwarded: ticketsToMint > 1 ? ticketsToMint - 1 : 1,
-        totalTickets: ticketsToMint,
-      };
-
-      setGeneratedTicket(ticket);
-      setGeneratedBatchCount(ticketsToMint);
-      onTicketGenerated(ticket);
-
-      // Trigger grand celebratory confetti explosion
-      triggerGoldConfetti();
-    } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : "The entry preview is unavailable. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
+    setErrorMsg("Entries are not open. No details have been submitted or stored.");
   };
 
   const handleCopyReferral = () => {
