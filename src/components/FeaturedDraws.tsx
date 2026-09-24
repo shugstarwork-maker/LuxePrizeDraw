@@ -26,17 +26,17 @@ export function FeaturedDraws() {
       <div className="grid gap-6 lg:grid-cols-[1fr_18rem] lg:items-center">
         <div>
           <p className="inline-flex items-center gap-2 rounded-full border border-amber-200/35 bg-amber-300/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-amber-100"><Sparkles className="h-3.5 w-3.5" /> Luxe Prize Draws</p>
-          <p className="mt-5 text-sm font-black uppercase tracking-[.18em] text-amber-200">Big prizes. Small entry options.</p>
-          <h1 className="mt-2 text-4xl font-black leading-none sm:text-6xl"><span className="headline-prize-flash">£100K</span> headline prize package.<br /><span className="text-amber-200">Prizes from 1p.</span></h1>
+          <p className="mt-5 text-sm font-black uppercase tracking-[.18em] text-amber-200">Headline prize preview</p>
+          <h1 className="mt-2 text-4xl font-black leading-none sm:text-6xl"><span className="headline-prize-flash">£100K</span> prize package.<br /><span className="headline-entry-flash">From 1p.</span></h1>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/65">Explore the launch prize concepts, including cash, cars, holidays and luxury lifestyle draws. Entry availability and official terms are confirmed when each draw opens.</p>
           <button onClick={() => navigate("/draws")} className="group mt-6 inline-flex w-full items-center justify-center gap-3 rounded-2xl border border-amber-100/70 bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-400 px-6 py-4 text-sm font-black uppercase tracking-[.13em] text-black shadow-[0_12px_30px_rgba(251,191,36,.35)] transition hover:-translate-y-1 hover:brightness-110 hover:shadow-[0_18px_42px_rgba(251,191,36,.5)] sm:w-auto">
-            Explore prize draws <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+            View draws <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
           </button>
         </div>
         <div className="relative mx-auto w-full max-w-[16rem] lg:max-w-none">
           <div className="absolute inset-4 rounded-full bg-emerald-300/20 blur-3xl" />
           <img src="/prizes/cash-stack.svg" alt="Illustration of stacked cash prize notes" className="relative w-full rotate-[-4deg] rounded-2xl border border-emerald-100/40 shadow-[0_20px_45px_rgba(0,0,0,.5)] transition duration-500 hover:rotate-0 hover:scale-[1.03]" />
-          <span className="absolute -bottom-3 -right-3 rounded-full border border-amber-100/60 bg-black/80 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-amber-100 shadow-lg">Cash prizes</span>
+          <span className="absolute -bottom-3 -right-3 rounded-full border border-amber-100/60 bg-black/80 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-amber-100 shadow-lg">£100K prize</span>
         </div>
       </div>
     </div>
