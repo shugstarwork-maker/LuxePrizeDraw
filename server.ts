@@ -480,76 +480,9 @@ app.post("/api/free-draws/redeem", async (req, res) => {
   }
 });
 
-// API: Competition Entry Submission & Subscriptions
-app.post("/api/competition/enter", (req, res) => {
-  try {
-    const {
-      fullName,
-      email,
-      country,
-      phone,
-      businessIdea,
-      targetIndustry,
-      entryType = "FREE",
-      planId,
-      ticketsCount = 1,
-      charityAmount = 0,
-      demo = false
-    } = req.body;
-
-    if (!fullName || !email) {
-      return res.status(400).json({ error: "Full name and email are required to generate an official entry ticket." });
-    }
-    if (!demo) {
-      return res.status(403).json({ error: "Public entry issuance is disabled. Free Draw entries require an administrator-issued ticket." });
-    }
-
-    const count = Math.min(100, Math.max(1, Math.floor(Number(ticketsCount) || 1)));
-    if (!demo) {
-      totalEntriesCount += count;
-      if (charityAmount && Number(charityAmount) > 0) {
-        totalCharityRaisedGBP += Number(charityAmount);
-        if (Math.random() > 0.5) totalScholarshipsFunded += 1;
-      }
-    }
-
-    const ticketId = `UAE-${Math.floor(100000 + Math.random() * 900000)}-${(country || "GLB").slice(0, 3).toUpperCase()}`;
-
-    const newEntrant = {
-      id: ticketId,
-      name: fullName.split(" ")[0] + " " + (fullName.split(" ")[1] ? fullName.split(" ")[1][0] + "." : ""),
-      country: country || "International",
-      timestamp: "Just now",
-      business: businessIdea ? businessIdea.slice(0, 25) + "..." : (entryType === "SUBSCRIBER_VIP" ? "VIP Founder Subscriber" : "Luxe Prize Draw Venture"),
-      entryType: entryType as "FREE" | "SUBSCRIBER_VIP" | "POWER_BUNDLE",
-    };
-    if (!demo) {
-      verifiedEntrants.unshift(newEntrant);
-      if (verifiedEntrants.length > 20) verifiedEntrants.pop();
-    }
-
-    return res.json({
-      success: true,
-      ticketId,
-      fullName,
-      email,
-      country,
-      phone,
-      businessIdea,
-      targetIndustry: targetIndustry || "Tech & Innovation",
-      entryTimestamp: new Date().toISOString(),
-      ticketStatus: demo ? "PREVIEW_ONLY" : "VERIFIED_ACTIVE",
-      drawDate: "October 31, 2026 at 18:00 GST (Dubai Time)",
-      bonusEntriesAwarded: count > 1 ? count - 1 : 1,
-      totalTickets: count,
-      entryType,
-      planId,
-      charityContributionGBP: charityAmount || (count > 1 ? (count * 0.25).toFixed(2) : 0),
-    });
-  } catch (error: any) {
-    console.error("Entry error:", error);
-    return res.status(500).json({ error: "Failed to process entry ticket." });
-  }
+// API: competition entry is fail-closed until approved launch controls and public rules are in place.
+app.post("/api/competition/enter", (_req, res) => {
+  return res.status(423).json({ error: "Entries are not open. No entry details are accepted or stored." });
 });
 
 // API: AI Business Feasibility & Pitch Evaluator

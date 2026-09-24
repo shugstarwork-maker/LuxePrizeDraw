@@ -483,9 +483,9 @@ export const DrawVerificationSection: React.FC<DrawVerificationSectionProps> = (
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <p className="font-bold text-white">Full Public Ledger & Open Source Verification Code</p>
+              <p className="font-bold text-white">Approved Draw Audit Record</p>
               <p className="text-white/50 text-[11px]">
-                The complete list of hashed ticket IDs and verification scripts are available on public GitHub and decentralized storage.
+                For an approved draw, the official rules and audit record will state the publication approach. Confidential source code, security controls and non-public draw inputs remain protected.
               </p>
             </div>
           </div>
