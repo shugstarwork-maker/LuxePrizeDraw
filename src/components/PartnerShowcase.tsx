@@ -12,7 +12,7 @@ const partners = [
 ];
 
 export function PartnerShowcase() {
-  return <section id="partners" className="bg-[#090806] py-16 sm:py-24">
+  return <section id="partners" className="bg-[#090806] py-10 sm:py-14">
     <div className="mx-auto max-w-7xl px-4 sm:px-6">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>

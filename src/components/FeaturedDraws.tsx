@@ -21,7 +21,7 @@ export function FeaturedDraws() {
   useEffect(() => { const timer = window.setInterval(() => setActive((value) => (value + 1) % draws.length), 5000); return () => window.clearInterval(timer); }, []);
   const draw = draws[active];
   const move = (offset: number) => { play("ticketSelect"); setActive((value) => (value + offset + draws.length) % draws.length); };
-  return <section className="mx-auto max-w-7xl px-4 pt-12 sm:px-6">
+  return <section className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 sm:pt-10">
     <div className="headline-prize-fire overflow-hidden rounded-[2rem] border border-amber-200/35 bg-[radial-gradient(circle_at_top_right,rgba(251,191,36,.28),transparent_38%),linear-gradient(115deg,#221600,#0b0a0a_55%,#0d1728)] p-6 shadow-[0_18px_55px_rgba(0,0,0,.32)] sm:p-8">
       <div className="grid gap-6 lg:grid-cols-[1fr_18rem] lg:items-center">
         <div>
