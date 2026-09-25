@@ -1,12 +1,12 @@
 # IP and Confidentiality Policy
 
-**Owner:** LUXEPRIZEDRAW LIMITED
+**Owner and developer:** HUASH LTD
 **Applies to:** Luxe Prize Draws software, designs, data, business rules, campaign material and supporting documentation.
 **Effective date:** 24 September 2026
 
 ## Ownership and permitted use
 
-All original work created for the platform belongs to LUXEPRIZEDRAW LIMITED unless a written agreement recorded in the company legal archive says otherwise. This includes source code, website copy, graphics, designs, databases, prompts, scoring logic, campaign rules, commercial processes, specifications and deployment configuration.
+All original work created for the platform belongs to HUASH LTD unless a written agreement recorded in the company legal archive says otherwise. This includes source code, website copy, graphics, designs, databases, prompts, scoring logic, campaign rules, commercial processes, specifications and deployment configuration.
 
 The repository is proprietary. Contributors receive only the access needed to perform authorised work; no public, implied or open-source licence is granted for company work product.
 
@@ -26,7 +26,7 @@ Do not place credentials, signed contracts, unredacted invoices, personal data, 
 
 Before granting source or design access, the company must retain a written agreement that:
 
-1. assigns present and future intellectual-property rights in deliverables to LUXEPRIZEDRAW LIMITED;
+1. assigns present and future intellectual-property rights in deliverables to HUASH LTD;
 2. includes confidentiality obligations covering non-public information;
 3. requires the contributor to identify third-party materials and licence terms; and
 4. permits the company to retain and use all deliverables, documentation and evidence.
@@ -51,7 +51,7 @@ Trademark registration, registered-design applications, patent assessment and ex
 
 The public notice used throughout the application is:
 
-> © 2026 LUXEPRIZEDRAW LIMITED. All rights reserved. The software, source code, visual assets, content and documentation are proprietary and must not be copied, reproduced, modified or distributed without written permission.
+> © 2026 HUASH LTD, owner and developer of the Luxe Prize Draws app. All rights reserved. The software, source code, visual assets, content and documentation are proprietary and must not be copied, reproduced, modified or distributed without written permission.
 
 For UK planning, copyright does not require an application; a trade mark and a patent application are separate registrations that have fees. A business method and non-technical software are generally excluded from patent protection, while a genuinely new technical invention may qualify. This is operational guidance, not legal advice: obtain advice from a qualified UK IP professional before claiming protection or filing an application.
 
