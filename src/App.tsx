@@ -16,6 +16,7 @@ import { FeaturedDraws } from "./components/FeaturedDraws";
 import { GamesArena } from "./components/GamesArena";
 import { LegalReadinessNotice } from "./components/LegalReadinessNotice";
 import { LaunchCommitment } from "./components/LaunchCommitment";
+import { IntellectualPropertyNotice } from "./components/IntellectualPropertyNotice";
 import { LuxePokerLeague } from "./components/LuxePokerLeague";
 import { LuxuryHolidaysSection } from "./components/LuxuryHolidaysSection";
 import { LuxeHost } from "./components/LuxeHost";
@@ -57,7 +58,7 @@ export default function App() {
 
   const category = path === "/category" ? new URLSearchParams(window.location.search).get("name") : path === "/sports-cars" ? "Cars" : "";
   const backdropTheme = path === "/" ? "money" : category === "Cars" ? "cars" : category === "Cash" ? "money" : category === "Women's prizes" ? "heels" : category === "Men's prizes" ? "ties" : undefined;
-  return <div className="storm-page"><div className="storm-page__content">{page}</div><StormBackdrop theme={backdropTheme} /><AudioControls /></div>;
+  return <div className="storm-page"><div className="storm-page__content">{page}<IntellectualPropertyNotice /></div><StormBackdrop theme={backdropTheme} /><AudioControls /></div>;
 }
 
 function SiteContent({ path }: { path: string }) {

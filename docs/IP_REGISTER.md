@@ -20,10 +20,10 @@ This register records the intellectual-property assets created for the Luxe Priz
 
 | Evidence type | System of record | Maintenance requirement |
 | --- | --- | --- |
-| Source and development history | Private Git repository | Keep repositories private; preserve commits, branches, pull requests and tags. Do not rewrite shared history. |
-| Release evidence | Vercel deployment history | Retain production and preview deployment records for material releases. |
+| Source and development history | Private Git repository | Keep repositories private; preserve dated commits, branches, pull requests, review records and tags. Do not rewrite shared history. |
+| Release evidence | Vercel deployment history | Retain dated production and preview deployment records for material releases. |
 | Specifications | Repository documentation and approved external records | Keep dated versions of briefs, requirements, legal reviews and design specifications. |
-| Visual evidence | Controlled company archive | Capture dated screenshots of each material production release, including distinctive screens, icons and animation. |
+| Visual evidence | Controlled company archive | Capture dated screenshots, design drafts and development logs for each material release, including distinctive screens, icons and animation. |
 | Contractor and supplier paperwork | Controlled company legal archive | Retain signed agreements and written IP assignments; record the agreement date and counterparty below. |
 | Third-party software and licences | `package.json`, lockfiles and supplier records | Review dependencies and asset licences before release; retain the relevant licence text, supplier terms and purchase records. |
 
@@ -46,5 +46,5 @@ This register records the intellectual-property assets created for the Luxe Priz
 
 1. Before a material release, add any new original software, content or visual assets to the asset register.
 2. Save dated screenshots and approved specifications in the company evidence archive; add their reference to this register.
-3. Record signed contractor assignments and third-party licence evidence without storing confidential agreements or credentials in this repository.
+3. Record signed developer and contractor IP-assignment agreement references and third-party licence evidence without storing confidential agreements or credentials in this repository. Paying for deliverables alone may not transfer copyright; obtain written assignment advice and agreements.
 4. Review the register quarterly and retain its Git history as part of the creation and ownership evidence.
