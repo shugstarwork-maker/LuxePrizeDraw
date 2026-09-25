@@ -10,7 +10,7 @@ const primaryLinks: Link[] = [
   { href: "/poker", label: "Poker", icon: Crown },
 ];
 const moreLinks: Link[] = [
-  { href: "/prizes/northern-supercar-hire", label: "Partnerships", icon: Sparkles },
+  { href: "/prizes/luxury-supercar-experience", label: "Partnerships", icon: Sparkles },
 ];
 
 const navigate = (href: string) => {

@@ -3,7 +3,6 @@ export type PartnershipStatus = "OPPORTUNITY" | "CONFIRMED";
 export interface PartnershipCampaign {
   slug: string;
   partnerName: string;
-  partnerWebsite: string;
   partnershipStatus: PartnershipStatus;
   heroImage: string;
   prizeTitle: string;
@@ -22,15 +21,14 @@ export interface PartnershipCampaign {
   charity?: { name?: string; contribution?: string; amountRaised?: number; message?: string };
 }
 
-export const NORTHERN_SUPERCAR_HIRE_CAMPAIGN: PartnershipCampaign = {
-  slug: "northern-supercar-hire",
-  partnerName: "Northern Supercar Hire",
-  partnerWebsite: "https://northernsupercarhire.com/",
+export const LUXE_AUTOMOTIVE_CAMPAIGN: PartnershipCampaign = {
+  slug: "luxury-supercar-experience",
+  partnerName: "LuxePrizeDraw Automotive",
   partnershipStatus: "OPPORTUNITY",
   heroImage: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=2200&q=85",
   prizeTitle: "Luxury Supercar Driving Experience",
   prizeDescription: "A potential LuxePrizeDraw automotive experience, subject to campaign approval and published prize terms.",
-  vehicle: "Selected from participating Northern Supercar Hire vehicles",
+  vehicle: "Selected from participating luxury vehicles",
   location: "UK",
   delivery: "Subject to participating vehicle and booking terms",
   campaignStatus: "DRAFT",

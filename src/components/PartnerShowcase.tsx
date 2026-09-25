@@ -4,7 +4,7 @@ import { RollingCardCarousel } from "./RollingCardCarousel";
 const navigate = (path: string) => { window.history.pushState({}, "", path); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); };
 
 const partners = [
-  { name: "Northern Supercar Hire", detail: "Premium automotive partnership opportunity", status: "Partnership opportunity", icon: CarFront, tone: "from-amber-300/20 to-orange-500/5", path: "/prizes/northern-supercar-hire" },
+  { name: "Luxury Supercar Experience", detail: "Premium automotive partnership opportunity", status: "Partnership opportunity", icon: CarFront, tone: "from-amber-300/20 to-orange-500/5", path: "/prizes/luxury-supercar-experience" },
   { name: "Veno Corp Gaming", detail: "Gaming operations", status: "Showcase partner", icon: Building2, tone: "from-violet-400/20 to-fuchsia-400/5" },
   { name: "Luxe Gaming Bundles", detail: "Free-ticket game bundles", status: "Showcase partner", icon: Gift, tone: "from-amber-300/20 to-orange-400/5" },
   { name: "Moss Prestige", detail: "Performance vehicle prizes", status: "Vehicle supply partner", icon: CarFront, tone: "from-rose-400/20 to-amber-300/5" },
