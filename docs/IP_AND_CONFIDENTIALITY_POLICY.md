@@ -46,3 +46,17 @@ Before each material release, the release owner must:
 ## Legal actions requiring external completion
 
 Trademark registration, registered-design applications, patent assessment and execution of contributor/partner agreements are legal and commercial actions. They are not completed by this repository policy. Record filing numbers, signed-agreement references and renewal dates in the controlled company archive and `docs/IP_REGISTER.md`.
+
+## UK IP position and registrations
+
+The public notice used throughout the application is:
+
+> © 2026 LUXEPRIZEDRAW LIMITED. All rights reserved. The software, source code, visual assets, content and documentation are proprietary and must not be copied, reproduced, modified or distributed without written permission.
+
+For UK planning, copyright does not require an application; a trade mark and a patent application are separate registrations that have fees. A business method and non-technical software are generally excluded from patent protection, while a genuinely new technical invention may qualify. This is operational guidance, not legal advice: obtain advice from a qualified UK IP professional before claiming protection or filing an application.
+
+Authoritative guidance:
+
+- [Copyright](https://www.gov.uk/copyright)
+- [Register a trade mark](https://www.gov.uk/how-to-register-a-trade-mark)
+- [Patent your invention](https://www.gov.uk/patent-your-invention)
