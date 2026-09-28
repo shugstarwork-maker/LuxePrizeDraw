@@ -567,3 +567,15 @@
 .cash-note-frame__note--1 { left:-2%; top:8%; --r:-18deg; }.cash-note-frame__note--2 { left:23%; top:2%; --r:12deg; }.cash-note-frame__note--3 { left:48%; top:10%; --r:-10deg; }.cash-note-frame__note--4 { left:70%; top:3%; --r:17deg; }.cash-note-frame__note--5 { left:6%; top:36%; --r:9deg; }.cash-note-frame__note--6 { left:29%; top:32%; --r:-15deg; }.cash-note-frame__note--7 { left:54%; top:37%; --r:18deg; }.cash-note-frame__note--8 { left:77%; top:32%; --r:-8deg; }.cash-note-frame__note--9 { left:-4%; top:66%; --r:14deg; }.cash-note-frame__note--10 { left:20%; top:65%; --r:-7deg; }.cash-note-frame__note--11 { left:47%; top:68%; --r:11deg; }.cash-note-frame__note--12 { left:71%; top:64%; --r:-16deg; }
 @keyframes cash-frame-shine { 0%,55%,100% { transform:translateX(-110%); } 72% { transform:translateX(110%); } }
 @media (prefers-reduced-motion: reduce) { .cash-note-frame::after { animation:none; } }
+
+/* Glassy left-to-right category showcase. */
+.carousel-glass-row { position:relative; perspective:1100px; }
+.carousel-glass-row::before,.carousel-glass-row::after { content:""; position:absolute; top:0; bottom:0; z-index:20; width:12%; pointer-events:none; }
+.carousel-glass-row::before { left:0; background:linear-gradient(90deg,rgba(5,5,5,.86),transparent); }
+.carousel-glass-row::after { right:0; background:linear-gradient(270deg,rgba(5,5,5,.86),transparent); }
+.carousel-glass-row__track { transform-style:preserve-3d; }
+.carousel-glass-row__card { transform:perspective(1100px) rotateY(11deg) translateZ(-45px); filter:saturate(.7); }
+.carousel-glass-row__card:nth-child(3) { transform:perspective(1100px) rotateY(-11deg) translateZ(-45px); }
+.carousel-glass-row__card--centre { transform:perspective(1100px) rotateY(0deg) translateZ(45px) !important; filter:saturate(1.12) drop-shadow(0 0 28px rgba(251,191,36,.42)); }
+.carousel-glass-row__card--centre > * { border-color:rgba(255,236,158,.72) !important; box-shadow:0 18px 45px rgba(0,0,0,.5),inset 0 1px rgba(255,255,255,.28),0 0 28px rgba(251,191,36,.2); }
+@media (prefers-reduced-motion: reduce) { .carousel-glass-row__card,.carousel-glass-row__card:nth-child(3),.carousel-glass-row__card--centre { transform:none !important; } }
