@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { CashLaunchReadiness } from "./components/CashLaunchReadiness";
 import { TermsPage } from "./components/TermsPage";
+import { TrustBadges } from "./components/TrustBadges";
 import { ParticipationStandardsPage } from "./components/ParticipationStandardsPage";
 import { CashGiveawaysPage } from "./components/CashGiveawaysPage";
 import { ArcadeHome } from "./components/ArcadeHome";
@@ -62,6 +63,6 @@ export default function App() {
 }
 
 function SiteContent({ path }: { path: string }) {
-  const content = path === "/draws" ? <><LuxuryHolidaysSection /><PrestigeCarsDraws /><PartnerShowcase /><PrizeExperience /><PrizeStandings /><MembershipPreview /></> : path === "/community" ? <><LaunchCommitment /><CommunitySuggestionBoard /><CommunityLeaderboards /></> : path === "/play" ? <><CompetitiveHub /><GamesArena /></> : <><FeaturedDraws /><PrizePlatform /><PartnerShowcase /><CashLaunchReadiness /><LaunchCommitment /></>;
+  const content = path === "/draws" ? <><LuxuryHolidaysSection /><PrestigeCarsDraws /><PartnerShowcase /><PrizeExperience /><PrizeStandings /><MembershipPreview /></> : path === "/community" ? <><LaunchCommitment /><CommunitySuggestionBoard /><CommunityLeaderboards /></> : path === "/play" ? <><CompetitiveHub /><GamesArena /></> : <><FeaturedDraws /><PrizePlatform /><TrustBadges /><PartnerShowcase /><CashLaunchReadiness /><LaunchCommitment /></>;
   return <><LegalReadinessNotice /><ExperienceNav /><CommunityTicker /><main className="animate-page-enter pb-24 sm:pb-0">{content}</main><ScottishHost /><MobileDock /></>;
 }
