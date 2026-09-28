@@ -558,3 +558,12 @@
 .entry-price-flash { animation:entry-price-pulse 1.8s steps(2,end) infinite; text-shadow:0 0 12px rgba(252,211,77,.78),0 0 28px rgba(245,158,11,.4); }
 @keyframes entry-price-pulse { 0%,42%,100% { opacity:1; filter:brightness(1); } 48%,76% { opacity:.42; filter:brightness(.7); } 82% { opacity:1; filter:brightness(1.55); } }
 @media (prefers-reduced-motion: reduce) { .entry-price-flash { animation:none; filter:none; } }
+
+/* Original prize-note art. This is not a reproduction of UK legal tender. */
+.cash-note-frame { background:radial-gradient(circle at 20% 10%,rgba(255,247,190,.32),transparent 30%),linear-gradient(135deg,#183d37,#071f1b 55%,#102d27); isolation:isolate; }
+.cash-note-frame::after { content:""; position:absolute; inset:0; background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.16) 47%,transparent 66%); transform:translateX(-110%); animation:cash-frame-shine 5s ease-in-out infinite; }
+.cash-note-frame__note { position:absolute; display:flex; width:8.5rem; height:4rem; flex-direction:column; justify-content:center; border:1px solid rgba(255,247,190,.55); border-radius:.4rem; background:linear-gradient(135deg,#5db47d,#236848 55%,#0e3e2e); color:#ecffd0; box-shadow:0 9px 17px rgba(0,0,0,.34),inset 0 1px rgba(255,255,255,.28); text-align:center; transform:rotate(var(--r)); }
+.cash-note-frame__note b { font-size:1.3rem; line-height:1; }.cash-note-frame__note small { margin-top:.25rem; font-size:.45rem; font-weight:900; letter-spacing:.18em; }
+.cash-note-frame__note--1 { left:-2%; top:8%; --r:-18deg; }.cash-note-frame__note--2 { left:23%; top:2%; --r:12deg; }.cash-note-frame__note--3 { left:48%; top:10%; --r:-10deg; }.cash-note-frame__note--4 { left:70%; top:3%; --r:17deg; }.cash-note-frame__note--5 { left:6%; top:36%; --r:9deg; }.cash-note-frame__note--6 { left:29%; top:32%; --r:-15deg; }.cash-note-frame__note--7 { left:54%; top:37%; --r:18deg; }.cash-note-frame__note--8 { left:77%; top:32%; --r:-8deg; }.cash-note-frame__note--9 { left:-4%; top:66%; --r:14deg; }.cash-note-frame__note--10 { left:20%; top:65%; --r:-7deg; }.cash-note-frame__note--11 { left:47%; top:68%; --r:11deg; }.cash-note-frame__note--12 { left:71%; top:64%; --r:-16deg; }
+@keyframes cash-frame-shine { 0%,55%,100% { transform:translateX(-110%); } 72% { transform:translateX(110%); } }
+@media (prefers-reduced-motion: reduce) { .cash-note-frame::after { animation:none; } }
