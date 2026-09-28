@@ -10,9 +10,10 @@ type RollingCardCarouselProps<T> = {
   interval?: number;
   compactControls?: boolean;
   enableArrivalEffects?: boolean;
+  variant?: "standard" | "three-card-auto";
 };
 
-export function RollingCardCarousel<T>({ items, getKey, renderItem, label, className = "", interval = 5000, compactControls = false, enableArrivalEffects = true }: RollingCardCarouselProps<T>) {
+export function RollingCardCarousel<T>({ items, getKey, renderItem, label, className = "", interval = 5000, compactControls = false, enableArrivalEffects = true, variant = "standard" }: RollingCardCarouselProps<T>) {
   const [active, setActive] = useState(0);
   const startX = useRef<number | null>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -34,6 +35,19 @@ export function RollingCardCarousel<T>({ items, getKey, renderItem, label, class
   }, [interval, items.length, reducedMotion]);
 
   if (!items.length) return null;
+  if (variant === "three-card-auto") {
+    const offsets = [-1, 0, 1];
+    return <div aria-label={label} className={`overflow-hidden ${className}`}>
+      <div className="flex min-w-[150%] -translate-x-[16.666%] items-center gap-4 py-5 transition-transform duration-700 ease-out sm:min-w-0 sm:translate-x-0 sm:gap-6">
+        {offsets.map(offset => {
+          const index = (active + offset + items.length) % items.length;
+          const centre = offset === 0;
+          return <div key={`${getKey(items[index])}-${offset}`} className={`w-[66.666%] shrink-0 transition duration-700 sm:w-[31%] ${centre ? "z-10 scale-105 opacity-100 drop-shadow-[0_0_28px_rgba(251,191,36,.38)]" : "scale-90 opacity-55 blur-[.35px]"}`}>{renderItem(items[index], index)}</div>;
+        })}
+      </div>
+      <p className="mt-1 text-center text-[10px] font-black uppercase tracking-[.18em] text-amber-200/80">Featured selection rotates automatically</p>
+    </div>;
+  }
   return <div aria-label={label} className={className} onKeyDown={event => {
     if (event.key === "ArrowLeft") previous();
     if (event.key === "ArrowRight") next();
