@@ -30,6 +30,7 @@ import { PrestigeCarsDraws } from "./components/PrestigeCarsDraws";
 import { PrizePlatform } from "./components/PrizePlatform";
 import { PlayerPortal } from "./components/PlayerPortal";
 import { PartnerShowcase } from "./components/PartnerShowcase";
+import { OwnershipNotice } from "./components/OwnershipNotice";
 import { PartnershipCampaignPage } from "./components/PartnershipCampaignPage";
 import { PrizeStandings } from "./components/PrizeStandings";
 import { ScottishHost } from "./components/ScottishHost";
@@ -60,7 +61,7 @@ export default function App() {
 
   const category = path === "/category" ? new URLSearchParams(window.location.search).get("name") : path === "/sports-cars" ? "Cars" : "";
   const backdropTheme = path === "/" ? "money" : category === "Cars" ? "cars" : category === "Cash" ? "money" : category === "Women's prizes" ? "heels" : category === "Men's prizes" ? "ties" : undefined;
-  return <div className="storm-page"><div className="storm-page__content">{page}<IntellectualPropertyNotice /></div><StormBackdrop theme={backdropTheme} /><AudioControls /></div>;
+  return <div className="storm-page"><div className="storm-page__content"><OwnershipNotice />{page}<IntellectualPropertyNotice /></div><StormBackdrop theme={backdropTheme} /><AudioControls /></div>;
 }
 
 function SiteContent({ path }: { path: string }) {
