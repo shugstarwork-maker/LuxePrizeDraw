@@ -32,7 +32,7 @@ export function FeaturedDraws() {
         </div>
         <div className="relative mx-auto w-full max-w-[16rem] lg:max-w-none">
           <div className="absolute inset-4 rounded-full bg-emerald-300/20 blur-3xl" />
-          <img src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=1200&q=92" alt="Stack of cash prize notes" className="relative w-full rotate-[-4deg] rounded-2xl border border-emerald-100/40 object-cover shadow-[0_20px_45px_rgba(0,0,0,.5)] transition duration-500 hover:rotate-0 hover:scale-[1.03]" />
+          <img src="https://images.unsplash.com/photo-1553729459-efe14ef6055d?auto=format&fit=crop&w=1200&q=94" alt="Stack of cash prize notes" className="relative h-56 w-full rotate-[-4deg] rounded-2xl border border-emerald-100/40 object-cover object-center shadow-[0_20px_45px_rgba(0,0,0,.5)] transition duration-500 hover:rotate-0 hover:scale-[1.03] sm:h-72" />
           <span className="absolute -bottom-3 -right-3 rounded-full border border-amber-100/60 bg-black/80 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-amber-100 shadow-lg">£100K choice</span>
         </div>
       </div>
