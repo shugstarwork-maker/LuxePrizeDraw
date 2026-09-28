@@ -1,11 +1,12 @@
 import React from "react";
-import { Heart, Mail, ShieldCheck, Trophy } from "lucide-react";
+import { Copyright, Heart, Mail, ShieldCheck, Trophy } from "lucide-react";
 
 const items = [
   { icon: Trophy, text: "£500K headline-prize target — subject to funded prize evidence and approved rules" },
   { icon: ShieldCheck, text: "Safeguarding status publishes only after independent evidence is recorded" },
   { icon: Heart, text: "Charity donations publish only after partner confirmation and reconciliation" },
   { icon: Mail, text: "Postal-entry route: counsel-approved rules required" },
+  { icon: Copyright, text: "© 2026 HUASH LTD — Luxe Prize Draws proprietary product" },
 ];
 
 export const CommunityTicker: React.FC = () => (
