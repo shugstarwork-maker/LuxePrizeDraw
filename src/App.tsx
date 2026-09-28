@@ -4,6 +4,7 @@ import { TermsPage } from "./components/TermsPage";
 import { TrustBadges } from "./components/TrustBadges";
 import { ParticipationStandardsPage } from "./components/ParticipationStandardsPage";
 import { CashGiveawaysPage } from "./components/CashGiveawaysPage";
+import { CashPrizesCarousel } from "./components/CashPrizesCarousel";
 import { ArcadeHome } from "./components/ArcadeHome";
 import { AudioControls } from "./components/AudioControls";
 import { CategoryDrawCarousel } from "./components/CategoryDrawCarousel";
@@ -63,6 +64,6 @@ export default function App() {
 }
 
 function SiteContent({ path }: { path: string }) {
-  const content = path === "/draws" ? <><LuxuryHolidaysSection /><PrestigeCarsDraws /><PartnerShowcase /><PrizeExperience /><PrizeStandings /><MembershipPreview /></> : path === "/community" ? <><LaunchCommitment /><CommunitySuggestionBoard /><CommunityLeaderboards /></> : path === "/play" ? <><CompetitiveHub /><GamesArena /></> : <><FeaturedDraws /><PrizePlatform /><TrustBadges /><PartnerShowcase /><CashLaunchReadiness /><LaunchCommitment /></>;
+  const content = path === "/draws" ? <><LuxuryHolidaysSection /><PrestigeCarsDraws /><PartnerShowcase /><PrizeExperience /><PrizeStandings /><MembershipPreview /></> : path === "/community" ? <><LaunchCommitment /><CommunitySuggestionBoard /><CommunityLeaderboards /></> : path === "/play" ? <><CompetitiveHub /><GamesArena /></> : <><FeaturedDraws /><CashPrizesCarousel /><LuxuryHolidaysSection /><PrizePlatform /><TrustBadges /><PartnerShowcase /><CashLaunchReadiness /><LaunchCommitment /></>;
   return <><LegalReadinessNotice /><ExperienceNav /><CommunityTicker /><main className="animate-page-enter pb-24 sm:pb-0">{content}</main><ScottishHost /><MobileDock /></>;
 }
