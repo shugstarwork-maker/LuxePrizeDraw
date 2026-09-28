@@ -13,7 +13,7 @@ type RollingCardCarouselProps<T> = {
   variant?: "standard" | "three-card-auto";
 };
 
-export function RollingCardCarousel<T>({ items, getKey, renderItem, label, className = "", interval = 5000, compactControls = false, enableArrivalEffects = true, variant = "standard" }: RollingCardCarouselProps<T>) {
+export function RollingCardCarousel<T>({ items, getKey, renderItem, label, className = "", interval = 5000, compactControls = false, enableArrivalEffects = true, variant = "three-card-auto" }: RollingCardCarouselProps<T>) {
   const [active, setActive] = useState(0);
   const startX = useRef<number | null>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
