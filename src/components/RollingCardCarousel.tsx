@@ -38,11 +38,11 @@ export function RollingCardCarousel<T>({ items, getKey, renderItem, label, class
   if (variant === "three-card-auto") {
     const offsets = [-1, 0, 1];
     return <div aria-label={label} className={`carousel-glass-row overflow-hidden ${className}`}>
-      <div className="carousel-glass-row__track flex min-w-[150%] -translate-x-[16.666%] items-center gap-4 py-5 transition-transform duration-700 ease-out sm:min-w-0 sm:translate-x-0 sm:gap-6">
+      <div key={active} className="carousel-glass-row__track carousel-glass-row__track--moving flex min-w-[150%] -translate-x-[16.666%] items-center gap-4 py-5 transition-transform duration-700 ease-out sm:min-w-0 sm:translate-x-0 sm:gap-6">
         {offsets.map(offset => {
           const index = (active + offset + items.length) % items.length;
           const centre = offset === 0;
-          return <div key={`${getKey(items[index])}-${offset}`} className={`carousel-glass-row__card w-[66.666%] shrink-0 transition duration-700 sm:w-[31%] ${centre ? "carousel-glass-row__card--centre z-10 scale-105 opacity-100" : "scale-90 opacity-55 blur-[.35px]"}`}>{renderItem(items[index], index)}</div>;
+          return <div key={`${getKey(items[index])}-${offset}`} className={`carousel-glass-row__card w-[66.666%] shrink-0 rounded-[1.75rem] transition duration-700 sm:w-[31%] ${centre ? "carousel-glass-row__card--centre z-10 scale-105 opacity-100" : "scale-90 opacity-55 blur-[.35px]"}`}>{renderItem(items[index], index)}</div>;
         })}
       </div>
       <p className="mt-1 text-center text-[10px] font-black uppercase tracking-[.18em] text-amber-200/80">Featured selection rotates automatically</p>
