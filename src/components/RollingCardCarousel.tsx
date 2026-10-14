@@ -9,13 +9,20 @@ type RollingCardCarouselProps<T> = {
   label: string;
   className?: string;
   interval?: number;
+  activeIndex?: number;
+  onActiveChange?: (index: number) => void;
   compactControls?: boolean;
   enableArrivalEffects?: boolean;
   variant?: "standard" | "three-card-auto";
 };
 
-export function RollingCardCarousel<T>({ items, getKey, renderItem, label, className = "", interval = 5000, compactControls = false }: RollingCardCarouselProps<T>) {
-  const [active, setActive] = useState(0);
+export function RollingCardCarousel<T>({ items, getKey, renderItem, label, className = "", interval = 5000, compactControls = false, activeIndex, onActiveChange }: RollingCardCarouselProps<T>) {
+  const [localActive, setLocalActive] = useState(0);
+  const active = activeIndex ?? localActive;
+  const setActive = (value: number | ((index: number) => number)) => {
+    const next = typeof value === "function" ? value(active) : value;
+    if (onActiveChange) onActiveChange(next); else setLocalActive(next);
+  };
   const startX = useRef<number | null>(null);
   const [paused, setPaused] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -34,7 +41,7 @@ export function RollingCardCarousel<T>({ items, getKey, renderItem, label, class
     if (paused || reducedMotion || items.length < 2) return;
     const timer = window.setInterval(next, interval);
     return () => window.clearInterval(timer);
-  }, [interval, items.length, reducedMotion, paused]);
+  }, [interval, items.length, reducedMotion, paused, active]);
 
   if (!items.length) return null;
   return <div aria-label={label} className={className} onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocusCapture={() => setPaused(true)} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setPaused(false); }} onKeyDown={event => {

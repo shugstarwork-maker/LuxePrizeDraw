@@ -591,3 +591,19 @@
 /* Bespoke draw displays retain their detailed content, at a smaller footprint. */
 .compact-cash-display, .featured-draw-fire, .luxury-destination-card--focus { max-width:42rem; margin-inline:auto; border-radius:6px; }
 @media (prefers-reduced-motion:reduce) { .compact-coverflow__card { transition:none; } }
+
+/* One compact coverflow system for every draw collection. */
+.compact-coverflow__card > .coverflow-draw { padding:0; min-height:26rem; margin:0; }
+.compact-coverflow__card > .coverflow-draw > div.relative { height:auto; min-height:26rem; padding:1rem; }
+.compact-coverflow__card > .coverflow-holiday { padding:0; }
+.compact-coverflow__card > .coverflow-holiday > img { height:12rem; }
+.compact-coverflow__card > .coverflow-holiday h3 { font-size:1.75rem; }
+.compact-coverflow__card > .coverflow-tier { padding:0; }
+.compact-coverflow__card > .coverflow-tier > div:first-child { height:12rem; }
+.seasonal-snow { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+.seasonal-snow > span { position:absolute; top:-2rem; border-radius:50%; background:#fff; opacity:.7; box-shadow:0 0 5px #d9eeff80; animation:seasonal-snowfall linear infinite; }
+.santa-flight { position:absolute; top:12%; left:0; display:flex; align-items:center; gap:.4rem; width:max-content; font-size:clamp(1.5rem,3vw,2.5rem); pointer-events:none; animation:santa-crossing 32s linear infinite; filter:drop-shadow(0 3px 8px #0008); }
+.santa-flight__reins { width:2rem; height:1px; background:#e5cb8b; }
+@keyframes seasonal-snowfall { from { transform:translate3d(0,-2rem,0); } to { transform:translate3d(35px,110vh,0); } }
+@keyframes santa-crossing { 0% { transform:translateX(-110%) translateY(0); } 45% { transform:translateX(calc(100vw + 100%)) translateY(-35px); } 100% { transform:translateX(calc(100vw + 100%)) translateY(-35px); } }
+@media (prefers-reduced-motion:reduce) { .seasonal-snow > span,.santa-flight { animation:none; display:none; } }
