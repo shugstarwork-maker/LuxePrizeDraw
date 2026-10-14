@@ -1,3 +1,4 @@
+import { PrizeUnlockBar } from "./PrizeUnlockBar";
 import React, { useState } from "react";
 import {
   Coins, ShieldCheck, Building2, Smartphone, Palette, Landmark, Palmtree,
@@ -90,6 +91,7 @@ export const PrizeShowcase: React.FC<PrizeShowcaseProps> = ({
                     {pillar.shortTitle}
                   </p>
                   <p className="text-[9px] uppercase tracking-wider text-white/40 mt-1 truncate">{pillar.badge}</p>
+                  <PrizeUnlockBar valueGBP={Number(pillar.valueGBP.replace(/[£,]/g, ""))} label={pillar.shortTitle} />
                 </div>
               </button>
             );
