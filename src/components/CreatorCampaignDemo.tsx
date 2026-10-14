@@ -4,9 +4,9 @@ import { Heart, Sparkles, UserRound } from "lucide-react";
 export function CreatorCampaignDemo() {
   const [imageFailed, setImageFailed] = useState(false);
   return <section aria-labelledby="creator-campaign-title" className="mx-auto max-w-6xl px-4 py-12 text-white">
-    <p className="text-xs font-bold uppercase tracking-[.2em] text-amber-200">Creator charity campaigns · design demo</p>
+    <p className="text-xs font-bold uppercase tracking-[.2em] text-amber-200">OnlyFans Creator Charity Campaign · design demo</p>
     <h1 id="creator-campaign-title" className="mt-3 text-3xl font-black sm:text-5xl">A little glamour. A greater purpose.</h1>
-    <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/70">Preview concept only. No live partnership, charity collection or token offer is represented here.</p>
+    <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/70">Preview concept only. No live partnership, charity collection or token offer is represented here. Not sponsored or endorsed by OnlyFans.</p>
     <article className="luxe-wallet-card mt-8 grid max-w-4xl sm:grid-cols-2">
       <div className="relative min-h-96 bg-gradient-to-br from-purple-950 via-black to-amber-950">
         {imageFailed ? <div className="grid h-96 place-items-center text-amber-200"><UserRound size={100} aria-hidden="true" /><span className="sr-only">Demo portrait unavailable</span></div> : <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=900&q=85" alt="Stock portrait used for layout demonstration; not the campaign partner" onError={() => setImageFailed(true)} className="h-full min-h-96 w-full object-cover" />}
@@ -23,4 +23,17 @@ export function CreatorCampaignDemo() {
       </div>
     </article>
   </section>;
+}
+
+export function CreatorCampaignCard() {
+  return <a href="/creator-campaigns" onClick={event => { if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); window.history.pushState({}, "", "/creator-campaigns"); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo(0, 0); }} className="luxe-wallet-card mx-auto mt-6 grid max-w-4xl text-white focus-visible:outline focus-visible:outline-amber-200 sm:grid-cols-[180px_1fr]">
+    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=900&q=85" alt="Stock demo portrait; not the campaign partner" className="h-56 w-full object-cover sm:h-full" />
+    <div className="p-5 sm:p-6">
+      <span className="text-xs font-bold uppercase tracking-wider text-amber-200">Demo · fictional creator</span>
+      <h2 className="mt-2 text-2xl font-black">OnlyFans Creator Charity Campaign</h2>
+      <p className="mt-2 text-sm text-white/75">Amber Vale · fictional placeholder name. Stock photo; person pictured is not affiliated.</p>
+      <p className="mt-2 text-xs text-white/65">Not sponsored or endorsed by OnlyFans. Charity and token details pending; no claiming or donations available.</p>
+      <span className="mt-4 inline-block font-bold text-amber-200">Explore demo campaign →</span>
+    </div>
+  </a>;
 }
