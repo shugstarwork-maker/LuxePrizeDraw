@@ -580,58 +580,14 @@
 .carousel-glass-row__card--centre > * { border-color:rgba(255,236,158,.72) !important; box-shadow:0 18px 45px rgba(0,0,0,.5),inset 0 1px rgba(255,255,255,.28),0 0 28px rgba(251,191,36,.2); }
 @media (prefers-reduced-motion: reduce) { .carousel-glass-row__card,.carousel-glass-row__card:nth-child(3),.carousel-glass-row__card--centre { transform:none !important; } }
 
-/* Prize displays: slim graphite TV bezels, wide screens and quiet motion.
-   Let mobile content grow rather than crop draw terms into a fixed ratio. */
-.prize-tv {
-  position: relative;
-  isolation: isolate;
-  border: 7px solid #181b20;
-  border-bottom-width: 14px;
-  border-radius: 6px;
-  background-color: #07090c;
-  box-shadow: 0 0 0 1px #46505b, 0 24px 60px #0009;
-  animation: none;
-}
-.prize-tv::after {
-  content: "";
-  position: absolute;
-  inset: auto 16px 0 auto;
-  z-index: 5;
-  border: 0;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: #c3dfed;
-  pointer-events: none;
-}
-.prize-tv--featured, .prize-tv--cash, .prize-tv--category {
-  min-height: 25rem;
-}
-.prize-tv--category { display: block; }
-.prize-tv--category > img { opacity: .9; }
-.prize-tv--category > span:last-child { bottom: 1.5rem; left: 1.5rem; right: 1.5rem; }
-.prize-tv--category > span:last-child > span:first-child > span:last-child { font-size: clamp(1.5rem, 4vw, 3rem); }
-.prize-tv--featured aside { border-radius: 3px; }
-.prize-tv--vehicle { padding: 0; }
-.prize-tv--vehicle > div:first-child { border-radius: 0; border: 0; aspect-ratio: 16 / 9; height: auto; }
-.prize-tv--details > div:first-child { aspect-ratio: 16 / 9; height: auto; }
-.prize-tv--holiday { min-height: 0; }
-.prize-tv--holiday > img { min-height: 38rem; }
-.prize-tv--holiday:hover { transform: none; }
-.carousel-card-stage:has(> .prize-tv) { width: 100%; border-radius: 6px; animation: none; transform: none; }
-.carousel-card-stage:has(> .prize-tv)::before,
-.carousel-card-stage:has(> .prize-tv)::after,
-.carousel-card-stage:has(> .prize-tv) > .carousel-card-stage__lightning,
-.carousel-card-stage:has(> .prize-tv) > .carousel-card-stage__flash { display: none; }
-.carousel-card-stage:has(> .prize-tv) > .prize-tv { animation: none; }
-@media (min-width: 640px) {
-  .prize-tv--featured, .prize-tv--cash, .prize-tv--category { aspect-ratio: 16 / 9; min-height: 0; }
-  .prize-tv--cash > div.relative { min-height: 100%; }
-  .prize-tv--holiday > img { width: 100%; height: auto; aspect-ratio: 16 / 9; min-height: 34rem; }
-}
-@media (max-width: 639px) {
-  .prize-tv { border-width: 4px; border-bottom-width: 10px; }
-  .prize-tv--featured aside { bottom: 3rem; left: 1rem; width: calc(100% - 2rem); }
-  .prize-tv--featured > button, .prize-tv--cash > button { top: 2rem; }
-  .prize-tv--cash > div.relative { padding-bottom: 3.5rem; }
-}
+
+/* Compact, stable-key coverflow: cards move between slots instead of remounting. */
+.compact-coverflow { display:grid; perspective:1100px; overflow:hidden; padding:2rem 0; }
+.compact-coverflow__card { position:relative; width:min(62%,22rem); margin:auto; align-self:center; min-width:0; transform-style:preserve-3d; transition:transform .7s cubic-bezier(.22,.68,0,1),opacity .7s,visibility .7s; }
+.compact-coverflow__card > * { width:100%; border-radius:6px; border:1px solid #81b6d54d; background-color:#10151d; box-shadow:0 16px 40px #0008,0 2px 0 #5fbce5; }
+.compact-coverflow__card article > div:first-child { height:12rem; }
+.compact-coverflow__card article { padding:1rem; }
+.compact-coverflow__card [class*="rounded-"] { border-radius:5px; }
+/* Bespoke draw displays retain their detailed content, at a smaller footprint. */
+.compact-cash-display, .featured-draw-fire, .luxury-destination-card--focus { max-width:42rem; margin-inline:auto; border-radius:6px; }
+@media (prefers-reduced-motion:reduce) { .compact-coverflow__card { transition:none; } }
