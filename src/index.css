@@ -607,3 +607,50 @@
 @keyframes seasonal-snowfall { from { transform:translate3d(0,-2rem,0); } to { transform:translate3d(35px,110vh,0); } }
 @keyframes santa-crossing { 0% { transform:translateX(-110%) translateY(0); } 45% { transform:translateX(calc(100vw + 100%)) translateY(-35px); } 100% { transform:translateX(calc(100vw + 100%)) translateY(-35px); } }
 @media (prefers-reduced-motion:reduce) { .seasonal-snow > span,.santa-flight { animation:none; display:none; } }
+
+
+/* Shared wallet-inspired shell for casino and poker lobby cards.
+   Playing-card faces and table controls deliberately keep their own styling. */
+.luxe-wallet-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid rgba(239, 202, 119, .65);
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(ellipse at 95% 0%, rgba(128, 63, 187, .23), transparent 55%),
+    linear-gradient(155deg, #242029 0%, #100f14 45%, #070708 100%);
+  box-shadow: inset 0 1px 1px rgba(255, 242, 204, .28),
+    inset 0 -1px 1px rgba(220, 164, 51, .3),
+    0 14px 32px rgba(0, 0, 0, .5), 0 0 18px rgba(218, 165, 46, .12);
+  backdrop-filter: blur(14px);
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.luxe-wallet-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(115deg, rgba(255, 238, 188, .09), transparent 35%, transparent 75%, rgba(187, 116, 255, .06));
+}
+button.luxe-wallet-card:not(:disabled):hover {
+  transform: translateY(-3px);
+  border-color: #ffe5a2;
+  box-shadow: inset 0 1px rgba(255, 242, 204, .4),
+    0 18px 36px rgba(0, 0, 0, .55), 0 0 24px rgba(235, 182, 58, .3);
+}
+button.luxe-wallet-card:focus-visible {
+  outline: 3px solid #ffe5a2;
+  outline-offset: 4px;
+}
+.luxe-wallet-card svg { color: #f3d48a; filter: drop-shadow(0 0 6px rgba(242, 190, 65, .25)); }
+.luxe-wallet-card__action {
+  background: linear-gradient(180deg, #ffe8ab, #d5a63f);
+  color: #171006;
+  box-shadow: inset 0 1px rgba(255, 255, 255, .5), 0 0 14px rgba(224, 171, 47, .18);
+}
+@media (prefers-reduced-motion: reduce) {
+  .luxe-wallet-card { transition: none; }
+  button.luxe-wallet-card:not(:disabled):hover { transform: none; }
+}

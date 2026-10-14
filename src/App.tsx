@@ -1,3 +1,4 @@
+import { CreatorCampaignDemo } from "./components/CreatorCampaignDemo";
 import React, { useEffect, useState } from "react";
 import { CashLaunchReadiness } from "./components/CashLaunchReadiness";
 import { TermsPage } from "./components/TermsPage";
@@ -45,6 +46,7 @@ export default function App() {
   const [path, setPath] = useState(() => window.location.pathname);
   useEffect(() => { const sync = () => setPath(window.location.pathname); window.addEventListener("popstate", sync); return () => window.removeEventListener("popstate", sync); }, []);
   const page = path === "/welcome" ? <WelcomePage onEnter={() => go("/")} />
+    : path === "/creator-campaigns" ? <><ExperienceNav /><CreatorCampaignDemo /><MobileDock /></>
     : path === "/serenity" ? <SerenityCharityPage />
     : path === "/cash-giveaways" ? <CashGiveawaysPage />
     : path === "/terms" ? <TermsPage />
