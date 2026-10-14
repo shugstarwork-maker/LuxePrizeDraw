@@ -1,3 +1,4 @@
+import { coverflowOffset } from "./coverflow";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 
@@ -13,9 +14,10 @@ type RollingCardCarouselProps<T> = {
   variant?: "standard" | "three-card-auto";
 };
 
-export function RollingCardCarousel<T>({ items, getKey, renderItem, label, className = "", interval = 5000, compactControls = false, enableArrivalEffects = true, variant = "standard" }: RollingCardCarouselProps<T>) {
+export function RollingCardCarousel<T>({ items, getKey, renderItem, label, className = "", interval = 5000, compactControls = false }: RollingCardCarouselProps<T>) {
   const [active, setActive] = useState(0);
   const startX = useRef<number | null>(null);
+  const [paused, setPaused] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const next = () => setActive(index => (index + 1) % items.length);
   const previous = () => setActive(index => (index - 1 + items.length) % items.length);
@@ -29,26 +31,13 @@ export function RollingCardCarousel<T>({ items, getKey, renderItem, label, class
   }, []);
 
   useEffect(() => {
-    if (reducedMotion || items.length < 2) return;
+    if (paused || reducedMotion || items.length < 2) return;
     const timer = window.setInterval(next, interval);
     return () => window.clearInterval(timer);
-  }, [interval, items.length, reducedMotion]);
+  }, [interval, items.length, reducedMotion, paused]);
 
   if (!items.length) return null;
-  if (variant === "three-card-auto") {
-    const offsets = [-1, 0, 1];
-    return <div aria-label={label} className={`carousel-glass-row overflow-hidden ${className}`}>
-      <div className="carousel-glass-row__track flex min-w-[150%] -translate-x-[16.666%] items-center gap-4 py-5 transition-transform duration-700 ease-out sm:min-w-0 sm:translate-x-0 sm:gap-6">
-        {offsets.map(offset => {
-          const index = (active + offset + items.length) % items.length;
-          const centre = offset === 0;
-          return <div key={`${getKey(items[index])}-${offset}`} className={`carousel-glass-row__card w-[66.666%] shrink-0 transition duration-700 sm:w-[31%] ${centre ? "carousel-glass-row__card--centre z-10 scale-105 opacity-100" : "scale-90 opacity-55 blur-[.35px]"}`}>{renderItem(items[index], index)}</div>;
-        })}
-      </div>
-      <p className="mt-1 text-center text-[10px] font-black uppercase tracking-[.18em] text-amber-200/80">Featured selection rotates automatically</p>
-    </div>;
-  }
-  return <div aria-label={label} className={className} onKeyDown={event => {
+  return <div aria-label={label} className={className} onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocusCapture={() => setPaused(true)} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setPaused(false); }} onKeyDown={event => {
     if (event.key === "ArrowLeft") previous();
     if (event.key === "ArrowRight") next();
   }}>
@@ -59,7 +48,18 @@ export function RollingCardCarousel<T>({ items, getKey, renderItem, label, class
       if (distance < -50) next();
       startX.current = null;
     }} className="outline-none focus-visible:ring-2 focus-visible:ring-amber-200">
-      <div key={getKey(items[active])} className={`carousel-card-stage carousel-card-stage--${active % 4}${enableArrivalEffects ? " carousel-card-stage--arriving" : ""}`}>{enableArrivalEffects && <><span aria-hidden="true" className="carousel-card-stage__lightning" /><span aria-hidden="true" className="carousel-card-stage__flash" /></>}{renderItem(items[active], active)}</div>
+      <div className="compact-coverflow">
+        {items.map((item, index) => {
+          const offset = coverflowOffset(index, active, items.length);
+          const distance = Math.abs(offset);
+          return <div key={getKey(item)} className="compact-coverflow__card" inert={offset !== 0} aria-hidden={offset !== 0} style={{
+            gridArea: "1 / 1", zIndex: items.length - distance,
+            opacity: distance > 2 ? 0 : offset === 0 ? 1 : .65,
+            visibility: distance > 2 ? "hidden" : "visible",
+            transform: `translateX(${offset * 64}%) translateZ(${-distance * 100}px) rotateY(${offset === 0 ? 0 : offset < 0 ? 28 : -28}deg) scale(${1 - Math.min(distance, 3) * .12})`,
+          }}>{renderItem(item, index)}</div>;
+        })}
+      </div>
     </div>
     <div className={`mt-5 flex items-center justify-between ${compactControls ? "gap-2" : "gap-3"}`}>
       <button aria-label={`Previous ${label}`} onClick={previous} className={compactControls ? "grid h-12 w-12 place-items-center rounded-2xl border border-amber-100/70 bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-400 text-black shadow-[0_10px_24px_rgba(251,191,36,.28)] transition hover:-translate-y-0.5 hover:brightness-110 sm:inline-flex sm:h-auto sm:w-auto sm:gap-2 sm:px-4 sm:py-3 sm:text-xs sm:font-black" : "inline-flex items-center gap-2 rounded-2xl border border-amber-100/70 bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-400 px-4 py-3 text-xs font-black text-black shadow-[0_10px_24px_rgba(251,191,36,.28)] transition hover:-translate-y-0.5 hover:brightness-110"}><ChevronLeft className="h-4 w-4" /><span className="hidden sm:inline">Previous</span></button>
