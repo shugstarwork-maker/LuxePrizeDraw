@@ -16,3 +16,12 @@ Sources consulted:
 - https://www.gamblingcommission.gov.uk/licensees-and-businesses/guide/page/free-draws-and-prize-competitions
 - https://www.asa.org.uk/advice-online/promotional-marketing-prize-draws.html
 - https://www.asa.org.uk/advice-online/promotional-marketing-changing-ongoing-promotions.html
+
+## Owner-directed schedules added to draft v3
+- Non-seasonal draws: published 12-calendar-month entry periods, no hidden fallback. Opening and exact closing/selection timestamps still missing.
+- Christmas: 25 December 2026 closes 21:00 GMT, selection 22:00 GMT.
+- New Year's Eve: 31 December 2026 closes 21:00 GMT, selection 22:00 GMT. Separate pool/pot/winner.
+- Seasonal proposed payout uses actual documented costs capped at 30%, then a 5% donation from the remainder, then the winner receives all balance. This follows the recommendation the owner asked us to proceed with; final categories, accounting/settlement cutoffs, rounding and operational feasibility are not yet approved.
+- Verify Serenity Soul CIC identity/status and donation agreement; do not claim registered-charity status based solely on CIC designation.
+- Confirm unlimited-total vs per-person limits, opening dates, price, minimum payout (if any), refund/chargeback policies, postal route and prize particulars. No missing values have been invented.
+- The published schedules are drafts only. No live entry/payment or ledger logic was changed.

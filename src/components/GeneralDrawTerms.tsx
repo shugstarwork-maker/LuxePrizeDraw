@@ -1,4 +1,5 @@
-export const GENERAL_DRAW_TERMS_VERSION = "draft-2026-10-15-v2";
+import { DrawSchedules } from "./DrawSchedules";
+export const GENERAL_DRAW_TERMS_VERSION = "draft-2026-10-15-v3";
 
 const sections = [
   {
@@ -75,6 +76,7 @@ export function GeneralDrawTerms() {
     <p className="mt-3">Support and complaints: <a href="mailto:director@luxeprizedraw.com" className="text-amber-200 underline underline-offset-4">director@luxeprizedraw.com</a></p>
     <nav aria-label="General terms sections" className="my-5 flex flex-wrap gap-3">{sections.map(section => <a key={section.id} href={`#${section.id}`} className="text-amber-200 underline underline-offset-4">{section.title}</a>)}</nav>
     <div className="space-y-6">{sections.map((section, index) => <section key={section.id} id={section.id}><h3 className="font-black text-white">{index + 1}. {section.title}</h3><p className="mt-2">{section.text}</p></section>)}</div>
+    <DrawSchedules />
     <p className="mt-6">Reference guidance: <a href="https://www.gamblingcommission.gov.uk/licensees-and-businesses/guide/page/free-draws-and-prize-competitions" className="text-amber-200 underline">Gambling Commission: free draws and prize competitions</a> and <a href="https://www.asa.org.uk/advice-online/promotional-marketing-prize-draws.html" className="text-amber-200 underline">ASA: prize draws</a>. Neither organisation approves this draft or this platform.</p>
   </section>;
 }
