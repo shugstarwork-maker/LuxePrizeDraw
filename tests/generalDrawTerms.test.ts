@@ -30,3 +30,10 @@ test('shared draw details and all routed pages expose terms links', () => {
   const app = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8');
   assert.match(app, /\{page\}<footer[^]*href="\/terms"/);
 });
+
+test('company details are shown without approving the office for postal entry', () => {
+  const html = renderToStaticMarkup(createElement(TermsPage));
+  for (const text of ['SC888447', '40 Donaldson Avenue, Stevenston, KA20 4EJ', 'not an approved postal-entry address', 'not been independently verified']) assert.ok(html.includes(text), text);
+  assert.match(html, /href="mailto:director@luxeprizedraw.com"/);
+  assert.match(html, /no approved postal address/);
+});

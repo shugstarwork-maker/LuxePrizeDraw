@@ -1,10 +1,10 @@
-export const GENERAL_DRAW_TERMS_VERSION = "draft-2026-10-15";
+export const GENERAL_DRAW_TERMS_VERSION = "draft-2026-10-15-v2";
 
 const sections = [
   {
     "id": "scope",
     "title": "Scope and promoter",
-    "text": "This draft framework is intended for all future Luxe Prize Draw Ltd draws. It is not final official rules or evidence of legal approval. Before entry opens, the promoter’s verified legal name, company number, registered office, correspondence address and complaints contact must be published. No draw is open on this pre-launch site."
+    "text": "This draft framework is intended for all future Luxe Prize Draw Ltd draws. It is not final official rules or evidence of legal approval. The promoter is Luxe Prize Draw Ltd, company number SC888447. Its current registered office is 40 Donaldson Avenue, Stevenston, KA20 4EJ, Scotland. These details are confirmed by the company owner and have not been independently verified. The registered office is not an approved postal-entry address. Any launch address change must be reflected in the published company information and final draw rules before entry opens. No draw is open on this pre-launch site."
   },
   {
     "id": "eligibility",
@@ -64,7 +64,7 @@ const sections = [
   {
     "id": "complaints",
     "title": "Complaints, liability and governing law",
-    "text": "Each draw must provide a working complaints contact and explain escalation and response times before opening. Entrants may seek independent advice from Citizens Advice and exercise their statutory remedies. Nothing excludes liability for fraud, death or personal injury caused by negligence, or any liability that cannot lawfully be excluded. Subject to legal approval, the intended governing law is England and Wales, without removing mandatory protections or an entrant’s right to bring proceedings in the courts of their home jurisdiction where applicable. Scotland, Northern Ireland and overseas eligibility require specific review."
+    "text": "For support or complaints, email director@luxeprizedraw.com. Each draw must explain escalation and response times before opening. Entrants may seek independent advice from Citizens Advice and exercise their statutory remedies. Nothing excludes liability for fraud, death or personal injury caused by negligence, or any liability that cannot lawfully be excluded. Subject to legal approval, the intended governing law is England and Wales, without removing mandatory protections or an entrant’s right to bring proceedings in the courts of their home jurisdiction where applicable. Scotland, Northern Ireland and overseas eligibility require specific review."
   }
 ] as const;
 
@@ -72,6 +72,7 @@ export function GeneralDrawTerms() {
   return <section aria-labelledby="general-draw-terms" className="mt-8 text-sm leading-relaxed text-white/70">
     <h2 id="general-draw-terms" className="text-2xl font-black text-white">General terms for all draws</h2>
     <p className="mt-2">Version {GENERAL_DRAW_TERMS_VERSION} · Draft for legal review, not effective entry rules.</p>
+    <p className="mt-3">Support and complaints: <a href="mailto:director@luxeprizedraw.com" className="text-amber-200 underline underline-offset-4">director@luxeprizedraw.com</a></p>
     <nav aria-label="General terms sections" className="my-5 flex flex-wrap gap-3">{sections.map(section => <a key={section.id} href={`#${section.id}`} className="text-amber-200 underline underline-offset-4">{section.title}</a>)}</nav>
     <div className="space-y-6">{sections.map((section, index) => <section key={section.id} id={section.id}><h3 className="font-black text-white">{index + 1}. {section.title}</h3><p className="mt-2">{section.text}</p></section>)}</div>
     <p className="mt-6">Reference guidance: <a href="https://www.gamblingcommission.gov.uk/licensees-and-businesses/guide/page/free-draws-and-prize-competitions" className="text-amber-200 underline">Gambling Commission: free draws and prize competitions</a> and <a href="https://www.asa.org.uk/advice-online/promotional-marketing-prize-draws.html" className="text-amber-200 underline">ASA: prize draws</a>. Neither organisation approves this draft or this platform.</p>
