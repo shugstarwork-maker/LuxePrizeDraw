@@ -4,7 +4,7 @@ The `/terms` page now includes a versioned shared framework for future draws. It
 
 Before publishing effective rules:
 - Verify Luxe Prize Draw Ltd's exact registered name, number, registered office, service address and working complaints contact. The owner confirmed the name, number SC888447, current registered office and director@luxeprizedraw.com; these have not been independently verified. The registered office may change before launch and is not an approved postal-entry address.
-- Provide the actual postal address and entry-processing procedure; review genuine choice, prominence, normal postage, sufficient receipt/processing time, equal limits and prize allocation. No address has been invented.
+- The owner confirmed postal premises at 17–18 Factory Place, Saltcoats, KA21 5LZ. Finalise the entry-processing procedure; review genuine choice, prominence, normal postage, sufficient receipt/processing time, equal limits and prize allocation. No address has been invented.
 - Obtain a solicitor's approval of the model and eligible territories. The Gambling Act 2005 framework is Great Britain, not a blanket approval for Northern Ireland or overseas participation.
 - Publish versioned individual rules: dates/time zone, limits, price, verified prize/specifications, alternatives, selection/audit evidence, claim and delivery deadlines, restrictions and fulfilment costs.
 - Implement and test the stated processes before using these terms as a contract, including refunds, complaints, privacy, winner disclosure/objections and participant protection. The prose is not an implementation of those services.
@@ -25,3 +25,6 @@ Sources consulted:
 - Verify Serenity Soul CIC identity/status and donation agreement; do not claim registered-charity status based solely on CIC designation.
 - Confirm unlimited-total vs per-person limits, opening dates, price, minimum payout (if any), refund/chargeback policies, postal route and prize particulars. No missing values have been invented.
 - The published schedules are drafts only. No live entry/payment or ledger logic was changed.
+
+## Postal premises confirmation
+The owner confirmed both units 17–18 after public directory listings identified KA21 5LZ. This is not a change to the registered office, independent verification of occupancy, or permission to accept entries before approved rules are effective.

@@ -1,5 +1,5 @@
 import { DrawSchedules } from "./DrawSchedules";
-export const GENERAL_DRAW_TERMS_VERSION = "draft-2026-10-15-v3";
+export const GENERAL_DRAW_TERMS_VERSION = "draft-2026-10-15-v4";
 
 const sections = [
   {
@@ -20,7 +20,7 @@ const sections = [
   {
     "id": "free-entry",
     "title": "Free postal entry and equal treatment",
-    "text": "For any draw offering paid and free entry, entrants must have a genuine choice to participate without paying the promoter. Ordinary first- or second-class post may be used; normal postage costs are payable to the postal service. Special or recorded delivery, premium-rate services and additional entry fees must not be required. The approved draw rules must publish the actual postal address, required entrant details, draw identifier, receipt deadline and how entries are acknowledged or checked. Do not send postal entries now: no approved postal address or open draw is provided on this prototype."
+    "text": "For any draw offering paid and free entry, entrants must have a genuine choice to participate without paying the promoter. Ordinary first- or second-class post may be used; normal postage costs are payable to the postal service. Special or recorded delivery, premium-rate services and additional entry fees must not be required. The approved draw rules must publish the actual postal address, required entrant details, draw identifier, receipt deadline and how entries are acknowledged or checked. The owner-confirmed postal-entry premises are Luxe Prize Draw Ltd, 17–18 Factory Place, Saltcoats, KA21 5LZ, Scotland. This is separate from the registered office. Do not send postal entries now: no draw is open for entry. The address alone does not establish an approved entry-processing procedure."
   },
   {
     "id": "equal-treatment",
