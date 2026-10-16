@@ -659,10 +659,17 @@
   .luxe-dealer-cardfly { display: none; }
 }
 
-/* ——— Carousel sharpen pass ——— */
+/* ——— Temptation pass: bright, juicy prize cards ——— */
 .compact-coverflow__card { transition: transform .55s cubic-bezier(.22,1,.36,1), opacity .55s ease; will-change: transform, opacity; }
-.coverflow-draw { border: 1px solid rgba(212,175,55,.38) !important; box-shadow: 0 30px 70px rgba(0,0,0,.6), 0 0 34px rgba(212,175,55,.12) !important; }
-.coverflow-draw img { filter: contrast(1.06) saturate(1.08); }
-.coverflow-draw:hover img { transform: scale(1.06); }
-.compact-coverflow__card[style*="rotateY(0deg)"] .coverflow-draw { border-color: rgba(243,220,154,.65) !important; box-shadow: 0 34px 80px rgba(0,0,0,.65), 0 0 44px rgba(212,175,55,.28) !important; }
-@media (prefers-reduced-motion: reduce) { .compact-coverflow__card { transition: none; } }
+.coverflow-draw { position: relative !important; border: 1.5px solid rgba(255,224,138,.75) !important; border-radius: 1.4rem !important; box-shadow: 0 24px 60px rgba(0,0,0,.45), 0 0 40px rgba(255,200,80,.35), 0 0 90px rgba(255,180,40,.18) !important; }
+.coverflow-draw img { filter: brightness(1.12) contrast(1.08) saturate(1.22) !important; }
+.coverflow-draw > div:first-of-type { opacity: .38 !important; }
+.coverflow-draw::after { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.22) 45%, rgba(255,244,200,.38) 50%, rgba(255,255,255,.22) 55%, transparent 70%); transform: translateX(-120%); animation: cardShine 4.5s ease-in-out infinite; pointer-events: none; }
+@keyframes cardShine { 0%,55% { transform: translateX(-120%); } 85%,100% { transform: translateX(120%); } }
+.compact-coverflow__card[style*="rotateY(0deg)"] .coverflow-draw { border-color: #ffe9a8 !important; box-shadow: 0 28px 70px rgba(0,0,0,.5), 0 0 60px rgba(255,210,90,.55), 0 0 130px rgba(255,180,40,.3) !important; }
+.compact-coverflow__card[style*="rotateY(0deg)"] .coverflow-draw::after { animation-duration: 2.8s; }
+.coverflow-draw .rounded-full { box-shadow: 0 0 16px rgba(255,210,90,.5); }
+@media (prefers-reduced-motion: reduce) {
+  .compact-coverflow__card { transition: none; }
+  .coverflow-draw::after { animation: none; }
+}
