@@ -33,3 +33,11 @@ test('poker table offers landscape guidance without blocking portrait play', () 
   assert.match(css, /poker-playing-wrap \{ max-width:90rem/);
   assert.match(css, /orientation:portrait/);
 });
+
+test('portrait table stays large inside its own accessible horizontal scroll region', () => {
+  const html = renderToStaticMarkup(createElement(PokerTableArtwork, { pot: 0, stage: 'ready' }));
+  assert.match(html, /poker-table-scroll/);
+  assert.match(html, /tabindex="0"/);
+  const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
+  assert.match(css, /poker-table-artwork \{ min-width:38rem/);
+});
