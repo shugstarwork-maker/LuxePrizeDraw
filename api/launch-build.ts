@@ -7,12 +7,6 @@ export const MAX_PER_DRAW = 10;
 export const PROOF_KEYS = ["officialRules", "prizeFunding", "fundSafeguards", "paymentControls", "counselSignoff"] as const;
 export const SEED_DRAWS = [
   /* --- cash ladder --- */
-  { id: 'cash10',    cat: 'Cash',        title: '£10 Cash Prize',           grade: 'TIER 1 · 6×',     mult: 6,  price: 0.10,  target: 60,      sold: 0, revenue: 0, paused: false, winner: null },
-  { id: 'cash25',    cat: 'Cash',        title: '£25 Cash Prize',           grade: 'TIER 1 · 6×',     mult: 6,  price: 0.25,  target: 150,     sold: 0, revenue: 0, paused: false, winner: null },
-  { id: 'cash50',    cat: 'Cash',        title: '£50 Cash Prize',           grade: 'TIER 1 · 6×',     mult: 6,  price: 0.50,  target: 300,     sold: 0, revenue: 0, paused: false, winner: null },
-  { id: 'cash100',   cat: 'Cash',        title: '£100 Cash Prize',          grade: 'TIER 2 · 7×',     mult: 7,  price: 0.50,  target: 700,     sold: 0, revenue: 0, paused: false, winner: null },
-  { id: 'cash250',   cat: 'Cash',        title: '£250 Cash Prize',          grade: 'TIER 2 · 7×',     mult: 7,  price: 1.00,  target: 1750,    sold: 0, revenue: 0, paused: false, winner: null },
-  { id: 'cash500',   cat: 'Cash',        title: '£500 Cash Prize',          grade: 'TIER 2 · 8×',     mult: 8,  price: 2.00,  target: 4000,    sold: 0, revenue: 0, paused: false, winner: null },
   { id: 'cash1000',  cat: 'Cash',        title: '£1,000 Cash Prize',        grade: 'TIER 3 · 8×',     mult: 8,  price: 2.00,  target: 8000,    sold: 0, revenue: 0, paused: false, winner: null },
   { id: 'cash2500',  cat: 'Cash',        title: '£2,500 Cash Prize',        grade: 'TIER 3 · 9×',     mult: 9,  price: 5.00,  target: 22500,   sold: 0, revenue: 0, paused: false, winner: null },
   { id: 'cash5000',  cat: 'Cash',        title: '£5,000 Cash Prize',        grade: 'TIER 3 · 9×',     mult: 9,  price: 5.00,  target: 45000,   sold: 0, revenue: 0, paused: false, winner: null },
