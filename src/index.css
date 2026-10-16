@@ -635,9 +635,26 @@
 .slot3d { box-shadow: inset 0 5px 9px rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.12); }
 .disc3d { box-shadow: inset 0 -5px 7px rgba(0,0,0,.4), inset 0 5px 7px rgba(255,255,255,.5), 0 7px 9px rgba(0,0,0,.45); }
 
-.luxe-dealer-medallion { border-radius: 9999px; padding: 3px; background: conic-gradient(from 210deg, #f6e2a0, #8a6a1c, #d4af37, #f6e2a0); box-shadow: 0 10px 28px rgba(0,0,0,.65), 0 0 22px rgba(212,175,55,.3); animation: dealerBreathe 4.2s ease-in-out infinite; }
-.luxe-dealer-medallion img { display: block; }
-.luxe-dealer-alive { box-shadow: 0 10px 28px rgba(0,0,0,.65), 0 0 34px rgba(255,214,110,.75); }
+/* Idle movement stays independent of state transforms. */
+.luxe-dealer-medallion { position: relative; border-radius: 9999px; padding: 3px; background: conic-gradient(from 210deg, #f6e2a0, #8a6a1c, #d4af37, #f6e2a0); box-shadow: 0 10px 28px rgba(0,0,0,.65), 0 0 22px rgba(212,175,55,.3); }
+.luxe-dealer-medallion img { display: block; animation: dealerIdle 4.2s ease-in-out infinite; }
+.luxe-dealer-float { position: relative; animation: dealerIdle 4.2s ease-in-out infinite; }
 .luxe-dealer-deal { animation: dealerDealFlick .7s ease-out 1; }
-@keyframes dealerBreathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.025); } }
-@keyframes dealerDealFlick { 0% { transform: rotate(0deg) translateY(0); } 30% { transform: rotate(-7deg) translateY(-6px); } 65% { transform: rotate(3deg); } 100% { transform: rotate(0deg) translateY(0); } }
+@keyframes dealerDealFlick { 0% { transform: rotate(0deg); } 15% { transform: rotate(-5deg); } 30% { transform: rotate(4deg) translateY(-4px); } 45% { transform: rotate(-8deg) translateY(-8px); } 65% { transform: rotate(3deg); } 100% { transform: rotate(0deg) translateY(0); } }
+.luxe-dealer-ring { position: absolute; inset: -5px; border-radius: 9999px; pointer-events: none; background: conic-gradient(from 0deg, transparent 0 42%, rgba(246,226,160,.95) 50%, transparent 58% 100%); animation: dealerSpin 4.5s linear infinite; -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px)); }
+.luxe-dealer-alive { transform: rotate(2.5deg); box-shadow: 0 10px 28px rgba(0,0,0,.65), 0 0 36px rgba(255,214,110,.85); }
+.luxe-dealer-win { animation: dealerWin .9s ease-out 1; }
+.luxe-dealer-lose { animation: dealerLose 1.5s ease-out 1; filter: saturate(.55); }
+.luxe-dealer-cardfly { position: absolute; left: 50%; top: 72%; width: 26px; height: 36px; margin-left: -13px; background: linear-gradient(160deg, #fffdf7, #efe9d8); border: 1px solid #d4af37; border-radius: 4px; box-shadow: 0 5px 12px rgba(0,0,0,.6); animation: dealerCardFly .95s cubic-bezier(.3,.7,.4,1) forwards; }
+.luxe-dealer-cardfly::after { content: ""; position: absolute; inset: 5px 7px; border: 1px solid rgba(212,175,55,.5); border-radius: 2px; }
+.luxe-dealer-cardfly-r { animation-name: dealerCardFlyR; animation-delay: .16s; }
+@keyframes dealerIdle { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-3px) scale(1.02); } }
+@keyframes dealerSpin { to { transform: rotate(360deg); } }
+@keyframes dealerWin { 0% { transform: scale(1); } 35% { transform: scale(1.14) rotate(-3deg); } 70% { transform: scale(1.05) rotate(2deg); } 100% { transform: scale(1); } }
+@keyframes dealerLose { 0%,100% { transform: translateY(0); } 40% { transform: translateY(7px) rotate(-1.5deg); } }
+@keyframes dealerCardFly { 0% { opacity: 0; transform: translate(0,0) rotate(0deg) scale(.55); } 12% { opacity: 1; transform: translate(-6px,26px) rotate(-8deg) scale(.8); } 55% { opacity: 1; transform: translate(-34px,150px) rotate(-20deg) scale(.95); } 100% { opacity: 0; transform: translate(-52px,248px) rotate(-32deg) scale(1); } }
+@keyframes dealerCardFlyR { 0% { opacity: 0; transform: translate(0,0) rotate(0deg) scale(.55); } 12% { opacity: 1; transform: translate(6px,26px) rotate(8deg) scale(.8); } 55% { opacity: 1; transform: translate(34px,150px) rotate(20deg) scale(.95); } 100% { opacity: 0; transform: translate(52px,248px) rotate(32deg) scale(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .luxe-dealer-medallion, .luxe-dealer-medallion img, .luxe-dealer-float, .luxe-dealer-ring { animation: none; }
+  .luxe-dealer-cardfly { display: none; }
+}
