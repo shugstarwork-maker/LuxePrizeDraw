@@ -911,3 +911,16 @@
   .poker-playing-page .poker-action-dock button,.poker-playing-page .poker-deal-dock { touch-action:manipulation; }
   .poker-playing-page .poker-action-dock input { min-height:1.5rem; }
 }
+
+/* Salon selection shares the actual playing table imagery and material palette. */
+.salon-selection { background:radial-gradient(ellipse at top,#302007,#050403 65%); }
+.salon-selection :is(h2,h3) { font-family:Georgia,'Times New Roman',serif; color:#ffe09a; text-shadow:0 2px #704b13; }
+.salon-selection > div > header { flex-wrap:wrap; gap:.5rem; background:linear-gradient(120deg,#171006,#050403); border-color:#b79a54; }
+.salon-table-preview { display:block; min-height:23rem; background:#080603; border-color:#c5a35b; box-shadow:inset 0 1px #fff0ae44,0 12px 30px #0008; }
+.salon-table-preview__image { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center; }
+.salon-table-preview__shade { position:absolute; inset:0; background:linear-gradient(transparent 15%,#05040388 40%,#050403f5 85%); }
+.salon-table-preview__content { position:relative; display:block; padding:1.25rem; padding-top:7rem; }
+.salon-table-preview__content > span:first-child { width:2.5rem; height:2.5rem; border:1px solid #ffe09a; border-radius:50%; background:linear-gradient(#fff0ae,#bd861c); }
+.salon-table-preview__content > p { color:#f0dfbb; }
+.salon-table-preview__action { min-height:2.75rem; align-items:center; background:linear-gradient(#fff0ae,#e4ae31); border:1px solid #ffe09a; box-shadow:0 3px #714914; color:#160e02; }
+.salon-table-preview:focus-visible { outline:3px solid #fff0ae; outline-offset:3px; }
