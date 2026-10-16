@@ -13,5 +13,6 @@ test('holiday cards use full-bleed destination photos and retain disclosures', (
   assert.match(html, /Valuation pending/);
   const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
   assert.match(css, /holiday-card-photo \{ height:100%; \}/);
+  assert.match(css, /holiday-card-shade \{ background:none/);
   assert.doesNotMatch(css, /coverflow-holiday > img \{ height:12rem/);
 });
