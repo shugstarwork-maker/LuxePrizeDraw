@@ -2,11 +2,14 @@ import { LaunchCatalogue } from "./LaunchShowcase";
 import React, { useEffect, useState } from "react";
 
 export type LaunchDraw = { id: string; cat: string; title: string; grade: string; price: number; target: number; paused: boolean };
+type Readiness = { blockers: string[] };
 type State = { draws: LaunchDraw[]; proofNotes: { proof_key: string; reviewed: boolean; note: string }[] };
 const proofKeys = ["officialRules", "prizeFunding", "fundSafeguards", "paymentControls", "counselSignoff"];
 export { LaunchDrawCard } from "./LaunchShowcase";
 
 export function LaunchBuildPage() {
+  const [readiness, setReadiness] = useState<Readiness | null>(null);
+  const [readinessError, setReadinessError] = useState(false);
   const [draws, setDraws] = useState<LaunchDraw[]>([]);
   const [message, setMessage] = useState("Loading catalogue…");
   const [token, setToken] = useState("");
@@ -17,6 +20,10 @@ export function LaunchBuildPage() {
   const [reviewed, setReviewed] = useState(false);
   useEffect(() => {
     const controller = new AbortController();
+    fetch("/api/launch-build?action=readiness", { signal: controller.signal }).then(async response => {
+      if (!response.ok) throw new Error();
+      setReadiness(await response.json());
+    }).catch(() => { if (!controller.signal.aborted) setReadinessError(true); });
     fetch("/api/launch-build?action=draws", { signal: controller.signal }).then(async response => {
       if (!response.ok) throw new Error();
       const data = await response.json();
@@ -43,9 +50,14 @@ export function LaunchBuildPage() {
   };
   return <main className="launch-build"><div className="launch-wrap">
     <a href="/" className="text-sm text-amber-200 underline">Back to home</a>
-    <header className="launch-header"><p className="launch-kicker">Luxe Prize Draws</p><h1>Launch catalogue</h1><p className="launch-meta">Cash draws // Luxury holidays // Experiences</p></header>
+    <header className="launch-header"><p className="launch-kicker">Luxe Prize Draws</p><h1>Launch catalogue</h1><p className="mt-4 text-xl font-bold text-amber-200">Approval pending</p><p className="launch-meta">Cash draws // Luxury holidays // Experiences</p></header>
     <p className="mt-4 rounded-xl border border-amber-200/30 bg-amber-300/10 p-4 text-sm text-amber-100">Pre-launch proposals from the uploaded build. No entries, payments or prize entitlements are created. Prices, grades and targets require reconciliation with approved rules; they do not replace the existing economics model. Proposed per-person limit: 10 per draw.</p>
     <p role="status" className="my-5 text-sm text-amber-100">{message}</p>
+    <section aria-labelledby="launch-readiness" className="my-6 rounded-xl border border-amber-200/30 p-4">
+      <h2 id="launch-readiness" className="text-xl font-bold">Launch readiness — approval pending</h2>
+      <p className="mt-2 text-sm">Payments, entry issuance and winner selection are blocked. Review notes and configured credentials do not grant approval.</p>
+      {readiness ? <ul className="mt-3 list-disc space-y-2 pl-5 text-sm">{readiness.blockers.map(blocker => <li key={blocker}>{blocker}</li>)}</ul> : <p className="mt-2 text-sm">{readinessError ? "Readiness checklist unavailable. Launch remains blocked." : "Loading readiness checklist…"}</p>}
+    </section>
     <LaunchCatalogue draws={draws} />
     <section className="mt-10 rounded-2xl border border-white/15 bg-black/40 p-6">
       <h2 className="text-2xl font-black">Protected review controls</h2>
