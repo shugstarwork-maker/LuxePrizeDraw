@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { GET, POST, launchConfig, publicDraw, SEED_DRAWS } from '../api/launch-build';
-import { LaunchDrawCard } from '../src/components/LaunchBuildPage';
+import { LaunchBuildPage, LaunchDrawCard } from '../src/components/LaunchBuildPage';
 
 const request = (action: string, body: unknown = {}, token = '') => new Request(`https://example.test/api/launch-build?action=${encodeURIComponent(action)}`, {
   method: 'POST', headers: { authorization: token ? `Bearer ${token}` : '' }, body: JSON.stringify(body),
@@ -79,4 +79,49 @@ test('public cards retain the proposal disclosure and never advertise active che
   assert.match(html, /Verified sales unavailable/);
   assert.match(html, /<button[^>]*disabled/);
   assert.doesNotMatch(html, /<form/);
+});
+
+test('readiness explicitly reports approval pending without promising operational integrations', async () => {
+  const response = await GET(new Request('https://example.test/api/launch-build?action=readiness'));
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get('cache-control'), 'no-store');
+  const readiness = await response.json();
+  assert.equal(readiness.approvalStatus, 'pending');
+  assert.equal(readiness.approvalLabel, 'Approval pending');
+  assert.equal(readiness.launchReady, false);
+  assert.equal(readiness.capabilities.checkout, 'blocked');
+  assert.equal(readiness.capabilities.winnerSelection, 'blocked');
+  assert.ok(readiness.blockers.length >= 7);
+  assert.equal(launchConfig().approvalLabel, 'Approval pending');
+});
+
+test('checkout rehearsal is protected, uses integer pennies and never creates entries or payments', async () => {
+  const previous = process.env.LAUNCH_BUILD_ADMIN_TOKEN;
+  process.env.LAUNCH_BUILD_ADMIN_TOKEN = 'rehearsal-test-token';
+  try {
+    assert.equal((await POST(request('admin/checkout-rehearsal', { drawId: 'cash10', qty: 2 }))).status, 401);
+    for (const qty of [0, 11, 1.5, '2', null]) {
+      assert.equal((await POST(request('admin/checkout-rehearsal', { drawId: 'cash10', qty }, 'rehearsal-test-token'))).status, 400);
+    }
+    assert.equal((await POST(request('admin/checkout-rehearsal', { drawId: 'unknown', qty: 1 }, 'rehearsal-test-token'))).status, 404);
+    const response = await POST(request('admin/checkout-rehearsal', { drawId: 'cash10', qty: 3 }, 'rehearsal-test-token'));
+    assert.equal(response.status, 200);
+    const quote = await response.json();
+    assert.equal(quote.totalAmountPence, 30);
+    assert.equal(quote.createsEntry, false);
+    assert.equal(quote.createsPayment, false);
+    assert.equal(quote.approvalStatus, 'pending');
+    assert.equal(quote.launchReady, false);
+    assert.equal((await POST(request('checkout', { drawId: 'cash10', qty: 3 }))).status, 423);
+  } finally {
+    if (previous === undefined) delete process.env.LAUNCH_BUILD_ADMIN_TOKEN;
+    else process.env.LAUNCH_BUILD_ADMIN_TOKEN = previous;
+  }
+});
+
+
+test('launch review page prominently states approval pending before any network request', () => {
+  const html = renderToStaticMarkup(createElement(LaunchBuildPage));
+  assert.match(html, /Approval pending/);
+  assert.match(html, /Payments, entry issuance and winner selection are blocked/);
 });

@@ -36,11 +36,50 @@ export function launchConfig() {
     counselSignoff: Boolean(process.env.LEGAL_REVIEW_APPROVAL_REFERENCE),
   };
   return {
-    mode: "pre-launch", launchReady: false, paidEntriesEnabled: false, prizeIssuanceEnabled: false,
+    mode: "pre-launch", approvalStatus: "pending", approvalLabel: "Approval pending", launchReady: false, paidEntriesEnabled: false, prizeIssuanceEnabled: false,
     maxPerDraw: MAX_PER_DRAW, storageConfigured: Boolean(process.env.LAUNCH_BUILD_DATABASE_URL),
     proofs: PROOF_KEYS.map(key => ({ key, ok: proofs[key] })),
-    message: "Proposed catalogue only. No entry, payment or prize entitlement is created. Proof notes cannot enable launch.",
+    message: "Approval pending. Proposed catalogue only. No entry, payment or prize entitlement is created. Proof notes cannot enable launch.",
   };
+}
+
+// Evidence presence is not approval or proof of an operational provider integration.
+export function launchReadiness() {
+  const config = launchConfig();
+  return {
+    approvalStatus: "pending", approvalLabel: "Approval pending", launchReady: false,
+    capabilities: {
+      catalogue: "available", reviewControls: config.storageConfigured ? "requires_database_verification" : "not_configured",
+      checkout: "blocked", postalEntryIssuance: "blocked", selfExclusion: "requires_verified_account_integration",
+      paymentWebhook: "requires_entry_ledger_integration", winnerSelection: "blocked",
+    },
+    evidence: config.proofs,
+    blockers: [
+      "Formal jurisdiction-specific legal and operational approval is pending.",
+      "Verify identity, age, jurisdiction, consent and self-exclusion before accepting entries.",
+      "Implement and verify transactional entry reservations, per-person caps and expiry.",
+      "Verify provider-approved entry payments, signed webhooks, refunds and reconciliation against the entry ledger.",
+      "Reconcile catalogue economics and skill challenges with approved official rules.",
+      "Verify postal eligibility and audited winner selection against the same entry ledger.",
+      "Apply and verify database migrations, backups and separate preview/production configuration.",
+    ],
+  };
+}
+
+// Admin-only rehearsal: no customer data, Stripe call, payment or ticket is created.
+export function rehearseCheckout(body: Record<string, unknown>) {
+  const seed = SEED_DRAWS.find(draw => draw.id === body.drawId);
+  if (!seed) return { status: 404, body: { error: "no_draw" } };
+  if (typeof body.qty !== "number" || !Number.isInteger(body.qty) || body.qty < 1 || body.qty > MAX_PER_DRAW)
+    return { status: 400, body: { error: "bad_qty" } };
+  const unitAmountPence = Math.round(seed.price * 100);
+  return { status: 200, body: {
+    approvalStatus: "pending", approvalLabel: "Approval pending", rehearsal: true,
+    drawId: seed.id, qty: body.qty, currency: "gbp", unitAmountPence,
+    totalAmountPence: unitAmountPence * body.qty, maxPerDraw: MAX_PER_DRAW,
+    createsEntry: false, createsPayment: false, launchReady: false,
+    message: "Quote rehearsal only. No eligibility check, reservation, entry or payment has occurred.",
+  } };
 }
 
 export function publicDraw(seed: (typeof SEED_DRAWS)[number], paused = false) {
@@ -70,6 +109,7 @@ function database() {
 export async function GET(request: Request) {
   const action = new URL(request.url).searchParams.get("action") || "config";
   if (action === "config") return json(launchConfig());
+  if (action === "readiness") return json(launchReadiness());
   if (action !== "draws" && action !== "admin/state") return json({ error: "no_route" }, 404);
   if (action === "admin/state" && !authorized(request)) return json({ error: "unauthorized" }, 401);
   // The proposed catalogue works before provisioning, but a configured store failure
@@ -98,7 +138,7 @@ export async function POST(request: Request) {
   if (action === "admin/postal") return json({ error: "use_postal_intake", path: "/postal-intake", message: "Use the existing protected postal intake. Recording a slip does not issue an entry." }, 409);
   const match = action.match(/^admin\/draws\/([a-z0-9]+)\/(pause|resume|draw)$/);
   if (match?.[2] === "draw") return json({ error: "prize_issuance_locked" }, 423);
-  if (action !== "admin/proofs" && !match) return json({ error: "no_route" }, 404);
+  if (action !== "admin/proofs" && action !== "admin/checkout-rehearsal" && !match) return json({ error: "no_route" }, 404);
   let body: Record<string, unknown>;
   try {
     const raw = await request.text();
@@ -107,6 +147,10 @@ export async function POST(request: Request) {
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("Invalid object");
     body = parsed;
   } catch { return json({ error: "invalid_json" }, 400); }
+  if (action === "admin/checkout-rehearsal") {
+    const result = rehearseCheckout(body);
+    return json(result.body, result.status);
+  }
   if (match && !SEED_DRAWS.some(draw => draw.id === match[1])) return json({ error: "no_draw" }, 404);
   if (action === "admin/proofs" && (!PROOF_KEYS.includes(body.key as typeof PROOF_KEYS[number]) || typeof body.ok !== "boolean" || (body.note !== undefined && typeof body.note !== "string"))) return json({ error: "invalid_proof" }, 400);
   try {

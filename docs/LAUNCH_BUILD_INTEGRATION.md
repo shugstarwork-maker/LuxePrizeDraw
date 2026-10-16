@@ -56,3 +56,36 @@ Local tests cover the catalogue, secret-free preview data, missing-store behavio
 authorization, input validation, locked money/entry routes, and rendered disclosures.
 Database-backed writes require the provisioning and smoke check above. No production
 configuration, database or live payment provider is modified by this integration.
+
+## Approval-pending launch preparation
+
+The public page prominently states **Approval pending**. The new read-only
+`GET /api/launch-build?action=readiness` reports outstanding implementation and
+operational blockers, not just whether environment variables exist. Even when all
+evidence signals are present, configuration and readiness remain locked. No checkbox
+or environment switch in this integration can activate entries or payments.
+
+A protected `POST ?action=admin/checkout-rehearsal` accepts `{drawId, qty}` and
+returns an integer-penny GBP quote with explicit `createsEntry: false` and
+`createsPayment: false`. Use the dedicated admin bearer token; never put it in a
+URL. This is an arithmetic rehearsal, not Stripe test mode, an eligibility check,
+a durable reservation, or evidence that checkout is production-ready. It performs
+no external calls or storage writes and requires no customer information.
+
+### Remaining launch work — not implemented by this preparation
+
+- Reconcile the new uploaded catalogue and challenge answers with approved rules;
+  the existing canonical catalogue is retained rather than silently conflicting
+  with the open ticket-target catalogue PR.
+- Build transactional reservations and verified-account per-person caps, including
+  pending payments, expiry, concurrent requests, refunds and chargebacks.
+- Integrate entry-specific Stripe sessions and signed, replay-safe webhooks with
+  that ledger. Existing membership payments are not draw-entry payments.
+- Integrate verified self-exclusion, age, identity, geography and consent controls.
+- Unify approved postal entries with the same eligibility and ticket ledger.
+- Implement and independently verify auditable winner selection and prize issuance.
+- Provision the database using the existing migration, verify atomic review/audit
+  writes, separate environments, backups, provider acceptance and formal approval.
+
+This PR is launch preparation, **not a completed live backend**. Do not announce
+entry availability or accept money based on the readiness page or rehearsal quote.
