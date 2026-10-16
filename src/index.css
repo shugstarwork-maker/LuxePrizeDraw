@@ -614,3 +614,23 @@
 .poker-win-flash { animation: goldPulse 0.9s ease-in-out 2; }
 .poker-chip-fly { position: absolute; animation: chipFly 0.8s ease-out forwards; }
 .poker-level-flash { animation: levelFlash 1.2s ease-in-out 1; }
+
+@keyframes turnRing { 0%,100% { box-shadow: 0 0 0 0 rgba(251,191,36,.55); } 50% { box-shadow: 0 0 0 6px rgba(251,191,36,0); } }
+.poker-turn-ring { animation: turnRing 1.6s ease-out infinite; }
+@keyframes dealerSway { 0%,100% { transform: rotate(-1.4deg); } 50% { transform: rotate(1.4deg); } }
+@keyframes dealerBlink { 0%,93%,100% { transform: scaleY(1); } 96% { transform: scaleY(0.08); } }
+@keyframes dealerTalk { 0%,100% { transform: scaleY(0.35); } 50% { transform: scaleY(1); } }
+@keyframes dealerDeal { 0% { transform: rotate(0deg); } 30% { transform: rotate(-40deg) translateX(8px); } 65% { transform: rotate(8deg); } 100% { transform: rotate(0deg); } }
+@keyframes dealerBubble { 0% { opacity: 0; transform: translateY(4px); } 12%,88% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; } }
+.luxe-dealer-eye { animation: dealerBlink 4.8s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.luxe-dealer-mouth-talk { animation: dealerTalk .55s ease-in-out infinite; }
+.luxe-dealer-arm-deal { animation: dealerDeal 1.5s ease-in-out 1; }
+.luxe-dealer-bubble { animation: dealerBubble 4s ease-in-out infinite; }
+/* --- 3D challenge boards --- */
+.board3d-scene { perspective: 900px; }
+.board3d-tilt { transform: rotateX(36deg); transform-style: preserve-3d; transition: transform .45s ease; }
+.board3d-tilt:hover { transform: rotateX(28deg); }
+.board3d-frame { box-shadow: 0 34px 54px rgba(0,0,0,.6), 0 10px 18px rgba(0,0,0,.45); }
+.piece3d { transform: translateZ(16px); text-shadow: 0 7px 5px rgba(0,0,0,.5); }
+.slot3d { box-shadow: inset 0 5px 9px rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.12); }
+.disc3d { box-shadow: inset 0 -5px 7px rgba(0,0,0,.4), inset 0 5px 7px rgba(255,255,255,.5), 0 7px 9px rgba(0,0,0,.45); }
