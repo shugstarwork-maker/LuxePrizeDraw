@@ -899,3 +899,15 @@
   .poker-playing-page:fullscreen .poker-playing-wrap { display:none; }
   .poker-playing-page:fullscreen .poker-landscape-gate { display:flex; }
 }
+
+/* Playability pass: isolate live cards from seat badges and preserve turn feedback. */
+@media (orientation:landscape) and (max-height:700px) {
+  .poker-playing-page .poker-live-seats > [data-seat-index="5"] { left:78% !important; top:76% !important; }
+  .poker-playing-page .poker-live-hand { top:62%; left:50%; pointer-events:none; }
+  .poker-playing-page .poker-live-host { top:16%; pointer-events:none; }
+  .poker-playing-page .poker-live-board { top:39%; width:auto; pointer-events:none; }
+  .poker-playing-page .poker-round-status { display:block; position:fixed; z-index:125; bottom:4.25rem; left:50%; transform:translateX(-50%); max-width:62%; margin:0; padding:.3rem .6rem; border-radius:.5rem; background:#080603eb; color:#ffe6a0; font-size:.7rem; line-height:1.3; pointer-events:none; }
+  .poker-playing-page .poker-table-artwork__state { max-width:24%; bottom:.5rem; pointer-events:none; }
+  .poker-playing-page .poker-action-dock button,.poker-playing-page .poker-deal-dock { touch-action:manipulation; }
+  .poker-playing-page .poker-action-dock input { min-height:1.5rem; }
+}
