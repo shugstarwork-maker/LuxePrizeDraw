@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 import dubaiSkylineNight from "../assets/images/dubai_skyline_night_1787855491978.jpg";
 
-export interface DubaiGalleryPhoto {
+export interface ExperienceGalleryPhoto {
   id: string;
   title: string;
   subtitle: string;
@@ -16,79 +16,79 @@ export interface DubaiGalleryPhoto {
   tag: string;
 }
 
-export const DUBAI_GALLERY_ITEMS: DubaiGalleryPhoto[] = [
+export const EXPERIENCE_GALLERY_ITEMS: ExperienceGalleryPhoto[] = [
   {
-    id: "dubai-1",
-    title: "Burj Khalifa & Downtown Skyline",
-    subtitle: "The world's epicenter of modern commerce and luxury living",
+    id: "city-1",
+    title: "City Lights Skyline",
+    subtitle: "A glittering downtown skyline after dark",
     category: "Skyline",
-    location: "Downtown Dubai & Financial Centre",
+    location: "City Financial District",
     imageUrl: dubaiSkylineNight,
-    description: "Towering 828 meters over the Arabian Gulf, surrounded by the Burj Lake fountain choreography, Michelin-star dining, and global financial headquarters.",
-    tag: "Iconic Landmark",
+    description: "Towering lights and evening energy — an aspirational glimpse of the city lifestyle that frames the Luxe experience. Preview imagery only.",
+    tag: "Iconic Views",
   },
   {
-    id: "dubai-2",
-    title: "Dubai Marina & JBR Waterfront",
-    subtitle: "Yacht marinas, waterfront penthouses & golden sunset promenades",
+    id: "city-2",
+    title: "London & The Thames",
+    subtitle: "Historic landmarks, five-star Mayfair & West End nights",
     category: "Lifestyle",
-    location: "Dubai Marina & Bluewaters Island",
-    imageUrl: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1200&q=85",
-    description: "Over 3 kilometers of man-made waterways lined with superyachts, alfresco cafes, and beachfront residences bathed in evening amber glow.",
-    tag: "Marina Living",
+    location: "London, United Kingdom",
+    imageUrl: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=1200&q=85",
+    description: "River views, royal parks, Michelin dining and private members clubs in the heart of the UK capital.",
+    tag: "Capital Living",
   },
   {
-    id: "dubai-3",
-    title: "Museum of the Future",
-    subtitle: "The architectural marvel crowned 'the most beautiful building on Earth'",
+    id: "city-3",
+    title: "Paris Landmark Escape",
+    subtitle: "Architecture, art and haute cuisine",
     category: "Architecture",
-    location: "Sheikh Zayed Road",
-    imageUrl: "https://images.unsplash.com/photo-1580674684081-7617fbf3d745?auto=format&fit=crop&w=1200&q=85",
-    description: "A torus-shaped monument adorned with Arabic calligraphy poetry by HH Sheikh Mohammed bin Rashid Al Maktoum, championing global innovation.",
-    tag: "Future Tech",
+    location: "Paris, France",
+    imageUrl: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1200&q=85",
+    description: "Candlelit bistros, world-famous galleries and five-star hospitality along the Seine.",
+    tag: "Classic Luxury",
   },
   {
-    id: "dubai-4",
-    title: "DIFC & Emirates Towers Hub",
-    subtitle: "Zero-tax financial freezone connecting East and West capital flows",
+    id: "city-4",
+    title: "Monaco Riviera Harbour",
+    subtitle: "Superyachts, casinos and Grand Prix glamour",
     category: "Venture & Tech",
-    location: "Dubai International Financial Centre",
-    imageUrl: "https://images.unsplash.com/photo-1580674285054-bed31e145f59?auto=format&fit=crop&w=1200&q=85",
-    description: "Home to over 5,000 active enterprises, venture incubators, art galleries, and top tier corporate law and asset management headquarters.",
-    tag: "Global Capital",
+    location: "Monte Carlo, Monaco",
+    imageUrl: "https://images.unsplash.com/photo-1523409070585-7f2a86b4b9c7?auto=format&fit=crop&w=1200&q=85",
+    description: "The playground of the Riviera — harbour-front suites, private terraces and Mediterranean sunsets.",
+    tag: "Riviera Glamour",
   },
   {
-    id: "dubai-5",
-    title: "Palm Jumeirah Luxury Archipelago",
-    subtitle: "World-renowned private villa enclaves and 5-star beachfront resorts",
+    id: "city-5",
+    title: "Maldives Private Villas",
+    subtitle: "Over-water villas and crystal lagoons",
     category: "Lifestyle",
-    location: "Palm Jumeirah & Atlantis The Royal",
-    imageUrl: "https://images.unsplash.com/photo-1546412414-e1885259563a?auto=format&fit=crop&w=1200&q=85",
-    description: "The palm-tree-shaped archipelago offering private beaches, crystal lagoon waters, and elite private member beach clubs.",
-    tag: "Ultra Luxury",
+    location: "Baa Atoll, Maldives",
+    imageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=85",
+    description: "Barefoot luxury with private plunge pools, seaplane arrivals and world-class diving.",
+    tag: "Island Luxury",
   },
   {
-    id: "dubai-6",
-    title: "Arabian Desert Sunset Safari",
-    subtitle: "Golden dunes and serene stargazing 30 minutes from the city center",
-    category: "Lifestyle",
-    location: "Al Marmoom Desert Conservation Reserve",
-    imageUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=85",
-    description: "Rolling desert landscapes meeting clear night skies, offering private eco-glamping, falconry, and traditional Arabian hospitality.",
-    tag: "Heritage & Nature",
+    id: "city-6",
+    title: "New York Skyline Nights",
+    subtitle: "Manhattan rooftops and Broadway lights",
+    category: "Skyline",
+    location: "New York, USA",
+    imageUrl: "https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?auto=format&fit=crop&w=1200&q=85",
+    description: "The city that never sleeps — skyline suites, private shopping and skyline dining.",
+    tag: "Skyline Living",
   },
 ];
 
-export const DubaiPhotoGallery: React.FC<{ onOpenEntry?: () => void }> = ({ onOpenEntry }) => {
+export const ExperiencePhotoGallery: React.FC<{ onOpenEntry?: () => void }> = ({ onOpenEntry }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
-  const [activePhoto, setActivePhoto] = useState<DubaiGalleryPhoto | null>(null);
+  const [activePhoto, setActivePhoto] = useState<ExperienceGalleryPhoto | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
 
   const filteredPhotos = selectedCategory === "ALL"
-    ? DUBAI_GALLERY_ITEMS
-    : DUBAI_GALLERY_ITEMS.filter((p) => p.category === selectedCategory);
+    ? EXPERIENCE_GALLERY_ITEMS
+    : EXPERIENCE_GALLERY_ITEMS.filter((p) => p.category === selectedCategory);
 
-  const handleOpenLightBox = (photo: DubaiGalleryPhoto, index: number) => {
+  const handleOpenLightBox = (photo: ExperienceGalleryPhoto, index: number) => {
     setActivePhoto(photo);
     setCurrentIndex(index);
   };
@@ -106,7 +106,7 @@ export const DubaiPhotoGallery: React.FC<{ onOpenEntry?: () => void }> = ({ onOp
   };
 
   return (
-    <section id="dubai-gallery" className="py-20 sm:py-28 relative overflow-hidden bg-neutral-950/80 border-t border-white/10">
+    <section id="experience-gallery" className="py-20 sm:py-28 relative overflow-hidden bg-neutral-950/80 border-t border-white/10">
       {/* Background ambient lighting */}
       <div className="absolute top-1/2 -right-48 w-96 h-96 bg-[#D4AF37]/10 rounded-full blur-[140px] pointer-events-none -z-10" />
 
@@ -119,11 +119,11 @@ export const DubaiPhotoGallery: React.FC<{ onOpenEntry?: () => void }> = ({ onOp
           </div>
 
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-light text-white tracking-tight">
-            The Dubai <span className="font-extrabold text-[#D4AF37]">Experience Gallery</span>
+            The Luxe <span className="font-extrabold text-[#D4AF37]">Experience Gallery</span>
           </h2>
 
           <p className="text-sm sm:text-base text-white/60 font-light leading-relaxed">
-            From the glittering heights of Downtown and private yacht berths in Dubai Marina to the tax-free corridors of DIFC — glimpse the world waiting for our next winner.
+            From glittering city skylines and five-star escapes to private island villas — glimpse the experiences waiting for our next winner.
           </p>
         </div>
 
@@ -196,14 +196,14 @@ export const DubaiPhotoGallery: React.FC<{ onOpenEntry?: () => void }> = ({ onOp
         {/* Gallery Footer Note with Entry CTA */}
         <div className="text-center pt-4">
           <p className="text-xs text-white/40 mb-3">
-            Winner receives fully paid 1-year penthouse lease in Dubai Marina or Downtown + company licensing
+            Winner receives the headline £100,000 prize — Bitcoin or cash — subject to approved rules
           </p>
           <button
             onClick={onOpenEntry}
             className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/5 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-wider border border-white/15 transition-all hover:border-[#D4AF37]"
           >
             <Compass className="w-4 h-4 text-[#D4AF37]" />
-            <span>Claim Your Entry to Win Dubai Relocation</span>
+            <span>Claim Your Entry to the £100K Draw</span>
           </button>
         </div>
       </div>

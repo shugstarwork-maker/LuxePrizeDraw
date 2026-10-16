@@ -10,38 +10,38 @@ interface PackageCustomizerProps {
 }
 
 export const PackageCustomizer: React.FC<PackageCustomizerProps> = ({ onOpenEntry }) => {
-  const [selectedZone, setSelectedZone] = useState("ifza");
+  const [selectedZone, setSelectedZone] = useState("england-wales");
   const [companyName, setCompanyName] = useState("AURA GLOBAL");
   const [industry, setIndustry] = useState("Tech & AI Software");
   const [brandStyle, setBrandStyle] = useState<"luxury-gold" | "cyber-emerald" | "royal-sapphire">("luxury-gold");
-  const [selectedHotel, setSelectedHotel] = useState("atlantis-the-royal");
+  const [selectedHotel, setSelectedHotel] = useState("the-savoy");
   const [oneClickFeature, setOneClickFeature] = useState("instant-vip-booking");
   const [selectedPrizeId, setSelectedPrizeId] = useState("monthly-stipend");
 
   const hotelOptions = [
     {
-      id: "atlantis-the-royal",
-      name: "Atlantis The Royal",
-      location: "Palm Jumeirah",
-      tier: "5-Star Ultra Luxury Ocean Suite",
+      id: "the-savoy",
+      name: "The Savoy",
+      location: "Strand, London",
+      tier: "5-Star Luxury River Suite",
     },
     {
-      id: "burj-al-arab",
-      name: "Burj Al Arab Jumeirah",
-      location: "Umm Suqeim",
-      tier: "Iconic Duplex Sky Suite",
+      id: "the-balmoral",
+      name: "The Balmoral",
+      location: "Edinburgh, Scotland",
+      tier: "Iconic Castle View Suite",
     },
     {
-      id: "jumeirah-al-naseem",
-      name: "Jumeirah Al Naseem",
-      location: "Madinat Jumeirah",
-      tier: "5-Star Lagoon View Suite",
+      id: "gleneagles",
+      name: "Gleneagles Resort",
+      location: "Auchterarder, Scotland",
+      tier: "5-Star Estate Room",
     },
     {
-      id: "bulgari-resort",
-      name: "Bulgari Resort Dubai",
-      location: "Jumeirah Bay Island",
-      tier: "5-Star Private Marina Suite",
+      id: "cliveden",
+      name: "Cliveden House",
+      location: "Berkshire, England",
+      tier: "5-Star Private Garden Suite",
     },
   ];
 
@@ -87,7 +87,7 @@ export const PackageCustomizer: React.FC<PackageCustomizerProps> = ({ onOpenEntr
             <span>Interactive Prize Simulator</span>
           </div>
           <h2 className="text-3xl sm:text-5xl font-light text-white tracking-tight">
-            Design Your <span className="font-bold text-[#D4AF37]">Winning UAE Setup</span>
+            Design Your <span className="font-bold text-[#D4AF37]">Winning UK Setup</span>
           </h2>
           <p className="text-white/50 text-base sm:text-lg max-w-2xl font-light leading-relaxed">
             Mix classic founder rewards with bold wildcard tiers, then preview the luxury lifestyle and launch energy behind the prize package that fits your ambition.
@@ -185,10 +185,10 @@ export const PackageCustomizer: React.FC<PackageCustomizerProps> = ({ onOpenEntr
                 />
               </div>
 
-              {/* Freezone Jurisdiction */}
+              {/* Formation Jurisdiction */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-white/60 mb-2">
-                  Select Free Zone or Mainland Jurisdiction
+                  Select UK Formation Route
                 </label>
                 <div className="space-y-2">
                   {FREEZONES_DATA.slice(0, 3).map((zone) => (
@@ -308,7 +308,7 @@ export const PackageCustomizer: React.FC<PackageCustomizerProps> = ({ onOpenEntr
                   </div>
                   <div>
                     <p className="text-[8px] text-[#D4AF37] uppercase tracking-widest font-bold">VIP Concierge & Travel Suite</p>
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-white">14-Day 5-Star Dubai Vacation Pass</h4>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-white">14-Day 5-Star UK Vacation Pass</h4>
                   </div>
                 </div>
                 <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/40">
@@ -325,7 +325,7 @@ export const PackageCustomizer: React.FC<PackageCustomizerProps> = ({ onOpenEntr
                 <div className="p-2.5 rounded-xl bg-white/5 border border-white/10">
                   <p className="text-[8px] uppercase tracking-wider text-white/40">Duration & Flight Class</p>
                   <p className="font-bold text-white text-xs">14 Days / Business Class (2 Pax)</p>
-                  <p className="text-[8px] text-emerald-400">DXB VIP Airport Escort</p>
+                  <p className="text-[8px] text-emerald-400">LHR VIP Airport Escort</p>
                 </div>
                 <div className="p-2.5 rounded-xl bg-white/5 border border-white/10">
                   <p className="text-[8px] uppercase tracking-wider text-white/40">Chauffeur Service</p>
@@ -338,15 +338,15 @@ export const PackageCustomizer: React.FC<PackageCustomizerProps> = ({ onOpenEntr
               </div>
             </div>
 
-            {/* 2. UAE Trade License Certificate Mockup */}
+            {/* 2. UK Company Certificate Mockup */}
             <div className="p-5 rounded-2xl bg-white/5 border border-[#D4AF37]/30 shadow-2xl backdrop-blur-xl relative overflow-hidden space-y-3">
               <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
                 <div className="flex items-center gap-2.5">
                   <div className="w-7 h-7 rounded-lg bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center font-bold text-[#D4AF37] text-xs">
-                    UAE
+                    UK
                   </div>
                   <div>
-                    <p className="text-[8px] text-white/40 uppercase tracking-widest font-semibold">Dubai Free Zone Authority</p>
+                    <p className="text-[8px] text-white/40 uppercase tracking-widest font-semibold">UK Companies House</p>
                     <h4 className="text-xs font-bold uppercase tracking-wider text-white">Trade License Certificate</h4>
                   </div>
                 </div>
@@ -369,8 +369,8 @@ export const PackageCustomizer: React.FC<PackageCustomizerProps> = ({ onOpenEntr
                   <p className="font-bold text-white">{industry}</p>
                 </div>
                 <div className="p-2.5 rounded-xl bg-white/5 border border-white/10">
-                  <p className="text-[8px] uppercase tracking-wider text-white/40">Investor Visa</p>
-                  <p className="font-bold text-emerald-400">3-Year VIP Residency</p>
+                  <p className="text-[8px] uppercase tracking-wider text-white/40">Founder Relocation</p>
+                  <p className="font-bold text-emerald-400">3-Year Founder Relocation</p>
                 </div>
               </div>
             </div>
@@ -379,7 +379,7 @@ export const PackageCustomizer: React.FC<PackageCustomizerProps> = ({ onOpenEntr
             <div className={`p-5 rounded-2xl bg-gradient-to-br ${currentTheme.cardGradient} shadow-2xl text-white relative overflow-hidden h-48 flex flex-col justify-between border ${currentTheme.border}`}>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[8px] tracking-widest uppercase opacity-70">Wio Bank / Emirates NBD</p>
+                  <p className="text-[8px] tracking-widest uppercase opacity-70">UK Business Banking</p>
                   <p className="text-xs font-bold tracking-widest uppercase mt-0.5">CORPORATE TITANIUM</p>
                 </div>
                 <div className="w-8 h-6 rounded bg-amber-300/30 border border-amber-300/60 flex items-center justify-center text-[8px] font-mono font-bold">

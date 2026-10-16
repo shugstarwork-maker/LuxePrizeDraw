@@ -60,7 +60,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: "poker-league", label: "Poker League" },
     { id: "leaderboards", label: "Leaderboards" },
     { id: "prizes", label: "The £220K Package" },
-    { id: "dubai-gallery", label: "Dubai Gallery" },
+    { id: "experience-gallery", label: "Experience Gallery" },
     { id: "hall-of-fame", label: "Hall of Fame (£100K+)" },
     { id: "draw-verification", label: "Auditable Draw" },
     { id: "charity-impact", label: "Charity (25%)" },
@@ -130,7 +130,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </div>
                 <p className="text-[10px] uppercase tracking-widest text-white/40 flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-pulse"></span>
-                  £100K Cash &middot; 3-Yr Visa &middot; LLC
+                  £100K Cash &middot; 3-Yr Relocation &middot; UK Company
                 </p>
               </div>
             </div>
@@ -243,7 +243,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 text-slate-200 text-sm font-medium border border-slate-700"
                 >
                   <Sparkles className="w-4 h-4 text-amber-400" />
-                  <span>Ask AI UAE Advisor</span>
+                  <span>Ask AI Business Advisor</span>
                 </button>
 
                 <button

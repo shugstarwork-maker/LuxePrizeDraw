@@ -27,14 +27,14 @@ export const HALL_OF_FAME_WINNERS: HallOfFameWinner[] = [
     id: "hof-1",
     name: "Tariq Al-Mansoor & Sophie Chen",
     avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
-    country: "United Kingdom / UAE",
+    country: "United Kingdom",
     flag: "🇬🇧 🇦🇪",
     winningsGBP: 220000,
     drawDate: "November 2025",
     edition: "Autumn Founder Grand Draw",
-    ventureCreated: "Aethelgard AI Logistics (DIFC Innovation Hub)",
-    location: "DIFC Dubai & London",
-    storyQuote: "Winning the £220,000 package gave us the license, Dubai Marina penthouse living, and seed runway to scale to £3.2M ARR in our first 10 months.",
+    ventureCreated: "Aethelgard AI Logistics (Edinburgh Innovation Hub)",
+    location: "Edinburgh & London",
+    storyQuote: "Winning the £220,000 package gave us the license, a London penthouse, and seed runway to scale to £3.2M ARR in our first 10 months.",
     tier: "Grand Champion",
     verifiedCertId: "DET-CERT-2025-884102",
     category: "Tech & AI",
@@ -49,8 +49,8 @@ export const HALL_OF_FAME_WINNERS: HallOfFameWinner[] = [
     drawDate: "August 2025",
     edition: "Summer Solstice Venture Series",
     ventureCreated: "SilkRoad Private Client Escapes & Yacht Concierge",
-    location: "Dubai Harbour & Vancouver",
-    storyQuote: "From entering with a 10-ticket bundle to receiving a call with the verified notary deed. The 3-year investor visa changed everything for my family.",
+    location: "Scotland & Vancouver",
+    storyQuote: "From entering with a 10-ticket bundle to receiving a call with the verified notary deed. The 3-year founder relocation package changed everything for my family.",
     tier: "Centurion Icon",
     verifiedCertId: "DET-CERT-2025-773194",
     category: "Luxury Hospitality",
@@ -64,8 +64,8 @@ export const HALL_OF_FAME_WINNERS: HallOfFameWinner[] = [
     winningsGBP: 150000,
     drawDate: "May 2025",
     edition: "Spring Horizon Draw",
-    ventureCreated: "Apex Quant Algorithms (DMCC Crypto Centre)",
-    location: "DMCC JLT Dubai & Sydney",
+    ventureCreated: "Apex Quant Algorithms (London FinTech Centre)",
+    location: "Glasgow & Sydney",
     storyQuote: "The 0% corporate and personal tax advantage along with £50k liquid cash paid out in 48 hours was the ultimate catalyst for my fund.",
     tier: "Centurion Icon",
     verifiedCertId: "DET-CERT-2025-612093",
@@ -80,9 +80,9 @@ export const HALL_OF_FAME_WINNERS: HallOfFameWinner[] = [
     winningsGBP: 120000,
     drawDate: "February 2025",
     edition: "Winter Pioneer Gala",
-    ventureCreated: "Solaris Water Tech & Desert Agriscience",
-    location: "Dubai Silicon Oasis",
-    storyQuote: "We combined the relocation grant and business license to deploy clean desalination sensors across GCC farms.",
+    ventureCreated: "Solaris Water Tech & Coastal Agriscience",
+    location: "Edinburgh Tech Hub",
+    storyQuote: "We combined the relocation grant and business license to deploy clean-water sensors across UK coastal farms.",
     tier: "Master Builder",
     verifiedCertId: "DET-CERT-2025-492104",
     category: "CleanTech",
@@ -97,7 +97,7 @@ export const HALL_OF_FAME_WINNERS: HallOfFameWinner[] = [
     drawDate: "December 2024",
     edition: "Year-End Platinum Draw",
     ventureCreated: "Iberia Luxe D2C Fashion & Arabian Scents",
-    location: "Dubai Design District (d3)",
+    location: "London Design District",
     storyQuote: "Moving into our sponsored Marina apartment on day one made the transition seamless. Forever grateful for this life-altering platform.",
     tier: "Master Builder",
     verifiedCertId: "DET-CERT-2024-910482",
@@ -134,7 +134,7 @@ export const HallOfFameSection: React.FC<{ onOpenEntry?: () => void }> = ({ onOp
           </h2>
 
           <p className="text-sm sm:text-base text-white/60 font-light leading-relaxed">
-            Honouring extraordinary winners who claimed over <strong className="text-white font-medium">&pound;100,000+</strong> in dream business relocation packages, tax-free cash, and golden residency in Dubai.
+            Honouring extraordinary winners who claimed over <strong className="text-white font-medium">&pound;100,000+</strong> in dream business relocation packages, tax-free cash, and relocation to the UK.
           </p>
 
           {/* Quick Stat Pill for Mobile & Desktop */}
@@ -146,7 +146,7 @@ export const HallOfFameSection: React.FC<{ onOpenEntry?: () => void }> = ({ onOp
             </div>
             <div className="px-4 py-2 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 backdrop-blur-md flex items-center gap-2 text-xs text-emerald-400">
               <ShieldCheck className="w-4 h-4" />
-              <span>100% DET Notary Verified</span>
+              <span>100% Independent Notary Verified</span>
             </div>
           </div>
         </div>
@@ -233,7 +233,7 @@ export const HallOfFameSection: React.FC<{ onOpenEntry?: () => void }> = ({ onOp
                   {/* Venture Built */}
                   <div className="space-y-1">
                     <span className="text-[10px] uppercase tracking-widest text-[#D4AF37] font-bold block">
-                      Venture Launched in Dubai:
+                      Venture Launched in the UK:
                     </span>
                     <p className="text-xs font-semibold text-white/90">
                       {winner.ventureCreated}
@@ -273,7 +273,7 @@ export const HallOfFameSection: React.FC<{ onOpenEntry?: () => void }> = ({ onOp
               Will You Be The Next <span className="font-extrabold text-[#D4AF37]">&pound;100K+ Legend?</span>
             </h3>
             <p className="text-xs sm:text-sm text-white/60 max-w-xl font-light">
-              Secure your verified entry now to enter the official live draw witnessed by Dubai government notaries.
+              Secure your verified entry now to enter the official live draw witnessed by independent notaries.
             </p>
           </div>
 
@@ -325,13 +325,13 @@ export const HallOfFameSection: React.FC<{ onOpenEntry?: () => void }> = ({ onOp
                 </span>
               </div>
               <div>
-                <span className="text-[10px] uppercase text-white/40 block font-bold">Residency Issued</span>
+                <span className="text-[10px] uppercase text-white/40 block font-bold">Relocation Confirmed</span>
                 <span className="text-xl font-extrabold text-emerald-400 font-mono">3-Year Investor</span>
               </div>
             </div>
 
             <div className="space-y-2">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-white">The Dubai Transformation Story</h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-white">The Luxe Transformation Story</h4>
               <p className="text-xs text-white/70 leading-relaxed">
                 &ldquo;{activeWinnerModal.storyQuote}&rdquo;
               </p>

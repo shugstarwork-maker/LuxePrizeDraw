@@ -19,7 +19,7 @@ export const DrawVerificationSection: React.FC<DrawVerificationSectionProps> = (
   const [activeTab, setActiveTab] = useState<"computer" | "physical">("computer");
 
   // Interactive Verification Playground state
-  const [inputTicketId, setInputTicketId] = useState(userTickets[0]?.ticketId || "UAE-782914-GLB");
+  const [inputTicketId, setInputTicketId] = useState(userTickets[0]?.ticketId || "LPD-782914-GLB");
   const [nonce, setNonce] = useState(1);
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationResult, setVerificationResult] = useState<any>(null);
@@ -31,7 +31,7 @@ export const DrawVerificationSection: React.FC<DrawVerificationSectionProps> = (
     finalSeedHash: null as string | null,
     settledAt: null as string | null,
     serverSeedHash: null as string | null,
-    publicClientSeed: "DUBAI-2026-GRAND-DRAW-COMMITTED",
+    publicClientSeed: "LPD-2026-GRAND-DRAW-COMMITTED",
   });
 
   useEffect(() => {
@@ -55,9 +55,9 @@ export const DrawVerificationSection: React.FC<DrawVerificationSectionProps> = (
     merkleRoot: "7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
     physicalDrumModel: "Smartplay Saturn Gravity-Feed Air-Mix Blower v4.8",
     ballWeightTolerance: "3.000g ± 0.005g (ISO-17025 Certified)",
-    auditorOrganization: "Dubai Department of Economy and Tourism (DET) & Notary Public Bureau",
+    auditorOrganization: "Independent UK Audit Firm & Notary Public",
     certNumber: "DET-PROMO-REG-2026-98124",
-    lastCalibrated: "2026-08-15 (Certificate #CAL-DXB-882)",
+    lastCalibrated: "2026-08-15 (Certificate #CAL-LHR-882)",
   };
 
   const handleRunVerification = async () => {
@@ -217,7 +217,7 @@ export const DrawVerificationSection: React.FC<DrawVerificationSectionProps> = (
                     type="text"
                     value={inputTicketId}
                     onChange={(e) => setInputTicketId(e.target.value)}
-                    placeholder="UAE-782914-GLB"
+                    placeholder="LPD-782914-GLB"
                     className="w-full bg-white/5 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-[#D4AF37]"
                   />
                   {userTickets.length > 0 && (
@@ -342,7 +342,7 @@ export const DrawVerificationSection: React.FC<DrawVerificationSectionProps> = (
                     Smartplay Saturn <span className="font-bold text-[#D4AF37]">Air-Mix Blower Drum</span>
                   </h3>
                   <p className="text-xs sm:text-sm text-white/60 leading-relaxed font-light">
-                    For participants who prefer tangible physical drawing instruments, our drawing facility deploys an internationally certified mechanical gravity-feed air-mix blower, strictly supervised on-site by legal notaries and the Dubai Department of Economy and Tourism (DET).
+                    For participants who prefer tangible physical drawing instruments, our drawing facility deploys an internationally certified mechanical gravity-feed air-mix blower, strictly supervised on-site by independent legal notaries and audit representatives.
                   </p>
                 </div>
 
@@ -441,7 +441,7 @@ export const DrawVerificationSection: React.FC<DrawVerificationSectionProps> = (
                         <div className="w-16 h-16 rounded-full bg-[#D4AF37] text-black font-black text-xl flex items-center justify-center shadow-2xl my-1 border-2 border-white">
                           #{drawnBallNumber}
                         </div>
-                        <span className="text-[8px] text-white/70 font-mono">RFID Tag: DXB-2026-{drawnBallNumber}</span>
+                        <span className="text-[8px] text-white/70 font-mono">RFID Tag: LHR-2026-{drawnBallNumber}</span>
                       </div>
                     )}
                   </div>

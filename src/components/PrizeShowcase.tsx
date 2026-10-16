@@ -61,7 +61,7 @@ export const PrizeShowcase: React.FC<PrizeShowcaseProps> = ({
             The Complete <span className="font-bold text-[#D4AF37]">Luxe Prize Draws Package</span>
           </h2>
           <p className="text-white/50 text-base sm:text-lg max-w-2xl font-light leading-relaxed">
-            Every single component required to establish, operate, fund, and scale a high-growth business in Dubai with zero personal income tax.
+            Every single component required to establish, operate, fund, and scale a high-growth business in the UK with world-class founder support.
           </p>
         </div>
 

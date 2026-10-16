@@ -18,7 +18,7 @@ export const OneClickBookDemo: React.FC<OneClickBookDemoProps> = ({ onOpenEntry 
   const [aiChatMessages, setAiChatMessages] = useState<Array<{ role: "ai" | "user"; text: string; time: string }>>([
     {
       role: "ai",
-      text: "Marhaba! I am the automated AI Copilot built for this UAE app. I handle 24/7 client booking, answer pricing in 12 languages, and route confirmed VIP leads. How can I assist your Dubai booking today?",
+      text: "Hello! I am the automated AI Copilot built for this Luxe app. I handle 24/7 client booking, answer pricing in 12 languages, and route confirmed VIP leads. How can I assist your London booking today?",
       time: "Just now",
     },
   ]);
@@ -27,27 +27,27 @@ export const OneClickBookDemo: React.FC<OneClickBookDemoProps> = ({ onOpenEntry 
 
   const industryPresets = {
     concierge: {
-      name: "Dubai VIP Concierge & Chauffeur",
+      name: "London VIP Concierge & Chauffeur",
       service: "Private Chauffeur & Luxury Marina Yacht Experience",
       priceGBP: 525,
       duration: "4 Hours VIP Experience",
-      location: "Dubai Marina & Palm Jumeirah",
+      location: "Central London & The Thames",
       avatar: "🛥️",
     },
     advisory: {
       name: "Global Executive Strategy Advisory",
-      service: "1-on-1 Dubai Market Expansion & Licensing Masterclass",
+      service: "1-on-1 UK Market Expansion & Company Masterclass",
       priceGBP: 395,
       duration: "60 Min Private Session",
-      location: "DIFC Gate Tower / Remote Video",
+      location: "City Tower / Remote Video",
       avatar: "👔",
     },
     realestate: {
-      name: "Emirates Ultra-Prime Estates",
-      service: "Private Helicopter & Villa Tour (Downtown & Emirates Hills)",
+      name: "Luxe Ultra-Prime Estates",
+      service: "Private Helicopter & Estate Tour (City & Countryside)",
       priceGBP: 815,
       duration: "Full Day VIP Inspection",
-      location: "Dubai Heliport / Luxury Villa Site",
+      location: "Private Heliport / Luxury Estate",
       avatar: "🏰",
     },
   };
@@ -84,12 +84,12 @@ export const OneClickBookDemo: React.FC<OneClickBookDemoProps> = ({ onOpenEntry 
     setIsAiTyping(true);
 
     setTimeout(() => {
-      let reply = "Your request has been analyzed by the UAE AI Engine! We have reserved your priority slot and synced your booking with Dubai real-time availability.";
+      let reply = "Your request has been analyzed by the Luxe AI Engine! We have reserved your priority slot and synced your booking with London real-time availability.";
       const lower = query.toLowerCase();
       if (lower.includes("price") || lower.includes("cost") || lower.includes("how much")) {
         reply = `Pricing for this service is £${currentPreset.priceGBP} GBP. With the One-Click feature, your client can pay instantly with Apple Pay or credit card with 0% payment drop-off!`;
-      } else if (lower.includes("visa") || lower.includes("license") || lower.includes("tax")) {
-        reply = "In the UAE, business profits benefit from zero personal tax, and this app uses transparent GBP pricing for every booking.";
+      } else if (lower.includes("relocation") || lower.includes("company") || lower.includes("tax")) {
+        reply = "In the UK, a limited company keeps your finances clean and simple, and this app uses transparent GBP pricing for every booking.";
       } else if (lower.includes("one click") || lower.includes("book") || lower.includes("how it works")) {
         reply = "The One-Click Book feature bypasses 5 tedious registration steps. With biometric FaceID or 1-tap Apple Pay, clients confirm appointments in under 2.4 seconds!";
       }
@@ -255,7 +255,7 @@ export const OneClickBookDemo: React.FC<OneClickBookDemoProps> = ({ onOpenEntry 
                           </div>
                         </div>
                         <span className="text-[9px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30">
-                          Dubai Verified
+                          Luxe Verified
                         </span>
                       </div>
 
@@ -293,7 +293,7 @@ export const OneClickBookDemo: React.FC<OneClickBookDemoProps> = ({ onOpenEntry 
                               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                               Booking Confirmed in 0.8s!
                             </span>
-                            <span className="text-[10px] font-mono text-emerald-400">#DXB-8839</span>
+                            <span className="text-[10px] font-mono text-emerald-400">#LHR-8839</span>
                           </div>
                           <p className="text-[10px] text-emerald-400/80">
                             Calendar invite & instant VIP WhatsApp concierge alert dispatched.
@@ -354,7 +354,7 @@ export const OneClickBookDemo: React.FC<OneClickBookDemoProps> = ({ onOpenEntry 
                           AI
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-white">UAE Business Copilot</p>
+                          <p className="text-xs font-bold text-white">UK Business Copilot</p>
                           <p className="text-[10px] text-emerald-400">Online &middot; Active in App</p>
                         </div>
                       </div>

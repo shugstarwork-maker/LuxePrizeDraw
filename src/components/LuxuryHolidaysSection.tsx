@@ -5,7 +5,6 @@ import { DrawDetailsPanel } from "./DrawDetailsPanel";
 
 const destinations = [
   { name: "Paris", image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1800&q=90", package: "5-Star Hotel • Luxury Concierge • Premium Flights • Private Transfers • Fine Dining • £5,000 Luxury Shopping Budget" },
-  { name: "Dubai", image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1800&q=90", package: "5-Star Suite • Personal Concierge • Premium Flights • Private Transfers • Fine Dining • Spa Experience" },
   { name: "Monaco", image: "https://images.unsplash.com/photo-1523409070585-7f2a86b4b9c7?auto=format&fit=crop&w=1800&q=90", package: "5-Star Riviera Hotel • Concierge • Premium Flights • Private Transfers • Fine Dining • Luxury Experience Budget" },
   { name: "Maldives", image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1800&q=90", package: "Private Villa • Island Concierge • Premium Flights • Seaplane Transfers • Fine Dining • Wellness Experience" },
   { name: "New York", image: "https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?auto=format&fit=crop&w=1800&q=90", package: "5-Star Manhattan Hotel • Luxury Concierge • Premium Flights • Private Transfers • Fine Dining • Shopping Budget" },

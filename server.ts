@@ -57,11 +57,11 @@ let totalScholarshipsFunded = 1350;
 let totalMicroGrants = 84;
 
 const verifiedEntrants = [
-  { id: "UAE-7829-DXB", name: "Siddharth M.", country: "India", timestamp: "Just now", business: "FinTech Cross-Border Platform", entryType: "SUBSCRIBER_VIP" },
-  { id: "UAE-7830-LDN", name: "Elena Rostova", country: "United Kingdom", timestamp: "2 mins ago", business: "Luxury AI Concierge", entryType: "POWER_BUNDLE" },
-  { id: "UAE-7831-SGP", name: "Marcus Tan", country: "Singapore", timestamp: "5 mins ago", business: "B2B SaaS Logistics", entryType: "FREE" },
-  { id: "UAE-7832-DUB", name: "Amina Al-Mansoor", country: "Egypt", timestamp: "8 mins ago", business: "Green Tech Packaging", entryType: "SUBSCRIBER_VIP" },
-  { id: "UAE-7833-NYC", name: "Tyler Harrison", country: "United States", timestamp: "12 mins ago", business: "E-Commerce Lifestyle Hub", entryType: "FREE" },
+  { id: "LPD-7829-LHR", name: "Siddharth M.", country: "India", timestamp: "Just now", business: "FinTech Cross-Border Platform", entryType: "SUBSCRIBER_VIP" },
+  { id: "LPD-7830-LDN", name: "Elena Rostova", country: "United Kingdom", timestamp: "2 mins ago", business: "Luxury AI Concierge", entryType: "POWER_BUNDLE" },
+  { id: "LPD-7831-SGP", name: "Marcus Tan", country: "Singapore", timestamp: "5 mins ago", business: "B2B SaaS Logistics", entryType: "FREE" },
+  { id: "LPD-7832-GLA", name: "Amina Al-Mansoor", country: "Egypt", timestamp: "8 mins ago", business: "Green Tech Packaging", entryType: "SUBSCRIBER_VIP" },
+  { id: "LPD-7833-NYC", name: "Tyler Harrison", country: "United States", timestamp: "12 mins ago", business: "E-Commerce Lifestyle Hub", entryType: "FREE" },
 ];
 
 type EntropyAudit = {
@@ -80,7 +80,7 @@ type EntropyAudit = {
 
 const drawId = process.env.ENTROPY_DRAW_ID || "2026-10-31-founder-draw";
 const targetBlockHeight = Number(process.env.ENTROPY_BTC_BLOCK_HEIGHT || "0");
-const publicClientSeed = process.env.ENTROPY_CLIENT_SEED || "DUBAI-2026-GRAND-DRAW-COMMITTED";
+const publicClientSeed = process.env.ENTROPY_CLIENT_SEED || "LPD-2026-GRAND-DRAW-COMMITTED";
 const databaseUrl = process.env.ENTROPY_AUDIT_DATABASE_URL;
 
 function getAuditDatabase() {
@@ -497,61 +497,31 @@ app.post("/api/ai/pitch-evaluate", async (req, res) => {
       return res.status(400).json({ error: "Please provide a business idea or concept." });
     }
 
-    const prompt = `You are the Lead UAE Commercial Strategy & Free Zone Advisor for the official Luxe Prize Draws competition.
-Evaluate the following business idea that a participant wants to launch in the UAE with their 2-Week 5-Star Dubai Luxury Holiday, £100K Sterling Cash Prize, 3-Year Residency Visa, UAE Limited Company, Custom Branding, and Web/App with One-Click Book & AI.
-
-Business Details:
-- Idea: ${businessIdea}
-- Industry: ${industry || "Technology / Services"}
-- Target Market: ${targetMarket || "UAE, UK & Global"}
-- Key Features Desired: ${dreamFeatures || "One-Click Booking and AI assistant"}
-
-Please provide a structured, encouraging, professional, and actionable UAE Launch Assessment.
-Return a valid JSON object with the following fields:
-{
-  "feasibilityScore": number (between 82 and 99),
-  "executiveSummary": "2-3 punchy sentences highlighting why this concept will thrive in Dubai/Abu Dhabi",
-  "recommendedFreezone": "e.g. Dubai Internet City (DIC), DMCC (Dubai Multi Commodities Centre), IFZA (International Free Zone Authority), Abu Dhabi Global Market (ADGM), or Meydan Free Zone",
-  "whyThisZone": "1 sentence explanation of why this zone fits their license and banking needs",
-  "appOneClickFeatureConcept": "A creative description of how the 'One-Click Book' feature should be customized specifically for this business",
-  "aiCopilotIntegration": "How AI can automate customer onboarding or operations in their custom app",
-  "budgetAllocation100k": [
-    {"category": "Product Development & AI Cloud", "amountGBP": 35000, "description": "App enhancement, AI fine-tuning & server architecture"},
-    {"category": "UAE & UK Go-To-Market & PR", "amountGBP": 30000, "description": "Targeted GCC & UK marketing, LinkedIn ads, Dubai launch event"},
-    {"category": "Working Capital & Operations", "amountGBP": 20000, "description": "Initial inventory / team runway / prime flexi-desk"},
-    {"category": "Reserve & Treasury Fund", "amountGBP": 15000, "description": "High-yield UAE corporate treasury deposit in GBP"}
-  ],
-  "threeYearRoadmap": [
-    {"year": "Year 1", "milestone": "Launch MVP app with One-Click Booking, establish corporate banking with Emirates NBD/Wio, capture initial 500 high-value clients"},
-    {"year": "Year 2", "milestone": "Expand across GCC (Saudi Arabia & Qatar) and London, integrate automated AI workflow, scale to £500K ARR"},
-    {"year": "Year 3", "milestone": "Apply for UAE Golden Visa expansion, open physical flagship hub in Downtown Dubai / DIFC"}
-  ],
-  "suggestedBrandNames": ["Name 1", "Name 2", "Name 3"],
-  "competitiveAdvantage": "What makes this irresistible in the UAE and international markets"
-}`;
+    const prompt = `You are the Lead UK Commercial Strategy & Company Formation Advisor for the official Luxe Prize Draws competition.
+Evaluate the following business idea that a participant wants to launch in the UK with their 2-Week 5-Star Luxury Holiday, £100K Sterling Cash Prize, Custom App, and Full Brand Suite. `;
 
     if (process.env.AI_GATEWAY_ENABLED === "false") {
       // Fallback high-quality structured response while AI Gateway is intentionally disabled.
       return res.json({
         feasibilityScore: 94,
-        executiveSummary: `Your concept "${businessIdea}" has immense growth potential in the UAE ecosystem, capitalizing on the UAE's zero-tax commercial framework and booming digital-first consumer adoption.`,
-        recommendedFreezone: "IFZA Dubai / DMCC",
-        whyThisZone: "Offers seamless 100% foreign ownership, rapid digital license issuance, and instant pre-approval with leading UAE corporate banks.",
-        appOneClickFeatureConcept: `A 1-touch VIP instant reservation pipeline allowing UAE clients to secure services with biometric Apple Pay / Google Pay and instant WhatsApp confirmation.`,
+        executiveSummary: `Your concept "${businessIdea}" has immense growth potential in the UK ecosystem, capitalising on the UK's thriving commercial landscape. `,
+        recommendedFormation: "England & Wales / Scotland",
+        whyThisFormation: "Offers fast digital registration, simple compliance, and instant pre-approval with leading UK banks.",
+        appOneClickFeatureConcept: `A 1-touch VIP instant reservation pipeline allowing UK clients to secure services with Apple Pay / Google Pay. `,
         aiCopilotIntegration: "24/7 Multilingual AI concierge that answers client queries in Arabic & English, qualifies high-ticket leads, and auto-dispatches bookings.",
         budgetAllocation100k: [
           { category: "Product Development & Cloud AI", amountGBP: 35000, description: "App architecture, One-Click book pipeline, AI agents" },
-          { category: "GCC & Global Marketing", amountGBP: 30000, description: "Dubai billboard & digital omnichannel acquisition" },
+          { category: "UK & International Marketing", amountGBP: 30000, description: "UK billboard & digital omnichannel acquisition" },
           { category: "Operational Runway & Team", amountGBP: 20000, description: "Office presence and local commercial operations" },
           { category: "Corporate Treasury Reserve", amountGBP: 15000, description: "Zero-risk high yield GBP savings cushion" }
         ],
         threeYearRoadmap: [
-          { year: "Year 1", milestone: "Establish corporate license, deploy Web & Mobile App, achieve £150K Gross Volume in UAE." },
-          { year: "Year 2", milestone: "Expand B2B partnerships across Abu Dhabi & Riyadh (KSA), scale team to 5." },
-          { year: "Year 3", milestone: "Attain £1.2M valuation, qualify for UAE 10-Year Golden Visa, establish DIFC headquarters." }
+          { year: "Year 1", milestone: "Establish the company, deploy Web & Mobile App, achieve £150K Gross Volume in the UK." },
+          { year: "Year 2", milestone: "Expand B2B partnerships across Edinburgh & Manchester, scale team to 5." },
+          { year: "Year 3", milestone: "Attain £1.2M valuation and establish a UK headquarters." }
         ],
-        suggestedBrandNames: ["Aura Emirates", "Nexis Dubai", "Veloce UAE"],
-        competitiveAdvantage: "First-mover digital convenience combined with instant AI-driven fulfillment in the GCC's fastest growing economy."
+        suggestedBrandNames: ["Aura UK", "Nexis London", "Veloce Luxe"],
+        competitiveAdvantage: "First-mover digital convenience combined with instant AI-driven fulfillment in one of the UK's fastest growing markets."
       });
     }
 
@@ -564,29 +534,29 @@ Return a valid JSON object with the following fields:
     // Return friendly resilient fallback
     return res.json({
       feasibilityScore: 92,
-      executiveSummary: "Your venture idea aligns exceptionally well with the UAE's National Digital Economy Strategy and Vision 2031, providing a solid foundation for rapid scaling.",
-      recommendedFreezone: "DMCC / Meydan Free Zone Dubai",
+      executiveSummary: "Your venture idea aligns exceptionally well with the UK's digital economy strategy, providing a solid foundation for rapid scaling.",
+      recommendedFormation: "Companies House / London",
       whyThisZone: "World-class digital trade infrastructure, fast corporate bank account onboarding, and flexible commercial licensing.",
       appOneClickFeatureConcept: "Smart frictionless booking system featuring one-tap instant checkout, automated calendar sync, and real-time SMS/WhatsApp confirmation.",
       aiCopilotIntegration: "Autonomous AI customer agent handling multilingual inquiries, custom quote generation, and booking optimization.",
       budgetAllocation100k: [
         { category: "Platform & App Polish", amountGBP: 35000, description: "One-Click engine, AI automation, cloud security" },
-        { category: "UAE Launch & PR Campaign", amountGBP: 30000, description: "Growth marketing across Dubai, Abu Dhabi, and GCC" },
+        { category: "UK Launch & PR Campaign", amountGBP: 30000, description: "Growth marketing across London, Edinburgh, and the UK" },
         { category: "Operations & Equipment", amountGBP: 20000, description: "Prime workspace and essential business tooling" },
-        { category: "Reserve Treasury", amountGBP: 15000, description: "Emergency fund in UAE corporate bank account" }
+        { category: "Reserve Treasury", amountGBP: 15000, description: "Emergency fund in a UK corporate bank account" }
       ],
       threeYearRoadmap: [
-        { year: "Year 1", milestone: "Incorporate company, launch Web/App, activate UAE bank accounts, hit 1,000 users." },
-        { year: "Year 2", milestone: "GCC regional expansion into Saudi Arabia and Qatar." },
+        { year: "Year 1", milestone: "Incorporate company, launch Web/App, activate UK bank accounts, hit 1,000 users." },
+        { year: "Year 2", milestone: "UK regional expansion into Scotland and Northern Ireland." },
         { year: "Year 3", milestone: "Establish enterprise division with £1M+ annual run rate." }
       ],
-      suggestedBrandNames: ["Emirates Velocity", "Zayed Global Tech", "DuneLink Solutions"],
-      competitiveAdvantage: "Turnkey operational readiness backed by the £100K seed grant and 3-Year Residency freedom."
+      suggestedBrandNames: ["Britannia Velocity", "Caledonian Tech", "ThamesLink Solutions"],
+      competitiveAdvantage: "Turnkey operational readiness backed by the £100K seed grant and 3-Year Relocation freedom."
     });
   }
 });
 
-// API: AI Live UAE Business Advisor Chat
+// API: AI Live UK Business Advisor Chat
 app.post("/api/ai/ask-advisor", async (req, res) => {
   try {
     const question = limitedText(req.body?.question, 1_000);
@@ -597,22 +567,22 @@ app.post("/api/ai/ask-advisor", async (req, res) => {
 
     const prompt = `You are the Luxe Prize Draws Senior Business & Legal Advisor.
 You are helping a prospective winner understand the full prize package:
-1. 2-Week VIP Dubai Holiday & 5-Star Hotel Stay (Business class flights for 2, luxury suite, private chauffeur, £4,000 dining credit)
-2. UAE Limited Company Formation (Freezone/Mainland 100% foreign ownership)
+1. 2-Week VIP UK Holiday & 5-Star Hotel Stay (Business class flights for 2, luxury suite, private chauffeur, £4,000 dining credit)
+2. UK Limited Company Formation (fully managed, England & Wales or Scotland)
 3. Complete Luxury Branding Suite (Logo, identity, brand book, stationery)
 4. Custom-Built Web & Mobile App (iOS & Android) with ONE-CLICK BOOKING & AI Smart Assistant
-5. 3-Year UAE Residency Visa with VIP Emirates ID & Express Medical
-6. Corporate VIP Banking Account (Emirates NBD, ADCB, Mashreq, Wio Bank)
+5. 3-Year Founder Relocation Programme with VIP Onboarding
+6. Corporate VIP Banking Account (leading UK banks)
 7. £100,000 Sterling Clean Cash Seed Grant deposited directly into their corporate account.
 
 User Business Context: ${userBusinessContext || "Aspiring entrepreneur entering the competition"}
 User Question: "${question}"
 
-Provide a concise, direct, helpful, and inspiring response (2-3 paragraphs max) packed with accurate UAE business knowledge (0% personal tax, 9% corporate tax on profits above the applicable corporate-tax threshold with qualifying freezone exemptions, family visa sponsorship, fast-track banking, app launch).`;
+Provide a concise, direct, helpful, and inspiring response (2-3 paragraphs max) packed with accurate UK business knowledge.`;
 
     if (process.env.AI_GATEWAY_ENABLED === "false") {
       return res.json({
-        answer: `As a winner of Luxe Prize Draws, your entire journey is 100% covered. We handle the entire company incorporation with 100% foreign ownership, provide your complete brand identity, build and launch your custom iOS/Android app with One-Click Booking & AI features, sponsor your 3-Year UAE Investor Residency Visa, and treat you to a 2-Week 5-Star Dubai VIP Holiday.\n\nYour £100,000 Sterling cash prize is deposited directly into your newly minted UAE corporate bank account at premier institutions like Emirates NBD or Wio Bank. You will benefit from the UAE's world-leading 0% personal income tax and zero capital gains tax, giving you the ultimate launchpad to scale globally.`
+        answer: `As a winner of Luxe Prize Draws, your entire journey is 100% covered. We handle the entire company incorporation with full digital registration. `
       });
     }
 
@@ -622,7 +592,7 @@ Provide a concise, direct, helpful, and inspiring response (2-3 paragraphs max) 
     console.error("AI Advisor error:", error);
     if (error?.statusCode === 429) return res.status(429).json({ error: "The advisor is busy. Please try again shortly." });
     return res.json({
-      answer: "Luxe Prize Draws is designed for maximum speed and zero friction. From company licensing, 5-Star luxury holiday, and 3-Year Residency to corporate bank setup and transferring your £100,000 cash grant, everything is orchestrated so you can focus entirely on growing your business with your custom app and One-Click booking system.",
+      answer: "Luxe Prize Draws is designed for maximum speed and zero friction. From company licensing, 5-Star luxury holiday, and 3-Year Relocation to corporate bank setup and transferring your £100,000 cash grant, everything is orchestrated so you can focus entirely on growing your business with your custom app and One-Click booking system.",
     });
   }
 });

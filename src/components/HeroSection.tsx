@@ -33,15 +33,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     },
     {
       icon: ShieldCheck,
-      title: "3-Year Residency",
-      subtitle: "VIP investor visa + Emirates ID",
+      title: "3-Yr Relocation",
+      subtitle: "VIP onboarding + founder support",
       badge: "0% Personal Tax",
       color: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10",
     },
     {
       icon: Building2,
-      title: "UAE LLC Company",
-      subtitle: "100% foreign ownership in Dubai",
+      title: "UK Limited Company",
+      subtitle: "Registered in England & Wales or Scotland",
       badge: "Turnkey License",
       color: "text-blue-400 border-blue-500/30 bg-blue-500/10",
     },
@@ -70,11 +70,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
   return (
     <div className="relative pt-32 pb-24 overflow-hidden">
-      {/* Cinematic Dubai Skyline Backdrop with subtle dark fade & gold lighting */}
+      {/* Cinematic city skyline backdrop with subtle dark fade & gold lighting */}
       <div className="absolute inset-0 -z-20 overflow-hidden">
         <img
           src={dubaiSkylineNight}
-          alt="Dubai Skyline at Night"
+          alt="City skyline at night"
           className="w-full h-full object-cover object-center opacity-25 scale-105 filter blur-[0.5px]"
           referrerPolicy="no-referrer"
         />
@@ -95,18 +95,18 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           <div className="lg:col-span-7 flex flex-col justify-center space-y-6">
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-light leading-[1.1] text-white tracking-tight">
               Win Your <span className="font-bold text-[#D4AF37]">Future</span> <br className="hidden sm:inline" />
-              in the Emirates
+              with Luxe Prize Draws
             </h1>
 
             <div className="inline-flex w-fit max-w-full items-center gap-2 self-start rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/10 px-3.5 py-1.5">
               <span className="h-2 w-2 shrink-0 rounded-full bg-[#D4AF37] animate-pulse"></span>
               <span className="text-[10px] font-bold uppercase leading-relaxed tracking-[0.16em] text-[#D4AF37]">
-                Exclusive 2026 Founder Opportunity
+                Exclusive 2026 Franchise Opportunity
               </span>
             </div>
 
             <p className="text-base sm:text-lg text-white/50 max-w-xl leading-relaxed">
-              The ultimate residency and business package. We don't just give you a prize; we build your turnkey legacy in Dubai with <strong className="text-white font-semibold">£100,000 Cash</strong>, an all-inclusive <strong className="text-[#D4AF37] font-semibold">2-Week 5-Star Dubai Holiday</strong>, a <strong className="text-white font-semibold">3-Year Residency Visa</strong>, and a custom <strong className="text-[#D4AF37] font-semibold">App with One-Click Book & AI</strong>.
+              The ultimate founder prize package. We don't just give you a prize; we set you up to own and run your own Luxe Prize Draws franchise in the UK with <strong className="text-white font-semibold">£100,000 Cash</strong>, an all-inclusive <strong className="text-[#D4AF37] font-semibold">2-Week 5-Star Luxury Holiday</strong>, a <strong className="text-white font-semibold">3-Year Founder Relocation Package</strong>, and a custom <strong className="text-[#D4AF37] font-semibold">App with One-Click Book & AI</strong>.
             </p>
 
             {/* Action Buttons matching Immersive UI */}
@@ -224,6 +224,25 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
           {/* Right Column: Immersive Glass Metric Cards */}
           <div className="lg:col-span-5 flex flex-col justify-center gap-4">
+            {/* Headline prize visual: £100K cash stack */}
+            <div className="relative overflow-hidden rounded-2xl border border-[#D4AF37]/30 bg-gradient-to-b from-[#D4AF37]/15 via-black/60 to-black/80 p-6 sm:p-8 backdrop-blur-xl">
+              <div className="pointer-events-none absolute -top-10 left-1/2 h-48 w-72 -translate-x-1/2 rounded-full bg-[#D4AF37]/25 blur-[80px]" />
+              <div className="relative flex flex-col items-center text-center">
+                <img
+                  src="/prizes/cash-stack.svg"
+                  alt="Stacks of cash representing the £100,000 headline prize"
+                  className="h-40 w-auto drop-shadow-[0_0_30px_rgba(212,175,55,0.35)] sm:h-48"
+                />
+                <p className="mt-4 text-[10px] font-black uppercase tracking-[.2em] text-[#D4AF37]">
+                  Headline prize — Bitcoin or cash
+                </p>
+                <p className="mt-1 text-2xl font-black tracking-tight text-white">£100,000</p>
+                <p className="mt-1 max-w-xs text-[11px] leading-relaxed text-white/45">
+                  Winner chooses £100K of Bitcoin or £100K cash, paid on activation. Pre-launch preview — no entry or payment yet.
+                </p>
+              </div>
+            </div>
+
             {/* Top Cash Card */}
             <div className="bg-white/5 border border-white/10 p-6 sm:p-7 rounded-2xl backdrop-blur-xl relative overflow-hidden group hover:border-[#D4AF37]/40 transition-colors">
               <div className="absolute top-0 right-0 p-5 opacity-20 text-[#D4AF37]">
@@ -236,21 +255,21 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <div className="text-3xl sm:text-4xl font-bold mb-1 text-white tracking-tight">
                 £100,000 <span className="text-lg font-medium text-white/50">GBP</span>
               </div>
-              <p className="text-xs text-white/40">Instant liquidation into your UAE corporate bank account upon activation.</p>
+              <p className="text-xs text-white/40">Paid directly into your UK bank account upon activation.</p>
             </div>
 
             {/* Middle 3-Column Split Cards */}
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-xl">
-                <h3 className="text-yellow-400 text-[10px] uppercase tracking-widest font-bold mb-1">Dubai Holiday</h3>
+                <h3 className="text-yellow-400 text-[10px] uppercase tracking-widest font-bold mb-1">Luxury Holiday</h3>
                 <div className="text-xl font-bold text-white">2 Weeks</div>
                 <p className="text-[9px] text-white/40 mt-0.5 uppercase tracking-wider">5-Star Luxury</p>
               </div>
 
               <div className="bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-xl">
-                <h3 className="text-blue-400 text-[10px] uppercase tracking-widest font-bold mb-1">Residency</h3>
+                <h3 className="text-blue-400 text-[10px] uppercase tracking-widest font-bold mb-1">Relocation</h3>
                 <div className="text-xl font-bold text-white">3 Years</div>
-                <p className="text-[9px] text-white/40 mt-0.5 uppercase tracking-wider">Golden Visa</p>
+                <p className="text-[9px] text-white/40 mt-0.5 uppercase tracking-wider">Founder Relocation</p>
               </div>
 
               <div className="bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-xl">
@@ -282,7 +301,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 </li>
                 <li className="flex items-center gap-3 text-xs sm:text-sm text-white/80">
                   <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full shadow-[0_0_8px_#34d399]"></div>
-                  <span>UAE business setup pathway and tax-ready guidance</span>
+                  <span>UK business setup pathway and tax-ready guidance</span>
                 </li>
               </ul>
             </div>

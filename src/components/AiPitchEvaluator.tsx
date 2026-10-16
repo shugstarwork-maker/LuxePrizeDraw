@@ -10,17 +10,17 @@ interface AiPitchEvaluatorProps {
 export const AiPitchEvaluator: React.FC<AiPitchEvaluatorProps> = ({ onApplyIdeaToEntry }) => {
   const [businessIdea, setBusinessIdea] = useState("");
   const [industry, setIndustry] = useState("Technology & AI Services");
-  const [targetMarket, setTargetMarket] = useState("UAE, GCC & Global");
+  const [targetMarket, setTargetMarket] = useState("UK & Global");
   const [dreamFeatures, setDreamFeatures] = useState("One-Click Booking and AI Concierge");
   const [isLoading, setIsLoading] = useState(false);
   const [evaluation, setEvaluation] = useState<AiPitchEvaluation | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
 
   const sampleIdeas = [
-    "AI-powered luxury yacht & desert safari booking platform in Dubai with instant crypto & Apple Pay",
+    "AI-powered luxury yacht & countryside retreat booking platform in the UK with instant crypto & Apple Pay",
     "High-ticket B2B legal & tax consultancy portal with automated one-click corporate compliance audits",
-    "Bespoke private wellness & longevity concierge delivering IV drips and bio-hacking directly to Dubai villas",
-    "Next-gen cross-border invoice financing hub for GCC e-commerce brands with instant automated settlement",
+    "Bespoke private wellness & longevity concierge delivering IV drips and bio-hacking directly to UK country estates",
+    "Next-gen cross-border invoice financing hub for UK e-commerce brands with instant automated settlement",
   ];
 
   const handleEvaluate = async (e: React.FormEvent) => {
@@ -70,13 +70,13 @@ export const AiPitchEvaluator: React.FC<AiPitchEvaluatorProps> = ({ onApplyIdeaT
         <div className="flex flex-col items-center text-center space-y-3 mb-12">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full text-[10px] uppercase tracking-[0.2em] text-[#D4AF37] font-bold">
             <Brain className="w-3.5 h-3.5" />
-            <span>Powered by Gemini 2.5 AI & UAE Commercial Database</span>
+            <span>Powered by Gemini 2.5 AI & UK Commercial Database</span>
           </div>
           <h2 className="text-3xl sm:text-5xl font-light text-white tracking-tight">
-            AI UAE Business <span className="font-bold text-[#D4AF37]">Launch Evaluator</span>
+            AI UK Business <span className="font-bold text-[#D4AF37]">Launch Evaluator</span>
           </h2>
           <p className="text-white/50 text-base sm:text-lg max-w-2xl font-light leading-relaxed">
-            Test your venture idea before the draw. Get instant UAE market feasibility, free zone suggestions, 1-Click booking integration, and custom £100K budget allocation.
+            Test your venture idea before the draw. Get instant UK market feasibility, company formation suggestions, 1-Click booking integration, and custom £100K budget allocation.
           </p>
         </div>
 
@@ -92,7 +92,7 @@ export const AiPitchEvaluator: React.FC<AiPitchEvaluatorProps> = ({ onApplyIdeaT
                   rows={3}
                   value={businessIdea}
                   onChange={(e) => setBusinessIdea(e.target.value)}
-                  placeholder="e.g. A digital platform for luxury concierge services in Dubai with instant One-Click reservations and an AI business assistant for international VIP clients..."
+                  placeholder="e.g. A digital platform for luxury concierge services in London with instant One-Click reservations and an AI assistant"
                   className="w-full bg-white/5 border border-white/15 rounded-xl p-3.5 text-xs sm:text-sm text-white placeholder-white/40 focus:outline-none focus:border-[#D4AF37] transition-all"
                 />
               </div>
@@ -165,7 +165,7 @@ export const AiPitchEvaluator: React.FC<AiPitchEvaluatorProps> = ({ onApplyIdeaT
                 {isLoading ? (
                   <>
                     <RefreshCw className="w-4 h-4 animate-spin text-black" />
-                    <span>Analyzing UAE Market with Gemini AI...</span>
+                    <span>Analyzing UK Market with Gemini AI...</span>
                   </>
                 ) : (
                   <>
@@ -194,7 +194,7 @@ export const AiPitchEvaluator: React.FC<AiPitchEvaluatorProps> = ({ onApplyIdeaT
                   </div>
                   <div className="text-right">
                     <span className="text-[10px] uppercase tracking-wider text-white/40 font-medium">Recommended Zone</span>
-                    <p className="text-xs font-bold text-[#D4AF37]">{evaluation.recommendedFreezone}</p>
+                    <p className="text-xs font-bold text-[#D4AF37]">{evaluation.recommendedFormation}</p>
                   </div>
                 </div>
 
@@ -202,7 +202,7 @@ export const AiPitchEvaluator: React.FC<AiPitchEvaluatorProps> = ({ onApplyIdeaT
                 <div className="space-y-1.5">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-1.5">
                     <TrendingUp className="w-4 h-4 text-emerald-400" />
-                    <span>Strategic UAE Market Advantage</span>
+                    <span>Strategic UK Market Advantage</span>
                   </h4>
                   <p className="text-xs text-white/70 leading-relaxed bg-white/5 p-4 rounded-xl border border-white/10">
                     {evaluation.executiveSummary}
@@ -283,7 +283,7 @@ export const AiPitchEvaluator: React.FC<AiPitchEvaluatorProps> = ({ onApplyIdeaT
                 <div className="max-w-sm space-y-1">
                   <h3 className="text-sm font-bold uppercase tracking-wider text-white">Enter Your Concept On The Left</h3>
                   <p className="text-xs text-white/50 leading-relaxed">
-                    Our AI Advisor will generate a complete UAE commercial blueprint including Free Zone licensing recommendations, 1-Click booking customization, and optimal £100K seed money distribution.
+                    Our AI Advisor will generate a complete UK commercial blueprint including company formation recommendations, 1-Click booking customization, and optimal £100K seed money distribution.
                   </p>
                 </div>
                 <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-white/40">
