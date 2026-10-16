@@ -1,0 +1,27 @@
+import { PGlite } from '@electric-sql/pglite';
+import { pgcrypto } from '@electric-sql/pglite/contrib/pgcrypto';
+import fs from 'node:fs';
+const db = new PGlite({extensions:{pgcrypto}});
+const root = new URL('../../', import.meta.url);
+const file = name => new URL(name, root);
+await db.exec(fs.readFileSync(file('database/prize-draw-schema.sql'),'utf8'));
+await db.exec(fs.readFileSync(file('database/automatic-ticket-draw.sql'),'utf8'));
+console.log('Both migrations executed successfully');
+await db.exec(`INSERT INTO prize_accounts(id,email,date_of_birth,age_verified_at) VALUES('00000000-0000-4000-8000-000000000001','test@example.test','1990-01-01',now());
+INSERT INTO prize_draws(id,status,title,prize_description,prize_value_minor,opens_at,closes_at,maximum_entries,ticket_price_minor,free_entry_method,free_entry_deadline,rules_url,rules_version,draw_type,randomization_version)
+VALUES('test','OPEN','Test','Test',100,now()-interval '1 day',now()+interval '1 day',1,1,'post',now()+interval '1 hour','https://example.test/rules','test','STANDARD','pgcrypto-48bit-rejection-v1');
+INSERT INTO prize_auto_draws(draw_id) VALUES('test');`);
+const state = async () => (await db.query("SELECT advance_prize_auto_draw('test') AS state")).rows[0].state;
+const assert = (v,m) => { if (!v) throw new Error(m); };
+assert(await state()==='APPROVAL_PENDING','approval gate');
+await db.exec("UPDATE prize_auto_draws SET approved=true WHERE draw_id='test'");
+assert(await state()==='SELLING','empty pool');
+await db.exec(`INSERT INTO prize_entries(id,draw_id,account_id,route,source_reference) VALUES('00000000-0000-4000-8000-000000000002','test','00000000-0000-4000-8000-000000000001','FREE','test');`);
+assert(await state()==='COUNTDOWN','start countdown');
+assert(await state()==='COUNTDOWN','early retry');
+await db.exec("UPDATE prize_auto_draws SET due_at=now()-interval '1 second' WHERE draw_id='test'");
+assert(await state()==='DRAWN','draw result');
+assert(await state()==='DRAWN','idempotent retry');
+assert(Number((await db.query("SELECT count(*) AS n FROM prize_auto_draw_events WHERE event_type='WINNER_SELECTED'")).rows[0].n)===1,'one winner event');
+console.log('SQL approval, ticket threshold, countdown, selection and retry checks passed');
+await db.close();
