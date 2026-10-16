@@ -2,7 +2,7 @@ import React from "react";
 import { Heart, Star, Trophy, Users, Crown } from "lucide-react";
 
 const categories = [
-  { title: "Games", subtitle: "Play, compete and unlock bonus entries", image: "/games/duel-neon.svg", accent: "from-violet-500 to-fuchsia-500", id: "games", draws: ["Golden Goal", "Luxe Quiz", "Match Predictor"] },
+  { title: "Games", subtitle: "Play, compete and unlock bonus entries", image: "/games/duel-neon.svg", accent: "from-amber-500 to-amber-600", id: "games", draws: ["Golden Goal", "Luxe Quiz", "Match Predictor"] },
   { title: "Prize Draw", subtitle: "Explore every live Luxe prize experience", image: "/prizes/cash-vault.svg", accent: "from-amber-400 to-orange-500", id: "prizes", draws: ["£100K Cash", "Luxury Lifestyle", "Founder Package"] },
   { title: "Sports Car Draw", subtitle: "Your next dream drive is one entry away", image: "/prizes/velocity.svg", accent: "from-sky-400 to-blue-600", id: "prizes", draws: ["Supercar Weekend", "Track Day VIP", "Dream Car Cash"] },
   { title: "Dream Lads Holiday", subtitle: "A once-in-a-lifetime escape with your crew", image: "/prizes/escape.svg", accent: "from-emerald-400 to-teal-500", id: "experience-gallery", draws: ["London Lads Trip", "Ibiza Escape", "Las Vegas Weekend"] },
