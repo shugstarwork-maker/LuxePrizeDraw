@@ -681,6 +681,17 @@
 .draw-value-highlights__grid > .draw-value-highlights__prize { border-color: #6ee7b7; background: #05251c; }
 .draw-value-highlights dt { font-size: .7rem; font-weight: 800; line-height: 1.4; color: #fef3c7; }
 .draw-value-highlights__prize dt { color: #a7f3d0; }
-.draw-value-highlights dd { margin: .35rem 0 0; font-size: clamp(1.25rem,3vw,2rem); font-weight: 900; line-height: 1.2; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.draw-value-highlights dd { margin: .35rem 0 0; font-size: clamp(1.5rem,4vw,2.4rem); font-weight: 900; line-height: 1.2; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
 .draw-value-highlights > p { margin-top: .5rem; font-size: .75rem; color: #fde68a; }
 @media(max-width:360px) { .draw-value-highlights__grid { grid-template-columns: minmax(0,1fr); } }
+
+/* Vivid, static value typography; no flashing or colour-dependent labels. */
+.draw-value-highlights__entry dd { color: #ffd700; text-shadow: 0 2px 2px #000, 0 0 18px rgba(255,215,0,.35); }
+.draw-value-highlights__prize dd { color: #69ffb4; text-shadow: 0 2px 2px #000, 0 0 18px rgba(105,255,180,.3); }
+.cash-pound-rain { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 1; }
+.cash-pound-rain span { position: absolute; top: -3rem; color: #ffd700; opacity: .4; font-size: 1.7rem; font-weight: 900; text-shadow: 0 2px 5px #000; animation: cash-pound-fall 7s linear infinite; }
+.cash-pound-rain--paused span { animation-play-state: paused; }
+.cash-pound-rain-toggle { position: absolute; top: .75rem; right: .75rem; z-index: 20; border: 1px solid #fcd34d; border-radius: .6rem; background: #100c02; color: #fde68a; padding: .55rem .75rem; font-size: .75rem; font-weight: 800; }
+.cash-pound-rain-toggle:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+@keyframes cash-pound-fall { from { transform: translateY(-3rem) rotate(-15deg); } to { transform: translateY(85rem) rotate(25deg); } }
+@media(prefers-reduced-motion: reduce) { .cash-pound-rain, .cash-pound-rain-toggle { display: none; } .cash-pound-rain span { animation: none; } }
