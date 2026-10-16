@@ -6,7 +6,7 @@ Open `/launch-build` from the homepage's proposed catalogue link.
 
 ## Available now
 
-- All 17 uploaded cash, holiday, experience and Bitcoin-or-cash proposals, including
+- 11 cash (£1,000 and up), holiday, experience and Bitcoin-or-cash proposals, including
   their original proposed prices, grades and revenue targets.
 - `GET /api/launch-build?action=config` and `?action=draws` return public preview
   data without secrets or entrant information. Unconnected sales are `null`, not zero.

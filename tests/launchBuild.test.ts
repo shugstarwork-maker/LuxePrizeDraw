@@ -9,16 +9,16 @@ const request = (action: string, body: unknown = {}, token = '') => new Request(
   method: 'POST', headers: { authorization: token ? `Bearer ${token}` : '' }, body: JSON.stringify(body),
 });
 
-test('uploaded catalogue retains all 17 unique proposals and never invents verified sales', async () => {
+test('uploaded catalogue retains 11 unique proposals with cash prizes starting at £1,000 and never invents verified sales', async () => {
   delete process.env.LAUNCH_BUILD_DATABASE_URL;
-  assert.equal(SEED_DRAWS.length, 17);
-  assert.equal(new Set(SEED_DRAWS.map(draw => draw.id)).size, 17);
+  assert.equal(SEED_DRAWS.length, 11);
+  assert.equal(new Set(SEED_DRAWS.map(draw => draw.id)).size, 11);
   const response = await GET(new Request('https://example.test/api/launch-build?action=draws'));
   assert.equal(response.status, 200);
   assert.equal(response.headers.get('cache-control'), 'no-store');
   const { draws, storageConfigured } = await response.json();
   assert.equal(storageConfigured, false);
-  assert.equal(draws.find(draw => draw.id === 'cash10').price, .1);
+  assert.equal(draws.find(draw => draw.id === 'cash1000').price, 2);
   assert.equal(draws.find(draw => draw.id === 'btc100').target, 500000);
   for (const draw of draws) {
     assert.equal(draw.proposed, true);
@@ -63,12 +63,12 @@ test('admin controls require a dedicated token, reject malformed inputs and fail
     assert.equal((await POST(request('admin/proofs', null, token))).status, 400);
     assert.equal((await POST(request('admin/proofs', { key: 'officialRules', ok: true, note: 'x'.repeat(40000) }, token))).status, 413);
     assert.equal((await POST(request('admin/draws/unknown/pause', {}, token))).status, 404);
-    assert.equal((await POST(request('admin/draws/cash10/draw', {}, token))).status, 423);
+    assert.equal((await POST(request('admin/draws/cash1000/draw', {}, token))).status, 423);
     const postal = await POST(request('admin/postal', {}, token));
     assert.equal(postal.status, 409);
     assert.equal((await postal.json()).path, '/postal-intake');
     assert.equal((await POST(request('admin/proofs', { key: 'officialRules', ok: true }, token))).status, 503);
-    assert.equal((await POST(request('admin/draws/cash10/pause', {}, token))).status, 503);
+    assert.equal((await POST(request('admin/draws/cash1000/pause', {}, token))).status, 503);
   } finally { delete process.env.LAUNCH_BUILD_ADMIN_TOKEN; }
 });
 

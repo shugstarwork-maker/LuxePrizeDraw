@@ -44,7 +44,7 @@ export function LaunchBuildPage() {
   return <main className="launch-build"><div className="launch-wrap">
     <a href="/" className="text-sm text-amber-200 underline">Back to home</a>
     <header className="launch-header"><p className="launch-kicker">Luxe Prize Draws</p><h1>Launch catalogue</h1><p className="launch-meta">Cash draws // Luxury holidays // Experiences</p></header>
-    <p className="mt-4 rounded-xl border border-amber-200/30 bg-amber-300/10 p-4 text-sm text-amber-100">Pre-launch proposals from the uploaded build. No entries, payments or prize entitlements are created. Prices, grades and targets require reconciliation with approved rules; they do not replace the existing economics model. Proposed per-person limit: 10 per draw.</p>
+    <p className="mt-4 rounded-xl border border-amber-200/30 bg-amber-300/10 p-4 text-sm text-amber-100">Pre-launch proposals from the uploaded build. No entries, payments or prize entitlements are created. Ticket targets are rounded up from each proposed revenue target divided by its entry price; they are not a confirmed entry cap. Prices, grades and targets require reconciliation with approved rules; they do not replace the existing economics model. Proposed per-person limit: 10 per draw.</p>
     <p role="status" className="my-5 text-sm text-amber-100">{message}</p>
     <LaunchCatalogue draws={draws} />
     <section className="mt-10 rounded-2xl border border-white/15 bg-black/40 p-6">
