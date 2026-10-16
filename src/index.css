@@ -789,3 +789,6 @@
 .luxe-brand-theme :is(nav,[role=tablist]) :is([aria-current=page],[aria-selected=true],[aria-pressed=true]) { background:var(--luxe-button); color:#160e02; }
 .luxe-brand-theme :is(.launch-button,.gold-games__play,.poker-salon-seat) { background:var(--luxe-button); }
 .luxe-brand-theme :is(input,select,textarea):focus-visible { outline:2px solid #ffe09a; outline-offset:2px; }
+
+.draw-value-highlights__grid--entry-only { grid-template-columns:minmax(0,1fr); }
+.luxe-brand-theme .cash-prize-heading { font-size:clamp(2.25rem,6vw,3.5rem); line-height:1.08; color:#ffe85c; text-shadow:0 2px 3px #000,0 0 22px #ffd70077; }
