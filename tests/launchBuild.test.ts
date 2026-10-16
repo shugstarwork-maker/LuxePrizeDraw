@@ -77,5 +77,6 @@ test('public cards retain the proposal disclosure and never advertise active che
   assert.match(html, /Proposed/);
   assert.match(html, /Not open/);
   assert.match(html, /Verified sales unavailable/);
-  assert.doesNotMatch(html, /<button|<form/);
+  assert.match(html, /<button[^>]*disabled/);
+  assert.doesNotMatch(html, /<form/);
 });
