@@ -41,3 +41,12 @@ This register records direct software dependencies and identified externally hos
 2. Add the package, version, licence and approval record before merging a new dependency.
 3. Retain full licence texts, supplier terms, receipts and signed permissions in the controlled company archive—not this repository when confidential.
 4. Escalate any copyleft, custom, unknown or incompatible licence to legal review before production use.
+
+## Owner-supplied lower cash carousel image
+
+- Asset: `public/prizes/lower-cash-notes.jpg`, uploaded 16 October 2026.
+- Usage: homepage cash carousel prizes £1,000–£10,000 inclusive.
+- Owner confirmed permission to use the supplied image in this conversation.
+- Image retained as supplied, including visible watermark; no watermark removed.
+- Permission is owner-reported, not independently verified. Retain the underlying
+  licence evidence in the restricted company asset archive, not this repository.
