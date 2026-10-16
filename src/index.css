@@ -607,3 +607,10 @@
 @keyframes seasonal-snowfall { from { transform:translate3d(0,-2rem,0); } to { transform:translate3d(35px,110vh,0); } }
 @keyframes santa-crossing { 0% { transform:translateX(-110%) translateY(0); } 45% { transform:translateX(calc(100vw + 100%)) translateY(-35px); } 100% { transform:translateX(calc(100vw + 100%)) translateY(-35px); } }
 @media (prefers-reduced-motion:reduce) { .seasonal-snow > span,.santa-flight { animation:none; display:none; } }
+
+@keyframes chipFly { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-46px) scale(0.6); opacity: 0; } }
+@keyframes goldPulse { 0%,100% { box-shadow: 0 0 0 rgba(212,175,55,0); } 50% { box-shadow: 0 0 42px rgba(212,175,55,0.55); } }
+@keyframes levelFlash { 0%,100% { filter: none; } 50% { filter: drop-shadow(0 0 18px rgba(212,175,55,0.9)); } }
+.poker-win-flash { animation: goldPulse 0.9s ease-in-out 2; }
+.poker-chip-fly { position: absolute; animation: chipFly 0.8s ease-out forwards; }
+.poker-level-flash { animation: levelFlash 1.2s ease-in-out 1; }
