@@ -33,3 +33,10 @@ test('homepage cash carousel discloses pending approval and never offers checkou
   assert.match(html, /Proposed entry/);
   assert.doesNotMatch(html, /Entry from 1p draw preview|<form|Buy now|Enter now/);
 });
+
+test('owner-supplied cash image is used only for £1,000–£10,000 prizes', () => {
+  const lower = CASH_DRAW_PROPOSALS.filter(draw => draw.valueGBP >= 1000 && draw.valueGBP <= 10000);
+  assert.equal(lower.length, 12);
+  for (const draw of lower) assert.equal(draw.image, '/prizes/lower-cash-notes.jpg');
+  for (const draw of CASH_DRAW_PROPOSALS.filter(draw => draw.valueGBP > 10000)) assert.notEqual(draw.image, '/prizes/lower-cash-notes.jpg');
+});
