@@ -768,3 +768,8 @@
 .coverflow-holiday .holiday-card-photo { object-position: center top; }
 .holiday-card-shade { background:none; pointer-events:none; }
 .coverflow-holiday .holiday-card-copy { margin-top:12rem; padding-top:1rem; background:rgba(0,0,0,.45); text-shadow:0 2px 5px #000; }
+
+.poker-table-artwork { position:relative; overflow:hidden; border-radius:1.5rem; background:#050403; }
+.poker-table-artwork > img { display:block; width:100%; height:auto; object-fit:contain; }
+.poker-table-artwork__state { display:flex; flex-wrap:wrap; justify-content:center; gap:.35rem 1rem; padding:.65rem; border-top:1px solid #b79a54; background:#080603; color:#ffe6a0; font-size:.8rem; text-align:center; }
+.poker-table-artwork__state span { color:#f5e5bd; }
