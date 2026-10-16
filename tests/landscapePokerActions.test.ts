@@ -14,3 +14,10 @@ test('landscape hides app chrome only during active table view', () => {
   assert.match(css, /poker-action-dock,\.poker-deal-dock \{ position:fixed/);
   assert.match(css, /app-audio-controls \{ display:none/);
 });
+
+test('landscape table dimensions reserve viewport space for header and betting controls', () => {
+  const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
+  assert.match(css, /height:100dvh; min-height:0/);
+  assert.match(css, /100dvh - 10rem/);
+  assert.match(css, /poker-table-artwork \{ margin:0 auto; width:min/);
+});
