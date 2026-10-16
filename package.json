@@ -13,7 +13,8 @@
     "test:games": "node --import tsx --test tests/rules.test.ts",
     "test:compliance": "node --import tsx --test tests/prizeDrawCompliance.test.ts",
     "test": "node --import tsx --test tests/*.test.ts",
-    "test:ticket-db": "node tests/integration/automaticTicketDraw.mjs"
+    "test:ticket-db": "node tests/integration/automaticTicketDraw.mjs",
+    "verify": "npm run lint && npm test && npm run test:ticket-db && npm run build"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",
