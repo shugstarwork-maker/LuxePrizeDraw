@@ -768,3 +768,15 @@
 .coverflow-holiday .holiday-card-photo { object-position: center top; }
 .holiday-card-shade { background:none; pointer-events:none; }
 .coverflow-holiday .holiday-card-copy { margin-top:12rem; padding-top:1rem; background:rgba(0,0,0,.45); text-shadow:0 2px 5px #000; }
+
+/* Shared Luxe identity: typography and chrome only; preserve game-state colours. */
+.luxe-brand-theme { --luxe-gold:#ffe09a; --luxe-edge:#b79a54; background-color:#050403; }
+.luxe-brand-theme :is(h1,h2,h3,h4) { font-family:Georgia,'Times New Roman',serif; color:var(--luxe-gold); text-shadow:0 2px 2px #4a300c,0 0 18px #dfb54c33; }
+.luxe-brand-theme :is(.coverflow-draw,.coverflow-holiday,.coverflow-tier,.gold-games__card,.launch-card) { border-color:var(--luxe-edge); }
+.luxe-brand-theme :is(.launch-button,.gold-games__play,.poker-salon-seat) { background:linear-gradient(#fff0b0,#ffbd22); color:#140c00; border:1px solid #ffe6a0; box-shadow:0 3px #785017; }
+.luxe-brand-theme :is(nav,header) button:focus-visible { outline:3px solid #ffe09a; outline-offset:3px; }
+.poker-salon-card { isolation:isolate; border-color:#c7a85c; box-shadow:inset 0 0 25px #c7a85c22,0 15px 30px #0008; }
+.poker-salon-card::before { content:''; position:absolute; inset:0; z-index:-1; background:linear-gradient(130deg,transparent 48%,#e2b84633 49%,transparent 51%),radial-gradient(ellipse at top right,#c59a3033,transparent 60%); pointer-events:none; }
+.poker-salon-emblem { position:absolute; top:1rem; right:1.25rem; font:4rem/1 Georgia,serif; color:#e8c16a; text-shadow:0 0 18px #d4af3755; }
+#poker-league > div > header { flex-wrap:wrap; gap:.65rem; border-color:#b79a54; background:linear-gradient(120deg,#100c05,#050403); }
+#poker-league .poker-salon-seat { min-height:2.75rem; align-items:center; }
