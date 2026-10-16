@@ -50,7 +50,7 @@ export function LaunchBuildPage() {
   };
   return <main className="launch-build"><div className="launch-wrap">
     <a href="/" className="text-sm text-amber-200 underline">Back to home</a>
-    <header className="launch-header"><p className="launch-kicker">Luxe Prize Draws</p><h1>Launch catalogue</h1><p className="mt-4 text-xl font-bold text-amber-200">Approval pending</p><p className="launch-meta">Cash draws // Luxury holidays // Experiences</p></header>
+    <header className="launch-header"><p className="launch-kicker">LuxePrizeDraw Ltd</p><h1>Launch catalogue</h1><p className="mt-4 text-xl font-bold text-amber-200">Approval pending</p><p className="launch-meta">Cash draws // Luxury holidays // Experiences</p></header>
     <p className="mt-4 rounded-xl border border-amber-200/30 bg-amber-300/10 p-4 text-sm text-amber-100">Pre-launch proposals from the uploaded build. No entries, payments or prize entitlements are created. Prices, grades and targets require reconciliation with approved rules; they do not replace the existing economics model. Proposed per-person limit: 10 per draw.</p>
     <p role="status" className="my-5 text-sm text-amber-100">{message}</p>
     <section aria-labelledby="launch-readiness" className="my-6 rounded-xl border border-amber-200/30 p-4">

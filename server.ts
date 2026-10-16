@@ -524,7 +524,7 @@ app.post("/api/ai/pitch-evaluate", async (req, res) => {
       return res.status(400).json({ error: "Please provide a business idea or concept." });
     }
 
-    const prompt = `You are the Lead UK Commercial Strategy & Company Formation Advisor for the official Luxe Prize Draws competition.
+    const prompt = `You are the Lead UK Commercial Strategy & Company Formation Advisor for the official LuxePrizeDraw Ltd competition.
 Evaluate the following business idea that a participant wants to launch in the UK with their 2-Week 5-Star Luxury Holiday, £100K Sterling Cash Prize, Custom App, and Full Brand Suite. `;
 
     if (process.env.AI_GATEWAY_ENABLED === "false") {
@@ -592,7 +592,7 @@ app.post("/api/ai/ask-advisor", async (req, res) => {
       return res.status(400).json({ error: "Question is required." });
     }
 
-    const prompt = `You are the Luxe Prize Draws Senior Business & Legal Advisor.
+    const prompt = `You are the LuxePrizeDraw Ltd Senior Business & Legal Advisor.
 You are helping a prospective winner understand the full prize package:
 1. 2-Week VIP UK Holiday & 5-Star Hotel Stay (Business class flights for 2, luxury suite, private chauffeur, £4,000 dining credit)
 2. UK Limited Company Formation (fully managed, England & Wales or Scotland)
@@ -609,7 +609,7 @@ Provide a concise, direct, helpful, and inspiring response (2-3 paragraphs max) 
 
     if (process.env.AI_GATEWAY_ENABLED === "false") {
       return res.json({
-        answer: `As a winner of Luxe Prize Draws, your entire journey is 100% covered. We handle the entire company incorporation with full digital registration. `
+        answer: `As a winner of LuxePrizeDraw Ltd, your entire journey is 100% covered. We handle the entire company incorporation with full digital registration. `
       });
     }
 
@@ -619,7 +619,7 @@ Provide a concise, direct, helpful, and inspiring response (2-3 paragraphs max) 
     console.error("AI Advisor error:", error);
     if (error?.statusCode === 429) return res.status(429).json({ error: "The advisor is busy. Please try again shortly." });
     return res.json({
-      answer: "Luxe Prize Draws is designed for maximum speed and zero friction. From company licensing, 5-Star luxury holiday, and 3-Year Relocation to corporate bank setup and transferring your £100,000 cash grant, everything is orchestrated so you can focus entirely on growing your business with your custom app and One-Click booking system.",
+      answer: "LuxePrizeDraw Ltd is designed for maximum speed and zero friction. From company licensing, 5-Star luxury holiday, and 3-Year Relocation to corporate bank setup and transferring your £100,000 cash grant, everything is orchestrated so you can focus entirely on growing your business with your custom app and One-Click booking system.",
     });
   }
 });
@@ -650,7 +650,7 @@ async function startServer() {
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Luxe Prize Draws server running on http://0.0.0.0:${PORT}`);
+    console.log(`LuxePrizeDraw Ltd server running on http://0.0.0.0:${PORT}`);
   });
 }
 

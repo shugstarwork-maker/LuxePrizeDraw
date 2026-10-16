@@ -80,7 +80,7 @@ export async function prepareDigests() {
       category: supplier.category,
       recipientConfigured: Boolean(process.env[supplier.emailEnv]),
       deliveryStatus: "PREPARED_NOT_SENT",
-      subject: `Luxe Prize Draws: ${supplier.category} trend digest`,
+      subject: `LuxePrizeDraw Ltd: ${supplier.category} trend digest`,
       topItems,
       text: topItems.length ? [`Top ${supplier.category} trends from the last 24 hours:`, ...topItems.map((item, index) => `${index + 1}. ${item.itemName} — ${item.interactions} interactions (${item.entryInterest} entry interest, ${item.wishlists} wishlists, ${item.ticketGameInterest} ticket-game interest)`)].join("\n") : `No ${supplier.category} trend activity was recorded in the last 24 hours.`,
     });

@@ -15,7 +15,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
   const [messages, setMessages] = useState<Array<{ role: "ai" | "user"; text: string }>>([
     {
       role: "ai",
-      text: "Hello! I am your Luxe Prize Draws Commercial & Legal AI Advisor. Ask me anything about UK company formation, the founder relocation programme, the 2-week 5-star luxury holiday, or your £100K cash prize.",
+      text: "Hello! I am your LuxePrizeDraw Ltd Commercial & Legal AI Advisor. Ask me anything about UK company formation, the founder relocation programme, the 2-week 5-star luxury holiday, or your £100K cash prize.",
     },
   ]);
   const [inputQuery, setInputQuery] = useState("");
@@ -66,7 +66,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                 <Sparkles className="w-5 h-5 text-black" />
               </div>
               <div>
-                <h3 className="text-sm font-bold uppercase tracking-wider text-white">Luxe Prize Draws AI Advisor</h3>
+                <h3 className="text-sm font-bold uppercase tracking-wider text-white">LuxePrizeDraw Ltd AI Advisor</h3>
                 <p className="text-[10px] text-emerald-400 font-semibold tracking-wider uppercase">Live &middot; Gemini 2.5 Flash</p>
               </div>
             </div>

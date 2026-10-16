@@ -31,7 +31,7 @@ export function CredentialsPartnershipsPage() {
           </p>
           <h1 className="mt-4 text-4xl font-black sm:text-6xl">Who we work with — and how we prove it</h1>
           <p className="mt-5 max-w-3xl text-sm leading-relaxed text-white/65">
-            Luxe Prize Draws is pre-launch. This page explains the confirmed-versus-opportunity publishing framework
+            LuxePrizeDraw Ltd is pre-launch. This page explains the confirmed-versus-opportunity publishing framework
             that governs every company name, logo, prize offer and partnership claim on this site. Nothing here is a
             contract, an entry route, or a promise of a prize.
           </p>

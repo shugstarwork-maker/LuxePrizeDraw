@@ -5,7 +5,7 @@ const sections = [
   {
     "id": "scope",
     "title": "Scope and promoter",
-    "text": "This draft framework is intended for all future Luxe Prize Draw Ltd draws. It is not final official rules or evidence of legal approval. The promoter is Luxe Prize Draw Ltd, company number SC888447. Its current registered office is 40 Donaldson Avenue, Stevenston, KA20 4EJ, Scotland. These details are confirmed by the company owner and have not been independently verified. The registered office is not an approved postal-entry address. Any launch address change must be reflected in the published company information and final draw rules before entry opens. No draw is open on this pre-launch site."
+    "text": "This draft framework is intended for all future LuxePrizeDraw Ltd draws. It is not final official rules or evidence of legal approval. The promoter is LuxePrizeDraw Ltd, company number SC888447. Its current registered office is 40 Donaldson Avenue, Stevenston, KA20 4EJ, Scotland. These details are confirmed by the company owner and have not been independently verified. The registered office is not an approved postal-entry address. Any launch address change must be reflected in the published company information and final draw rules before entry opens. No draw is open on this pre-launch site."
   },
   {
     "id": "eligibility",
@@ -20,7 +20,7 @@ const sections = [
   {
     "id": "free-entry",
     "title": "Free postal entry and equal treatment",
-    "text": "For any draw offering paid and free entry, entrants must have a genuine choice to participate without paying the promoter. Ordinary first- or second-class post may be used; normal postage costs are payable to the postal service. Special or recorded delivery, premium-rate services and additional entry fees must not be required. The approved draw rules must publish the actual postal address, required entrant details, draw identifier, receipt deadline and how entries are acknowledged or checked. The owner-confirmed business address is Luxe Prize Draw Ltd, 18 Factory Place, Saltcoats. Postcode to be added. This is separate from the registered office. The business address is not approved postal-entry instructions; the final postal-entry address and processing rules remain approval pending. Do not send postal entries now: no draw is open for entry. The address alone does not establish an approved entry-processing procedure."
+    "text": "For any draw offering paid and free entry, entrants must have a genuine choice to participate without paying the promoter. Ordinary first- or second-class post may be used; normal postage costs are payable to the postal service. Special or recorded delivery, premium-rate services and additional entry fees must not be required. The approved draw rules must publish the actual postal address, required entrant details, draw identifier, receipt deadline and how entries are acknowledged or checked. The owner-confirmed business address is LuxePrizeDraw Ltd, 18 Factory Place, Saltcoats. Postcode to be added. This is separate from the registered office. The business address is not approved postal-entry instructions; the final postal-entry address and processing rules remain approval pending. Do not send postal entries now: no draw is open for entry. The address alone does not establish an approved entry-processing procedure."
   },
   {
     "id": "equal-treatment",

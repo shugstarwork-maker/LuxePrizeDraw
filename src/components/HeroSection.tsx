@@ -95,7 +95,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           <div className="lg:col-span-7 flex flex-col justify-center space-y-6">
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-light leading-[1.1] text-white tracking-tight">
               Win Your <span className="font-bold text-[#D4AF37]">Future</span> <br className="hidden sm:inline" />
-              with Luxe Prize Draws
+              with LuxePrizeDraw Ltd
             </h1>
 
             <div className="inline-flex w-fit max-w-full items-center gap-2 self-start rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/10 px-3.5 py-1.5">
@@ -106,7 +106,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </div>
 
             <p className="text-base sm:text-lg text-white/50 max-w-xl leading-relaxed">
-              The ultimate founder prize package. We don't just give you a prize; we set you up to own and run your own Luxe Prize Draws franchise in the UK with <strong className="text-white font-semibold">£100,000 Cash</strong>, an all-inclusive <strong className="text-[#D4AF37] font-semibold">2-Week 5-Star Luxury Holiday</strong>, a <strong className="text-white font-semibold">3-Year Founder Relocation Package</strong>, and a custom <strong className="text-[#D4AF37] font-semibold">App with One-Click Book & AI</strong>.
+              The ultimate founder prize package. We don't just give you a prize; we set you up to own and run your own LuxePrizeDraw Ltd franchise in the UK with <strong className="text-white font-semibold">£100,000 Cash</strong>, an all-inclusive <strong className="text-[#D4AF37] font-semibold">2-Week 5-Star Luxury Holiday</strong>, a <strong className="text-white font-semibold">3-Year Founder Relocation Package</strong>, and a custom <strong className="text-[#D4AF37] font-semibold">App with One-Click Book & AI</strong>.
             </p>
 
             {/* Action Buttons matching Immersive UI */}

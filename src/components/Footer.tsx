@@ -22,12 +22,12 @@ export const Footer: React.FC<FooterProps> = ({ onOpenEntry, onOpenWallet }) => 
                 LUXE
               </div>
               <div>
-                <span className="font-bold text-sm uppercase tracking-wider text-white">LUXE PRIZE DRAWS</span>
+                <span className="font-bold text-sm uppercase tracking-wider text-white">LuxePrizeDraw Ltd</span>
                 <p className="text-[10px] text-[#D4AF37] font-semibold uppercase tracking-wider">Official 2026 Grand Draw</p>
               </div>
             </div>
             <p className="text-xs text-white/50 font-light leading-relaxed max-w-sm">
-              Luxe Prize Draws gives one visionary entrepreneur a turnkey UK business launch: £100K Cash, a 2-Week 5-Star Luxury Holiday, a 3-Year Founder Relocation Package, a Fully Managed UK Company, Full Branding Suite, Custom App & Website with One-Click Book & AI, and Tier-1 VIP Corporate Banking.
+              LuxePrizeDraw Ltd gives one visionary entrepreneur a turnkey UK business launch: £100K Cash, a 2-Week 5-Star Luxury Holiday, a 3-Year Founder Relocation Package, a Fully Managed UK Company, Full Branding Suite, Custom App & Website with One-Click Book & AI, and Tier-1 VIP Corporate Banking.
             </p>
             <div className="flex items-center gap-2 text-xs text-emerald-400 font-medium">
               <ShieldCheck className="w-4 h-4" />
@@ -114,7 +114,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenEntry, onOpenWallet }) => 
         {/* Bottom Bar with Compliance Notice */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/40 font-light">
           <div className="space-y-1 text-center sm:text-left">
-            <p>&copy; 2026 Luxe Prize Draw Ltd. All rights reserved.</p>
+            <p>&copy; 2026 LuxePrizeDraw Ltd. All rights reserved.</p>
             <p>Business address: 18 Factory Place, Saltcoats</p>
             <p>Approval pending. Postcode to be added.</p>
             <p className="text-[10px] text-white/30">

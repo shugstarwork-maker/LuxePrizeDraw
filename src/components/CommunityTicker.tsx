@@ -6,7 +6,7 @@ const items = [
   { icon: ShieldCheck, text: "Safeguarding status publishes only after independent evidence is recorded" },
   { icon: Heart, text: "Charity donations publish only after partner confirmation and reconciliation" },
   { icon: Mail, text: "Postal-entry route: counsel-approved rules required" },
-  { icon: Copyright, text: "© 2026 HUASH LTD — Luxe Prize Draws proprietary product" },
+  { icon: Copyright, text: "© 2026 LuxePrizeDraw Ltd — LuxePrizeDraw Ltd proprietary product" },
 ];
 
 export const CommunityTicker: React.FC = () => (

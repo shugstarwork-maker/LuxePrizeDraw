@@ -123,7 +123,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xl sm:text-2xl font-bold tracking-tighter uppercase text-white">Luxe Prize Draws</span>
+                  <span className="text-xl sm:text-2xl font-bold tracking-tighter uppercase text-white">LuxePrizeDraw Ltd</span>
                   <span className="hidden sm:inline-block text-[9px] uppercase tracking-[0.2em] font-bold px-2.5 py-0.5 rounded-full bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30">
                     2026 Draw
                   </span>
