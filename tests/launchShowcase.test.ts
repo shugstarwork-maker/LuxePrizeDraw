@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import fs from 'node:fs';
-import { LaunchCatalogue, LaunchCategoryShowcase, LaunchGauge } from '../src/components/LaunchShowcase';
+import { LaunchCatalogue, LaunchCategoryShowcase, LaunchGauge, LaunchDrawCard, launchTicketTarget } from '../src/components/LaunchShowcase';
 import { SEED_DRAWS, publicDraw } from '../api/launch-build';
 
 const draws = SEED_DRAWS.map(draw => publicDraw(draw));
@@ -44,4 +44,29 @@ test('gold HUD styles are scoped, responsive, and reduce motion', () => {
   assert.match(css, /minmax\(min\(100%,340px\),1fr\)/);
   assert.match(css, /prefers-reduced-motion:reduce/);
   assert.doesNotMatch(css, /(^|\n)(body|:root|button|h1|\.card)\s*\{/);
+});
+
+
+test('catalogue and carousel targets are tickets while entry prices remain GBP', () => {
+  for (const Component of [LaunchDrawCard, LaunchCategoryShowcase]) {
+    const html = renderToStaticMarkup(createElement(Component, Component === LaunchDrawCard
+      ? { draw: draws[0] } : { items: [draws[0]], label: 'Cash' }));
+    assert.match(html, /Ticket target <b>600 tickets<\/b>/);
+    assert.match(html, /Proposed entry <b>£0\.10<\/b>/);
+    assert.doesNotMatch(html, /Target <b>£|Ticket target <b>£/);
+  }
+});
+
+test('ticket targets round up using integer pennies without changing revenue thresholds', () => {
+  assert.equal(launchTicketTarget({ target: 60, price: .1 }), 600);
+  assert.equal(launchTicketTarget({ target: 16000, price: 3 }), 5334);
+  assert.equal(launchTicketTarget({ target: .07, price: .01 }), 7);
+  assert.equal(launchTicketTarget({ target: 500000, price: 10 }), 50000);
+  for (const draw of draws) {
+    const tickets = launchTicketTarget(draw);
+    const price = Math.round(draw.price * 100), target = Math.round(draw.target * 100);
+    assert.ok(tickets * price >= target);
+    assert.ok((tickets - 1) * price < target);
+  }
+  assert.equal(SEED_DRAWS.find(draw => draw.id === 'dubai')!.target, 16000);
 });

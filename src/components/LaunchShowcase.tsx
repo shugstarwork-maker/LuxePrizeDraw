@@ -2,6 +2,14 @@ import React, { useEffect, useState } from "react";
 import type { LaunchDraw } from "./LaunchBuildPage";
 
 const money = (value: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 2 }).format(value);
+// Use integer pennies to avoid floating-point rounding adding a phantom ticket.
+export function launchTicketTarget(draw: Pick<LaunchDraw, "target" | "price">) {
+  const targetMinor = Math.round(draw.target * 100);
+  const priceMinor = Math.round(draw.price * 100);
+  return Math.ceil(targetMinor / priceMinor);
+}
+
+const ticketTarget = (draw: LaunchDraw) => `${launchTicketTarget(draw).toLocaleString("en-GB")} tickets`;
 const categories = ["All", "Cash", "Holidays", "Experiences"];
 
 export function LaunchGauge() {
@@ -54,7 +62,7 @@ export function LaunchCategoryShowcase({ items, label }: { items: LaunchDraw[]; 
       <div className="launch-stage" key={draw.id} role="group" aria-roledescription="slide" aria-label={`${current + 1} of ${items.length}: ${draw.title}`}>
         <div className="launch-stage-copy"><p className="launch-kicker">{draw.grade} // {draw.cat}</p>
           <h3>{draw.title}</h3><p className="launch-kicker">Pre-launch prize proposal</p>
-          <p className="launch-meta">Proposed entry <b>{money(draw.price)}</b> · Target <b>{money(draw.target)}</b></p>
+          <p className="launch-meta">Proposed entry <b>{money(draw.price)}</b> · Ticket target <b>{ticketTarget(draw)}</b></p>
           <button className="launch-button" disabled>{draw.paused ? "Paused" : "Launch pending"}</button>
         </div>
         <div className="launch-stage-gauge"><LaunchGauge /><LaunchSegments /><p>Verified sales unavailable</p></div>
@@ -72,7 +80,7 @@ export function LaunchCategoryShowcase({ items, label }: { items: LaunchDraw[]; 
 export function LaunchDrawCard({ draw }: { draw: LaunchDraw }) {
   return <article className={`launch-card${draw.paused ? " launch-card-paused" : ""}`}>
       <div className="launch-card-top"><LaunchGauge /><div><p className="launch-kicker">{draw.cat} // Proposed</p><h2>{draw.title}</h2><p className="launch-meta">{draw.grade}</p></div></div>
-      <p className="launch-meta">Proposed entry <b>{money(draw.price)}</b> · Target <b>{money(draw.target)}</b></p>
+      <p className="launch-meta">Proposed entry <b>{money(draw.price)}</b> · Ticket target <b>{ticketTarget(draw)}</b></p>
       <LaunchSegments /><p className="launch-meta">Verified sales unavailable. No winner selected.</p>
       <p className="launch-kicker">{draw.paused ? "Paused" : "Not open · Awaiting approved rules"}</p>
       <button className="launch-button" disabled>Launch pending</button>
