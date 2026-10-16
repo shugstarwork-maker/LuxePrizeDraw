@@ -50,3 +50,12 @@ This register records direct software dependencies and identified externally hos
 - Image retained as supplied, including visible watermark; no watermark removed.
 - Permission is owner-reported, not independently verified. Retain the underlying
   licence evidence in the restricted company asset archive, not this repository.
+
+## Owner-supplied higher cash carousel image
+
+- Asset: `public/prizes/higher-cash-notes.jpg`, uploaded 16 October 2026.
+- Usage: homepage cash carousel prizes above £10,000 (£12,500–£250,000).
+- Source: owner supplied the screenshot and requested this usage; underlying
+  licence evidence has not been independently verified. Retain it in the restricted
+  company asset archive before commercial release.
+- Image retained as supplied; no marks or image content removed.
