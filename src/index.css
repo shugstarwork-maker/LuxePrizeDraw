@@ -658,3 +658,11 @@
   .luxe-dealer-medallion, .luxe-dealer-medallion img, .luxe-dealer-float, .luxe-dealer-ring { animation: none; }
   .luxe-dealer-cardfly { display: none; }
 }
+
+/* ——— Carousel sharpen pass ——— */
+.compact-coverflow__card { transition: transform .55s cubic-bezier(.22,1,.36,1), opacity .55s ease; will-change: transform, opacity; }
+.coverflow-draw { border: 1px solid rgba(212,175,55,.38) !important; box-shadow: 0 30px 70px rgba(0,0,0,.6), 0 0 34px rgba(212,175,55,.12) !important; }
+.coverflow-draw img { filter: contrast(1.06) saturate(1.08); }
+.coverflow-draw:hover img { transform: scale(1.06); }
+.compact-coverflow__card[style*="rotateY(0deg)"] .coverflow-draw { border-color: rgba(243,220,154,.65) !important; box-shadow: 0 34px 80px rgba(0,0,0,.65), 0 0 44px rgba(212,175,55,.28) !important; }
+@media (prefers-reduced-motion: reduce) { .compact-coverflow__card { transition: none; } }
