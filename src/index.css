@@ -889,3 +889,13 @@
   .poker-playing-page .poker-live-hand { top:62%; }
   .poker-playing-page .luxe-dealer-bubble { display:none; }
 }
+
+@media (orientation:landscape) and (max-height:700px) {
+  .poker-playing-page .poker-deal-dock { background:linear-gradient(#fff0b0,#ffbd22); color:#140c00; font-size:1rem; font-weight:900; min-height:2.75rem; text-shadow:none; }
+  .poker-playing-page .poker-deal-dock:focus-visible,.poker-playing-page .poker-action-dock button:focus-visible { outline:3px solid #fff; outline-offset:2px; }
+}
+/* Portrait remains a rotation prompt even when browser fullscreen is active. */
+@media (orientation:portrait) and (max-width:900px) {
+  .poker-playing-page:fullscreen .poker-playing-wrap { display:none; }
+  .poker-playing-page:fullscreen .poker-landscape-gate { display:flex; }
+}
