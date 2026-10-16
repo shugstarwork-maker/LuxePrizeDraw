@@ -15,9 +15,9 @@ test('landscape hides app chrome only during active table view', () => {
   assert.match(css, /app-audio-controls \{ display:none/);
 });
 
-test('landscape table dimensions reserve viewport space for header and betting controls', () => {
+test('landscape table fills viewport with overlay controls and no page scrolling', () => {
   const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
-  assert.match(css, /height:100dvh; min-height:0/);
-  assert.match(css, /100dvh - 10rem/);
-  assert.match(css, /poker-table-artwork \{ margin:0 auto; width:min/);
+  assert.match(css, /height:100dvh; min-height:0; padding:0; overflow:hidden/);
+  assert.doesNotMatch(css, /100dvh - 10rem/);
+  assert.match(css, /poker-table-artwork > img \{ width:100%; height:100%; object-fit:cover/);
 });
