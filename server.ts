@@ -1,3 +1,5 @@
+import { GET as ticketStatus } from "./api/ticket-draws/status";
+import { POST as ticketWorker } from "./api/ticket-draws/worker";
 import { GET as launchBuildGet, POST as launchBuildPost } from "./api/launch-build";
 import express from "express";
 import path from "path";
@@ -33,6 +35,17 @@ async function withAiCapacity<T>(work: () => Promise<T>) {
 
 app.use(express.json({ limit: "32kb", verify: (req, _res, buffer) => { (req as express.Request & { rawBody?: Buffer }).rawBody = Buffer.from(buffer); } }));
 app.set("query parser", "simple");
+
+app.get("/api/ticket-draws/status", async (req, res) => {
+  const response = await ticketStatus(new Request(`http://localhost${req.originalUrl}`));
+  response.headers.forEach((value, key) => res.setHeader(key, value));
+  res.status(response.status).send(await response.text());
+});
+app.post("/api/ticket-draws/worker", async (req, res) => {
+  const response = await ticketWorker(new Request("http://localhost/api/ticket-draws/worker", { method: "POST", headers: { authorization: req.header("authorization") || "" } }));
+  response.headers.forEach((value, key) => res.setHeader(key, value));
+  res.status(response.status).send(await response.text());
+});
 
 // Share the same handlers between local Express and the deployed Vercel API.
 app.all("/api/launch-build", async (req, res) => {

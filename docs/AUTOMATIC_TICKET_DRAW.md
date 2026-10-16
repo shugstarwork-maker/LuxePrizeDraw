@@ -35,3 +35,31 @@ no system should promise exact-time execution or fabricate a result at zero.
 
 Until these steps and formal approval are complete, this is backend groundwork,
 not an operational automatic draw. No real entry, payment or prize is enabled.
+
+## Connected application groundwork
+
+The 22 homepage cash cards now query `GET /api/ticket-draws/status?drawId=...`
+and show ticket targets instead of cash revenue targets. Until configured, the API
+returns approval pending and unknown counts. Proposed caps are calculated from
+existing economics using integer pennies; they are not approved maximum entries.
+The live database draw IDs must match the card IDs before activation.
+
+The protected `POST /api/ticket-draws/worker` invokes the transactional selection
+function for up to 50 approved open/closed draws. It requires the dedicated
+TICKET_DRAW_WORKER_SECRET bearer token and TICKET_DRAWS_ENABLED=true. Neither is
+provisioned here. A durable external scheduler must call it regularly; calls must
+continue with no visitors present. A two-second cadence gives approximately
+10–12 second execution after the persisted start, not a guaranteed exact instant.
+This endpoint is not itself a scheduler. Test retries and failures before launch.
+
+Cards poll status every two seconds and display the server deadline countdown.
+They never call selection. At zero they wait for the persisted result. No entrant
+IDs are exposed by the public API, and winner publication remains a separate
+verified workflow. Other legacy cards still use the prior revenue-progress UI.
+The complete verified-entry ingestion and payment integration remain outstanding.
+
+Run `npm run test:ticket-db` for the isolated PGlite/pgcrypto integration test.
+This executes both migrations and verifies approval blocking, below-cap behavior,
+countdown persistence, early retries, winner selection and one result event on
+retry. It is not a multi-connection production concurrency test. Run `npm test`
+for ticket arithmetic, countdown and API gate tests. No credentials are required.
