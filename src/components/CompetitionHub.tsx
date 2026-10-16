@@ -3,15 +3,15 @@ import { Heart, Star, Trophy, Users, Crown } from "lucide-react";
 
 const categories = [
   { title: "Games", subtitle: "Play, compete and unlock bonus entries", image: "/games/duel-neon.svg", accent: "from-violet-500 to-fuchsia-500", id: "games", draws: ["Golden Goal", "Luxe Quiz", "Match Predictor"] },
-  { title: "Prize Draw", subtitle: "Explore every live Luxe prize experience", image: "/prizes/cash-vault.svg", accent: "from-amber-400 to-orange-500", id: "prizes", draws: ["£100K Cash", "Dubai Lifestyle", "Founder Package"] },
+  { title: "Prize Draw", subtitle: "Explore every live Luxe prize experience", image: "/prizes/cash-vault.svg", accent: "from-amber-400 to-orange-500", id: "prizes", draws: ["£100K Cash", "Luxury Lifestyle", "Founder Package"] },
   { title: "Sports Car Draw", subtitle: "Your next dream drive is one entry away", image: "/prizes/velocity.svg", accent: "from-sky-400 to-blue-600", id: "prizes", draws: ["Supercar Weekend", "Track Day VIP", "Dream Car Cash"] },
-  { title: "Dream Lads Holiday", subtitle: "A once-in-a-lifetime escape with your crew", image: "/prizes/escape.svg", accent: "from-emerald-400 to-teal-500", id: "dubai-gallery", draws: ["Dubai Lads Trip", "Ibiza Escape", "Las Vegas Weekend"] },
-  { title: "Ladies Shopping Holiday", subtitle: "Fashion, five-star stays and unforgettable city moments", image: "/prizes/future-tech.svg", accent: "from-pink-400 to-rose-500", id: "dubai-gallery", draws: ["Dubai Shopping", "Paris Style Trip", "Milan Fashion Week"] },
+  { title: "Dream Lads Holiday", subtitle: "A once-in-a-lifetime escape with your crew", image: "/prizes/escape.svg", accent: "from-emerald-400 to-teal-500", id: "experience-gallery", draws: ["London Lads Trip", "Ibiza Escape", "Las Vegas Weekend"] },
+  { title: "Ladies Shopping Holiday", subtitle: "Fashion, five-star stays and unforgettable city moments", image: "/prizes/future-tech.svg", accent: "from-pink-400 to-rose-500", id: "experience-gallery", draws: ["London Shopping", "Paris Style Trip", "Milan Fashion Week"] },
 ];
 
 const leaderboards = [
   { title: "Top Ticket Holders", icon: Trophy, rows: [["1", "A. Thompson", "248 tickets"], ["2", "M. Khan", "196 tickets"], ["3", "S. Williams", "180 tickets"]] },
-  { title: "Recent Winners", icon: Star, rows: [["1", "S. Ahmed", "Dubai escape"], ["2", "J. Turner", "£5,000 cash"], ["3", "L. Morgan", "VIP experience"]] },
+  { title: "Recent Winners", icon: Star, rows: [["1", "S. Ahmed", "Luxury holiday escape"], ["2", "J. Turner", "£5,000 cash"], ["3", "L. Morgan", "VIP experience"]] },
   { title: "Top Donors", icon: Heart, rows: [["1", "R. Patel", "£2,400 raised"], ["2", "C. Jones", "£1,875 raised"], ["3", "D. Green", "£1,420 raised"]] },
   { title: "Legends", icon: Crown, rows: [["1", "The Founders", "Platinum"], ["2", "Golden Circle", "Gold"], ["3", "Luxe Insiders", "Silver"]] },
 ];

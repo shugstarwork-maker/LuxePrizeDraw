@@ -43,7 +43,7 @@ export const LiveDrawTracker: React.FC<LiveDrawTrackerProps> = ({ onOpenEntry })
                 Countdown to the <span className="font-bold text-[#D4AF37]">Grand Winner Selection</span>
               </h2>
               <p className="text-white/60 text-sm leading-relaxed font-light">
-                Streamed globally from Dubai on <strong className="text-[#D4AF37] font-semibold">October 31, 2026 at 18:00 GST</strong>. The winner receives the £100,000 cash grant, 2-week 5-star Dubai luxury holiday, 3-year residency visa, registered UAE company, brand suite, and full web/mobile app with One-Click Book & AI.
+                Streamed globally from London on <strong className="text-[#D4AF37] font-semibold">October 31, 2026 at 18:00 GMT</strong>. The winner receives the £100,000 cash grant, 2-week 5-star London luxury holiday, 3-year founder relocation package, registered UK company, brand suite, and full web/mobile app with One-Click Book & AI.
               </p>
               <div className="flex items-center gap-4 text-xs text-white/50">
                 <span className="flex items-center gap-1.5">
@@ -91,11 +91,11 @@ export const LiveDrawTracker: React.FC<LiveDrawTrackerProps> = ({ onOpenEntry })
           </div>
         </div>
 
-        {/* Previous UAE Founder Success Stories */}
+        {/* Previous UK Founder Success Stories */}
         <div className="mb-16">
           <div className="text-center space-y-2 mb-8">
             <h3 className="text-[10px] font-bold text-[#D4AF37] uppercase tracking-[0.2em]">Hall of Fame</h3>
-            <p className="text-2xl sm:text-3xl font-light text-white">Previous Winners <span className="font-bold">Thriving in Dubai</span></p>
+            <p className="text-2xl sm:text-3xl font-light text-white">Previous Winners <span className="font-bold">Thriving in the UK</span></p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

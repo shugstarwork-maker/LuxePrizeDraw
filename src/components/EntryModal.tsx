@@ -71,7 +71,7 @@ export const EntryModal: React.FC<EntryModalProps> = ({
 
   const handleCopyReferral = () => {
     const baseUrl = window.location.origin;
-    const link = `${baseUrl}/draw?ref=${generatedTicket?.ticketId || "UAE-7729"}`;
+    const link = `${baseUrl}/draw?ref=${generatedTicket?.ticketId || "LPD-7729"}`;
     navigator.clipboard.writeText(link);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
@@ -309,7 +309,6 @@ export const EntryModal: React.FC<EntryModalProps> = ({
                   >
                     <option>United Kingdom</option>
                     <option>United States</option>
-                    <option>United Arab Emirates</option>
                     <option>Canada</option>
                     <option>Germany</option>
                     <option>France</option>
@@ -407,12 +406,10 @@ export const EntryModal: React.FC<EntryModalProps> = ({
 
             {/* Luxurious Golden Ticket Pass */}
             <div className="p-6 rounded-2xl bg-gradient-to-br from-[#D4AF37] via-amber-600 to-yellow-800 text-black shadow-2xl relative overflow-hidden border border-[#D4AF37]">
-              {/* Dubai Skyline Badge Overlay */}
+              {/* Verified Badge Overlay */}
               <div className="flex items-center justify-between pb-4 border-b border-black/20">
                 <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-xl bg-black text-[#D4AF37] font-bold flex items-center justify-center text-sm shadow-md">
-                    UAE
-                  </div>
+                  <div className="w-10 h-10 rounded-xl bg-black text-[#D4AF37] font-bold flex items-center justify-center text-sm shadow-md">LPD</div>
                   <div>
                     <p className="text-[9px] font-bold tracking-widest uppercase text-black/70">Prototype Challenge Preview</p>
                     <p className="text-xs font-bold tracking-wider text-black">DEMO PRIZE CATEGORY PASS</p>

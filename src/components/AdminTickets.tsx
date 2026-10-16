@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { KeyRound, Send, ShieldCheck } from "lucide-react";
 
-const draws = ["£100K Founder Package", "Dream Sports Car Experience", "Dream Lads Holiday", "Ladies Shopping Holiday"];
+const draws = ["£100K Franchise Package", "Dream Sports Car Experience", "Dream Lads Holiday", "Ladies Shopping Holiday"];
 
 export const AdminTickets: React.FC = () => {
   const [password, setPassword] = useState("");

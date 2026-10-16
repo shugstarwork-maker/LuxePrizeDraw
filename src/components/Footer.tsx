@@ -27,7 +27,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenEntry, onOpenWallet }) => 
               </div>
             </div>
             <p className="text-xs text-white/50 font-light leading-relaxed max-w-sm">
-              Luxe Prize Draws gives one visionary entrepreneur a turnkey UAE business setup: £100K Cash, 2-Week 5-Star Dubai Luxury Holiday, 3-Year Residency Visa, 100% Foreign-Owned LLC, Full Branding Suite, Custom App & Website with One-Click Book & AI, and Tier-1 VIP Corporate Banking.
+              Luxe Prize Draws gives one visionary entrepreneur a turnkey UK business launch: £100K Cash, a 2-Week 5-Star Luxury Holiday, a 3-Year Founder Relocation Package, a Fully Managed UK Company, Full Branding Suite, Custom App & Website with One-Click Book & AI, and Tier-1 VIP Corporate Banking.
             </p>
             <div className="flex items-center gap-2 text-xs text-emerald-400 font-medium">
               <ShieldCheck className="w-4 h-4" />
@@ -40,9 +40,9 @@ export const Footer: React.FC<FooterProps> = ({ onOpenEntry, onOpenWallet }) => 
             <h4 className="text-[10px] font-bold text-white uppercase tracking-[0.2em]">The £220K+ Package</h4>
             <ul className="space-y-2 text-xs font-light">
               <li className="hover:text-[#D4AF37] transition-colors cursor-pointer">£100,000 Cash Grant</li>
-              <li className="hover:text-[#D4AF37] transition-colors cursor-pointer">2-Week 5-Star Dubai Luxury Holiday</li>
-              <li className="hover:text-[#D4AF37] transition-colors cursor-pointer">3-Year UAE Investor Visa</li>
-              <li className="hover:text-[#D4AF37] transition-colors cursor-pointer">Turnkey UAE LLC Formation</li>
+              <li className="hover:text-[#D4AF37] transition-colors cursor-pointer">2-Week 5-Star Luxury Holiday</li>
+              <li className="hover:text-[#D4AF37] transition-colors cursor-pointer">3-Year Founder Relocation Package</li>
+              <li className="hover:text-[#D4AF37] transition-colors cursor-pointer">Turnkey UK Company Formation</li>
               <li className="hover:text-[#D4AF37] transition-colors cursor-pointer">App & Web with One-Click Book</li>
               <li className="hover:text-[#D4AF37] transition-colors cursor-pointer">Autonomous AI Concierge</li>
               <li className="hover:text-[#D4AF37] transition-colors cursor-pointer">VIP GBP Banking</li>
@@ -64,8 +64,8 @@ export const Footer: React.FC<FooterProps> = ({ onOpenEntry, onOpenWallet }) => 
                 </button>
               </li>
               <li>
-                <a href="#dubai-gallery" className="hover:text-[#D4AF37] transition-colors">
-                  Dubai Photo Gallery
+                <a href="#experience-gallery" className="hover:text-[#D4AF37] transition-colors">
+                  Experience Gallery
                 </a>
               </li>
               <li>
@@ -97,14 +97,14 @@ export const Footer: React.FC<FooterProps> = ({ onOpenEntry, onOpenWallet }) => 
             </ul>
           </div>
 
-          {/* Official Freezones & Trust */}
+          {/* UK Formation & Trust */}
           <div className="space-y-3">
             <h4 className="text-[10px] font-bold text-white uppercase tracking-[0.2em]">Ecosystem Partners</h4>
             <ul className="space-y-2 text-xs text-white/50 font-light">
-              <li>IFZA Dubai & DSO</li>
-              <li>DMCC Global Freezone</li>
-              <li>Meydan Free Zone</li>
-              <li>Emirates NBD & Wio VIP</li>
+              <li>Companies House & Registered Office</li>
+              <li>Companies House (England & Wales)</li>
+              <li>Companies House (Scotland)</li>
+              <li>UK Business Banking VIP</li>
               <li>Apple Pay & Stripe Rails</li>
               <li>Google Cloud & Gemini AI</li>
             </ul>

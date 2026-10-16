@@ -6,7 +6,7 @@ type Market = { id: string; category: string; question: string; closes: string; 
 const markets: Market[] = [
   { id: "community-pitch", category: "Community", question: "Which founder pitch will lead this week's community vote?", closes: "Closes Friday", volume: "1,284 opinions", outcomes: [{ name: "Green Packaging", price: 62, change: "+8.4%" }, { name: "Logistics SaaS", price: 38, change: "-6.1%" }] },
   { id: "match-night", category: "Games", question: "Which player takes the Connect 4 community showdown?", closes: "Closes Sunday", volume: "842 opinions", outcomes: [{ name: "Mia Carter", price: 54, change: "+3.2%" }, { name: "Leo Foster", price: 46, change: "-2.7%" }] },
-  { id: "luxe-choice", category: "Luxe", question: "Which prize experience should headline next month's draw?", closes: "Closes in 3 days", volume: "2,091 opinions", outcomes: [{ name: "Dubai Escape", price: 71, change: "+11.6%" }, { name: "Sports Car Day", price: 29, change: "-9.5%" }] },
+  { id: "luxe-choice", category: "Luxe", question: "Which prize experience should headline next month's draw?", closes: "Closes in 3 days", volume: "2,091 opinions", outcomes: [{ name: "London Escape", price: 71, change: "+11.6%" }, { name: "Sports Car Day", price: 29, change: "-9.5%" }] },
 ];
 
 export const PredictionMarket: React.FC = () => {

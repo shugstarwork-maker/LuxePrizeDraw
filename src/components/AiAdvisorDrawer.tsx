@@ -15,7 +15,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
   const [messages, setMessages] = useState<Array<{ role: "ai" | "user"; text: string }>>([
     {
       role: "ai",
-      text: "Marhaba! I am your Luxe Prize Draws Commercial & Legal AI Advisor. Ask me anything about Dubai Freezones, the 3-Year Residency Visa, 0% personal tax rules, opening VIP bank accounts with Emirates NBD/Wio, or how the One-Click Book feature works!",
+      text: "Hello! I am your Luxe Prize Draws Commercial & Legal AI Advisor. Ask me anything about UK company formation, the founder relocation programme, the 2-week 5-star luxury holiday, or your £100K cash prize.",
     },
   ]);
   const [inputQuery, setInputQuery] = useState("");
@@ -24,10 +24,10 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
   if (!isOpen) return null;
 
   const quickQuestions = [
-    "What are the tax benefits of a UAE Free Zone company?",
+    "What are the benefits of a UK limited company?",
     "How does the £100K cash grant get paid into my bank?",
-    "What is included in the 2-week 5-star Dubai luxury holiday?",
-    "How quickly is the 3-Year residency visa processed?",
+    "What is included in the 2-week 5-star luxury holiday?",
+    "How quickly is the founder relocation programme arranged?",
   ];
 
   const handleSendMessage = async (queryText?: string) => {
@@ -114,7 +114,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
           {isLoading && (
             <div className="flex items-center gap-2 p-3 rounded-xl bg-white/5 border border-white/10 text-xs text-[#D4AF37] max-w-[200px]">
               <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-              <span>Consulting UAE database...</span>
+              <span>Consulting knowledge base...</span>
             </div>
           )}
         </div>
@@ -132,7 +132,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
               type="text"
               value={inputQuery}
               onChange={(e) => setInputQuery(e.target.value)}
-              placeholder="Ask about visas, taxes, freezones, or app tech..."
+              placeholder="Ask about company setup, the holiday, or app tech..."
               className="flex-1 bg-white/5 border border-white/15 rounded-xl px-3.5 py-3 text-xs text-white placeholder-white/40 focus:outline-none focus:border-[#D4AF37]"
             />
             <button

@@ -34,8 +34,8 @@ export interface CompetitionTicket {
 export interface AiPitchEvaluation {
   feasibilityScore: number;
   executiveSummary: string;
-  recommendedFreezone: string;
-  whyThisZone: string;
+  recommendedFormation: string;
+  whyThisFormation: string;
   appOneClickFeatureConcept: string;
   aiCopilotIntegration: string;
   budgetAllocation100k: {
@@ -62,7 +62,7 @@ export interface BookingDemoSlot {
 }
 
 export interface CustomizerState {
-  companyType: "freezone" | "mainland";
+  companyType: "uk-company" | "uk-mainland";
   selectedZone: string;
   industry: string;
   brandArchetype: string;
