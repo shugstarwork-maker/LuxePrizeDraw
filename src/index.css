@@ -673,3 +673,14 @@
   .compact-coverflow__card { transition: none; }
   .coverflow-draw::after { animation: none; }
 }
+
+/* Static, high-contrast selling points; keep proposal labels alongside amounts. */
+.draw-value-highlights { margin-block: 1rem; color: #fff; text-align: left; }
+.draw-value-highlights__grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .65rem; }
+.draw-value-highlights__grid > div { min-width: 0; border-radius: .9rem; padding: .85rem; border: 1px solid #fcd34d; background: #241b05; }
+.draw-value-highlights__grid > .draw-value-highlights__prize { border-color: #6ee7b7; background: #05251c; }
+.draw-value-highlights dt { font-size: .7rem; font-weight: 800; line-height: 1.4; color: #fef3c7; }
+.draw-value-highlights__prize dt { color: #a7f3d0; }
+.draw-value-highlights dd { margin: .35rem 0 0; font-size: clamp(1.25rem,3vw,2rem); font-weight: 900; line-height: 1.2; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.draw-value-highlights > p { margin-top: .5rem; font-size: .75rem; color: #fde68a; }
+@media(max-width:360px) { .draw-value-highlights__grid { grid-template-columns: minmax(0,1fr); } }

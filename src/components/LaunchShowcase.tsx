@@ -1,3 +1,4 @@
+import { DrawValueHighlights } from "./DrawValueHighlights";
 import React, { useEffect, useState } from "react";
 import type { LaunchDraw } from "./LaunchBuildPage";
 
@@ -54,7 +55,7 @@ export function LaunchCategoryShowcase({ items, label }: { items: LaunchDraw[]; 
       <div className="launch-stage" key={draw.id} role="group" aria-roledescription="slide" aria-label={`${current + 1} of ${items.length}: ${draw.title}`}>
         <div className="launch-stage-copy"><p className="launch-kicker">{draw.grade} // {draw.cat}</p>
           <h3>{draw.title}</h3><p className="launch-kicker">Pre-launch prize proposal</p>
-          <p className="launch-meta">Proposed entry <b>{money(draw.price)}</b> · Target <b>{money(draw.target)}</b></p>
+          <DrawValueHighlights entry={money(draw.price)} prize="Valuation pending" /><p className="launch-meta">Proposed revenue target <b>{money(draw.target)}</b> — not the prize value.</p>
           <button className="launch-button" disabled>{draw.paused ? "Paused" : "Launch pending"}</button>
         </div>
         <div className="launch-stage-gauge"><LaunchGauge /><LaunchSegments /><p>Verified sales unavailable</p></div>
@@ -72,7 +73,7 @@ export function LaunchCategoryShowcase({ items, label }: { items: LaunchDraw[]; 
 export function LaunchDrawCard({ draw }: { draw: LaunchDraw }) {
   return <article className={`launch-card${draw.paused ? " launch-card-paused" : ""}`}>
       <div className="launch-card-top"><LaunchGauge /><div><p className="launch-kicker">{draw.cat} // Proposed</p><h2>{draw.title}</h2><p className="launch-meta">{draw.grade}</p></div></div>
-      <p className="launch-meta">Proposed entry <b>{money(draw.price)}</b> · Target <b>{money(draw.target)}</b></p>
+      <DrawValueHighlights entry={money(draw.price)} prize="Valuation pending" /><p className="launch-meta">Proposed revenue target <b>{money(draw.target)}</b> — not the prize value.</p>
       <LaunchSegments /><p className="launch-meta">Verified sales unavailable. No winner selected.</p>
       <p className="launch-kicker">{draw.paused ? "Paused" : "Not open · Awaiting approved rules"}</p>
       <button className="launch-button" disabled>Launch pending</button>
