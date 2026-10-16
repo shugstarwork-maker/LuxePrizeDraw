@@ -786,7 +786,7 @@
   .poker-table-artwork__live .poker-live-seats > div { padding:.15rem; }
   .poker-table-artwork__live .poker-live-seats label > span { width:1.4rem; height:1.4rem; }
   .poker-table-artwork__live .poker-live-seats b { font-size:.45rem; }
-  .poker-live-host,.poker-live-hand { scale:.6; transform-origin:left top; }
+  .poker-live-host,.poker-live-hand { scale:1; }
 }
 
 /* Landscape-first table without locking orientation or blocking portrait play. */
@@ -815,7 +815,7 @@
 .poker-table-scroll { overflow-x:auto; overflow-y:hidden; padding-block:1rem; }
 .poker-table-scroll:focus-visible { outline:2px solid #ffe09a; outline-offset:2px; }
 @media (orientation:portrait) and (max-width:600px) {
-  .poker-table-scroll .poker-table-artwork { min-width:38rem; }
+  .poker-table-scroll .poker-table-artwork { min-width:0; width:100%; }
   .poker-playing-page { padding-inline:.25rem; }
 }
 
@@ -835,4 +835,16 @@
   .poker-playing-page .poker-fullscreen-controls p { display:none; }
   .poker-playing-page .poker-fullscreen-controls { margin-bottom:.25rem; }
   .poker-playing-page .poker-fullscreen-controls button { min-height:2.25rem; padding:.35rem .7rem; }
+}
+
+/* Portrait shows the entire rail; live overlays scale within the same surface. */
+.poker-table-scroll { overflow-x:hidden; }
+.poker-table-artwork { width:100%; min-width:0; }
+@media(max-width:600px) {
+  .poker-table-artwork__live .poker-card { width:clamp(1.4rem,7vw,2.6rem); height:clamp(2rem,10vw,3.7rem); font-size:clamp(.8rem,3vw,1.1rem); }
+  .poker-table-artwork__live .poker-live-board > div { width:clamp(1.4rem,7vw,2.6rem); height:clamp(2rem,10vw,3.7rem); flex-shrink:0; }
+  .poker-table-artwork__live .poker-live-seats > div { width:16%; max-width:16%; }
+  .poker-table-artwork__live .poker-live-seats small { font-size:.4rem; }
+  .poker-live-host { top:13%; }.poker-live-hand { top:58%; left:67%; }
+  .poker-table-artwork__state { font-size:.65rem; gap:.15rem .5rem; }
 }
