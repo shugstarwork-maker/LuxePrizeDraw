@@ -818,3 +818,21 @@
   .poker-table-scroll .poker-table-artwork { min-width:38rem; }
   .poker-playing-page { padding-inline:.25rem; }
 }
+
+/* Landscape poker: retain essential game actions, remove surrounding app chrome. */
+@media (orientation:landscape) and (max-height:700px) {
+  body:has(.poker-playing-page) .poker-external-chrome,
+  .storm-page:has(.poker-playing-page) > .storm-page__content > aside,
+  .storm-page:has(.poker-playing-page) > .storm-page__content > footer,
+  .storm-page:has(.poker-playing-page) > .app-audio-controls { display:none; }
+  .poker-playing-page { padding-bottom:8rem; }
+  .poker-playing-page .poker-social-controls { display:none; }
+  .poker-action-dock,.poker-deal-dock { position:fixed; z-index:70; left:50%; bottom:max(.5rem,env(safe-area-inset-bottom)); transform:translateX(-50%); width:min(38rem,calc(100% - 2rem)); margin:0; border:1px solid #d9b764; border-radius:1rem; background:#090703f5; box-shadow:0 0 25px #000b; }
+  .poker-action-dock { padding:.5rem .75rem; }
+  .poker-action-dock > div { margin-top:.25rem; }
+  .poker-action-dock button { min-height:2.75rem; padding-block:.5rem; }
+  .poker-action-dock input { display:block; height:1.25rem; }
+  .poker-playing-page .poker-fullscreen-controls p { display:none; }
+  .poker-playing-page .poker-fullscreen-controls { margin-bottom:.25rem; }
+  .poker-playing-page .poker-fullscreen-controls button { min-height:2.25rem; padding:.35rem .7rem; }
+}
