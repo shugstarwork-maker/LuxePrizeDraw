@@ -28,6 +28,12 @@ export const LuxeDealer: React.FC<DealerProps> = ({ stage, active, mood }) => {
       <div className={`luxe-dealer-medallion ${active ? "luxe-dealer-alive" : ""} ${dealing ? "luxe-dealer-deal" : ""}`}>
         <img src="/dealer/vex-bust.png" alt="Vex Delacroix, AI croupier" className="h-14 w-14 rounded-full object-cover sm:h-16 sm:w-16" draggable={false}/>
       </div>
+      {dealing && (
+        <>
+          <span className="luxe-dealer-cardfly" aria-hidden="true"/>
+          <span className="luxe-dealer-cardfly luxe-dealer-cardfly-r" aria-hidden="true"/>
+        </>
+      )}
     </div>
   );
 };
