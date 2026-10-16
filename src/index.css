@@ -788,3 +788,16 @@
   .poker-table-artwork__live .poker-live-seats b { font-size:.45rem; }
   .poker-live-host,.poker-live-hand { scale:.6; transform-origin:left top; }
 }
+
+/* Landscape-first table without locking orientation or blocking portrait play. */
+.poker-playing-page .poker-playing-wrap { max-width:90rem; }
+.poker-playing-page > .poker-playing-wrap > article { padding:.5rem; }
+.poker-rotate-prompt { display:none; }
+@media (orientation:portrait) and (max-width:800px) {
+  .poker-rotate-prompt { display:block; margin-bottom:.75rem; border:1px solid #d7b15b; border-radius:.8rem; padding:.8rem; background:#1c1505; color:#ffe8a0; font-size:.9rem; text-align:center; }
+}
+@media (orientation:landscape) and (max-height:600px) {
+  .poker-playing-page { padding-inline:.25rem; padding-top:.25rem; }
+  .poker-playing-page .poker-table-artwork { margin-block:1.5rem; }
+  .poker-playing-page > .poker-playing-wrap > article { margin-top:.5rem; padding:.25rem; }
+}
