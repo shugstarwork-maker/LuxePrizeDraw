@@ -801,3 +801,12 @@
   .poker-playing-page .poker-table-artwork { margin-block:1.5rem; }
   .poker-playing-page > .poker-playing-wrap > article { margin-top:.5rem; padding:.25rem; }
 }
+
+.poker-fullscreen-controls { display:flex; flex-wrap:wrap; align-items:center; gap:.6rem; margin-bottom:.6rem; }
+.poker-fullscreen-controls button { min-height:2.75rem; padding:.65rem 1rem; border:1px solid #ffe6a0; border-radius:.75rem; background:linear-gradient(#fff0b0,#ffbd22); color:#140c00; font-weight:900; }
+.poker-fullscreen-controls p { font-size:.8rem; color:#ffe6a0; flex:1 1 15rem; }
+.poker-playing-page:fullscreen { width:100%; height:100%; overflow:auto; padding:env(safe-area-inset-top) env(safe-area-inset-right) 1rem env(safe-area-inset-left); background:#050403; }
+.poker-playing-page:fullscreen .poker-playing-wrap { max-width:none; padding:.5rem; }
+.poker-playing-page:fullscreen .poker-table-artwork { margin-block:.75rem; }
+.poker-playing-page:fullscreen .poker-rotate-prompt { display:none; }
+.poker-fullscreen-controls button:focus-visible { outline:3px solid #fff; outline-offset:3px; }
