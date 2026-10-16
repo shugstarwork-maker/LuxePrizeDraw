@@ -27,7 +27,7 @@ test('Arcade library keeps poker separate and links to the styled lounge', async
   Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: { getItem: () => null } });
   try {
     const html = renderToStaticMarkup(createElement(ArcadeHome));
-    assert.match(html, /Separate Poker Lounge/);
+    assert.match(html, /Luxe Poker Lounge/);
     assert.doesNotMatch(html, /poker-neon.svg|Free-play Hold/);
   } finally {
     if (previous) Object.defineProperty(globalThis, 'localStorage', previous);
