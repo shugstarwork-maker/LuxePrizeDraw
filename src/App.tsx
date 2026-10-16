@@ -1,3 +1,4 @@
+import { useAudio } from "./audio/AudioProvider";
 import "./components/launchShowcase.css";
 import { LaunchBuildPage } from "./components/LaunchBuildPage";
 import React, { useEffect, useState } from "react";
@@ -47,6 +48,7 @@ import { StormBackdrop } from "./components/StormBackdrop";
 const go = (path: string) => { window.history.pushState({}, "", path); window.dispatchEvent(new PopStateEvent("popstate")); };
 
 export default function App() {
+  const audio = useAudio();
   const [path, setPath] = useState(() => window.location.pathname);
   useEffect(() => { const sync = () => setPath(window.location.pathname); window.addEventListener("popstate", sync); return () => window.removeEventListener("popstate", sync); }, []);
   const page = path === "/welcome" ? <WelcomePage onEnter={() => go("/")} />
@@ -59,7 +61,7 @@ export default function App() {
     : path === "/postal-intake" ? <PostalIntakePage />
     : path === "/standards" ? <ParticipationStandardsPage />
     : path === "/duel" ? <><DuelRoom /><ScottishHost /><MobileDock /></>
-    : path === "/lobby" ? <><NeonGameLobby /><ScottishHost /><MobileDock /></>
+    : path === "/lobby" ? <NeonGameLobby soundEnabled={audio.enabled} onToggleSound={() => audio.setEnabled(!audio.enabled)} />
     : path === "/poker" ? <><LuxePokerLeague /><ScottishHost /><MobileDock /></>
     : path === "/arcade" ? <><ArcadeHome /><ScottishHost /><MobileDock /></>
     : path === "/portal" ? <><PlayerPortal /><ScottishHost /><MobileDock /></>
@@ -70,7 +72,7 @@ export default function App() {
 
   const category = path === "/category" ? new URLSearchParams(window.location.search).get("name") : path === "/sports-cars" ? "Cars" : "";
   const backdropTheme = path === "/" ? "money" : category === "Cars" ? "cars" : category === "Cash" || category === "Bitcoin" ? "money" : undefined;
-  return <div className="storm-page luxe-brand-theme"><div className="storm-page__content"><OwnershipNotice />{page}<footer className="border-t border-white/10 bg-black/60 px-4 py-6 pb-28 text-center text-xs text-white/65 sm:pb-6"><a href="/terms" className="font-bold text-amber-200 underline underline-offset-4">General terms for all draws</a><p className="mt-2">Pre-launch · Draft rules require legal approval before entries open.</p></footer><IntellectualPropertyNotice /></div><StormBackdrop theme={backdropTheme} /><AudioControls /></div>;
+  return <div className="storm-page luxe-brand-theme"><div className="storm-page__content"><OwnershipNotice />{page}<footer className="border-t border-white/10 bg-black/60 px-4 py-6 pb-28 text-center text-xs text-white/65 sm:pb-6"><a href="/terms" className="font-bold text-amber-200 underline underline-offset-4">General terms for all draws</a><p className="mt-2">Pre-launch · Draft rules require legal approval before entries open.</p></footer><IntellectualPropertyNotice /></div><StormBackdrop theme={backdropTheme} />{path !== "/lobby" && <AudioControls />}</div>;
 }
 
 function SiteContent({ path }: { path: string }) {

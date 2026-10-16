@@ -780,3 +780,12 @@
 .poker-salon-emblem { position:absolute; top:1rem; right:1.25rem; font:4rem/1 Georgia,serif; color:#e8c16a; text-shadow:0 0 18px #d4af3755; }
 #poker-league > div > header { flex-wrap:wrap; gap:.65rem; border-color:#b79a54; background:linear-gradient(120deg,#100c05,#050403); }
 #poker-league .poker-salon-seat { min-height:2.75rem; align-items:center; }
+
+/* Master lounge palette for shared navigation and card chrome. */
+.luxe-brand-theme { --luxe-panel:linear-gradient(135deg,#241b09,#080604 55%,#171006); --luxe-button:linear-gradient(#fff0b0,#edb934 52%,#bc7b12); }
+.luxe-brand-theme :is(.launch-card,.gold-games__card,.poker-salon-card) { background:var(--luxe-panel); box-shadow:inset 0 1px #fff0b033,0 14px 35px #0007; }
+.luxe-brand-theme :is(nav,[role=tablist]) { border-color:#b79a5480; }
+.luxe-brand-theme :is(nav,[role=tablist]) :is(button,a) { border-color:#b79a5470; }
+.luxe-brand-theme :is(nav,[role=tablist]) :is([aria-current=page],[aria-selected=true],[aria-pressed=true]) { background:var(--luxe-button); color:#160e02; }
+.luxe-brand-theme :is(.launch-button,.gold-games__play,.poker-salon-seat) { background:var(--luxe-button); }
+.luxe-brand-theme :is(input,select,textarea):focus-visible { outline:2px solid #ffe09a; outline-offset:2px; }

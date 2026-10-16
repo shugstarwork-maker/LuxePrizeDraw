@@ -17,3 +17,13 @@ test('poker salon replaces purple panels with gold identity and preserves seatin
   assert.match(source, /no cash value/);
   assert.doesNotMatch(source, /#451256/);
 });
+
+test('artwork lounge owns navigation and sound without duplicated floating controls', () => {
+  const app = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8');
+  const lobby = readFileSync(new URL('../src/components/NeonGameLobby.tsx', import.meta.url), 'utf8');
+  assert.match(app, /path !== "\/lobby" && <AudioControls/);
+  const loungeRoute = app.split('path === "/lobby"')[1].split('path === "/poker"')[0];
+  assert.doesNotMatch(loungeRoute, /ScottishHost|MobileDock/);
+  assert.match(lobby, /onClick=\{onToggleSound\}/);
+  assert.match(lobby, /Mute sound effects/);
+});
