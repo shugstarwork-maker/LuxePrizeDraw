@@ -757,3 +757,9 @@
 .gold-games__badge { display:inline-block; border:1px solid #b89b50; border-radius:2rem; padding:.3rem .8rem; text-transform:uppercase; letter-spacing:.12em; }
 .gold-games__play { display:flex; justify-content:center; align-items:center; max-width:19rem; min-height:3.5rem; margin:1.25rem auto .8rem; border:1px solid #fff0aa; border-radius:1rem; background:linear-gradient(#ffeaa0,#ffb600); color:#120c00; font-size:1.1rem; font-weight:900; text-transform:uppercase; box-shadow:0 4px #805012; }
 .gold-games__play:focus-visible { outline:3px solid white; outline-offset:4px; }
+
+/* Arcade and Poker Lounge share typography, but remain separate destinations. */
+.arcade-gold-home { background: #070604; }
+.arcade-gold-home h1,.arcade-gold-home h2,.arcade-gold-home h3 { font-family: Georgia,'Times New Roman',serif; color:#ffe09a; text-shadow:0 2px #704b13,0 0 22px #e6b84b44; }
+.arcade-gold-home .arcade-card-fx { border-color:#b79a54; background:#100c05; }
+.arcade-gold-home .arcade-card-fx button { background:linear-gradient(#ffeaa0,#ffb600); color:#120c00; }

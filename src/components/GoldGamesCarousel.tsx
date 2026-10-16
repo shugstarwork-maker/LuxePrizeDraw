@@ -1,7 +1,6 @@
 import { RollingCardCarousel } from './RollingCardCarousel';
 
 export const GOLD_GAMES = [
-  { id: 'poker', title: 'Luxe Poker Lounge', symbol: '♠', image: '/games/poker-neon.svg', href: '/poker', detail: 'Texas Hold’em · Free-play practice tables' },
   { id: 'chess', title: 'The Royal Chess Room', symbol: '♛', image: '/games/chess.svg', href: '/play?game=chess#games', detail: 'Chess · Local two-player strategy' },
   { id: 'connect4', title: 'Connect Four Club', symbol: '●', image: '/games/connect-four.svg', href: '/play?game=connect4#games', detail: 'Connect Four · Local play and private online rooms' },
   { id: 'draughts', title: 'The Draughts Salon', symbol: '♜', image: '/games/draughts.svg', href: '/play?game=draughts#games', detail: 'Draughts · Captures and crowned kings' },
