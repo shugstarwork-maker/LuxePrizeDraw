@@ -740,3 +740,26 @@
 .original-lounge-disclosure,.original-lounge-notice { max-width:64rem; margin:0 auto; padding:.75rem 1rem; font-size:.75rem; text-align:center; background:#100e06; }
 .original-lounge__sound { left:5%; top:78.5%; width:11%; height:7%; }
 .original-lounge__portal { left:81%; top:77%; width:14%; height:9%; }
+
+/* Luxe games carousel: presentation only, existing engines remain authoritative. */
+.gold-games { max-width:64rem; margin:auto; padding:2rem 1rem; background:radial-gradient(ellipse at top,#38280755,transparent 60%),#070604; color:#ffeab1; }
+.gold-games > header { text-align:center; margin-bottom:1.5rem; }
+.gold-games > header > span { font-size:2rem; }.gold-games > header > p { font-weight:800; text-transform:uppercase; letter-spacing:.25em; font-size:.75rem; }
+.gold-games h2,.gold-games h3 { font-family:Georgia,'Times New Roman',serif; color:#ffe09a; text-shadow:0 2px #704b13,0 0 22px #e6b84b44; }
+.gold-games h2 { font-size:clamp(2rem,7vw,3.5rem); line-height:1.1; margin:.5rem 0; }
+.gold-games small { display:block; font-size:.75rem; line-height:1.5; color:#f5dfa5; }
+.gold-games__card { overflow:hidden; border:1px solid #c4a25c; border-radius:1.75rem; background:linear-gradient(130deg,#2a1e08,#050505 45%,#211806); box-shadow:inset 0 0 25px #e8bb4622,0 15px 35px #0009; }
+.gold-games__top { display:flex; justify-content:space-between; gap:.5rem; padding:.8rem 1rem; border-bottom:1px solid #a78a4744; text-transform:uppercase; font-size:.7rem; font-weight:900; }
+.gold-games__art { position:relative; height:clamp(10rem,35vw,18rem); overflow:hidden; }
+.gold-games__art img { width:100%; height:100%; object-fit:cover; }.gold-games__art::after { content:''; position:absolute; inset:0; background:linear-gradient(transparent 45%,#080603); pointer-events:none; }
+.gold-games__art > span { position:absolute; right:1rem; top:1rem; display:grid; place-items:center; width:3rem; height:3rem; border:1px solid #dfbf70; border-radius:50%; background:#080603; font-size:2rem; }
+.gold-games__copy { position:relative; text-align:center; padding:0 1rem 1.5rem; }.gold-games__copy h3 { font-size:clamp(1.7rem,5vw,2.7rem); line-height:1.15; margin:.6rem 0; }.gold-games__copy > p { font-size:.85rem; }
+.gold-games__badge { display:inline-block; border:1px solid #b89b50; border-radius:2rem; padding:.3rem .8rem; text-transform:uppercase; letter-spacing:.12em; }
+.gold-games__play { display:flex; justify-content:center; align-items:center; max-width:19rem; min-height:3.5rem; margin:1.25rem auto .8rem; border:1px solid #fff0aa; border-radius:1rem; background:linear-gradient(#ffeaa0,#ffb600); color:#120c00; font-size:1.1rem; font-weight:900; text-transform:uppercase; box-shadow:0 4px #805012; }
+.gold-games__play:focus-visible { outline:3px solid white; outline-offset:4px; }
+
+/* Arcade and Poker Lounge share typography, but remain separate destinations. */
+.arcade-gold-home { background: #070604; }
+.arcade-gold-home h1,.arcade-gold-home h2,.arcade-gold-home h3 { font-family: Georgia,'Times New Roman',serif; color:#ffe09a; text-shadow:0 2px #704b13,0 0 22px #e6b84b44; }
+.arcade-gold-home .arcade-card-fx { border-color:#b79a54; background:#100c05; }
+.arcade-gold-home .arcade-card-fx button { background:linear-gradient(#ffeaa0,#ffb600); color:#120c00; }
