@@ -17,3 +17,10 @@ test('game uses artwork without removing dealer or betting handlers', () => {
   assert.match(source, /PokerTableArtwork pot=\{pot\} stage=\{stage\}/);
   for (const handler of ['<LuxeDealer', 'onClick={deal}', 'act("fold")', 'act("raise")']) assert.ok(source.includes(handler));
 });
+
+
+test('live seats and board are nested inside the artwork rather than below it', () => {
+  const source = readFileSync(new URL('../src/components/LuxePokerLeague.tsx', import.meta.url), 'utf8');
+  const surface = source.split('<PokerTableArtwork')[1].split('</PokerTableArtwork>')[0];
+  for (const layer of ['poker-live-seats', 'poker-live-board', 'poker-live-hand']) assert.ok(surface.includes(layer));
+});
