@@ -59,3 +59,11 @@ This register records direct software dependencies and identified externally hos
   licence evidence has not been independently verified. Retain it in the restricted
   company asset archive before commercial release.
 - Image retained as supplied; no marks or image content removed.
+
+## Owner-created poker lounge reference
+
+- `public/prizes/original-poker-lounge.png`: supplied by the owner as their created
+  design and explicitly requested for the lounge. Retained as provided.
+- Live controls overlay the artwork; free-play/no-cash-value disclosures qualify
+  the artwork's reward wording. No real reward or cash-out is enabled.
+- Retain creation/licensing evidence in the restricted asset archive.

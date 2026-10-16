@@ -718,3 +718,25 @@
 .lounge-feature-copy { padding-top: .25rem; padding-bottom: 1.5rem; }
 .lounge-game-title { margin-top: .8rem; font: 700 clamp(1.8rem,6vw,3rem)/1.1 Georgia,serif; color: #ffe296; text-shadow: 0 2px #704a13; }
 .lounge-play-button { min-width: min(100%,17rem); justify-content: center; min-height: 3.5rem; }
+
+/* Preserve the supplied artwork's aspect ratio; live controls follow its coordinates. */
+.original-lounge-page { background:#050503; padding-bottom:7rem; color:#fff0b1; }
+.original-lounge { position:relative; max-width:64rem; margin-inline:auto; }
+.original-lounge__image { display:block; width:100%; height:auto; }
+.original-lounge__hotspot { position:absolute; background:transparent; border:0; border-radius:1rem; cursor:pointer; }
+.original-lounge button:focus-visible { outline:3px solid #fff; outline-offset:2px; box-shadow:0 0 0 5px #a66d00; }
+.original-lounge__arcade { left:5%; top:1%; width:35%; height:6%; }
+.original-lounge__balance { position:absolute; left:59%; top:2.6%; width:12%; height:3%; display:grid; place-items:center; background:#050503; color:#ffefae; font:bold clamp(.8rem,3.5vw,2rem)/1 monospace; }
+.original-lounge__bonus { left:79%; top:1.2%; width:15%; height:5.3%; }
+.original-lounge__previous { left:7%; top:50%; width:10%; height:8%; }
+.original-lounge__next { left:83%; top:50%; width:10%; height:8%; }
+.original-lounge__game { position:absolute; left:20%; top:50.7%; width:60%; padding:.4rem; border-radius:2rem; background:#080703; color:#ffe39b; text-align:center; font-size:clamp(.6rem,2vw,1.1rem); font-weight:800; }
+.original-lounge__play { left:29%; top:75%; width:42%; height:7.5%; }
+.original-lounge__seats { position:absolute; right:6%; top:32.7%; background:#050503; padding:.2rem; font-size:clamp(.6rem,2vw,1.1rem); font-weight:800; text-transform:uppercase; }
+.original-lounge__navigation { position:absolute; left:4%; top:90%; width:92%; height:8%; display:grid; grid-template-columns:repeat(5,1fr); }
+.original-lounge__navigation button,.original-lounge__dots button { background:transparent; border:0; cursor:pointer; border-radius:.5rem; }
+.original-lounge__dots { position:absolute; left:41%; top:87%; width:18%; height:2.5%; display:flex; }
+.original-lounge__dots button { flex:1; }.original-lounge__dots button[aria-pressed=true] { box-shadow:inset 0 -3px #ffe39b; }
+.original-lounge-disclosure,.original-lounge-notice { max-width:64rem; margin:0 auto; padding:.75rem 1rem; font-size:.75rem; text-align:center; background:#100e06; }
+.original-lounge__sound { left:5%; top:78.5%; width:11%; height:7%; }
+.original-lounge__portal { left:81%; top:77%; width:14%; height:9%; }
