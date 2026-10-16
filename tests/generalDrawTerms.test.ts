@@ -8,7 +8,7 @@ import { DrawDetailsPanel } from '../src/components/DrawDetailsPanel';
 
 test('shared terms disclose draft status and material draw protections', () => {
   const html = renderToStaticMarkup(createElement(TermsPage));
-  for (const text of ['General terms for all draws', 'draft-2026-10-15', 'not effective entry rules', 'Luxe Prize Draw Ltd', 'Northern Ireland', 'first- or second-class', 'same chance per entry', 'Low ticket sales', 'statutory rights', 'UK GDPR', 'complaints', 'Bitcoin prize with cash alternative']) assert.ok(html.includes(text), text);
+  for (const text of ['General terms for all draws', 'draft-2026-10-15', 'not effective entry rules', 'LuxePrizeDraw Ltd', 'Northern Ireland', 'first- or second-class', 'same chance per entry', 'Low ticket sales', 'statutory rights', 'UK GDPR', 'complaints', 'Bitcoin prize with cash alternative']) assert.ok(html.includes(text), text);
   assert.match(html, /Do not send postal entries now: no draw is open for entry/);
   assert.match(html, /Payments remain disabled/);
   assert.match(html, /verifiably random results/);

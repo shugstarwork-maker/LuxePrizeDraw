@@ -1,7 +1,7 @@
 # Third-Party Software and Asset Register
 
-**Project:** Luxe Prize Draws platform
-**Owner of original platform work:** Luxe Prize Draw Ltd
+**Project:** LuxePrizeDraw Ltd platform
+**Owner of original platform work:** LuxePrizeDraw Ltd
 **Review date:** 24 September 2026
 
 This register records direct software dependencies and identified externally hosted assets. It is not a substitute for supplier terms or a licence review. The lockfile is the source of truth for exact package versions and transitive dependencies.

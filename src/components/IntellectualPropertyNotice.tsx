@@ -5,7 +5,7 @@ export function IntellectualPropertyNotice() {
     <footer className="border-t border-white/10 bg-black/80 px-4 py-6 text-center text-[11px] leading-relaxed text-white/50 sm:px-6">
       <div className="mx-auto max-w-5xl">
         <p className="font-semibold text-white/70">
-          © 2026 HUASH LTD, owner and developer of the Luxe Prize Draws app. All rights reserved.
+          © 2026 LuxePrizeDraw Ltd, owner and developer of the LuxePrizeDraw Ltd app. All rights reserved.
         </p>
         <p className="mt-2">
           The software, source code, visual assets, content and documentation are proprietary and must not be copied,

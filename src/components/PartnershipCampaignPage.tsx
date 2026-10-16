@@ -29,9 +29,9 @@ export function PartnershipCampaignPage({ campaign = LUXE_AUTOMOTIVE_CAMPAIGN }:
     setMeta('meta[property="og:title"]', title);
     setMeta('meta[property="og:description"]', description);
     return () => {
-      document.title = "Luxe Prize Draws | £100K Bitcoin or Cash, Luxury Prizes";
-      setMeta('meta[name="description"]', "Enter Luxe Prize Draws for the headline £100,000 prize — Bitcoin or cash — plus luxury holidays, prestige vehicles and tech prizes. Pre-launch preview; no entry or payment.");
-      setMeta('meta[property="og:title"]', "Luxe Prize Draws");
+      document.title = "LuxePrizeDraw Ltd | £100K Bitcoin or Cash, Luxury Prizes";
+      setMeta('meta[name="description"]', "Enter LuxePrizeDraw Ltd for the headline £100,000 prize — Bitcoin or cash — plus luxury holidays, prestige vehicles and tech prizes. Pre-launch preview; no entry or payment.");
+      setMeta('meta[property="og:title"]', "LuxePrizeDraw Ltd");
       setMeta('meta[property="og:description"]', "Win £100K of Bitcoin or £100K Cash, plus luxury holidays, prestige vehicles and tech prizes. Pre-launch preview.");
     };
   }, [campaign.partnerName]);

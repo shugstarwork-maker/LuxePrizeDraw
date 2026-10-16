@@ -18,7 +18,7 @@ export function PartnerShowcase() {
         <div>
           <p className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[.2em] text-amber-200"><ShieldCheck className="h-4 w-4" /> Partner showcase</p>
           <h2 className="mt-3 text-4xl font-black sm:text-5xl">The prize-draw network.</h2>
-          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/60">A demo view of the brands and businesses intended to shape Luxe Prize Draws experiences.</p>
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/60">A demo view of the brands and businesses intended to shape LuxePrizeDraw Ltd experiences.</p>
         </div>
         <span className="w-fit rounded-full border border-white/10 bg-white/[.03] px-3 py-2 text-[10px] font-black uppercase tracking-wider text-white/50">Text-only demo marks</span>
       </div>

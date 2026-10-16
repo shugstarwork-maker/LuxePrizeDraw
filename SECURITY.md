@@ -1,6 +1,6 @@
 # Security and Access Controls
 
-Luxe Prize Draw Ltd maintains this repository and the Luxe Prize Draws project as proprietary systems.
+LuxePrizeDraw Ltd maintains this repository and the LuxePrizeDraw Ltd project as proprietary systems.
 
 ## Required controls
 
@@ -15,7 +15,7 @@ Luxe Prize Draw Ltd maintains this repository and the Luxe Prize Draws project a
 
 ## Repository safeguards in place
 
-- The project package is marked `UNLICENSED` and the root `LICENSE` reserves rights to Luxe Prize Draw Ltd.
+- The project package is marked `UNLICENSED` and the root `LICENSE` reserves rights to LuxePrizeDraw Ltd.
 - The IP register, confidentiality policy and third-party asset register are version-controlled under `docs/`.
 - The public competition-entry endpoint is fail-closed while the platform is pre-launch.
 - Production source maps are protected at the Vercel project level.

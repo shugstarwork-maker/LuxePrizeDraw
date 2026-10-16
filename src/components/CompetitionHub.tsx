@@ -25,7 +25,7 @@ export const CompetitionHub: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mb-10">
           <p className="text-[#D4AF37] text-xs font-black uppercase tracking-[0.25em] mb-3">Choose your experience</p>
-          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight">The Luxe Prize Draws hub</h2>
+          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight">The LuxePrizeDraw Ltd hub</h2>
           <p className="mt-4 text-white/55 leading-relaxed">Pick a category, then choose the live draw you want to enter.</p>
         </div>
 
