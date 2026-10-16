@@ -1,3 +1,4 @@
+import "./components/launchShowcase.css";
 import { LaunchBuildPage } from "./components/LaunchBuildPage";
 import React, { useEffect, useState } from "react";
 import { CashLaunchReadiness } from "./components/CashLaunchReadiness";

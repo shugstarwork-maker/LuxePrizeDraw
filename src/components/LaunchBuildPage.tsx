@@ -1,19 +1,10 @@
+import { LaunchCatalogue } from "./LaunchShowcase";
 import React, { useEffect, useState } from "react";
 
 export type LaunchDraw = { id: string; cat: string; title: string; grade: string; price: number; target: number; paused: boolean };
 type State = { draws: LaunchDraw[]; proofNotes: { proof_key: string; reviewed: boolean; note: string }[] };
 const proofKeys = ["officialRules", "prizeFunding", "fundSafeguards", "paymentControls", "counselSignoff"];
-const money = (value: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(value);
-
-export function LaunchDrawCard({ draw }: { draw: LaunchDraw }) {
-  return <article className="rounded-2xl border border-white/15 bg-black/40 p-5">
-    <p className="text-xs text-amber-200">{draw.cat} · Proposed · {draw.paused ? "Paused" : "Not open"}</p>
-    <h2 className="mt-3 text-2xl font-black">{draw.title}</h2>
-    <p className="mt-4 text-sm text-white/70">Proposed entry price: {money(draw.price)}</p>
-    <p className="mt-2 text-xs text-white/50">Uploaded proposal: {draw.grade} · Revenue target {money(draw.target)}</p>
-    <p className="mt-3 text-xs text-white/50">Verified sales unavailable. No winner selected.</p>
-  </article>;
-}
+export { LaunchDrawCard } from "./LaunchShowcase";
 
 export function LaunchBuildPage() {
   const [draws, setDraws] = useState<LaunchDraw[]>([]);
@@ -50,12 +41,12 @@ export function LaunchBuildPage() {
     } catch (error) { setAdmin(null); setMessage((error as Error).message); }
     finally { setBusy(false); }
   };
-  return <main className="min-h-screen bg-[#090a11] px-4 py-10 text-white"><div className="mx-auto max-w-5xl">
+  return <main className="launch-build"><div className="launch-wrap">
     <a href="/" className="text-sm text-amber-200 underline">Back to home</a>
-    <h1 className="mt-6 text-4xl font-black">Launch catalogue & controls</h1>
+    <header className="launch-header"><p className="launch-kicker">Luxe Prize Draws</p><h1>Launch catalogue</h1><p className="launch-meta">Cash draws // Luxury holidays // Experiences</p></header>
     <p className="mt-4 rounded-xl border border-amber-200/30 bg-amber-300/10 p-4 text-sm text-amber-100">Pre-launch proposals from the uploaded build. No entries, payments or prize entitlements are created. Prices, grades and targets require reconciliation with approved rules; they do not replace the existing economics model. Proposed per-person limit: 10 per draw.</p>
     <p role="status" className="my-5 text-sm text-amber-100">{message}</p>
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{draws.map(draw => <div key={draw.id}><LaunchDrawCard draw={draw} /></div>)}</div>
+    <LaunchCatalogue draws={draws} />
     <section className="mt-10 rounded-2xl border border-white/15 bg-black/40 p-6">
       <h2 className="text-2xl font-black">Protected review controls</h2>
       <p className="mt-3 text-sm text-white/60">Review notes cannot enable launch. Postal slips continue through the <a href="/postal-intake" className="text-amber-200 underline">existing postal intake</a>. Tokens are held only in this page’s memory.</p>
