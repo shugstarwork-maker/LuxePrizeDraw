@@ -614,3 +614,14 @@
 .poker-win-flash { animation: goldPulse 0.9s ease-in-out 2; }
 .poker-chip-fly { position: absolute; animation: chipFly 0.8s ease-out forwards; }
 .poker-level-flash { animation: levelFlash 1.2s ease-in-out 1; }
+
+
+@keyframes dealerSway { 0%,100% { transform: rotate(-1.4deg); } 50% { transform: rotate(1.4deg); } }
+@keyframes dealerBlink { 0%,93%,100% { transform: scaleY(1); } 96% { transform: scaleY(0.08); } }
+@keyframes dealerTalk { 0%,100% { transform: scaleY(0.35); } 50% { transform: scaleY(1); } }
+@keyframes dealerDeal { 0% { transform: rotate(0deg); } 30% { transform: rotate(-40deg) translateX(8px); } 65% { transform: rotate(8deg); } 100% { transform: rotate(0deg); } }
+@keyframes dealerBubble { 0% { opacity: 0; transform: translateY(4px); } 12%,88% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; } }
+.luxe-dealer-eye { animation: dealerBlink 4.8s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.luxe-dealer-mouth-talk { animation: dealerTalk .55s ease-in-out infinite; }
+.luxe-dealer-arm-deal { animation: dealerDeal 1.5s ease-in-out 1; }
+.luxe-dealer-bubble { animation: dealerBubble 4s ease-in-out infinite; }
