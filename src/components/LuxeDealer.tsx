@@ -22,11 +22,11 @@ export const LuxeDealer: React.FC<DealerProps> = ({ stage, active, mood }) => {
   const key = mood === "win" ? "win" : mood === "lose" ? "lose" : active ? "yourmove" : dealing ? "deal" : stage in LINES ? stage : "idle";
   return (
     <div className="pointer-events-none absolute left-1/2 top-1 z-30 flex -translate-x-1/2 flex-col items-center">
-      <div key={key} className="luxe-dealer-bubble mb-1.5 max-w-48 rounded-2xl border border-amber-200/40 bg-black/75 px-3 py-1.5 text-center text-[10px] font-bold leading-tight text-amber-100 backdrop-blur">
+      <div key={key} className="luxe-dealer-bubble mb-1 rounded-xl border border-amber-200/40 bg-black/80 px-2 py-1 text-center text-[9px] font-bold leading-tight text-amber-100 backdrop-blur">
         {LINES[key]}
       </div>
       <div className={`luxe-dealer-medallion ${active ? "luxe-dealer-alive" : ""} ${dealing ? "luxe-dealer-deal" : ""}`}>
-        <img src="/dealer/vex-bust.png" alt="Vex Delacroix, AI croupier" className="h-24 w-24 rounded-full object-cover sm:h-28 sm:w-28" draggable={false}/>
+        <img src="/dealer/vex-bust.png" alt="Vex Delacroix, AI croupier" className="h-14 w-14 rounded-full object-cover sm:h-16 sm:w-16" draggable={false}/>
       </div>
     </div>
   );
