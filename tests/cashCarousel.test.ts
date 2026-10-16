@@ -40,3 +40,10 @@ test('owner-supplied cash image is used only for £1,000–£10,000 prizes', () 
   for (const draw of lower) assert.equal(draw.image, '/prizes/lower-cash-notes.jpg');
   for (const draw of CASH_DRAW_PROPOSALS.filter(draw => draw.valueGBP > 10000)) assert.notEqual(draw.image, '/prizes/lower-cash-notes.jpg');
 });
+
+test('higher cash prizes use the supplied £50-note image without changing lower cards', () => {
+  const higher = CASH_DRAW_PROPOSALS.filter(draw => draw.valueGBP > 10000);
+  assert.equal(higher.length, 10);
+  for (const draw of higher) assert.equal(draw.image, '/prizes/higher-cash-notes.jpg');
+  for (const draw of CASH_DRAW_PROPOSALS.filter(draw => draw.valueGBP <= 10000)) assert.equal(draw.image, '/prizes/lower-cash-notes.jpg');
+});
