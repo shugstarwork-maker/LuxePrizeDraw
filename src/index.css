@@ -810,3 +810,11 @@
 .poker-playing-page:fullscreen .poker-table-artwork { margin-block:.75rem; }
 .poker-playing-page:fullscreen .poker-rotate-prompt { display:none; }
 .poker-fullscreen-controls button:focus-visible { outline:3px solid #fff; outline-offset:3px; }
+
+/* Keep the table comfortably large in portrait; pan only the table, not actions. */
+.poker-table-scroll { overflow-x:auto; overflow-y:hidden; padding-block:1rem; }
+.poker-table-scroll:focus-visible { outline:2px solid #ffe09a; outline-offset:2px; }
+@media (orientation:portrait) and (max-width:600px) {
+  .poker-table-scroll .poker-table-artwork { min-width:38rem; }
+  .poker-playing-page { padding-inline:.25rem; }
+}
