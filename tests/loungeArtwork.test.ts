@@ -8,7 +8,8 @@ test('lounge keeps free-play controls and game links while using compact gold ar
   const html = renderToStaticMarkup(createElement(NeonGameLobby));
   for (const text of ['Poker Lounge', 'No cash value', 'Texas Hold', 'Play now', 'Previous game', 'Next game', 'Bonus', 'No deposits, cash prizes, or cash-out']) assert.ok(html.includes(text), text);
   assert.doesNotMatch(html, /min-h-\[31rem\]|GET REWARDED/);
-  assert.match(html, /lounge-table-art/);
+  assert.match(html, /original-poker-lounge.png/);
+  assert.match(html, /Lounge navigation/);
 });
 test('aces and chips are decorative artwork, not game state', () => {
   const html = renderToStaticMarkup(createElement(LoungeTableArtwork));
