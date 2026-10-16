@@ -699,3 +699,22 @@
 /* Follow each card’s actual height instead of a fixed off-card travel distance. */
 .cash-pound-rain { container-type: size; }
 @supports (height: 1cqh) { .cash-pound-rain { --cash-rain-travel: calc(100cqh + 6rem); } }
+
+/* Original poker-lounge artwork: scoped to the existing free-play landing page. */
+.lounge-masthead { padding: 0 0 1rem; text-align: center; color: #ffe6a1; }
+.lounge-masthead > span { font-size: 2rem; line-height: 1; }
+.lounge-masthead > p { font-family: Georgia,serif; text-transform: uppercase; font-size: 2rem; line-height: 1; letter-spacing: .18em; }
+.lounge-masthead h1 { margin: .25rem 0 .6rem; font: 700 clamp(2rem,8vw,4rem)/1.05 Georgia,serif; text-transform: uppercase; color: #ffdf82; text-shadow: 0 2px #704a13,0 0 24px #9f701c66; }
+.lounge-masthead small { font-size: .7rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.lounge-table-art { position: relative; height: clamp(13rem,48vw,20rem); margin-top: 3rem; pointer-events: none; }
+.lounge-table-art__cards { position: absolute; top: .5rem; left: 50%; width: 12rem; height: 7rem; transform: translateX(-50%); }
+.lounge-table-art__ace { position: absolute; left: 3.4rem; width: 4.1rem; height: 6rem; padding: .35rem; border: 1px solid #fbd677; border-radius: .5rem; background: linear-gradient(135deg,#3b2c10,#050505); color: #ffe296; box-shadow: 0 0 18px #ffce5155; font: 1.6rem Georgia,serif; transform-origin: 50% 100%; }
+.lounge-table-art__ace small { display: block; font-size: 1.5rem; }
+.lounge-table-art__ace--0 { transform: rotate(-28deg); }.lounge-table-art__ace--1 { transform: rotate(-9deg); color: #ffb879; }.lounge-table-art__ace--2 { transform: rotate(10deg); color: #ffb879; }.lounge-table-art__ace--3 { transform: rotate(28deg); }
+.lounge-table-art__felt { position: absolute; inset: 5rem 6% .5rem; display: grid; place-items: center; border: .45rem ridge #d8b45b; border-radius: 50%; background: radial-gradient(ellipse,#28241a,#090909 70%); box-shadow: 0 0 0 5px #211a0a,0 0 22px #fbd67755,inset 0 0 18px #000; }
+.lounge-table-art__felt span { color: #ffe296; font-size: 3.5rem; text-shadow: 0 0 18px #eac25755; }
+.lounge-table-art__chips { position: absolute; z-index: 1; top: 4.5rem; display: flex; align-items: end; gap: .2rem; }.lounge-table-art__chips--left { left: 12%; }.lounge-table-art__chips--right { right: 12%; }
+.lounge-table-art__chips i { display: block; width: 1.4rem; height: 2rem; border: 2px solid #e5bd62; border-radius: 35%; background: repeating-linear-gradient(#d4af37 0 3px,#161007 3px 7px); box-shadow: 0 0 12px #eec76b55; }.lounge-table-art__chips i:nth-child(2) { height: 2.8rem; }
+.lounge-feature-copy { padding-top: .25rem; padding-bottom: 1.5rem; }
+.lounge-game-title { margin-top: .8rem; font: 700 clamp(1.8rem,6vw,3rem)/1.1 Georgia,serif; color: #ffe296; text-shadow: 0 2px #704a13; }
+.lounge-play-button { min-width: min(100%,17rem); justify-content: center; min-height: 3.5rem; }
