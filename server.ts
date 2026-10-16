@@ -1,3 +1,4 @@
+import { GET as launchBuildGet, POST as launchBuildPost } from "./api/launch-build";
 import express from "express";
 import path from "path";
 import fs from "fs";
@@ -32,6 +33,19 @@ async function withAiCapacity<T>(work: () => Promise<T>) {
 
 app.use(express.json({ limit: "32kb", verify: (req, _res, buffer) => { (req as express.Request & { rawBody?: Buffer }).rawBody = Buffer.from(buffer); } }));
 app.set("query parser", "simple");
+
+// Share the same handlers between local Express and the deployed Vercel API.
+app.all("/api/launch-build", async (req, res) => {
+  if (req.method !== "GET" && req.method !== "POST") return res.status(405).json({ error: "method_not_allowed" });
+  const request = new Request(`http://localhost${req.originalUrl}`, {
+    method: req.method,
+    headers: { authorization: req.header("authorization") || "" },
+    ...(req.method === "POST" ? { body: JSON.stringify(req.body ?? {}) } : {}),
+  });
+  const response = await (req.method === "GET" ? launchBuildGet(request) : launchBuildPost(request));
+  response.headers.forEach((value, key) => res.setHeader(key, value));
+  res.status(response.status).send(await response.text());
+});
 
 // AI Gateway uses the Vercel deployment's OIDC identity. No provider API key is stored in this app.
 const AI_GATEWAY_MODEL = process.env.AI_GATEWAY_MODEL || "openai/gpt-4o-mini";
