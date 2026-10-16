@@ -67,3 +67,11 @@ This register records direct software dependencies and identified externally hos
 - Live controls overlay the artwork; free-play/no-cash-value disclosures qualify
   the artwork's reward wording. No real reward or cash-out is enabled.
 - Retain creation/licensing evidence in the restricted asset archive.
+
+## Owner-supplied original poker table
+
+- `public/games/luxe-poker-table.png`: original full-resolution artwork supplied
+  by the owner on 16 October 2026 for the playable free-play poker table.
+- Retained uncropped; actual pot/stage remain separate live UI. Decorative chips,
+  seats and cards in the image are scenery, not authoritative game state.
+- Retain underlying creation/licensing evidence in the restricted asset archive.
