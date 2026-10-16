@@ -5,7 +5,7 @@ type AudioControls = { enabled: boolean; musicEnabled: boolean; volume: number; 
 const AudioContext = createContext<AudioControls | null>(null);
 const SETTINGS_KEY = "luxe-prize-draw-audio";
 
-const tones: Record<SoundEffect, number[]> = { button: [660], ticketSelect: [523, 659], ticketPurchase: [440, 660, 880], success: [523, 659, 784], error: [220, 185], drawStart: [220, 277, 330], drawSuspense: [196, 208], winnerReveal: [523, 659, 784, 1046], jackpotReveal: [392, 523, 659, 784, 1046], notification: [784, 1046] };
+const tones: Record<SoundEffect, number[]> = { button: [660], ticketSelect: [523, 659], ticketPurchase: [440, 660, 880], success: [523, 659, 784], error: [220, 185], drawStart: [220, 277, 330], drawSuspense: [196, 208], winnerReveal: [523, 659, 784, 1046], jackpotReveal: [392, 523, 659, 784, 1046], notification: [784, 1046], cardDeal: [392, 523, 659], chipStack: [330, 415, 494], levelUp: [523, 659, 784, 1046, 1318], coinWin: [880, 1046, 1175, 1318] };
 
 function fallbackTone(context: AudioContext, effect: SoundEffect, volume: number) {
   const now = context.currentTime;
