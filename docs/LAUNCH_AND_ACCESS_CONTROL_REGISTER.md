@@ -1,6 +1,6 @@
 # Launch and Access Control Register
 
-**Owner:** LUXEPRIZEDRAW LIMITED
+**Owner:** Luxe Prize Draw Ltd
 **Scope:** Luxe Prize Draws production repository, Vercel project and connected business systems.
 
 This operational record supports the IP register. Keep personal data, credentials, full contracts and sensitive security evidence in the controlled company archive, not in this repository.

@@ -46,9 +46,12 @@ test('all prize categories and seasonal schedules preserve draft launch gates', 
   assert.match(html, /final postal instructions and processing rules still require approval/);
 });
 
-test('confirmed postal premises remain separate from registered office and not open for entries', () => {
+test('corrected business address omits unconfirmed postcode and does not authorize postal entry', () => {
   const html = renderToStaticMarkup(createElement(TermsPage));
-  assert.match(html, /17–18 Factory Place, Saltcoats, KA21 5LZ/);
+  assert.match(html, /18 Factory Place, Saltcoats/);
+  assert.match(html, /Postcode to be added/);
+  assert.match(html, /approval pending/);
+  assert.doesNotMatch(html, /17–18 Factory Place|KA21 5LZ/);
   assert.match(html, /This is separate from the registered office/);
   assert.match(html, /Do not send postal entries now: no draw is open for entry/);
   assert.doesNotMatch(html, /postal-entry address is still unconfirmed|no approved postal address/);
