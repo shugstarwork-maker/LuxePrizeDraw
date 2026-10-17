@@ -10,7 +10,7 @@ test('holiday cards use full-bleed destination photos and retain disclosures', (
   assert.match(html, /holiday-card-shade/);
   assert.match(html, /Santorini/);
   assert.match(html, /Approval pending/);
-  assert.match(html, /Valuation pending/);
+  assert.match(html, /Proposed total package value/);
   const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
   assert.match(css, /holiday-card-photo \{ height:100%; \}/);
   assert.match(css, /holiday-card-shade \{ background:none/);
