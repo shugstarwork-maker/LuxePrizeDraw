@@ -1041,3 +1041,14 @@
 .bitcoin-coin-rain--paused > span { animation-play-state:paused; }
 .headline-luxe-card .bitcoin-coin-rain-toggle { position:relative; z-index:3; display:block; margin-left:auto; padding:.3rem .55rem; min-height:2rem; font-size:.65rem; box-shadow:none; }
 @media(prefers-reduced-motion:reduce) { .bitcoin-coin-rain,.bitcoin-coin-rain-toggle { display:none !important; }.bitcoin-coin-rain > span { animation:none; } }
+
+.headline-prize-choice { text-align:center; color:#ffe6a0; }
+.headline-prize-choice__options { display:flex; gap:.5rem; justify-content:center; }
+.headline-luxe-card .headline-prize-choice__options button { flex:1; min-height:2.75rem; padding:.6rem; border-radius:.75rem; background:#120d04; color:#ffe6a0; box-shadow:none; }
+.headline-luxe-card .headline-prize-choice__options button[aria-pressed=true] { background:linear-gradient(#fff0ae,#d5a12c); color:#140c00; }
+.headline-luxe-card .headline-prize-choice__art { display:grid; place-items:center; width:100%; padding:1.5rem .5rem; background:transparent; border:0; box-shadow:none; }
+.headline-choice-medallion { display:grid; place-items:center; width:clamp(8rem,28vw,13rem); aspect-ratio:1; border:7px double #fff0ac; border-radius:50%; background:radial-gradient(circle at 30% 20%,#ffefae,#dcaa32 48%,#815009 80%,#e7bd52); color:#613c06; box-shadow:inset 0 0 0 8px #b98822,0 12px 30px #0009; font:700 clamp(5rem,18vw,9rem)/1 Georgia,serif; animation:headline-choice-shimmer .6s ease-out; }
+.headline-prize-choice > p { font-size:.8rem; line-height:1.6; }.headline-prize-choice > small { display:block; margin-top:.6rem; font-size:.7rem; line-height:1.5; color:#e2d2ad; }
+.headline-prize-choice button:focus-visible { outline:3px solid #fff; outline-offset:3px; }
+@keyframes headline-choice-shimmer { 50% { filter:brightness(1.3); transform:rotateY(18deg); } }
+@media(prefers-reduced-motion:reduce) { .headline-choice-medallion { animation:none; } }
