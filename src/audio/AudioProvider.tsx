@@ -1,3 +1,4 @@
+import { playPokerPercussion } from "./pokerActionSound";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { backgroundMusic, licensedAudioEnabled, soundEffects, type SoundEffect } from "./config";
 
@@ -5,7 +6,7 @@ type AudioControls = { enabled: boolean; musicEnabled: boolean; volume: number; 
 const AudioContext = createContext<AudioControls | null>(null);
 const SETTINGS_KEY = "luxe-prize-draw-audio";
 
-const tones: Record<SoundEffect, number[]> = { button: [660], ticketSelect: [523, 659], ticketPurchase: [440, 660, 880], success: [523, 659, 784], error: [220, 185], drawStart: [220, 277, 330], drawSuspense: [196, 208], winnerReveal: [523, 659, 784, 1046], jackpotReveal: [392, 523, 659, 784, 1046], notification: [784, 1046], cardDeal: [392, 523, 659], chipStack: [330, 415, 494], levelUp: [523, 659, 784, 1046, 1318], coinWin: [880, 1046, 1175, 1318] };
+const tones: Record<SoundEffect, number[]> = { chipDrop: [], tableKnock: [], button: [660], ticketSelect: [523, 659], ticketPurchase: [440, 660, 880], success: [523, 659, 784], error: [220, 185], drawStart: [220, 277, 330], drawSuspense: [196, 208], winnerReveal: [523, 659, 784, 1046], jackpotReveal: [392, 523, 659, 784, 1046], notification: [784, 1046], cardDeal: [392, 523, 659], chipStack: [330, 415, 494], levelUp: [523, 659, 784, 1046, 1318], coinWin: [880, 1046, 1175, 1318] };
 
 function fallbackTone(context: AudioContext, effect: SoundEffect, volume: number) {
   const now = context.currentTime;
@@ -52,6 +53,10 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     const now = Date.now();
     if (now - (lastPlayed.current[effect] || 0) < 130) return;
     lastPlayed.current[effect] = now;
+    if (effect === "chipDrop" || effect === "tableKnock") {
+      try { playPokerPercussion(getContext(), effect, settings.volume); } catch { /* Audio failure must not block game actions. */ }
+      return;
+    }
     if (!licensedAudioEnabled) { fallbackTone(getContext(), effect, settings.volume); return; }
     const clip = new Audio(soundEffects[effect]);
     clip.volume = settings.volume;

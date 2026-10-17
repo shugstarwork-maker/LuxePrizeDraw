@@ -11,7 +11,7 @@ export const soundEffects = {
   notification: "/audio/notification.mp3",
 } as const;
 
-export type SoundEffect = keyof typeof soundEffects | "cardDeal" | "chipStack" | "levelUp" | "coinWin";
+export type SoundEffect = keyof typeof soundEffects | "cardDeal" | "chipStack" | "levelUp" | "coinWin" | "chipDrop" | "tableKnock";
 export const backgroundMusic = "/audio/luxe-ambient.wav";
 // Switch to true only after licensed files are added under public/audio/.
 export const licensedAudioEnabled = true;
