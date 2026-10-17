@@ -14,3 +14,11 @@ test('branded pot uses exact live amount rather than claiming denomination per t
   for (const value of ['LUXE','POKER','1,750','virtual chips','illustrative']) assert.ok(html.includes(value));
   assert.equal((html.match(/class="luxe-pot-chip"/g) || []).length, 7);
 });
+
+test('winner transfer targets follow the result and do not create payout logic', () => {
+  const player = renderToStaticMarkup(createElement(LuxePotChips, { pot:500, winner:'player' }));
+  assert.match(player, /luxe-pot-chips--player/);
+  assert.match(player, /Awarded to player/);
+  const host = renderToStaticMarkup(createElement(LuxePotChips, { pot:500, winner:'host' }));
+  assert.match(host, /luxe-pot-chips--host/);
+});
