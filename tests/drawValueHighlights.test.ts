@@ -7,7 +7,7 @@ import { DrawValueHighlights } from '../src/components/DrawValueHighlights';
 test('entry and cash values are labelled, prominent and explicitly pending approval', () => {
   const html = renderToStaticMarkup(createElement(DrawValueHighlights, { entry: '1p', prize: '£250,000', prizeLabel: 'Proposed cash prize' }));
   for (const text of ['Proposed entry', '1p', 'Proposed cash prize', '£250,000', 'Approval pending', 'Entries not open']) assert.ok(html.includes(text));
-  assert.equal((html.match(/<dd>/g) || []).length, 2);
+  assert.equal((html.match(/<dd(?:\s[^>]*)?>/g) || []).length, 2);
   assert.doesNotMatch(html, /<button|<form/);
 });
 
