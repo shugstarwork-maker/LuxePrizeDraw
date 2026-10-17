@@ -1,3 +1,4 @@
+import { LuxeChessPage } from "./components/LuxeChessPage";
 import "./components/launchShowcase.css";
 import { LaunchBuildPage } from "./components/LaunchBuildPage";
 import React, { useEffect, useState } from "react";
@@ -60,6 +61,7 @@ export default function App() {
     : path === "/standards" ? <ParticipationStandardsPage />
     : path === "/duel" ? <><DuelRoom /><ScottishHost /><MobileDock /></>
     : path === "/lobby" ? <><NeonGameLobby /><ScottishHost /><MobileDock /></>
+    : path === "/chess" ? <LuxeChessPage />
     : path === "/poker" ? <><LuxePokerLeague /><div className="poker-external-chrome"><ScottishHost /><MobileDock /></div></>
     : path === "/arcade" ? <><ArcadeHome /><ScottishHost /><MobileDock /></>
     : path === "/portal" ? <><PlayerPortal /><ScottishHost /><MobileDock /></>
