@@ -933,3 +933,11 @@
 .player-turn-ring--active { filter:drop-shadow(0 0 8px #ffd75f99); }
 @media (orientation:landscape) and (max-height:700px) { .poker-playing-page .player-turn-ring { width:2.3rem; height:2.3rem; } }
 @media(prefers-reduced-motion:reduce) { .player-turn-ring__clock { transition:none; } }
+
+/* Separate lower-right player seat from Theo, the hand and the action dock. */
+@media (orientation:landscape) and (max-height:700px) {
+  .poker-playing-page .poker-live-seats > [data-seat-index="4"] { left:91% !important; top:43% !important; }
+  .poker-playing-page .poker-live-seats > [data-seat-index="5"] { left:83% !important; top:78% !important; width:4rem; max-width:4rem; padding:.25rem; transform:translate(-50%,-50%) !important; }
+  .poker-playing-page .poker-live-seats > [data-seat-index="5"] b { font-size:.6rem; }
+  .poker-playing-page .poker-live-seats > [data-seat-index="5"] small { font-size:.55rem; }
+}
