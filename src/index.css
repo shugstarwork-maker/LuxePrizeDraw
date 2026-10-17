@@ -767,7 +767,7 @@
 /* Full-bleed destination image remains visible behind all holiday details. */
 .coverflow-holiday .holiday-card-photo { object-position: center top; }
 .holiday-card-shade { background:none; pointer-events:none; }
-.coverflow-holiday .holiday-card-copy { margin-top:12rem; padding-top:1rem; background:rgba(0,0,0,.45); text-shadow:0 2px 5px #000; }
+.coverflow-holiday .holiday-card-copy { margin-top:12rem; padding-top:1rem; background:transparent; text-shadow:0 2px 5px #000; }
 
 /* Shared Luxe identity: typography and chrome only; preserve game-state colours. */
 .luxe-brand-theme { --luxe-gold:#ffe09a; --luxe-edge:#b79a54; background-color:#050403; }
@@ -1102,7 +1102,7 @@
 /* Holiday-choice examples: vivid scenery with contained, readable gold copy. */
 .luxury-holidays .holiday-card-photo { filter:brightness(1.12) saturate(1.15); }
 .luxury-holidays .coverflow-holiday { border:1px solid #ffe09a; box-shadow:0 0 22px #e9ba3544,0 16px 35px #0008; }
-.luxury-holidays .holiday-card-copy { background:linear-gradient(#080603a8,#080603e8); border-top:1px solid #ffe09a88; }
+.luxury-holidays .holiday-card-copy { background:transparent; border-top:0; }
 .luxury-holidays .holiday-card-copy h3 { color:#ffe39a; font-family:Georgia,serif; text-shadow:0 2px 4px #000; }
 .holiday-example-label { margin-top:.5rem; color:#fff0bb; font-size:.75rem; font-weight:800; }
 .holiday-value-note { margin-top:1rem; padding:.65rem; border:1px solid #c9a65555; border-radius:.75rem; color:#f5e7c4; font-size:.7rem; line-height:1.6; background:#080603bb; }
@@ -1111,3 +1111,6 @@
 .holiday-ticket-target > span { display:block; font-size:.7rem; font-weight:800; text-transform:uppercase; letter-spacing:.12em; }
 .holiday-ticket-target > strong { display:block; margin-top:.3rem; font:700 1.2rem Georgia,serif; }
 .holiday-ticket-target > small { display:block; margin-top:.4rem; color:#f0e1bb; font-size:.65rem; line-height:1.5; }
+
+/* Keep scenery bright across the full card, with shadows on copy rather than a dark sheet. */
+.luxury-holidays .holiday-card-copy :is(p,li,dt,dd,h3) { text-shadow:0 2px 3px #000,1px 0 3px #000,-1px 0 3px #000; }
