@@ -1106,3 +1106,8 @@
 .luxury-holidays .holiday-card-copy h3 { color:#ffe39a; font-family:Georgia,serif; text-shadow:0 2px 4px #000; }
 .holiday-example-label { margin-top:.5rem; color:#fff0bb; font-size:.75rem; font-weight:800; }
 .holiday-value-note { margin-top:1rem; padding:.65rem; border:1px solid #c9a65555; border-radius:.75rem; color:#f5e7c4; font-size:.7rem; line-height:1.6; background:#080603bb; }
+
+.holiday-ticket-target { margin-top:1rem; padding:.85rem 1rem; border:1px solid #ffe09a44; border-radius:.8rem; background:#08060366; backdrop-filter:blur(3px); color:#ffe6a0; }
+.holiday-ticket-target > span { display:block; font-size:.7rem; font-weight:800; text-transform:uppercase; letter-spacing:.12em; }
+.holiday-ticket-target > strong { display:block; margin-top:.3rem; font:700 1.2rem Georgia,serif; }
+.holiday-ticket-target > small { display:block; margin-top:.4rem; color:#f0e1bb; font-size:.65rem; line-height:1.5; }

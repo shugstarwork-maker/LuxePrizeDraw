@@ -9,3 +9,10 @@ test('destinations are examples for one proposed package with spending money inc
  for(const text of ['Luxe Holiday Package of Your Choice','£25,000 spending money','Five-star hotel','Limousine transfers','Business-class flights','not separate prizes','not independently verified','Pending approval']) assert.ok(html.includes(text),text);
  assert.doesNotMatch(html,/1p preview|£5,000 Luxury Shopping Budget/);
 });
+
+test('holiday ticket target has a translucent pending placeholder rather than an invented cap', () => {
+ const html=renderToStaticMarkup(createElement(LuxuryHolidaysSection));
+ assert.match(html,/holiday-ticket-target/);
+ assert.match(html,/Ticket target/);
+ assert.match(html,/Confirmed ticket quantity will appear here/);
+});
