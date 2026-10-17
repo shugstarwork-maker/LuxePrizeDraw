@@ -1009,3 +1009,7 @@
 @keyframes luxe-pot-to-host { to { left:8%; top:44%; opacity:0; scale:.65; } }
 @keyframes luxe-pot-split { to { opacity:0; scale:.6; } }
 @media(prefers-reduced-motion:reduce) { .luxe-pot-chips--player,.luxe-pot-chips--host,.luxe-pot-chips--split { animation:none; opacity:0; } }
+
+.home-brand-banner { background:#050403; border-bottom:1px solid #bc984e; }
+.home-brand-banner img { display:block; width:100%; height:auto; max-width:100rem; margin-inline:auto; }
+.home-brand-banner p { margin:0; padding:.6rem 1rem; text-align:center; color:#f5dfa5; font-size:.7rem; line-height:1.5; }

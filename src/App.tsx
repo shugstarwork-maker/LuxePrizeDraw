@@ -1,3 +1,4 @@
+import { HomeBrandBanner } from "./components/HomeBrandBanner";
 import { LuxeChessPage } from "./components/LuxeChessPage";
 import "./components/launchShowcase.css";
 import { LaunchBuildPage } from "./components/LaunchBuildPage";
@@ -76,6 +77,6 @@ export default function App() {
 }
 
 function SiteContent({ path }: { path: string }) {
-  const content = path === "/draws" ? <><LuxuryHolidaysSection /><PrestigeCarsDraws /><PartnerShowcase /><PrizeExperience /><PrizeStandings /><MembershipPreview /></> : path === "/community" ? <><LaunchCommitment /><CommunitySuggestionBoard /><CommunityLeaderboards /></> : path === "/play" ? <><CompetitiveHub /><GamesArena /></> : <><FeaturedDraws /><CashPrizesCarousel /><LuxuryHolidaysSection /><PrizePlatform /><TrustBadges /><PartnerShowcase /><CashLaunchReadiness /><div className="px-4 py-5 text-center"><a href="/launch-build" className="text-sm text-amber-200 underline">Review the proposed launch catalogue</a></div><LaunchCommitment /></>;
+  const content = path === "/draws" ? <><LuxuryHolidaysSection /><PrestigeCarsDraws /><PartnerShowcase /><PrizeExperience /><PrizeStandings /><MembershipPreview /></> : path === "/community" ? <><LaunchCommitment /><CommunitySuggestionBoard /><CommunityLeaderboards /></> : path === "/play" ? <><CompetitiveHub /><GamesArena /></> : <>{path === "/" && <HomeBrandBanner />}<FeaturedDraws /><CashPrizesCarousel /><LuxuryHolidaysSection /><PrizePlatform /><TrustBadges /><PartnerShowcase /><CashLaunchReadiness /><div className="px-4 py-5 text-center"><a href="/launch-build" className="text-sm text-amber-200 underline">Review the proposed launch catalogue</a></div><LaunchCommitment /></>;
   return <><LegalReadinessNotice /><ExperienceNav /><CommunityTicker /><main className="animate-page-enter pb-24 sm:pb-0">{content}</main><ScottishHost /><MobileDock /></>;
 }
