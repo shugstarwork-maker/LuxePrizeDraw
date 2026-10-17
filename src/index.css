@@ -1078,3 +1078,13 @@
 .headline-prize-choice button:focus-visible { outline:3px solid #fff; outline-offset:3px; }
 @keyframes headline-choice-shimmer { 50% { filter:brightness(1.3); transform:rotateY(18deg); } }
 @media(prefers-reduced-motion:reduce) { .headline-choice-medallion { animation:none; } }
+
+/* Cash entries share the unboxed prize treatment; lettering rises like a slow swell. */
+.cash-swell-card .draw-value-highlights__grid--entry-only > .draw-value-highlights__entry { border:0; background:transparent; padding:.5rem 0; box-shadow:none; }
+.cash-swell-card .draw-value-highlights__entry dt { color:#ffe6a0; font-family:Georgia,'Times New Roman',serif; }
+.cash-swell-card :is(h3,p,dt,dd) { transform-origin:left center; animation:cash-letter-swell 7s ease-in-out infinite; }
+.cash-swell-card :is(dd,h3) { animation-delay:-2s; }
+@keyframes cash-letter-swell { 0%,100% { transform:translateY(0) scale(1); } 50% { transform:translateY(-2px) scale(1.015); } }
+@media(hover:hover) { .cash-swell-card:hover :is(h3,p,dt,dd) { animation-play-state:paused; } }
+.cash-swell-card:focus-within :is(h3,p,dt,dd) { animation-play-state:paused; }
+@media(prefers-reduced-motion:reduce) { .cash-swell-card :is(h3,p,dt,dd) { animation:none; transform:none; } }
