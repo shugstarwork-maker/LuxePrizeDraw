@@ -970,3 +970,14 @@
 .luxe-chess-view-toggle { display:block; margin:0 auto .5rem; min-height:2.75rem; padding:.5rem 1rem; border:1px solid #ffe09a; border-radius:.75rem; background:linear-gradient(#ffe9a5,#b7892c); color:#160e03; font-weight:800; }
 .luxe-chess-view-toggle:focus-visible { outline:3px solid #fff; outline-offset:3px; }
 @media(max-width:480px) { .luxe-chess-table--3d .luxe-chess-rail { transform:rotateX(15deg); } }
+
+.luxe-chess-play-page { min-height:100dvh; padding:1rem; background:radial-gradient(ellipse at top,#362608,#050403 65%); color:#ffe6a0; }
+.luxe-chess-play-page > nav { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:.75rem; max-width:90rem; margin:0 auto 1rem; padding:.75rem; border:1px solid #b79a54; border-radius:1rem; background:#080603; }
+.luxe-chess-play-page > nav > span { font:700 1.4rem Georgia,serif; }
+.luxe-chess-play-page > nav :is(a,button),.luxe-chess-open { display:inline-flex; min-height:2.75rem; align-items:center; border:1px solid #e3c574; border-radius:.7rem; padding:.5rem .8rem; color:#ffe6a0; background:#1b1407; font-weight:800; font-size:.8rem; }
+.luxe-chess-open { margin-bottom:1rem; }
+.luxe-chess-play-page__game { max-width:90rem; margin:auto; }
+.luxe-chess-play-page .luxe-chess-table { max-width:56rem; }
+.luxe-chess-play-page .luxe-chess-grid > button { font-size:clamp(1.8rem,7vw,4.5rem); }
+.luxe-chess-play-page > p { text-align:center; margin-top:1rem; font-size:.8rem; }
+.luxe-chess-play-page :is(a,button):focus-visible { outline:3px solid white; outline-offset:2px; }
