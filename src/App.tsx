@@ -21,6 +21,7 @@ import { DuelRoom } from "./components/DuelRoom";
 import { CredentialsPartnershipsPage } from "./components/CredentialsPartnershipsPage";
 import { EconomicsPage } from "./components/EconomicsPage";
 import { PostalIntakePage } from "./components/PostalIntakePage";
+import { AdminPanel } from "./components/AdminPanel";
 import { ExperienceNav } from "./components/ExperienceNav";
 import { FeaturedDraws } from "./components/FeaturedDraws";
 import { GamesArena } from "./components/GamesArena";
@@ -61,6 +62,7 @@ export default function App() {
     : path === "/economics" ? <EconomicsPage />
     : path === "/launch-build" ? <LaunchBuildPage />
     : path === "/postal-intake" ? <PostalIntakePage />
+    : path === "/admin" ? <AdminPanel />
     : path === "/standards" ? <ParticipationStandardsPage />
     : path === "/duel" ? <><DuelRoom /><ScottishHost /><MobileDock /></>
     : path === "/lobby" ? <NeonGameLobby soundEnabled={audio.enabled} onToggleSound={() => audio.setEnabled(!audio.enabled)} />

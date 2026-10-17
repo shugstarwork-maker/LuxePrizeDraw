@@ -624,6 +624,138 @@ Provide a concise, direct, helpful, and inspiring response (2-3 paragraphs max) 
   }
 });
 
+
+// ── Entrants portal: look up your own free-draw tickets and prize entries by email ──
+app.get("/api/portal/lookup", async (req, res) => {
+  try {
+    const email = String(req.query.email || "").trim().toLowerCase();
+    if (!/^\S+@\S+\.\S+$/.test(email)) return res.status(400).json({ error: "Enter a valid email address." });
+    const sql = getAuditDatabase();
+    await ensureFreeDrawTicketsTable();
+    const tickets = await sql`SELECT draw_name, issued_at, redeemed_at, entry_ticket_id FROM free_draw_tickets WHERE email = ${email} ORDER BY issued_at DESC LIMIT 50`;
+    const account = await sql`SELECT id, status, created_at FROM prize_accounts WHERE email = ${email} LIMIT 1`;
+    let entries: unknown[] = [];
+    if (account[0]) {
+      entries = await sql`SELECT e.id, e.route, e.status, e.created_at, d.title AS draw_title, d.id AS draw_id
+        FROM prize_entries e JOIN prize_draws d ON d.id = e.draw_id
+        WHERE e.account_id = ${account[0].id} ORDER BY e.created_at DESC LIMIT 50`;
+    }
+    const drawIds = [...new Set(tickets.map((t) => t.draw_name))];
+    return res.json({
+      email,
+      account: account[0] ? { status: account[0].status, since: account[0].created_at } : null,
+      tickets: tickets.map((t) => ({ drawName: t.draw_name, issuedAt: t.issued_at, redeemed: Boolean(t.redeemed_at), ticketId: t.entry_ticket_id })),
+      entries,
+      drawCount: drawIds.length,
+    });
+  } catch (error) {
+    console.error("Portal lookup error:", error);
+    return res.status(503).json({ error: "Portal storage is unavailable." });
+  }
+});
+
+// ── Admin panel: overview, draw management and ticket registers ──
+function requireAdmin(req: express.Request, res: express.Response): boolean {
+  try {
+    if (!requireAdminPassword(req.header("x-admin-password"))) { res.status(401).json({ error: "Invalid admin password." }); return false; }
+    return true;
+  } catch { res.status(503).json({ error: "Admin access is not configured." }); return false; }
+}
+
+app.get("/api/admin/overview", async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  try {
+    const sql = getAuditDatabase();
+    await ensureFreeDrawTicketsTable();
+    const [draws] = await sql`SELECT count(*)::int AS n FROM prize_draws`;
+    const [openDraws] = await sql`SELECT count(*)::int AS n FROM prize_draws WHERE status = 'OPEN'`;
+    const [entries] = await sql`SELECT count(*)::int AS n FROM prize_entries`;
+    const [accounts] = await sql`SELECT count(*)::int AS n FROM prize_accounts`;
+    const [tickets] = await sql`SELECT count(*)::int AS n FROM free_draw_tickets`;
+    const [redeemed] = await sql`SELECT count(*)::int AS n FROM free_draw_tickets WHERE redeemed_at IS NOT NULL`;
+    const [results] = await sql`SELECT count(*)::int AS n FROM prize_draw_results`;
+    return res.json({ draws: draws.n, openDraws: openDraws.n, entries: entries.n, accounts: accounts.n, freeTickets: tickets.n, redeemedTickets: redeemed.n, settledDraws: results.n });
+  } catch (error) { console.error("Admin overview error:", error); return res.status(503).json({ error: "Admin storage is unavailable." }); }
+});
+
+app.get("/api/admin/draws", async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  try {
+    const sql = getAuditDatabase();
+    const rows = await sql`SELECT d.id, d.title, d.status, d.prize_value_minor, d.ticket_price_minor, d.maximum_entries,
+      d.opens_at, d.closes_at, a.approved, a.due_at, a.drawn_at,
+      (SELECT count(*)::int FROM prize_entries e WHERE e.draw_id = d.id AND e.status IN ('ELIGIBLE','WINNER')) AS entries
+      FROM prize_draws d LEFT JOIN prize_auto_draws a ON a.draw_id = d.id ORDER BY d.created_at DESC LIMIT 100`;
+    return res.json({ draws: rows });
+  } catch (error) { console.error("Admin draws error:", error); return res.status(503).json({ error: "Admin storage is unavailable." }); }
+});
+
+app.post("/api/admin/draws", async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  try {
+    const id = limitedText(req.body?.id, 100);
+    const title = limitedText(req.body?.title, 200);
+    const prizeDescription = limitedText(req.body?.prizeDescription, 500) || title;
+    const prizeValueMinor = Math.max(0, Math.round(Number(req.body?.prizeValueMinor) || 0));
+    const ticketPriceMinor = Math.max(0, Math.round(Number(req.body?.ticketPriceMinor) || 0));
+    const maximumEntries = Math.max(1, Math.round(Number(req.body?.maximumEntries) || 0));
+    const closesInDays = Math.min(365, Math.max(1, Math.round(Number(req.body?.closesInDays) || 30)));
+    if (!/^[a-z0-9][a-z0-9-]{2,99}$/.test(id)) return res.status(400).json({ error: "Draw ID must be 3-100 lowercase letters, numbers or dashes." });
+    if (!title || !maximumEntries) return res.status(400).json({ error: "Title and maximum entries are required." });
+    const sql = getAuditDatabase();
+    await sql`INSERT INTO prize_draws (id,status,title,prize_description,prize_value_minor,opens_at,closes_at,maximum_entries,ticket_price_minor,free_entry_method,free_entry_deadline,entry_limit_per_account,rules_url,rules_version,draw_type,randomization_version,opened_at)
+      VALUES (${id},'OPEN',${title},${prizeDescription},${prizeValueMinor},NOW(),NOW() + (${closesInDays} || ' days')::interval,${maximumEntries},${ticketPriceMinor},'Postal entry — see terms',NOW() + (${Math.max(1, closesInDays - 5)} || ' days')::interval,25,'/terms','v1.0','STANDARD','pgcrypto-48bit-rejection-v1',NOW())`;
+    await sql`INSERT INTO prize_auto_draws (draw_id, approved) VALUES (${id}, false) ON CONFLICT (draw_id) DO NOTHING`;
+    return res.status(201).json({ success: true, id });
+  } catch (error) {
+    const message = error instanceof Error && error.message.includes("duplicate") ? "A draw with that ID already exists." : "Draw storage is unavailable.";
+    console.error("Admin create draw error:", error);
+    return res.status(503).json({ error: message });
+  }
+});
+
+app.post("/api/admin/draws/:id/approve", async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  try {
+    const id = String(req.params.id || "");
+    if (!/^[a-zA-Z0-9_-]{1,100}$/.test(id)) return res.status(400).json({ error: "invalid_draw" });
+    const sql = getAuditDatabase();
+    const rows = await sql`UPDATE prize_auto_draws SET approved = true WHERE draw_id = ${id} RETURNING draw_id`;
+    if (!rows[0]) return res.status(404).json({ error: "No auto-draw control exists for that draw." });
+    return res.json({ success: true, id });
+  } catch (error) { console.error("Admin approve error:", error); return res.status(503).json({ error: "Admin storage is unavailable." }); }
+});
+
+app.get("/api/admin/free-tickets", async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  try {
+    const sql = getAuditDatabase();
+    await ensureFreeDrawTicketsTable();
+    const rows = await sql`SELECT email, draw_name, issued_at, redeemed_at, entry_ticket_id FROM free_draw_tickets ORDER BY issued_at DESC LIMIT 200`;
+    return res.json({ tickets: rows });
+  } catch (error) { console.error("Admin tickets error:", error); return res.status(503).json({ error: "Admin storage is unavailable." }); }
+});
+
+// ── Public leaderboards: live counts from the draw database ──
+app.get("/api/leaderboards", async (_req, res) => {
+  res.set("Cache-Control", "no-store");
+  try {
+    const sql = getAuditDatabase();
+    const ticketBoard = await sql`SELECT d.title, d.status, d.maximum_entries,
+      (SELECT count(*)::int FROM prize_entries e WHERE e.draw_id = d.id AND e.status IN ('ELIGIBLE','WINNER')) AS entries
+      FROM prize_draws d ORDER BY entries DESC, d.created_at DESC LIMIT 5`;
+    const winners = await sql`SELECT r.draw_id, d.title, r.eligible_entry_count, r.created_at, r.fulfilled_at
+      FROM prize_draw_results r JOIN prize_draws d ON d.id = r.draw_id ORDER BY r.created_at DESC LIMIT 5`;
+    return res.json({
+      ticketBoard,
+      winners,
+      impact: { charityRaisedGBP: totalCharityRaisedGBP, scholarshipsFunded: totalScholarshipsFunded, microGrants: totalMicroGrants },
+      totalEntries: totalEntriesCount,
+    });
+  } catch (error) { console.error("Leaderboards error:", error); return res.status(503).json({ error: "Leaderboard storage is unavailable." }); }
+});
+
+
 // Vite Middleware for Full Stack
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
