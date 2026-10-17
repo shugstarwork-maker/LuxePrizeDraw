@@ -990,3 +990,13 @@
 @media (orientation:portrait) and (max-width:900px) {
   .poker-playing-page .poker-landscape-gate { position:fixed; inset:0; z-index:85; min-height:100dvh; box-sizing:border-box; padding: max(1.5rem,env(safe-area-inset-top)) 1.5rem max(1.5rem,env(safe-area-inset-bottom)); background:radial-gradient(ellipse at center,#302207,#050403 70%); }
 }
+
+/* Live pot chips are distinct from static stacks in the table artwork. */
+.luxe-pot-chips { position:absolute; left:69%; top:36%; z-index:3; display:grid; justify-items:center; gap:.15rem; pointer-events:none; color:#ffe6a0; }
+.luxe-pot-chips__stack { position:relative; width:3rem; height:4rem; animation:luxe-pot-arrive .3s ease-out; }
+.luxe-pot-chip { position:absolute; left:0; width:3rem; height:3rem; border:3px dashed #ffe09a; border-radius:50%; background:linear-gradient(135deg,#e4bc58,#53370c 35%,#f8dc89 65%,#a97c24); box-shadow:0 3px #5b3c12,0 5px 6px #0009; transform:rotateX(25deg); display:grid; place-items:center; }
+.luxe-pot-chip > span { display:flex; flex-direction:column; align-items:center; justify-content:center; width:2.1rem; height:2.1rem; border:1px solid #d5ab49; border-radius:50%; background:#0d0a04; font-size:.6rem; line-height:1.05; }
+.luxe-pot-chip b { font:.55rem Georgia,serif; }.luxe-pot-chip small { font:.32rem Georgia,serif; letter-spacing:.05em; }
+.luxe-pot-chips__amount { padding:.2rem .4rem; border:1px solid #c4a050; border-radius:.4rem; background:#080603e8; font-size:.65rem; }
+@keyframes luxe-pot-arrive { from { opacity:.4; translate:1rem .6rem; } to { opacity:1; translate:0 0; } }
+@media (prefers-reduced-motion:reduce) { .luxe-pot-chips__stack { animation:none; } }
