@@ -1098,3 +1098,11 @@
 @media(hover:hover) { .draw-value-highlights:hover dd.draw-gold-amount,.headline-choice-title:hover strong,.headline-choice-title:hover strong::before { animation-play-state:paused; } }
 .draw-value-highlights:focus-within dd.draw-gold-amount,.headline-luxe-card:focus-within .headline-gold-flames,.headline-luxe-card:focus-within .headline-gold-flames::before { animation-play-state:paused; }
 @media(prefers-reduced-motion:reduce) { .draw-value-highlights dd.draw-gold-amount,.cash-swell-card .cash-prize-heading,.headline-choice-title strong { animation:none; transform:none; opacity:1; filter:none; }.headline-gold-flames::before { animation:none; display:none; } }
+
+/* Holiday-choice examples: vivid scenery with contained, readable gold copy. */
+.luxury-holidays .holiday-card-photo { filter:brightness(1.12) saturate(1.15); }
+.luxury-holidays .coverflow-holiday { border:1px solid #ffe09a; box-shadow:0 0 22px #e9ba3544,0 16px 35px #0008; }
+.luxury-holidays .holiday-card-copy { background:linear-gradient(#080603a8,#080603e8); border-top:1px solid #ffe09a88; }
+.luxury-holidays .holiday-card-copy h3 { color:#ffe39a; font-family:Georgia,serif; text-shadow:0 2px 4px #000; }
+.holiday-example-label { margin-top:.5rem; color:#fff0bb; font-size:.75rem; font-weight:800; }
+.holiday-value-note { margin-top:1rem; padding:.65rem; border:1px solid #c9a65555; border-radius:.75rem; color:#f5e7c4; font-size:.7rem; line-height:1.6; background:#080603bb; }
