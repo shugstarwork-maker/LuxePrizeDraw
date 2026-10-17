@@ -958,3 +958,15 @@
 .luxe-chess-piece--ivory { color:#fff9df; text-shadow:-1px 0 #39290c,1px 0 #39290c,0 2px #39290c,0 4px 4px #0009; }
 .luxe-chess-piece--onyx { color:#100e09; text-shadow:-1px 0 #ffe4a0,1px 0 #ffe4a0,0 1px #ffe4a0,0 4px 4px #0008; }
 .luxe-chess-signature { padding-top:.8rem; text-align:center; color:#e9c872; font:.7rem Georgia,serif; letter-spacing:.2em; }
+
+/* CSS 3D board; square hit targets stay attached to their visible surfaces. */
+.luxe-chess-perspective { perspective:1100px; padding:.5rem 0 1.5rem; }
+.luxe-chess-table--3d .luxe-chess-rail { transform:rotateX(22deg); transform-style:preserve-3d; transform-origin:center; box-shadow:0 7px 0 #a17422,0 14px 0 #50340f,0 20px 0 #191005,0 30px 35px #000b; }
+.luxe-chess-table--3d .luxe-chess-grid { transform-style:preserve-3d; }
+.luxe-chess-table--3d .luxe-chess-grid > button { transform-style:preserve-3d; box-shadow:inset 0 1px #fff3,inset 0 -2px #0004; }
+.luxe-chess-table--3d .luxe-chess-piece { transform:translateZ(12px) rotateX(-15deg); filter:drop-shadow(0 7px 3px #0009); }
+.luxe-chess-table--3d .luxe-chess-piece--ivory { text-shadow:0 1px #c7ad6a,0 2px #ad8c42,0 3px #806024,0 4px #3c2b0d; }
+.luxe-chess-table--3d .luxe-chess-piece--onyx { text-shadow:0 1px #e2c780,0 2px #a68237,0 3px #57431c,0 4px #000; }
+.luxe-chess-view-toggle { display:block; margin:0 auto .5rem; min-height:2.75rem; padding:.5rem 1rem; border:1px solid #ffe09a; border-radius:.75rem; background:linear-gradient(#ffe9a5,#b7892c); color:#160e03; font-weight:800; }
+.luxe-chess-view-toggle:focus-visible { outline:3px solid #fff; outline-offset:3px; }
+@media(max-width:480px) { .luxe-chess-table--3d .luxe-chess-rail { transform:rotateX(15deg); } }
