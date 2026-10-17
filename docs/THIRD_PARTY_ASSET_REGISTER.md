@@ -75,3 +75,14 @@ This register records direct software dependencies and identified externally hos
 - Retained uncropped; actual pot/stage remain separate live UI. Decorative chips,
   seats and cards in the image are scenery, not authoritative game state.
 - Retain underlying creation/licensing evidence in the restricted asset archive.
+
+## Recorded poker-chip collision sound
+
+- Asset: `public/audio/poker-chips-0942.mp3`, supplied by the owner on 17 October 2026.
+- Source: https://bigsoundbank.com/poker-chips-s0942.html
+- Title: Poker Chips; author: Clarisse; sound ID: 0942.
+- Source page explicitly lists CC0/public-domain-equivalent licensing, commercial
+  app use and redistribution allowed, attribution optional. Verified 17 October 2026.
+- Used for chipDrop (Raise/Call) and chipStack (collection) with opt-in/mute/volume.
+- Binary retained as uploaded. Actual listening and target-device playback remain
+  unverified; no claim is made that automated checks judge audio quality.

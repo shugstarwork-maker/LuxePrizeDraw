@@ -53,7 +53,16 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     const now = Date.now();
     if (now - (lastPlayed.current[effect] || 0) < 130) return;
     lastPlayed.current[effect] = now;
-    if (effect === "chipDrop" || effect === "tableKnock") {
+    if (effect === "chipDrop" || effect === "chipStack") {
+      try {
+        const clip = new Audio("/audio/poker-chips-0942.mp3");
+        clip.volume = settings.volume;
+        clip.preload = "auto";
+        void clip.play().catch(() => { /* Never substitute the rejected beep or block gameplay. */ });
+      } catch { /* Unsupported audio must not block the game. */ }
+      return;
+    }
+    if (effect === "tableKnock") {
       try { playPokerPercussion(getContext(), effect, settings.volume); } catch { /* Audio failure must not block game actions. */ }
       return;
     }
