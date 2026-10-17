@@ -17,3 +17,17 @@ test('unconfirmed fees and valuations remain pending, never fabricated cash amou
   assert.match(html, /Valuation pending/);
   assert.doesNotMatch(html, /£|cash alternative|Free/);
 });
+
+test('cash cards can keep the existing prize heading without duplicating a prize panel', () => {
+  const html = renderToStaticMarkup(createElement(DrawValueHighlights, { entry: '80p', prize: '£12,500', hidePrize: true }));
+  assert.match(html, /80p/);
+  assert.doesNotMatch(html, /Proposed prize value|£12,500|draw-value-highlights__prize/);
+});
+
+test('cash entry and existing prize heading share larger gold serif styling', async () => {
+  const { readFileSync } = await import('node:fs');
+  const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
+  assert.match(css, /cash-prize-heading \{ font-size:clamp\(2\.8rem,8vw,4\.5rem\)/);
+  assert.match(css, /draw-value-highlights__grid--entry-only dd \{ font-family:Georgia/);
+  assert.match(css, /font-size:clamp\(2\.6rem,7vw,4rem\)/);
+});

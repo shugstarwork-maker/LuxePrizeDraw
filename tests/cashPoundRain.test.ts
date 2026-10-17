@@ -16,10 +16,17 @@ test('pound rain is decorative, bounded and has no visible pause button', () => 
   assert.ok(Math.min(...positions) < 10);
   for (const [, duration] of html.matchAll(/animation-duration:(\d+)s/g)) assert.ok(Number(duration) >= 24 && Number(duration) <= 30);
 });
-test('cash rain respects reduced motion and value colours are explicitly gold and emerald', () => {
+test('cash rain respects reduced motion and value colours are explicitly gold', () => {
   const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
   assert.match(css, /draw-value-highlights__entry dd \{ color: #ffd700/);
-  assert.match(css, /draw-value-highlights__prize dd \{ color: #69ffb4/);
+  assert.match(css, /draw-value-highlights__prize dd \{ color: #ffe85c/);
   assert.match(css, /focus-within \.cash-pound-rain span \{ animation-play-state: paused/);
   assert.match(css, /prefers-reduced-motion: reduce\) \{ \.cash-pound-rain/);
+});
+
+
+test('prize panel no longer has an emerald box', () => {
+  const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
+  assert.match(css, /draw-value-highlights__prize \{ border-color: transparent; background: transparent/);
+  assert.doesNotMatch(css, /background: #05251c/);
 });

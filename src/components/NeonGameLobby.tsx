@@ -9,7 +9,7 @@ const games: LobbyGame[] = [
 ];
 const navigate = (href: string) => { window.history.pushState({}, "", href); window.dispatchEvent(new PopStateEvent("popstate")); };
 
-export const NeonGameLobby: React.FC = () => {
+export const NeonGameLobby: React.FC<{ soundEnabled?: boolean; onToggleSound?: () => void }> = ({ soundEnabled = false, onToggleSound }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [chips, setChips] = useState(5000);
   const [notice, setNotice] = useState("");
@@ -29,7 +29,7 @@ export const NeonGameLobby: React.FC = () => {
       <button className="original-lounge__hotspot original-lounge__next" aria-label="Next game" onClick={() => move(1)} />
       <span className="original-lounge__game" aria-live="polite">{selected.title} · {selected.badge}</span>
       <button className="original-lounge__hotspot original-lounge__play" aria-label={selected.href ? `Play now: ${selected.title}` : `View table: ${selected.title}`} onClick={playSelected} />
-      <button className="original-lounge__hotspot original-lounge__sound" aria-label="Sound control unavailable in artwork preview" onClick={() => setNotice("Use the app audio settings to control sound.")} />
+      <button className="original-lounge__hotspot original-lounge__sound" aria-label={soundEnabled ? "Mute sound effects" : "Enable sound effects"} aria-pressed={soundEnabled} onClick={onToggleSound} />
       <button className="original-lounge__hotspot original-lounge__portal" aria-label="Open player portal" onClick={() => navigate("/portal")} />
       <span className="original-lounge__seats">{selected.players}</span>
       <nav aria-label="Lounge navigation" className="original-lounge__navigation">{[['Home','/'],['Draws','/draws'],['Arcade','/arcade'],['Portal','/portal'],['More','/lobby']].map(([name,href]) => <button key={name} aria-label={name} onClick={() => navigate(href)} />)}</nav>

@@ -678,16 +678,16 @@
 .draw-value-highlights { margin-block: 1rem; color: #fff; text-align: left; }
 .draw-value-highlights__grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .65rem; }
 .draw-value-highlights__grid > div { min-width: 0; border-radius: .9rem; padding: .85rem; border: 1px solid #fcd34d; background: #241b05; }
-.draw-value-highlights__grid > .draw-value-highlights__prize { border-color: #6ee7b7; background: #05251c; }
+.draw-value-highlights__grid > .draw-value-highlights__prize { border-color: transparent; background: transparent; }
 .draw-value-highlights dt { font-size: .7rem; font-weight: 800; line-height: 1.4; color: #fef3c7; }
-.draw-value-highlights__prize dt { color: #a7f3d0; }
+.draw-value-highlights__prize dt { color: #fff0ae; text-shadow: 0 2px 4px #000; }
 .draw-value-highlights dd { margin: .35rem 0 0; font-size: clamp(1.5rem,4vw,2.4rem); font-weight: 900; line-height: 1.2; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
 .draw-value-highlights > p { margin-top: .5rem; font-size: .75rem; color: #fde68a; }
 @media(max-width:360px) { .draw-value-highlights__grid { grid-template-columns: minmax(0,1fr); } }
 
 /* Vivid, static value typography; no flashing or colour-dependent labels. */
 .draw-value-highlights__entry dd { color: #ffd700; text-shadow: 0 2px 2px #000, 0 0 18px rgba(255,215,0,.35); }
-.draw-value-highlights__prize dd { color: #69ffb4; text-shadow: 0 2px 2px #000, 0 0 18px rgba(105,255,180,.3); }
+.draw-value-highlights__prize dd { color: #ffe85c; text-shadow: 0 2px 3px #000, 0 0 20px rgba(255,215,0,.65); }
 .cash-pound-rain { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 1; }
 .cash-pound-rain span { position: absolute; top: -3rem; color: #ffd700; opacity: .4; font-size: 1.7rem; font-weight: 900; text-shadow: 0 2px 5px #000; animation: cash-pound-fall 21s linear infinite; }
 @keyframes cash-pound-fall { from { transform: translateY(-3rem) rotate(-15deg); } to { transform: translateY(var(--cash-rain-travel, 85rem)) rotate(25deg); } }
@@ -769,6 +769,32 @@
 .holiday-card-shade { background:none; pointer-events:none; }
 .coverflow-holiday .holiday-card-copy { margin-top:12rem; padding-top:1rem; background:rgba(0,0,0,.45); text-shadow:0 2px 5px #000; }
 
+/* Shared Luxe identity: typography and chrome only; preserve game-state colours. */
+.luxe-brand-theme { --luxe-gold:#ffe09a; --luxe-edge:#b79a54; background-color:#050403; }
+.luxe-brand-theme :is(h1,h2,h3,h4) { font-family:Georgia,'Times New Roman',serif; color:var(--luxe-gold); text-shadow:0 2px 2px #4a300c,0 0 18px #dfb54c33; }
+.luxe-brand-theme :is(.coverflow-draw,.coverflow-holiday,.coverflow-tier,.gold-games__card,.launch-card) { border-color:var(--luxe-edge); }
+.luxe-brand-theme :is(.launch-button,.gold-games__play,.poker-salon-seat) { background:linear-gradient(#fff0b0,#ffbd22); color:#140c00; border:1px solid #ffe6a0; box-shadow:0 3px #785017; }
+.luxe-brand-theme :is(nav,header) button:focus-visible { outline:3px solid #ffe09a; outline-offset:3px; }
+.poker-salon-card { isolation:isolate; border-color:#c7a85c; box-shadow:inset 0 0 25px #c7a85c22,0 15px 30px #0008; }
+.poker-salon-card::before { content:''; position:absolute; inset:0; z-index:-1; background:linear-gradient(130deg,transparent 48%,#e2b84633 49%,transparent 51%),radial-gradient(ellipse at top right,#c59a3033,transparent 60%); pointer-events:none; }
+.poker-salon-emblem { position:absolute; top:1rem; right:1.25rem; font:4rem/1 Georgia,serif; color:#e8c16a; text-shadow:0 0 18px #d4af3755; }
+#poker-league > div > header { flex-wrap:wrap; gap:.65rem; border-color:#b79a54; background:linear-gradient(120deg,#100c05,#050403); }
+#poker-league .poker-salon-seat { min-height:2.75rem; align-items:center; }
+
+/* Master lounge palette for shared navigation and card chrome. */
+.luxe-brand-theme { --luxe-panel:linear-gradient(135deg,#241b09,#080604 55%,#171006); --luxe-button:linear-gradient(#fff0b0,#edb934 52%,#bc7b12); }
+.luxe-brand-theme :is(.launch-card,.gold-games__card,.poker-salon-card) { background:var(--luxe-panel); box-shadow:inset 0 1px #fff0b033,0 14px 35px #0007; }
+.luxe-brand-theme :is(nav,[role=tablist]) { border-color:#b79a5480; }
+.luxe-brand-theme :is(nav,[role=tablist]) :is(button,a) { border-color:#b79a5470; }
+.luxe-brand-theme :is(nav,[role=tablist]) :is([aria-current=page],[aria-selected=true],[aria-pressed=true]) { background:var(--luxe-button); color:#160e02; }
+.luxe-brand-theme :is(.launch-button,.gold-games__play,.poker-salon-seat) { background:var(--luxe-button); }
+.luxe-brand-theme :is(input,select,textarea):focus-visible { outline:2px solid #ffe09a; outline-offset:2px; }
+
+.draw-value-highlights__grid--entry-only { grid-template-columns:minmax(0,1fr); }
+.luxe-brand-theme .cash-prize-heading { font-size:clamp(2.8rem,8vw,4.5rem); line-height:1.06; color:#ffe85c; text-shadow:0 2px 3px #000,0 0 22px #ffd70077; overflow-wrap:anywhere; }
+
+/* Match cash-card entry amounts to the enlarged metallic-gold prize heading. */
+.luxe-brand-theme .coverflow-draw .draw-value-highlights__grid--entry-only dd { font-family:Georgia,'Times New Roman',serif; font-size:clamp(2.6rem,7vw,4rem); line-height:1.06; color:#ffe85c; text-shadow:0 2px 3px #000,0 0 22px #ffd70077; }
 .poker-table-artwork { position:relative; overflow:hidden; border-radius:1.5rem; background:#050403; }
 .poker-table-artwork > img { display:block; width:100%; height:auto; object-fit:contain; }
 .poker-table-artwork__state { display:flex; flex-wrap:wrap; justify-content:center; gap:.35rem 1rem; padding:.65rem; border-top:1px solid #b79a54; background:#080603; color:#ffe6a0; font-size:.8rem; text-align:center; }
