@@ -985,3 +985,8 @@
 .poker-seat-error { position:sticky; top:.5rem; z-index:40; margin-top:1rem; border:1px solid #ffe09a; border-radius:.8rem; padding:1rem; background:#241704; color:#fff0b0; font-weight:700; }
 .salon-table-preview__image,.salon-table-preview__shade { pointer-events:none; }
 .salon-table-preview { touch-action:manipulation; }
+
+/* Centre the rotate guidance in the phone viewport rather than the page flow. */
+@media (orientation:portrait) and (max-width:900px) {
+  .poker-playing-page .poker-landscape-gate { position:fixed; inset:0; z-index:85; min-height:100dvh; box-sizing:border-box; padding: max(1.5rem,env(safe-area-inset-top)) 1.5rem max(1.5rem,env(safe-area-inset-bottom)); background:radial-gradient(ellipse at center,#302207,#050403 70%); }
+}
