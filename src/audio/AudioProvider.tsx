@@ -9,6 +9,20 @@ const tones: Record<SoundEffect, number[]> = { button: [660], ticketSelect: [523
 
 function fallbackTone(context: AudioContext, effect: SoundEffect, volume: number) {
   const now = context.currentTime;
+  if (effect === "chipStack") {
+    for (let index = 0; index < 9; index++) {
+      const start = now + index * .035;
+      const oscillator = context.createOscillator(), gain = context.createGain();
+      oscillator.type = "triangle";
+      oscillator.frequency.setValueAtTime(1100 + (index * 347) % 1800, start);
+      oscillator.frequency.exponentialRampToValueAtTime(500, start + .055);
+      gain.gain.setValueAtTime(Math.min(.08, volume * .1), start);
+      gain.gain.exponentialRampToValueAtTime(.001, start + .065);
+      oscillator.connect(gain).connect(context.destination);
+      oscillator.start(start); oscillator.stop(start + .07);
+    }
+    return;
+  }
   tones[effect].forEach((frequency, index) => {
     const oscillator = context.createOscillator();
     const gain = context.createGain();

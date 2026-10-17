@@ -1000,3 +1000,12 @@
 .luxe-pot-chips__amount { padding:.2rem .4rem; border:1px solid #c4a050; border-radius:.4rem; background:#080603e8; font-size:.65rem; }
 @keyframes luxe-pot-arrive { from { opacity:.4; translate:1rem .6rem; } to { opacity:1; translate:0 0; } }
 @media (prefers-reduced-motion:reduce) { .luxe-pot-chips__stack { animation:none; } }
+
+/* Pot travels within the same percentage coordinate space as player seats. */
+.luxe-pot-chips--player { animation:luxe-pot-to-player .85s ease-in-out forwards; }
+.luxe-pot-chips--host { animation:luxe-pot-to-host .85s ease-in-out forwards; }
+.luxe-pot-chips--split { animation:luxe-pot-split .85s ease-in-out forwards; }
+@keyframes luxe-pot-to-player { to { left:83%; top:78%; opacity:0; scale:.65; } }
+@keyframes luxe-pot-to-host { to { left:8%; top:44%; opacity:0; scale:.65; } }
+@keyframes luxe-pot-split { to { opacity:0; scale:.6; } }
+@media(prefers-reduced-motion:reduce) { .luxe-pot-chips--player,.luxe-pot-chips--host,.luxe-pot-chips--split { animation:none; opacity:0; } }
