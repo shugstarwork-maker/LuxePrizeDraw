@@ -1,3 +1,4 @@
+import { playPokerPercussion } from "./pokerActionSound";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { backgroundMusic, licensedAudioEnabled, soundEffects, type SoundEffect } from "./config";
 
@@ -5,10 +6,24 @@ type AudioControls = { enabled: boolean; musicEnabled: boolean; volume: number; 
 const AudioContext = createContext<AudioControls | null>(null);
 const SETTINGS_KEY = "luxe-prize-draw-audio";
 
-const tones: Record<SoundEffect, number[]> = { button: [660], ticketSelect: [523, 659], ticketPurchase: [440, 660, 880], success: [523, 659, 784], error: [220, 185], drawStart: [220, 277, 330], drawSuspense: [196, 208], winnerReveal: [523, 659, 784, 1046], jackpotReveal: [392, 523, 659, 784, 1046], notification: [784, 1046], cardDeal: [392, 523, 659], chipStack: [330, 415, 494], levelUp: [523, 659, 784, 1046, 1318], coinWin: [880, 1046, 1175, 1318] };
+const tones: Record<SoundEffect, number[]> = { chipDrop: [], tableKnock: [], button: [660], ticketSelect: [523, 659], ticketPurchase: [440, 660, 880], success: [523, 659, 784], error: [220, 185], drawStart: [220, 277, 330], drawSuspense: [196, 208], winnerReveal: [523, 659, 784, 1046], jackpotReveal: [392, 523, 659, 784, 1046], notification: [784, 1046], cardDeal: [392, 523, 659], chipStack: [330, 415, 494], levelUp: [523, 659, 784, 1046, 1318], coinWin: [880, 1046, 1175, 1318] };
 
 function fallbackTone(context: AudioContext, effect: SoundEffect, volume: number) {
   const now = context.currentTime;
+  if (effect === "chipStack") {
+    for (let index = 0; index < 9; index++) {
+      const start = now + index * .035;
+      const oscillator = context.createOscillator(), gain = context.createGain();
+      oscillator.type = "triangle";
+      oscillator.frequency.setValueAtTime(1100 + (index * 347) % 1800, start);
+      oscillator.frequency.exponentialRampToValueAtTime(500, start + .055);
+      gain.gain.setValueAtTime(Math.min(.08, volume * .1), start);
+      gain.gain.exponentialRampToValueAtTime(.001, start + .065);
+      oscillator.connect(gain).connect(context.destination);
+      oscillator.start(start); oscillator.stop(start + .07);
+    }
+    return;
+  }
   tones[effect].forEach((frequency, index) => {
     const oscillator = context.createOscillator();
     const gain = context.createGain();
@@ -38,6 +53,19 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     const now = Date.now();
     if (now - (lastPlayed.current[effect] || 0) < 130) return;
     lastPlayed.current[effect] = now;
+    if (effect === "chipDrop" || effect === "chipStack") {
+      try {
+        const clip = new Audio("/audio/poker-chips-0942.mp3");
+        clip.volume = settings.volume;
+        clip.preload = "auto";
+        void clip.play().catch(() => { /* Never substitute the rejected beep or block gameplay. */ });
+      } catch { /* Unsupported audio must not block the game. */ }
+      return;
+    }
+    if (effect === "tableKnock") {
+      try { playPokerPercussion(getContext(), effect, settings.volume); } catch { /* Audio failure must not block game actions. */ }
+      return;
+    }
     if (!licensedAudioEnabled) { fallbackTone(getContext(), effect, settings.volume); return; }
     const clip = new Audio(soundEffects[effect]);
     clip.volume = settings.volume;

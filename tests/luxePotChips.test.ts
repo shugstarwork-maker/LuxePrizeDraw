@@ -1,0 +1,24 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { LuxePotChips, potChipCount } from '../src/components/LuxePotChips';
+test('pot stack is bounded and absent before betting', () => {
+  assert.equal(potChipCount(0), 0); assert.equal(potChipCount(-1), 0);
+  assert.equal(potChipCount(NaN), 0); assert.equal(potChipCount(150), 1);
+  assert.equal(potChipCount(100000), 9);
+  assert.equal(renderToStaticMarkup(createElement(LuxePotChips, { pot:0 })), '');
+});
+test('branded pot uses exact live amount rather than claiming denomination per token', () => {
+  const html = renderToStaticMarkup(createElement(LuxePotChips, { pot:1750 }));
+  for (const value of ['LUXE','POKER','1,750','virtual chips','illustrative']) assert.ok(html.includes(value));
+  assert.equal((html.match(/class="luxe-pot-chip"/g) || []).length, 7);
+});
+
+test('winner transfer targets follow the result and do not create payout logic', () => {
+  const player = renderToStaticMarkup(createElement(LuxePotChips, { pot:500, winner:'player' }));
+  assert.match(player, /luxe-pot-chips--player/);
+  assert.match(player, /Awarded to player/);
+  const host = renderToStaticMarkup(createElement(LuxePotChips, { pot:500, winner:'host' }));
+  assert.match(host, /luxe-pot-chips--host/);
+});

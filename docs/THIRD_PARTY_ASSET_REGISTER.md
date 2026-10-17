@@ -67,3 +67,29 @@ This register records direct software dependencies and identified externally hos
 - Live controls overlay the artwork; free-play/no-cash-value disclosures qualify
   the artwork's reward wording. No real reward or cash-out is enabled.
 - Retain creation/licensing evidence in the restricted asset archive.
+
+## Owner-supplied original poker table
+
+- `public/games/luxe-poker-table.png`: original full-resolution artwork supplied
+  by the owner on 16 October 2026 for the playable free-play poker table.
+- Retained uncropped; actual pot/stage remain separate live UI. Decorative chips,
+  seats and cards in the image are scenery, not authoritative game state.
+- Retain underlying creation/licensing evidence in the restricted asset archive.
+
+## Recorded poker-chip collision sound
+
+- Asset: `public/audio/poker-chips-0942.mp3`, supplied by the owner on 17 October 2026.
+- Source: https://bigsoundbank.com/poker-chips-s0942.html
+- Title: Poker Chips; author: Clarisse; sound ID: 0942.
+- Source page explicitly lists CC0/public-domain-equivalent licensing, commercial
+  app use and redistribution allowed, attribution optional. Verified 17 October 2026.
+- Used for chipDrop (Raise/Call) and chipStack (collection) with opt-in/mute/volume.
+- Binary retained as uploaded. Actual listening and target-device playback remain
+  unverified; no claim is made that automated checks judge audio quality.
+
+## Homepage Luxe brand header
+
+`public/prizes/home-luxe-banner.png` was supplied by the owner for placement above
+headline prize previews. Retained uncropped. The pictured vehicle is illustrative,
+not proof of a confirmed prize or supplier relationship. Retain rights evidence
+in the restricted company asset archive.
