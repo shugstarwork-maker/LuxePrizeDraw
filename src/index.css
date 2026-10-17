@@ -924,3 +924,12 @@
 .salon-table-preview__content > p { color:#f0dfbb; }
 .salon-table-preview__action { min-height:2.75rem; align-items:center; background:linear-gradient(#fff0ae,#e4ae31); border:1px solid #ffe09a; box-shadow:0 3px #714914; color:#160e02; }
 .salon-table-preview:focus-visible { outline:3px solid #fff0ae; outline-offset:3px; }
+
+.player-turn-ring { position:relative; display:block; width:2.75rem; height:2.75rem; margin-inline:auto; border-radius:50%; filter:drop-shadow(0 0 5px #d4af3755); }
+.player-turn-ring > svg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; transform:rotate(-90deg); }
+.player-turn-ring__base { fill:#100c05; stroke:#b9943e; stroke-width:3; }
+.player-turn-ring__clock { fill:none; stroke:#ffe69a; stroke-width:3.5; stroke-linecap:round; transition:stroke-dashoffset 1s linear; }
+.player-turn-ring__avatar { position:absolute; inset:5px; display:grid; place-items:center; border-radius:50%; overflow:hidden; background:linear-gradient(#ffecac,#b7892c); color:#160f04; font-size:.65rem; font-weight:900; }
+.player-turn-ring--active { filter:drop-shadow(0 0 8px #ffd75f99); }
+@media (orientation:landscape) and (max-height:700px) { .poker-playing-page .player-turn-ring { width:2.3rem; height:2.3rem; } }
+@media(prefers-reduced-motion:reduce) { .player-turn-ring__clock { transition:none; } }
