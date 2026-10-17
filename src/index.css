@@ -1114,3 +1114,9 @@
 
 /* Keep scenery bright across the full card, with shadows on copy rather than a dark sheet. */
 .luxury-holidays .holiday-card-copy :is(p,li,dt,dd,h3) { text-shadow:0 2px 3px #000,1px 0 3px #000,-1px 0 3px #000; }
+
+/* Holiday entry and prize are equal, unboxed gold-serif highlights. */
+.luxury-holidays .draw-value-highlights__grid > div { border:0; background:transparent; padding:.5rem 0; box-shadow:none; }
+.luxury-holidays .draw-value-highlights :is(dt,dd) { font-family:Georgia,'Times New Roman',serif; }
+.luxury-holidays .draw-value-highlights dt { color:#fff0ae; text-shadow:0 2px 4px #000; }
+.luxury-holidays .draw-value-highlights dd { color:#ffe85c; font-size:clamp(1.5rem,4vw,2.4rem); font-weight:900; text-shadow:0 2px 3px #000,0 0 20px #ffd70077; }
