@@ -1088,3 +1088,13 @@
 @media(hover:hover) { .cash-swell-card:hover :is(h3,p,dt,dd) { animation-play-state:paused; } }
 .cash-swell-card:focus-within :is(h3,p,dt,dd) { animation-play-state:paused; }
 @media(prefers-reduced-motion:reduce) { .cash-swell-card :is(h3,p,dt,dd) { animation:none; transform:none; } }
+
+/* Shared draw amounts only: never animate pending labels or game balances. */
+@keyframes draw-gold-pulse { 0%,100% { opacity:1; filter:brightness(1.15); } 50% { opacity:.7; filter:brightness(.95); } }
+.draw-value-highlights dd.draw-gold-amount,.cash-swell-card .cash-prize-heading,.headline-choice-title strong { animation:cash-letter-swell 7s ease-in-out infinite,draw-gold-pulse 3s ease-in-out infinite; transform-origin:left center; }
+.headline-gold-flames { position:relative; isolation:isolate; }
+.headline-gold-flames::before { content:''; position:absolute; inset:-.15em -.05em -.05em; z-index:-1; pointer-events:none; background:radial-gradient(ellipse at 10% 80%,#ffd34b99,transparent 20%),radial-gradient(ellipse at 35% 65%,#ffbd2699,transparent 23%),radial-gradient(ellipse at 60% 75%,#ffe9a0aa,transparent 20%),radial-gradient(ellipse at 85% 70%,#daa52099,transparent 22%); filter:blur(8px); transform-origin:center bottom; animation:headline-gold-flame 4s ease-in-out infinite; }
+@keyframes headline-gold-flame { 0%,100% { transform:scaleY(.8); opacity:.45; } 50% { transform:scaleY(1.2) translateY(-.08em); opacity:.7; } }
+@media(hover:hover) { .draw-value-highlights:hover dd.draw-gold-amount,.headline-choice-title:hover strong,.headline-choice-title:hover strong::before { animation-play-state:paused; } }
+.draw-value-highlights:focus-within dd.draw-gold-amount,.headline-luxe-card:focus-within .headline-gold-flames,.headline-luxe-card:focus-within .headline-gold-flames::before { animation-play-state:paused; }
+@media(prefers-reduced-motion:reduce) { .draw-value-highlights dd.draw-gold-amount,.cash-swell-card .cash-prize-heading,.headline-choice-title strong { animation:none; transform:none; opacity:1; filter:none; }.headline-gold-flames::before { animation:none; display:none; } }
