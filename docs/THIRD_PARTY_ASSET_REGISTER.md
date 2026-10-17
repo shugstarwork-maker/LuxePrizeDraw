@@ -86,3 +86,10 @@ This register records direct software dependencies and identified externally hos
 - Used for chipDrop (Raise/Call) and chipStack (collection) with opt-in/mute/volume.
 - Binary retained as uploaded. Actual listening and target-device playback remain
   unverified; no claim is made that automated checks judge audio quality.
+
+## Homepage Luxe brand header
+
+`public/prizes/home-luxe-banner.png` was supplied by the owner for placement above
+headline prize previews. Retained uncropped. The pictured vehicle is illustrative,
+not proof of a confirmed prize or supplier relationship. Retain rights evidence
+in the restricted company asset archive.
