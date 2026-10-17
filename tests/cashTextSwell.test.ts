@@ -9,3 +9,10 @@ test('cash entry is unboxed and slow text swell respects reduced motion', () => 
  const source=readFileSync(new URL('../src/components/CashPrizesCarousel.tsx',import.meta.url),'utf8');
  assert.match(source,/cash-swell-card coverflow-draw/);
 });
+
+test('attention pulse is slow and never hides entry or prize amounts', () => {
+ const css=readFileSync(new URL('../src/index.css',import.meta.url),'utf8');
+ assert.match(css,/cash-amount-glow 3s ease-in-out infinite/);
+ assert.match(css,/@keyframes cash-amount-glow[^}]*\} 50% \{ opacity:\.65/);
+ assert.match(css,/animation:none; opacity:1; filter:none/);
+});

@@ -1088,3 +1088,10 @@
 @media(hover:hover) { .cash-swell-card:hover :is(h3,p,dt,dd) { animation-play-state:paused; } }
 .cash-swell-card:focus-within :is(h3,p,dt,dd) { animation-play-state:paused; }
 @media(prefers-reduced-motion:reduce) { .cash-swell-card :is(h3,p,dt,dd) { animation:none; transform:none; } }
+
+/* Slow attention pulse: never fully hide important prices or flash rapidly. */
+.cash-swell-card .draw-value-highlights__entry dd,.cash-swell-card .cash-prize-heading { animation:cash-letter-swell 7s ease-in-out infinite,cash-amount-glow 3s ease-in-out infinite; }
+@keyframes cash-amount-glow { 0%,100% { opacity:1; filter:brightness(1.2); } 50% { opacity:.65; filter:brightness(.9); } }
+@media(hover:hover) { .cash-swell-card:hover .draw-value-highlights__entry dd,.cash-swell-card:hover .cash-prize-heading { animation-play-state:paused; } }
+.cash-swell-card:focus-within .draw-value-highlights__entry dd,.cash-swell-card:focus-within .cash-prize-heading { animation-play-state:paused; }
+@media(prefers-reduced-motion:reduce) { .cash-swell-card .draw-value-highlights__entry dd,.cash-swell-card .cash-prize-heading { animation:none; opacity:1; filter:none; } }
