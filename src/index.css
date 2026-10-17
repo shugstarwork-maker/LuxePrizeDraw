@@ -1024,3 +1024,20 @@
 .headline-luxe-art img { display:block; width:100%; height:14rem; object-fit:cover; }
 .headline-luxe-crown { position:absolute; top:.25rem; left:50%; transform:translateX(-50%); font-size:2rem; color:#ffe09a; }
 .headline-luxe-art-label { display:block; text-align:center; padding:.65rem .3rem; color:#ffe09a; font:700 .9rem Georgia,serif; letter-spacing:.08em; }
+
+.headline-luxe-card { isolation:isolate; }
+.headline-luxe-layout { position:relative; z-index:2; }
+.headline-choice-title { margin-top:1rem; }
+.headline-luxe-card .headline-choice-title__intro { display:block; font:800 .7rem/1.5 system-ui,sans-serif; text-transform:uppercase; letter-spacing:.15em; color:#e8cf93; }
+.headline-luxe-card .headline-choice-title strong { display:block; font:700 clamp(3rem,12vw,6rem)/1.1 Georgia,serif; color:#ffe39a; text-shadow:0 2px #8d5f18,0 0 25px #cda13744; }
+.headline-choice-title > span:last-child { display:block; margin-top:.5rem; font-size:clamp(1.1rem,4vw,1.7rem); letter-spacing:.04em; }.headline-choice-title i { font-size:.8em; color:#ead7aa; }
+.headline-bitcoin-art { display:flex; flex-direction:column; align-items:center; gap:1rem; padding:1rem; }
+.headline-bitcoin-art__coin { display:grid; place-items:center; width:clamp(8rem,28vw,13rem); aspect-ratio:1; border:7px double #fff0ac; border-radius:50%; background:radial-gradient(circle at 30% 20%,#ffefae,#dcaa32 48%,#815009 80%,#e7bd52); box-shadow:inset 0 0 0 8px #b98822,0 12px 30px #0009,0 0 45px #e8b63333; color:#613c06; font:700 clamp(5rem,18vw,9rem)/1 Georgia,serif; text-shadow:0 2px #fff0ae; }
+.headline-bitcoin-art > span { font:700 .8rem Georgia,serif; letter-spacing:.18em; color:#ffe39a; }
+.bitcoin-coin-rain { position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none; container-type:size; }
+.bitcoin-coin-rain > span { position:absolute; top:-2rem; display:grid; place-items:center; width:1rem; height:1rem; border:1px solid #ffe49a; border-radius:50%; background:radial-gradient(circle at 30% 20%,#fff0ab,#bd8318); color:#6b4204; font:900 .7rem Georgia,serif; opacity:.55; animation:bitcoin-coin-fall 18s linear infinite; }
+@keyframes bitcoin-coin-fall { to { transform:translateY(100rem) rotate(240deg); } }
+@supports(height:1cqh) { @keyframes bitcoin-coin-fall { to { transform:translateY(calc(100cqh + 3rem)) rotate(240deg); } } }
+.bitcoin-coin-rain--paused > span { animation-play-state:paused; }
+.headline-luxe-card .bitcoin-coin-rain-toggle { position:relative; z-index:3; display:block; margin-left:auto; padding:.3rem .55rem; min-height:2rem; font-size:.65rem; box-shadow:none; }
+@media(prefers-reduced-motion:reduce) { .bitcoin-coin-rain,.bitcoin-coin-rain-toggle { display:none !important; }.bitcoin-coin-rain > span { animation:none; } }
