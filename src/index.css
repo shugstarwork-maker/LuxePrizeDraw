@@ -887,8 +887,7 @@
 .poker-live-host { z-index:100; }
 .poker-landscape-gate { display:none; }
 @media (orientation:portrait) and (max-width:900px) {
-  .poker-playing-page .poker-playing-wrap { display:none; }
-  .poker-landscape-gate { display:flex; min-height:65dvh; flex-direction:column; align-items:center; justify-content:center; gap:1rem; padding:1.5rem; text-align:center; color:#ffe095; }
+  .poker-landscape-gate { display:none; min-height:65dvh; flex-direction:column; align-items:center; justify-content:center; gap:1rem; padding:1.5rem; text-align:center; color:#ffe095; }
   .poker-landscape-gate > span { font-size:4rem; }.poker-landscape-gate h2 { font:700 2rem Georgia,serif; }
   .poker-landscape-gate button { padding:.8rem 1.25rem; border:1px solid #ffe095; border-radius:.8rem; background:#ffe095; color:#171109; font-weight:900; }
 }
@@ -920,10 +919,9 @@
   .poker-playing-page .poker-deal-dock { background:linear-gradient(#fff0b0,#ffbd22); color:#140c00; font-size:1rem; font-weight:900; min-height:2.75rem; text-shadow:none; }
   .poker-playing-page .poker-deal-dock:focus-visible,.poker-playing-page .poker-action-dock button:focus-visible { outline:3px solid #fff; outline-offset:2px; }
 }
-/* Portrait remains a rotation prompt even when browser fullscreen is active. */
+/* Portrait stays playable; the rotate hint is a suggestion, not a block. */
 @media (orientation:portrait) and (max-width:900px) {
-  .poker-playing-page:fullscreen .poker-playing-wrap { display:none; }
-  .poker-playing-page:fullscreen .poker-landscape-gate { display:flex; }
+  .poker-playing-page:fullscreen .poker-landscape-gate { display:none; }
 }
 
 /* Playability pass: isolate live cards from seat badges and preserve turn feedback. */
