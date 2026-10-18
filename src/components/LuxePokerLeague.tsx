@@ -2,26 +2,30 @@ import { pokerActionSound } from "../audio/pokerActionSound";
 import { PlayerTurnRing } from "./PlayerTurnRing";
 import { LuxePlayingCard } from "./LuxePlayingCard";
 import { PokerFullscreen } from "./PokerFullscreen";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { LuxeDealer } from "./LuxeDealer";
-import { Bot, ChevronLeft, Crown, Gift, MessageCircle, ShieldCheck, Sparkles, Timer, Volume2, X } from "lucide-react";
+import { Bot, ChevronLeft, Crown, Gift, MessageCircle, ShieldCheck, Sparkles, Timer, Users, Volume2 } from "lucide-react";
 import { PokerTableArtwork } from "./PokerTableArtwork";
 import { useAudio } from "../audio/AudioProvider";
-import { compareHands, evaluateHand, POKER_RANKS, POKER_SUITS, type PokerCard, type PokerSuit } from "../lib/poker";
+import { applyAction, botAction, createTable, dealHand, type HoldemState } from "../games/holdem";
 
-type Card = PokerCard;
-type Suit = PokerSuit;
-type Stage = "pre-flop" | "flop" | "turn" | "river" | "showdown";
-type Action = "check" | "call" | "raise" | "fold";
-const seats = [{name:"Luxe Host", initials:"LH", chips:"5,000", position:"top-1/2 left-1 -translate-y-1/2"},{name:"Amelia K.", initials:"AK", chips:"4,250", position:"top-3 right-8"},{name:"Marcus B.", initials:"MB", chips:"3,800", position:"top-3 left-8"},{name:"Ruby C.", initials:"RC", chips:"2,900", position:"bottom-20 left-8"},{name:"Theo M.", initials:"TM", chips:"4,600", position:"bottom-20 right-8"},{name:"You", initials:"LP", chips:"6,600", position:"bottom-2 left-1/2 -translate-x-1/2"}];
-const tables = [{ name: "Onyx Luxe Lounge", image: "/games/luxe-poker-table.png", blinds: "25 / 50", buyIn: 500, players: "4 / 6", tone: "from-amber-200 to-amber-500" }, { name: "Noir Lounge", image: "/games/luxe-deck-preview.svg", blinds: "100 / 200", buyIn: 1500, players: "5 / 6", tone: "from-yellow-200 to-amber-600" }, { name: "Gilded Room", image: "/games/luxe-chips-preview.svg", blinds: "250 / 500", buyIn: 5000, players: "3 / 6", tone: "from-amber-300 to-orange-500" }];
-const emotes = ["Nice hand", "Good luck", "Well played", "Thinking..."];
-const gifts = [{name:"Lucky chip", cost:25, icon:"🪙"},{name:"Gold crown", cost:75, icon:"👑"},{name:"Luxe sparkle", cost:150, icon:"✨"}];
-const makeDeck = () => POKER_SUITS.flatMap(suit => POKER_RANKS.map((rank, index) => ({ rank, suit, value: index + 2 })));
-const shuffle = (deck: Card[]) => { const shuffled = [...deck]; for (let index = shuffled.length - 1; index > 0; index -= 1) { const swapIndex = Math.floor(Math.random() * (index + 1)); [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]]; } return shuffled; };
-const isRed = (suit: Suit) => suit === "♥" || suit === "♦";
-const key = (card: Card) => `${card.rank}${card.suit}`;
 const CardView = LuxePlayingCard;
+const key = (card: { rank: string; suit: string }) => `${card.rank}${card.suit}`;
+
+type TableDef = { name: string; image: string; blinds: string; smallBlind: number; bigBlind: number; buyIn: number; bots: number; tone: string; minLevel: number };
+const tables: TableDef[] = [
+  { name: "Onyx Luxe Lounge", image: "/games/luxe-poker-table.png", blinds: "25 / 50", smallBlind: 25, bigBlind: 50, buyIn: 500, bots: 5, tone: "from-amber-200 to-amber-500", minLevel: 0 },
+  { name: "Noir Lounge", image: "/games/luxe-deck-preview.svg", blinds: "100 / 200", smallBlind: 100, bigBlind: 200, buyIn: 1500, bots: 5, tone: "from-yellow-200 to-amber-600", minLevel: 0 },
+  { name: "Gilded Room", image: "/games/luxe-chips-preview.svg", blinds: "250 / 500", smallBlind: 250, bigBlind: 500, buyIn: 5000, bots: 5, tone: "from-amber-300 to-orange-500", minLevel: 2 },
+];
+const emotes = ["Nice hand", "Good luck", "Well played", "Thinking..."];
+const gifts = [{ name: "Lucky chip", cost: 25, icon: "🪙" }, { name: "Gold crown", cost: 75, icon: "👑" }, { name: "Luxe sparkle", cost: 150, icon: "✨" }];
+
+// Seat slots around the oval artwork (percent coordinates). Slot 5 = bottom centre = you.
+const SEAT_SLOTS = [180, 55, 125, 235, 305, 270].map((deg) => {
+  const th = (deg * Math.PI) / 180;
+  return { px: 50 + 42 * Math.cos(th), py: 44 - 27 * Math.sin(th), sc: 1.06 - 0.34 * ((Math.sin(th) + 1) / 2) };
+});
 
 export const LuxePokerLeague: React.FC = () => {
   const { enabled, setEnabled, play, musicEnabled, setMusicEnabled } = useAudio();
@@ -33,6 +37,7 @@ export const LuxePokerLeague: React.FC = () => {
   const [avatar, setAvatar] = useState(() => localStorage.getItem("luxe-poker-avatar") || "");
   const [chips, setChips] = useState(() => Number(localStorage.getItem("luxe-demo-poker-chips")) || 6600);
   const [xp, setXp] = useState(() => Number(localStorage.getItem("luxe-poker-xp")) || 340);
+  const level = Math.floor(xp / 200);
 
   type StoreItem = { id: string; type: "chips" | "ticket" | "theme" | "frame"; label: string; badge: string; chips?: number; count?: number };
   const STORE: StoreItem[] = [
@@ -49,16 +54,108 @@ export const LuxePokerLeague: React.FC = () => {
   const [tableTheme, setTableTheme] = useState<"classic" | "onyx" | "noir">("classic");
   const [avatarFrame, setAvatarFrame] = useState<"none" | "gold" | "platinum">("none");
   const [tickets, setTickets] = useState(0);
-  const [potWinner, setPotWinner] = useState<"player" | "host" | "split" | null>(null);
   const [winFlash, setWinFlash] = useState(false);
   const [levelFlash, setLevelFlash] = useState(false);
   const [stats, setStats] = useState(() => { try { return JSON.parse(localStorage.getItem("luxe-poker-stats") || "") ?? { handsWon: 0, biggestPot: 0, streak: 0, bestStreak: 0 }; } catch { return { handsWon: 0, biggestPot: 0, streak: 0, bestStreak: 0 }; } });
   const vipTier = xp >= 800 ? { name: "Diamond member", benefit: "Priority tables" } : xp >= 400 ? { name: "Gold member", benefit: "1.25x XP" } : xp >= 150 ? { name: "Silver member", benefit: "Daily bonus +" } : { name: "Bronze member", benefit: "Welcome tier" };
+
+  const [seatError, setSeatError] = useState("");
+  const [activeTable, setActiveTable] = useState<TableDef | null>(null);
+  const [game, setGame] = useState<HoldemState | null>(null);
+  const [raiseTo, setRaiseTo] = useState(0);
+  const [seconds, setSeconds] = useState(20);
+  const [status, setStatus] = useState("Choose a table to sit down.");
+  const [feed, setFeed] = useState<string[]>(["Welcome to Luxe Poker League"]);
+  const [rewardReady, setRewardReady] = useState(() => localStorage.getItem("luxe-poker-reward") !== new Date().toDateString());
+  const settledHand = useRef(0);
+
+  const you = game?.players.find((p) => p.id === "you");
+  const yourTurn = Boolean(game && !game.handOver && game.players[game.turnIndex]?.id === "you");
+  const toCall = game && you ? game.currentBet - you.bet : 0;
+  const minRaiseTo = game && you ? Math.min(game.currentBet + game.minRaise, you.bet + you.chips) : 0;
+  const maxRaiseTo = you ? you.bet + you.chips : 0;
+
+  useEffect(() => { localStorage.setItem("luxe-demo-poker-chips", String(chips)); localStorage.setItem("luxe-poker-xp", String(xp)); }, [chips, xp]);
+
+  const note = (message: string) => { setStatus(message); setFeed((items) => [message, ...items].slice(0, 4)); };
   const awardXp = (amount: number) => {
-    const next = xp + amount;
-    setXp(next);
-    if (Math.floor(next / 200) > Math.floor(xp / 200)) { play("levelUp"); setLevelFlash(true); window.setTimeout(() => setLevelFlash(false), 1200); }
+    setXp((prev) => {
+      const next = prev + amount;
+      if (Math.floor(next / 200) > Math.floor(prev / 200)) { play("levelUp"); setLevelFlash(true); window.setTimeout(() => setLevelFlash(false), 1200); }
+      return next;
+    });
   };
+
+  // ── Engine: bot turn loop ──
+  useEffect(() => {
+    if (!game || game.handOver) return;
+    const actor = game.players[game.turnIndex];
+    if (!actor || !actor.isBot) return;
+    const timer = window.setTimeout(() => {
+      setGame((g) => {
+        if (!g || g.handOver) return g;
+        const bot = g.players[g.turnIndex];
+        if (!bot?.isBot) return g;
+        const decision = botAction(g, bot);
+        const next = applyAction(g, bot.id, decision.action, decision.raiseTo);
+        if (next.lastAction !== g.lastAction) play(decision.action === "fold" ? "tableKnock" : "chipDrop");
+        return next;
+      });
+    }, 650 + Math.random() * 750);
+    return () => window.clearTimeout(timer);
+  }, [game, play]);
+
+  // ── Engine: surface the latest action ──
+  useEffect(() => {
+    if (!game) return;
+    setStatus(game.lastAction);
+    setFeed((items) => (items[0] === game.lastAction ? items : [game.lastAction, ...items].slice(0, 4)));
+  }, [game]);
+
+  // ── Engine: settle XP / stats / win flash once per hand ──
+  useEffect(() => {
+    if (!game || !game.handOver || game.winners.length === 0) return;
+    if (settledHand.current === game.handNumber) return;
+    settledHand.current = game.handNumber;
+    const mine = game.winners.find((w) => w.id === "you");
+    play("winnerReveal");
+    if (mine) {
+      play("coinWin");
+      setWinFlash(true);
+      window.setTimeout(() => setWinFlash(false), 1800);
+      awardXp(20 * (tickets > 0 ? 2 : 1));
+      setStats((prev) => {
+        const streak = prev.streak + 1;
+        const next = { handsWon: prev.handsWon + 1, biggestPot: Math.max(prev.biggestPot, mine.amount), streak, bestStreak: Math.max(prev.bestStreak, streak) };
+        localStorage.setItem("luxe-poker-stats", JSON.stringify(next));
+        return next;
+      });
+    } else {
+      setStats((prev) => { const next = { ...prev, streak: 0 }; localStorage.setItem("luxe-poker-stats", JSON.stringify(next)); return next; });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game?.handOver, game?.handNumber]);
+
+  // ── Player turn timer: auto check/fold ──
+  useEffect(() => {
+    if (!yourTurn) return;
+    setSeconds(20);
+    const timer = window.setInterval(() => setSeconds((v) => Math.max(0, v - 1)), 1000);
+    return () => window.clearInterval(timer);
+  }, [yourTurn, game?.handNumber, game?.stage, game?.turnIndex]);
+  useEffect(() => {
+    if (!yourTurn || seconds > 0 || !game || !you) return;
+    const auto = toCall > 0 ? "fold" : "check";
+    play(pokerActionSound(auto));
+    setGame((g) => (g ? applyAction(g, "you", auto) : g));
+    note(`Time expired — auto ${auto}.`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seconds, yourTurn]);
+
+  // Keep the raise slider inside legal bounds as the hand evolves.
+  useEffect(() => { if (game && you) setRaiseTo((v) => Math.min(Math.max(v || minRaiseTo, minRaiseTo), maxRaiseTo)); }, [game?.currentBet, game?.stage, yourTurn]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const chooseAvatar = (file?: File) => { if (!file) return; const reader = new FileReader(); reader.onload = () => { const value = String(reader.result); localStorage.setItem("luxe-poker-avatar", value); setAvatar(value); note("Demo avatar updated on this device."); }; reader.readAsDataURL(file); };
   const buyItem = (item: StoreItem) => {
     if (item.type === "chips") { setChips((v) => v + (item.chips ?? 0)); awardXp(Math.round((item.chips ?? 0) / 5)); }
     else if (item.type === "ticket") setTickets((v) => v + (item.count ?? 0));
@@ -67,32 +164,54 @@ export const LuxePokerLeague: React.FC = () => {
     play(item.type === "chips" ? "chipStack" : "ticketPurchase");
     note(`${item.label} — acquired. Demo store, no cash value.`);
   };
-  const [seatError, setSeatError] = useState("");
-  const [activeTable, setActiveTable] = useState<typeof tables[number] | null>(null);
-  const [deck, setDeck] = useState<Card[]>([]); const [yourCards, setYourCards] = useState<Card[]>([]); const [hostCards, setHostCards] = useState<Card[]>([]); const [board, setBoard] = useState<Card[]>([]);
-  const [pot, setPot] = useState(0); const [stage, setStage] = useState<Stage>("pre-flop"); const [active, setActive] = useState(false); const [reveal, setReveal] = useState(false); const [raise, setRaise] = useState(100); const [seconds, setSeconds] = useState(20); const [status, setStatus] = useState("Choose a table to sit down."); const [feed, setFeed] = useState<string[]>(["Welcome to Luxe Poker League"]); const [rewardReady, setRewardReady] = useState(() => localStorage.getItem("luxe-poker-reward") !== new Date().toDateString());
-  useEffect(() => { localStorage.setItem("luxe-demo-poker-chips", String(chips)); localStorage.setItem("luxe-poker-xp", String(xp)); }, [chips, xp]);
-  useEffect(() => { if (!active) return; setSeconds(20); const timer = window.setInterval(() => setSeconds(value => Math.max(0, value - 1)), 1000); return () => window.clearInterval(timer); }, [active, stage]);
-  const chooseAvatar = (file?: File) => { if (!file) return; const reader = new FileReader(); reader.onload = () => { const value = String(reader.result); localStorage.setItem("luxe-poker-avatar", value); setAvatar(value); note("Demo avatar updated on this device."); }; reader.readAsDataURL(file); };
-  const note = (message: string) => { setStatus(message); setFeed(items => [message, ...items].slice(0, 4)); };
-  const join = (table: typeof tables[number]) => { if (chips < table.buyIn) { const message = `${table.name} needs ${table.buyIn.toLocaleString()} free-play chips. You have ${chips.toLocaleString()}. Choose a lower entry or collect free daily chips below.`; setSeatError(message); note(message); return; } setSeatError(""); setPotWinner(null); setScreen("table"); setActiveTable(table); setChips(value => value - table.buyIn); setYourCards([]); setHostCards([]); setBoard([]); setActive(false); setReveal(false); setPot(0); note(`Welcome to ${table.name}. Your seat is ready.`); };
-  const sendGift = (gift: typeof gifts[number]) => { if (chips < gift.cost) return note(`You need ${gift.cost} virtual chips to send ${gift.name}.`); setChips(value => value - gift.cost); play("success"); setGiftsOpen(false); note(`You sent ${gift.icon} ${gift.name} to ${selectedSeat}. Virtual gift only.`); };
+  const join = (table: TableDef) => {
+    if (level < table.minLevel) { const message = `${table.name} opens at level ${table.minLevel}. You are level ${level} — win hands to level up.`; setSeatError(message); note(message); return; }
+    if (chips < table.buyIn) { const message = `${table.name} needs ${table.buyIn.toLocaleString()} free-play chips. You have ${chips.toLocaleString()}. Choose a lower entry or collect free daily chips below.`; setSeatError(message); note(message); return; }
+    setSeatError("");
+    setScreen("table");
+    setActiveTable(table);
+    setChips((v) => v - table.buyIn);
+    const table0 = createTable({ playerName: "You", playerChips: table.buyIn, botCount: table.bots, botChips: table.buyIn * 2, smallBlind: table.smallBlind, bigBlind: table.bigBlind });
+    settledHand.current = 0;
+    setGame(table0);
+    note(`Welcome to ${table.name}. Six seats, real Texas Hold'em — deal the first hand.`);
+  };
+  const leaveTable = () => {
+    if (game) { const stack = game.players.find((p) => p.id === "you")?.chips ?? 0; setChips((v) => v + stack); }
+    setGame(null); setActiveTable(null); setLeaveOpen(false); setScreen("lobby");
+    note("You left the table. Your remaining stack returned to your wallet.");
+  };
+  const rebuy = () => {
+    if (!activeTable || !game) return;
+    if (chips < activeTable.buyIn) return note(`Rebuy needs ${activeTable.buyIn.toLocaleString()} chips — collect daily chips or visit the store.`);
+    setChips((v) => v - activeTable.buyIn);
+    setGame((g) => g ? { ...g, players: g.players.map((p) => p.id === "you" ? { ...p, chips: p.chips + activeTable.buyIn, sittingOut: false } : p) } : g);
+    note(`Rebought ${activeTable.buyIn.toLocaleString()} chips.`);
+  };
+  const deal = () => { play("cardDeal"); setGame((g) => (g ? dealHand(g) : g)); };
+  const act = (action: "fold" | "check" | "call" | "raise") => {
+    if (!game || !yourTurn) return;
+    play(pokerActionSound(action));
+    setGame((g) => (g ? applyAction(g, "you", action, action === "raise" ? raiseTo : 0) : g));
+  };
+  const sendGift = (gift: typeof gifts[number]) => { if (chips < gift.cost) return note(`You need ${gift.cost} virtual chips to send ${gift.name}.`); setChips((v) => v - gift.cost); play("success"); setGiftsOpen(false); note(`You sent ${gift.icon} ${gift.name} to ${selectedSeat}. Virtual gift only.`); };
+  const dailyReward = () => { if (!rewardReady) return; setChips((v) => v + 1000); awardXp(25); play("chipStack"); setRewardReady(false); localStorage.setItem("luxe-poker-reward", new Date().toDateString()); note("Daily reward collected: 1,000 virtual chips and 25 demo XP."); };
   const visibleTables = tables.filter((table) => stakeFilter === "all" || (stakeFilter === "starter" ? table.buyIn <= 1500 : table.buyIn > 1500));
-  const hostPrivateTable = () => { join(tables[0]); note("Private Texas Hold’em demo table created. Invite links require online Poker rooms."); };
-  const dailyReward = () => { if (!rewardReady) return; setChips(value => value + 1000); awardXp(25); play("chipStack"); setRewardReady(false); localStorage.setItem("luxe-poker-reward", new Date().toDateString()); note("Daily reward collected: 1,000 virtual chips and 25 demo XP."); };
-  const deal = () => { setPotWinner(null); play("cardDeal"); if (!activeTable) return; const cards = shuffle(makeDeck()); setDeck(cards.slice(4)); setYourCards([cards[0], cards[2]]); setHostCards([cards[1], cards[3]]); setBoard([]); setPot(150); setStage("pre-flop"); setReveal(false); setActive(true); note("Hand dealt. The Host posts the big blind — your move."); };
-  const settle = (nextBoard: Card[], finalPot: number) => { play("winnerReveal"); const playerHand = evaluateHand([...yourCards, ...nextBoard]); const hostHand = evaluateHand([...hostCards, ...nextBoard]); const result = compareHands(playerHand, hostHand); setReveal(true); setActive(false); setStage("showdown"); setPotWinner(result > 0 ? "player" : result < 0 ? "host" : "split"); play("chipStack"); if (result >= 0) { setChips(value => value + finalPot); awardXp(20 * (tickets > 0 ? 2 : 1)); play("coinWin"); setWinFlash(true); window.setTimeout(() => setWinFlash(false), 1800); setStats((prev) => { const streak = prev.streak + 1; const next = { handsWon: prev.handsWon + 1, biggestPot: Math.max(prev.biggestPot, finalPot), streak, bestStreak: Math.max(prev.bestStreak, streak) }; localStorage.setItem("luxe-poker-stats", JSON.stringify(next)); return next; }); note(result ? `You win ${finalPot} chips with ${playerHand.label}.` : "Split pot. Well played."); } else { note(`Luxe Host wins with ${hostHand.label}.`); setStats((prev) => { const next = { ...prev, streak: 0 }; localStorage.setItem("luxe-poker-stats", JSON.stringify(next)); return next; }); } };
-  const act = (action: Action) => { if (!active) return; if (action === "fold") { play(pokerActionSound(action)); setPotWinner("host"); play("chipStack"); setReveal(true); setActive(false); note(`You fold. Luxe Host collects ${pot} chips.`); return; } const amount = action === "raise" ? raise : action === "call" && stage === "pre-flop" ? 50 : 0; if (amount && chips < amount) { note("Not enough free-play chips to make that move."); return; } play(pokerActionSound(action)); if (action === "raise" && Math.random() < Math.min(.4, raise / 1300)) { setPotWinner("player"); play("chipStack"); setChips(value => value + pot); awardXp(12); setReveal(true); setActive(false); note(`Luxe Host folds to your raise. You collect ${pot} chips.`); return; } if (amount) { setChips(value => value - amount); setPot(value => value + amount * 2); } const count = board.length === 0 ? 3 : board.length + 1; const next = deck.slice(0, count); setBoard(next); if (count === 5 && stage === "river") settle(next, pot + amount * 2); else if (count === 5) { setStage("river"); note("River dealt. Luxe Host checks — choose your final action."); } else { setStage(count === 3 ? "flop" : "turn"); note(`${count === 3 ? "Flop" : "Turn"} dealt. Luxe Host checks.`); } };
-  const reset = () => { setPotWinner(null); setActive(false); setReveal(false); setYourCards([]); setHostCards([]); setBoard([]); setPot(0); setStage("pre-flop"); note("Table reset. Deal when you are ready."); };
-  const handScore = useMemo(() => yourCards.length === 2 && board.length === 5 ? evaluateHand([...yourCards, ...board]) : null, [yourCards, board]);
-  if (screen === "lobby") return <section id="poker-league" className="salon-selection min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-4 py-6 pb-28 text-white"><div className="mx-auto max-w-5xl"><header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-4 py-3"><span className="inline-flex items-center gap-2 font-black text-amber-100"><Crown className="h-5 w-5"/>LUXE POKER LOUNGE</span><span className="rounded-full border border-amber-200/35 bg-amber-300/10 px-3 py-1.5 font-mono text-sm font-black text-amber-100">{chips.toLocaleString()} chips</span><button onClick={() => setEnabled(!enabled)} className="rounded-lg bg-white/10 p-2"><Volume2 className="h-4 w-4"/></button></header><div className="mt-8 text-center"><p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">Members’ casino · no cash value</p><h2 className="mt-3 text-4xl font-black">Choose your Luxe Lounge</h2><p className="mt-3 text-sm text-white/60">The luxe lounge: gold-leather felts, a progressive VIP ladder, and a chip store for free-play stacks. No cash value — pure experience.</p></div><div className="mt-7 flex flex-wrap items-center justify-between gap-3"><div className="flex gap-2">{(["all","starter","high"] as const).map((filter) => <button key={filter} onClick={() => setStakeFilter(filter)} className={`rounded-full px-3 py-2 text-xs font-black capitalize ${stakeFilter === filter ? "bg-amber-300 text-black" : "border border-white/15 bg-white/5 text-white/70"}`}>{filter === "all" ? "All stakes" : filter === "starter" ? "Starter stakes" : "High stakes"}</button>)}</div><button onClick={hostPrivateTable} className="rounded-xl border border-amber-200/35 bg-amber-300/10 px-4 py-2 text-xs font-black text-amber-100">Host private table</button></div>{seatError && <p role="alert" className="poker-seat-error">{seatError}</p>}<div className="mt-4 grid gap-4 sm:grid-cols-3">{visibleTables.map((table,index) => <button type="button" key={table.name} aria-label={`Take seat at ${table.name}, requires ${table.buyIn} free-play chips`} onClick={() => join(table)} className="salon-table-preview group relative overflow-hidden rounded-[1.75rem] border text-left shadow-xl transition hover:-translate-y-1"><img className="salon-table-preview__image" src={table.image} alt="" loading="lazy" /><span className="salon-table-preview__shade" aria-hidden="true"/><span className="salon-table-preview__content"><span className="relative grid h-12 w-12 place-items-center rounded-2xl bg-amber-300 text-xl font-black text-black">{index+1}</span><p className="relative mt-8 text-[10px] font-black uppercase tracking-[.18em] text-amber-200">{table.blinds} blinds</p><h3 className="relative mt-2 text-2xl font-black">{table.name}</h3><p className="relative mt-2 text-sm text-white/60">{table.players} seated · buy-in {table.buyIn}</p><span className="salon-table-preview__action relative mt-6 inline-flex rounded-xl px-4 py-2 text-xs font-black text-black">{chips < table.buyIn ? `Needs ${table.buyIn.toLocaleString()} chips` : "Take seat"}</span></span></button>)}</div><div className="mt-7 rounded-[1.75rem] border border-amber-200/25 bg-[linear-gradient(145deg,#241a08,#120d06_70%)] p-5">
+
+  const dealerStage = game?.stage === "preflop" ? "pre-flop" : game?.stage ?? "idle";
+  const potWinner: "player" | "host" | "split" | null = !game?.handOver || !game.winners.length ? null : game.winners.length > 1 ? "split" : game.winners[0].id === "you" ? "player" : "host";
+  const dealerMood: "idle" | "win" | "lose" = potWinner === "player" || potWinner === "split" ? "win" : potWinner === "host" ? "lose" : "idle";
+  const busted = Boolean(game?.handOver && you && you.chips <= 0);
+
+  if (screen === "lobby") return <section id="poker-league" className="salon-selection min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-4 py-6 pb-28 text-white"><div className="mx-auto max-w-5xl"><header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-4 py-3"><span className="inline-flex items-center gap-2 font-black text-amber-100"><Crown className="h-5 w-5" />LUXE POKER LOUNGE</span><span className="rounded-full border border-amber-200/35 bg-amber-300/10 px-3 py-1.5 font-mono text-sm font-black text-amber-100">{chips.toLocaleString()} chips</span><button onClick={() => setEnabled(!enabled)} className="rounded-lg bg-white/10 p-2"><Volume2 className="h-4 w-4" /></button></header><div className="mt-8 text-center"><p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">Members’ casino · no cash value</p><h2 className="mt-3 text-4xl font-black">Choose your Luxe Lounge</h2><p className="mt-3 text-sm text-white/60">Full six-seat Texas Hold’em against five Luxe regulars — blinds, raises, all-ins and split pots. Free-play chips only, pure experience.</p></div><div className="mt-7 flex flex-wrap items-center justify-between gap-3"><div className="flex gap-2">{(["all", "starter", "high"] as const).map((filter) => <button key={filter} onClick={() => setStakeFilter(filter)} className={`rounded-full px-3 py-2 text-xs font-black capitalize ${stakeFilter === filter ? "bg-amber-300 text-black" : "border border-white/15 bg-white/5 text-white/70"}`}>{filter === "all" ? "All stakes" : filter === "starter" ? "Starter stakes" : "High stakes"}</button>)}</div><button onClick={() => join(tables[0])} className="rounded-xl border border-amber-200/35 bg-amber-300/10 px-4 py-2 text-xs font-black text-amber-100">Host private table</button></div>{seatError && <p role="alert" className="poker-seat-error">{seatError}</p>}<div className="mt-4 grid gap-4 sm:grid-cols-3">{visibleTables.map((table) => { const locked = level < table.minLevel; const poor = chips < table.buyIn; return <button key={table.name} onClick={() => join(table)} className={`group overflow-hidden rounded-2xl border text-left transition active:scale-[.98] ${locked || poor ? "border-white/10 opacity-70" : "border-amber-200/30 hover:border-amber-200/70"} bg-black/40`}><div className={`relative h-28 bg-gradient-to-br ${table.tone}`}><img src={table.image} alt="" className="h-full w-full object-cover opacity-80 mix-blend-luminosity" /><span className="absolute right-2 top-2 rounded-full bg-black/70 px-2 py-1 text-[9px] font-black uppercase tracking-wider text-amber-100">{locked ? `Level ${table.minLevel}+` : poor ? "Need chips" : "Open"}</span></div><div className="p-4"><p className="font-black text-amber-100">{table.name}</p><p className="mt-1 flex items-center gap-1 text-[11px] text-white/55"><Users className="h-3 w-3" /> 6 seats · blinds {table.blinds}</p><p className="mt-2 font-mono text-sm font-black text-white">Buy-in {table.buyIn.toLocaleString()}</p></div></button>; })}</div>
+        <div className="mt-8 rounded-[1.75rem] border border-amber-200/25 bg-[linear-gradient(145deg,#241a08,#120d06_70%)] p-5">
           <p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">VIP ladder &amp; chip store</p>
           <div className="mt-4 flex items-center gap-3">
             <div className="min-w-0 flex-1">
-              <p className={`text-sm font-black text-white ${levelFlash ? "poker-level-flash" : ""}`}>{vipTier.name}{avatarFrame === "gold" ? " 🟡" : avatarFrame === "platinum" ? " ⚪" : ""}</p>
-              <p className="mt-0.5 text-xs text-white/55">{(xp%200)} / 200 XP this level · {chips.toLocaleString()} chips</p>
+              <p className={`text-sm font-black text-white ${levelFlash ? "poker-level-flash" : ""}`}>{vipTier.name} · Level {level}{avatarFrame === "gold" ? " 🟡" : avatarFrame === "platinum" ? " ⚪" : ""}</p>
+              <p className="mt-0.5 text-xs text-white/55">{(xp % 200)} / 200 XP this level · {chips.toLocaleString()} chips{tickets > 0 ? ` · ${tickets} tournament ticket${tickets > 1 ? "s" : ""} (2x XP)` : ""}</p>
               <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/10">
-                <div className="h-full rounded-full bg-gradient-to-r from-amber-300 to-amber-500 transition-all duration-500" style={{width: `${Math.min(100,(xp%200)/2)}%`}} />
+                <div className="h-full rounded-full bg-gradient-to-r from-amber-300 to-amber-500 transition-all duration-500" style={{ width: `${Math.min(100, (xp % 200) / 2)}%` }} />
               </div>
             </div>
             <span className="rounded-full border border-amber-200/35 bg-amber-300/10 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-amber-200">{vipTier.benefit}</span>
@@ -107,13 +226,13 @@ export const LuxePokerLeague: React.FC = () => {
           </div>
         </div>
         <div className="mt-7 flex flex-wrap items-center gap-3">
-          <button type="button" onClick={() => setMusicEnabled(!musicEnabled)} className="inline-flex items-center gap-2 rounded-xl border border-amber-200/25 bg-black/40 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-amber-100 transition hover:border-amber-200/60"><Volume2 className="h-4 w-4"/>{musicEnabled ? "Lounge music on" : "Lounge music off"}</button>
+          <button type="button" onClick={() => setMusicEnabled(!musicEnabled)} className="inline-flex items-center gap-2 rounded-xl border border-amber-200/25 bg-black/40 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-amber-100 transition hover:border-amber-200/60"><Volume2 className="h-4 w-4" />{musicEnabled ? "Lounge music on" : "Lounge music off"}</button>
           <span className="text-[10px] text-white/35">Ambient Luxe Lounge loop — synthesized in-house, no licensing needed.</span>
         </div>
         <div className="mt-4 rounded-[1.75rem] border border-amber-200/25 bg-[linear-gradient(145deg,#241a08,#120d06_70%)] p-5">
           <p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">Luxe Lounge leaderboard</p>
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {[{l:"Hands won",v:stats.handsWon},{l:"Biggest pot",v:stats.biggestPot.toLocaleString()},{l:"Current streak",v:stats.streak},{l:"Best streak",v:stats.bestStreak}].map((row) => (
+            {[{ l: "Hands won", v: stats.handsWon }, { l: "Biggest pot", v: stats.biggestPot.toLocaleString() }, { l: "Current streak", v: stats.streak }, { l: "Best streak", v: stats.bestStreak }].map((row) => (
               <div key={row.l} className="rounded-xl border border-white/10 bg-black/30 p-3 text-center">
                 <p className="text-lg font-black text-amber-100">{row.v}</p>
                 <p className="text-[9px] font-black uppercase tracking-wider text-white/40">{row.l}</p>
@@ -122,10 +241,48 @@ export const LuxePokerLeague: React.FC = () => {
           </div>
           <p className="mt-3 text-[10px] text-white/35">Your private Luxe Lounge record — stored on this device. Realtime multiplayer tables are on the roadmap.</p>
         </div>
-        <div className="mt-7 grid gap-3 sm:grid-cols-3"><button onClick={dailyReward} disabled={!rewardReady} className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-4 text-left disabled:opacity-40"><Gift className="h-5 w-5 text-emerald-200"/><b className="mt-3 block">{rewardReady ? "Collect daily chips" : "Daily chips claimed"}</b><small className="text-white/55">Virtual chips only</small></button><button onClick={() => note("Demo leaderboard becomes available after completing a hand.")} className="rounded-2xl border border-violet-300/30 bg-violet-300/10 p-4 text-left"><Crown className="h-5 w-5 text-violet-200"/><b className="mt-3 block">League table</b><small className="text-white/55">Practice ranking</small></button><button onClick={() => note("Demo tournaments use virtual chips and cannot issue tickets.")} className="rounded-2xl border border-amber-200/30 bg-amber-300/10 p-4 text-left"><Sparkles className="h-5 w-5 text-amber-200"/><b className="mt-3 block">Tournament night</b><small className="text-white/55">Demo bracket preview</small></button></div>{status !== "Choose a table to sit down." && <p className="mt-5 rounded-xl border border-amber-200/20 bg-amber-300/10 p-3 text-sm text-amber-100">{status}</p>}</div></section>;
-  return <section id="poker-league" className="poker-playing-page min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-3 py-4 pb-28 text-white"><div className="poker-landscape-gate" role="status"><span aria-hidden="true">↻</span><h2>Turn your phone sideways</h2><p>Poker is played in landscape. Rotate your phone to see your cards and betting controls.</p><button type="button" onClick={() => { reset(); setScreen("lobby"); }}>Back to Luxe Lounges</button></div><div className="poker-playing-wrap mx-auto max-w-5xl"><PokerFullscreen /><p className="poker-rotate-prompt" role="status">↻ Turn your phone sideways for a bigger poker table. You can still play in portrait. The whole table fits your screen.</p><header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-3 py-2"><button onClick={() => setLeaveOpen(true)} className="inline-flex items-center gap-1 rounded-lg bg-white/10 px-3 py-2 text-xs font-black"><ChevronLeft className="h-4 w-4"/>Lobby</button><span className="font-mono text-sm font-black text-amber-100">{chips.toLocaleString()} chips</span><button onClick={() => setEnabled(!enabled)} className="rounded-lg bg-white/10 p-2"><Volume2 className="h-4 w-4"/></button></header><article className="poker-game-article relative mt-4 overflow-hidden rounded-[2rem] border border-amber-200/50 bg-[radial-gradient(ellipse_at_center,#2a2318,#151009_55%,#090604)] p-4 shadow-[0_0_70px_rgba(212,175,55,.22),inset_0_0_140px_rgba(0,0,0,0.5)] sm:p-6"><div className={`poker-surface-frame relative rounded-[2rem] ${winFlash ? "poker-win-flash" : ""} ${tableTheme === "onyx" ? "ring-4 ring-amber-400/50" : tableTheme === "noir" ? "ring-4 ring-zinc-400/50" : ""}`}>
+        <div className="mt-7 grid gap-3 sm:grid-cols-3"><button onClick={dailyReward} disabled={!rewardReady} className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-4 text-left disabled:opacity-40"><Gift className="h-5 w-5 text-emerald-200" /><b className="mt-3 block">{rewardReady ? "Collect daily chips" : "Daily chips claimed"}</b><small className="text-white/55">Virtual chips only</small></button><button onClick={() => note("Demo leaderboard becomes available after completing a hand.")} className="rounded-2xl border border-violet-300/30 bg-violet-300/10 p-4 text-left"><Crown className="h-5 w-5 text-violet-200" /><b className="mt-3 block">League table</b><small className="text-white/55">Practice ranking</small></button><button onClick={() => note("Demo tournaments use virtual chips and cannot issue tickets.")} className="rounded-2xl border border-amber-200/30 bg-amber-300/10 p-4 text-left"><Sparkles className="h-5 w-5 text-amber-200" /><b className="mt-3 block">Tournament night</b><small className="text-white/55">Demo bracket preview</small></button></div>{status !== "Choose a table to sit down." && <p className="mt-5 rounded-xl border border-amber-200/20 bg-amber-300/10 p-3 text-sm text-amber-100">{status}</p>}</div></section>;
+
+  // ── Table screen ──
+  const botSlots = game ? game.players.filter((p) => p.isBot) : [];
+  return <section id="poker-league" className="poker-playing-page min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-3 py-4 pb-28 text-white"><div className="poker-landscape-gate" role="status"><span aria-hidden="true">↻</span><h2>Turn your phone sideways</h2><p>Poker is played in landscape. Rotate your phone to see your cards and betting controls.</p><button type="button" onClick={leaveTable}>Back to Luxe Lounges</button></div><div className="poker-playing-wrap mx-auto max-w-5xl"><PokerFullscreen /><p className="poker-rotate-prompt" role="status">↻ Turn your phone sideways for a bigger poker table. You can still play in portrait. The whole table fits your screen.</p><header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-3 py-2"><button onClick={() => setLeaveOpen(true)} className="inline-flex items-center gap-1 rounded-lg bg-white/10 px-3 py-2 text-xs font-black"><ChevronLeft className="h-4 w-4" />Lobby</button><span className="font-mono text-sm font-black text-amber-100">{chips.toLocaleString()} wallet · {you?.chips.toLocaleString() ?? 0} at table</span><button onClick={() => setEnabled(!enabled)} className="rounded-lg bg-white/10 p-2"><Volume2 className="h-4 w-4" /></button></header><article className="poker-game-article relative mt-4 overflow-hidden rounded-[2rem] border border-amber-200/50 bg-[radial-gradient(ellipse_at_center,#2a2318,#151009_55%,#090604)] p-4 shadow-[0_0_70px_rgba(212,175,55,.22),inset_0_0_140px_rgba(0,0,0,0.5)] sm:p-6"><div className={`poker-surface-frame relative rounded-[2rem] ${winFlash ? "poker-win-flash" : ""} ${tableTheme === "onyx" ? "ring-4 ring-amber-400/50" : tableTheme === "noir" ? "ring-4 ring-zinc-400/50" : ""}`}>
               {winFlash && <div className="pointer-events-none absolute inset-0 z-20 flex items-start justify-center gap-2 pt-14">{[...Array(6)].map((_, i) => <span key={i} className="poker-chip-fly h-4 w-4 rounded-full border border-amber-200/70 bg-gradient-to-br from-amber-300 to-amber-600" style={{ animationDelay: `${i * 90}ms` }} />)}</div>}
-              <PokerTableArtwork pot={pot} stage={stage} winner={potWinner}>{/* Live seats and cards share the artwork coordinate space. */}<div className="poker-live-seats pointer-events-none absolute inset-0">{seats.map((seat,index)=>{ const TH=[180,55,125,235,305,270][index]*Math.PI/180, PX=50+42*Math.cos(TH), PY=44-27*Math.sin(TH), SC=(1.06-0.34*((Math.sin(TH)+1)/2)).toFixed(2); return <div key={seat.name} onClick={() => setSelectedSeat(seat.name)} data-seat-index={index} className={`pointer-events-auto absolute w-[4.7rem] rounded-2xl border px-1.5 py-1 text-center shadow-2xl backdrop-blur-md ${index===5?(active?"border-amber-200 bg-amber-300/20 poker-turn-ring":"border-amber-200 bg-amber-300/15"):selectedSeat===seat.name?"border-fuchsia-300 bg-fuchsia-300/15":"border-white/15 bg-black/55"}`} style={{left:`${PX}%`,top:`${PY}%`,zIndex:10+Math.round(PY),transform:`translate(-50%,-50%) scale(${SC})`}}><label className="block cursor-pointer"><PlayerTurnRing active={index===5 && active} seconds={seconds} name={seat.name}>{index===5&&avatar?<img src={avatar} alt="Your avatar" className="h-full w-full object-cover"/>:seat.initials}</PlayerTurnRing>{index===5&&<input aria-label="Upload demo avatar" type="file" accept="image/*" className="hidden" onChange={e=>chooseAvatar(e.target.files?.[0])}/>}</label><b className="mt-1 block truncate text-[9px] text-amber-100">{seat.name}</b><small className="text-[8px] text-white/55">{seat.chips}</small></div>;})}</div><div className="poker-live-board flex justify-center gap-1">{[0,1,2,3,4].map(i=>board[i]?<CardView key={key(board[i])} card={board[i]}/>:<div key={i} className="h-16 w-11 rounded-lg border border-dashed border-amber-100/30 bg-black/40 sm:h-20 sm:w-14"/>)}</div><div className="poker-live-hand flex justify-center gap-2">{yourCards.length?yourCards.map(card=><CardView key={key(card)} card={card}/>):<><CardView hidden/><CardView hidden/></>}</div></PokerTableArtwork>
-              <LuxeDealer stage={stage} active={active} mood={winFlash ? "win" : (status || "").toLowerCase().includes("wins") ? "lose" : "idle"} />
-            </div><div className="poker-below-table relative"><div className="poker-round-meta flex justify-between text-[10px] font-black uppercase tracking-wider text-white/60"><span>{activeTable?.name}</span><span>{active ? `00:${String(seconds).padStart(2,"0")}` : "Ready"}</span></div><div className="poker-round-status mt-5 rounded-xl bg-black/35 p-3 text-center text-sm text-emerald-100" role="status">{status}</div><div className="poker-social-controls mt-3 flex flex-wrap justify-center gap-2">{emotes.map(emote=><button key={emote} onClick={()=>note(`You to ${selectedSeat}: ${emote}`)} className="rounded-full border border-white/15 bg-white/10 px-3 py-2 text-xs font-bold">{emote}</button>)}<button onClick={()=>setGiftsOpen(value=>!value)} className="rounded-full border border-amber-200/35 bg-amber-300/10 px-3 py-2 text-xs font-black text-amber-100">Send gift</button></div>{giftsOpen&&<div className="mt-3 grid grid-cols-3 gap-2 rounded-xl border border-amber-200/20 bg-black/40 p-2">{gifts.map(gift=><button key={gift.name} onClick={()=>sendGift(gift)} className="rounded-lg bg-white/10 p-2 text-center text-xs"><span className="block text-lg">{gift.icon}</span><b className="block">{gift.name}</b><small className="text-amber-100">{gift.cost} chips</small></button>)}</div>}{active?<div className="poker-action-dock mt-5" role="group" aria-label="Poker actions"><input aria-label="Raise amount" type="range" min="100" max="500" step="50" value={raise} onChange={e=>setRaise(Number(e.target.value))} className="w-full accent-amber-300"/><div className="mt-3 grid grid-cols-3 gap-2"><button onClick={()=>act("fold")} className="rounded-xl bg-zinc-800/90 py-4 text-xs font-black text-zinc-100 shadow-lg shadow-black/60 transition hover:bg-zinc-700 active:scale-95">Fold</button><button onClick={()=>act(stage==="pre-flop"?"call":"check")} className="rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-4 text-xs font-black text-black shadow-lg shadow-black/50 transition hover:brightness-110 active:scale-95">{stage==="pre-flop"?"Call":"Check"}</button><button onClick={()=>act("raise")} className="rounded-xl bg-gradient-to-b from-amber-100 via-amber-300 to-amber-500 py-4 text-xs font-black text-black shadow-lg shadow-black/60 ring-2 ring-amber-100/70 transition hover:brightness-110 active:scale-95">Raise {raise}</button></div></div>:<button onClick={deal} className="poker-deal-dock mt-5 w-full rounded-xl bg-gradient-to-b from-amber-200 via-amber-300 to-amber-500 py-4 shadow-lg shadow-amber-950/60 transition hover:brightness-110 active:scale-95 text-xs font-black uppercase tracking-wider text-black">{stage==="showdown"?"Play another hand":"Deal hand"}</button>}</div></article>{leaveOpen&&<div className="fixed inset-0 z-[90] grid place-items-center bg-black/75 p-5"><div className="w-full max-w-sm rounded-3xl border border-amber-200/35 bg-[#1b1024] p-6 text-center"><button onClick={()=>setLeaveOpen(false)} className="float-right"><X className="h-4 w-4"/></button><h3 className="text-2xl font-black">Back to lobby?</h3><p className="mt-3 text-sm text-white/60">Your current demo hand will be left. Virtual chips have no cash value.</p><div className="mt-6 grid grid-cols-2 gap-3"><button onClick={()=>setLeaveOpen(false)} className="rounded-xl bg-white/10 py-3 text-xs font-black">Stay</button><button onClick={()=>{reset();setScreen("lobby");setLeaveOpen(false)}} className="rounded-xl bg-amber-300 py-3 text-xs font-black text-black">Leave</button></div></div></div>}</div></section>;
+              <PokerTableArtwork pot={game?.pot ?? 0} stage={dealerStage} winner={potWinner}><div className="poker-live-seats pointer-events-none absolute inset-0">{game && game.players.map((p) => {
+                const slotIndex = p.isBot ? botSlots.indexOf(p) : 5;
+                const slot = SEAT_SLOTS[slotIndex];
+                const isTurn = !game.handOver && game.players[game.turnIndex]?.id === p.id;
+                const isWinner = game.handOver && game.winners.some((w) => w.id === p.id);
+                const showCards = !p.isBot || (game.stage === "showdown" && !p.folded && !p.sittingOut);
+                return <div key={p.id} onClick={() => p.isBot && setSelectedSeat(p.name)} className={`pointer-events-auto absolute w-[4.9rem] rounded-2xl border px-1.5 py-1 text-center shadow-2xl backdrop-blur-md transition ${p.sittingOut ? "opacity-30" : p.folded ? "opacity-45" : ""} ${isWinner ? "border-emerald-300 bg-emerald-300/20" : isTurn ? "border-amber-200 bg-amber-300/20 poker-turn-ring" : !p.isBot ? "border-amber-200/70 bg-amber-300/10" : selectedSeat === p.name ? "border-fuchsia-300 bg-fuchsia-300/15" : "border-white/15 bg-black/55"}`} style={{ left: `${slot.px}%`, top: `${slot.py}%`, zIndex: 10 + Math.round(slot.py), transform: `translate(-50%,-50%) scale(${slot.sc.toFixed(2)})` }}>
+                  {!p.isBot ? <label className="block cursor-pointer"><PlayerTurnRing active={isTurn} seconds={seconds} name={p.name}>{avatar ? <img src={avatar} alt="Your avatar" className="h-full w-full object-cover" /> : p.initials}</PlayerTurnRing><input aria-label="Upload demo avatar" type="file" accept="image/*" className="hidden" onChange={(e) => chooseAvatar(e.target.files?.[0])} /></label> : <PlayerTurnRing active={isTurn} seconds={20} name={p.name}>{p.initials}</PlayerTurnRing>}
+                  <b className="mt-1 block truncate text-[9px] text-amber-100">{p.name}{game.players[game.dealerIndex]?.id === p.id ? " 🔘" : ""}</b>
+                  <small className="text-[8px] text-white/55">{p.chips.toLocaleString()}{p.allIn ? " · ALL-IN" : ""}</small>
+                  {p.bet > 0 && <span className="mt-0.5 inline-block rounded-full bg-amber-300/90 px-1.5 py-px font-mono text-[8px] font-black text-black">bet {p.bet.toLocaleString()}</span>}
+                  {p.cards.length === 2 && !p.sittingOut && <span className="mt-1 flex justify-center gap-0.5">{p.cards.map((c) => showCards ? <span key={key(c)} className={`flex h-6 w-[1.1rem] items-center justify-center rounded-sm border border-black/20 bg-white font-mono text-[9px] font-black ${c.suit === "♥" || c.suit === "♦" ? "text-red-600" : "text-zinc-900"}`}>{c.rank}{c.suit}</span> : <span key={key(c)} className="flex h-6 w-[1.1rem] items-center justify-center rounded-sm border border-amber-200/40 bg-gradient-to-br from-amber-900 to-black text-[7px] text-amber-200/70">♛</span>)}</span>}
+                </div>;
+              })}</div><div className="poker-live-board flex justify-center gap-1">{[0, 1, 2, 3, 4].map((i) => game?.board[i] ? <CardView key={key(game.board[i])} card={game.board[i]} /> : <div key={i} className="h-16 w-11 rounded-lg border border-dashed border-amber-100/30 bg-black/40 sm:h-20 sm:w-14" />)}</div><div className="poker-live-hand flex justify-center gap-2">{you?.cards.length ? you.cards.map((card) => <CardView key={key(card)} card={card} />) : <><CardView hidden /><CardView hidden /></>}</div></PokerTableArtwork>
+              <LuxeDealer stage={dealerStage} active={yourTurn} mood={dealerMood} />
+            </div><div className="poker-below-table relative"><div className="poker-round-meta flex justify-between text-[10px] font-black uppercase tracking-wider text-white/60"><span>{activeTable?.name} · Hand #{game?.handNumber ?? 0} · Blinds {activeTable?.blinds}</span><span className="inline-flex items-center gap-1"><Timer className="h-3 w-3" />{yourTurn ? `00:${String(seconds).padStart(2, "0")}` : game?.handOver ? "Hand over" : "Playing"}</span></div><div className="poker-round-status mt-5 rounded-xl bg-black/35 p-3 text-center text-sm text-emerald-100" role="status">{status}</div>
+            <div className="mt-2 flex flex-wrap justify-center gap-1.5">{feed.slice(0, 3).map((line, i) => <span key={`${line}-${i}`} className={`rounded-full px-2.5 py-1 text-[10px] ${i === 0 ? "bg-amber-300/15 text-amber-100" : "bg-white/5 text-white/40"}`}>{line}</span>)}</div>
+            <div className="poker-social-controls mt-3 flex flex-wrap justify-center gap-2">{emotes.map((emote) => <button key={emote} onClick={() => { play("tableKnock"); note(`You to ${selectedSeat}: ${emote}`); }} className="rounded-full border border-white/15 bg-white/10 px-3 py-2 text-xs font-bold">{emote}</button>)}<button onClick={() => setGiftsOpen((v) => !v)} className="rounded-full border border-amber-200/35 bg-amber-300/10 px-3 py-2 text-xs font-black text-amber-100">Send gift</button></div>{giftsOpen && <div className="mt-3 grid grid-cols-3 gap-2 rounded-xl border border-amber-200/20 bg-black/40 p-2">{gifts.map((gift) => <button key={gift.name} onClick={() => sendGift(gift)} className="rounded-lg bg-white/10 p-2 text-center text-xs"><span className="block text-lg">{gift.icon}</span><b className="block">{gift.name}</b><small className="text-amber-100">{gift.cost} chips</small></button>)}</div>}
+            {game && !game.handOver && yourTurn && <div className="poker-action-dock mt-5" role="group" aria-label="Poker actions">
+              <div className="flex items-center gap-3"><input aria-label="Raise amount" type="range" min={minRaiseTo} max={maxRaiseTo} step={activeTable?.bigBlind ?? 50} value={Math.min(Math.max(raiseTo, minRaiseTo), maxRaiseTo)} onChange={(e) => setRaiseTo(Number(e.target.value))} className="w-full accent-amber-300" disabled={maxRaiseTo <= toCall} /><span className="w-24 text-right font-mono text-xs font-black text-amber-100">{Math.min(Math.max(raiseTo, minRaiseTo), maxRaiseTo).toLocaleString()}</span></div>
+              <div className="mt-3 grid grid-cols-3 gap-2">
+                <button onClick={() => act("fold")} className="rounded-xl bg-zinc-800/90 py-4 text-xs font-black text-zinc-100 shadow-lg shadow-black/60 transition hover:bg-zinc-700 active:scale-95">Fold</button>
+                {toCall > 0 ? <button onClick={() => act("call")} className="rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-4 text-xs font-black text-black shadow-lg shadow-black/50 transition hover:brightness-110 active:scale-95">Call {Math.min(toCall, you?.chips ?? 0).toLocaleString()}</button> : <button onClick={() => act("check")} className="rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-4 text-xs font-black text-black shadow-lg shadow-black/50 transition hover:brightness-110 active:scale-95">Check</button>}
+                <button onClick={() => act("raise")} disabled={maxRaiseTo <= toCall} className="rounded-xl bg-gradient-to-b from-rose-400 to-rose-600 py-4 text-xs font-black text-white shadow-lg shadow-black/50 transition hover:brightness-110 active:scale-95 disabled:opacity-40">{raiseTo >= maxRaiseTo ? "All-in" : "Raise to"} {Math.min(Math.max(raiseTo, minRaiseTo), maxRaiseTo).toLocaleString()}</button>
+              </div>
+            </div>}
+            {game && !game.handOver && !yourTurn && <p className="mt-5 flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-black/30 py-3 text-xs text-white/55"><Bot className="h-4 w-4 text-amber-200" />{game.players[game.turnIndex]?.name ?? "Table"} is thinking…</p>}
+            {game?.handOver && <div className="mt-5 grid gap-2">
+              {game.winners.length > 0 && <p className={`rounded-xl border p-3 text-center text-sm font-black ${potWinner === "player" ? "border-emerald-300/40 bg-emerald-300/15 text-emerald-100" : "border-white/15 bg-white/5 text-white/75"}`}>{potWinner === "player" ? "🏆 " : ""}{game.lastAction}</p>}
+              <div className="grid grid-cols-2 gap-2">
+                {busted ? <button onClick={rebuy} className="rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-4 text-xs font-black text-black shadow-lg active:scale-95">Rebuy {activeTable?.buyIn.toLocaleString()}</button> : <button onClick={deal} className="rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-4 text-xs font-black text-black shadow-lg active:scale-95">{game.handNumber === 0 ? "Deal first hand" : "Deal next hand"}</button>}
+                <button onClick={leaveTable} className="rounded-xl bg-zinc-800/90 py-4 text-xs font-black text-zinc-100 shadow-lg active:scale-95">Leave table</button>
+              </div>
+            </div>}
+            <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-[10px] text-white/35"><ShieldCheck className="h-3 w-3" /> Free-play table — virtual chips have no cash value and cannot be exchanged.</p>
+            </div></article>
+      {leaveOpen && <div className="fixed inset-0 z-[1300] flex items-center justify-center bg-black/70 p-6" role="dialog" aria-modal="true"><div className="w-full max-w-sm rounded-2xl border border-amber-200/30 bg-zinc-950 p-5 text-center"><MessageCircle className="mx-auto h-6 w-6 text-amber-200" /><h3 className="mt-3 font-black text-amber-100">Leave {activeTable?.name}?</h3><p className="mt-2 text-xs text-white/60">Your remaining stack of {you?.chips.toLocaleString() ?? 0} chips returns to your wallet.</p><div className="mt-4 grid grid-cols-2 gap-2"><button onClick={() => setLeaveOpen(false)} className="rounded-xl bg-white/10 py-3 text-xs font-black">Stay</button><button onClick={leaveTable} className="rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-3 text-xs font-black text-black">Leave</button></div></div></div>}
+    </div></section>;
 };
