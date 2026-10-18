@@ -8,7 +8,6 @@ const partners = [
   { name: "Veno Corp Gaming", detail: "Gaming operations", status: "Showcase partner", icon: Building2, tone: "from-violet-400/20 to-fuchsia-400/5" },
   { name: "Luxe Gaming Bundles", detail: "Free-ticket game bundles", status: "Showcase partner", icon: Gift, tone: "from-amber-300/20 to-orange-400/5" },
   { name: "Moss Prestige", detail: "Performance vehicle prizes", status: "Vehicle supply partner", icon: CarFront, tone: "from-rose-400/20 to-amber-300/5" },
-  { name: "Selfridges", detail: "Luxury retail prize concepts", status: "Prospective partner", icon: Sparkles, tone: "from-yellow-300/20 to-lime-300/5" },
 ];
 
 export function PartnerShowcase() {
