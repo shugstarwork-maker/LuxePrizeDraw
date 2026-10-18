@@ -766,8 +766,8 @@
 
 /* Full-bleed destination image remains visible behind all holiday details. */
 .coverflow-holiday .holiday-card-photo { object-position: center top; }
-.holiday-card-shade { background:none; pointer-events:none; }
-.coverflow-holiday .holiday-card-copy { margin-top:8rem; padding-top:1rem; background:transparent; text-shadow:0 2px 5px #000; }
+.holiday-card-shade { background:linear-gradient(180deg, rgba(5,3,0,.62) 0%, rgba(5,3,0,.12) 32%, rgba(5,3,0,.32) 58%, rgba(5,3,0,.88) 100%); pointer-events:none; }
+.coverflow-holiday .holiday-card-copy { margin-top:5.5rem; padding-top:.75rem; background:transparent; text-shadow:0 2px 5px #000; }
 
 /* Shared Luxe identity: typography and chrome only; preserve game-state colours. */
 .luxe-brand-theme { --luxe-gold:#ffe09a; --luxe-edge:#b79a54; background-color:#050403; }
@@ -1100,7 +1100,7 @@
 @media(prefers-reduced-motion:reduce) { .draw-value-highlights dd.draw-gold-amount,.cash-swell-card .cash-prize-heading,.headline-choice-title strong { animation:none; transform:none; opacity:1; filter:none; }.headline-gold-flames::before { animation:none; display:none; } }
 
 /* Holiday-choice examples: vivid scenery with contained, readable gold copy. */
-.luxury-holidays .holiday-card-photo { filter:brightness(1.12) saturate(1.15); }
+.luxury-holidays .holiday-card-photo { filter:brightness(.92) saturate(1.45) contrast(1.08); }
 .luxury-holidays .coverflow-holiday { border:1px solid #ffe09a; box-shadow:0 0 22px #e9ba3544,0 16px 35px #0008; }
 .luxury-holidays .holiday-card-copy { background:transparent; border-top:0; }
 .luxury-holidays .holiday-card-copy h3 { color:#ffe39a; font-family:Georgia,serif; text-shadow:0 2px 4px #000; }
@@ -1128,6 +1128,18 @@
   .compact-coverflow__card > .coverflow-draw { min-height:13rem; }
   .compact-coverflow__card > .coverflow-draw > div.relative { min-height:13rem; }
   .compact-coverflow__card .cash-swell-card, .compact-coverflow__card article { box-shadow:0 10px 24px #0007; }
-  .coverflow-holiday .holiday-card-copy { margin-top:6rem; }
+  .coverflow-holiday .holiday-card-copy { margin-top:3.5rem; }
   .luxe-brand-theme .cash-prize-heading { font-size:1.45rem; }
+}
+
+/* Compact holiday card internals so they match the other draw cards */
+.coverflow-holiday .holiday-card-copy ul { margin-top:.6rem !important; gap:.35rem !important; }
+.coverflow-holiday .holiday-ticket-target { margin-top:.6rem; padding:.55rem .8rem; }
+.coverflow-holiday .holiday-ticket-target > strong { font-size:1rem; margin-top:.15rem; }
+.coverflow-holiday .holiday-ticket-target > small { margin-top:.2rem; }
+.coverflow-holiday .holiday-value-note { margin-top:.6rem; padding:.5rem; }
+.coverflow-holiday .holiday-card-copy h3 { font-size:1.5rem; }
+@media (max-width: 640px) {
+  .coverflow-holiday .holiday-card-copy h3 { font-size:1.3rem; }
+  .compact-coverflow__card > .coverflow-holiday h3 { font-size:1.2rem; }
 }

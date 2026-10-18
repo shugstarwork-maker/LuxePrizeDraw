@@ -61,9 +61,9 @@ export function RollingCardCarousel<T>({ items, getKey, renderItem, label, class
           const distance = Math.abs(offset);
           return <div key={getKey(item)} className="compact-coverflow__card" inert={offset !== 0} aria-hidden={offset !== 0} style={{
             gridArea: "1 / 1", zIndex: items.length - distance,
-            opacity: distance > 2 ? 0 : offset === 0 ? 1 : .65,
+            opacity: distance > 2 ? 0 : offset === 0 ? 1 : .45,
             visibility: distance > 2 ? "hidden" : "visible",
-            transform: `translateX(${offset * 64}%) translateZ(${-distance * 100}px) rotateY(${offset === 0 ? 0 : offset < 0 ? 28 : -28}deg) scale(${1 - Math.min(distance, 3) * .12})`,
+            transform: `translateX(${offset * 82}%) translateZ(${-distance * 100}px) rotateY(${offset === 0 ? 0 : offset < 0 ? 28 : -28}deg) scale(${1 - Math.min(distance, 3) * .12})`,
           }}>{renderItem(item, index)}</div>;
         })}
       </div>
