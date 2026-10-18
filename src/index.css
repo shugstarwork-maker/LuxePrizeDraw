@@ -583,7 +583,7 @@
 
 /* Compact, stable-key coverflow: cards move between slots instead of remounting. */
 .compact-coverflow { display:grid; perspective:1100px; overflow:hidden; padding:2rem 0; }
-.compact-coverflow__card { position:relative; width:min(62%,22rem); margin:auto; align-self:center; min-width:0; transform-style:preserve-3d; transition:transform .7s cubic-bezier(.22,.68,0,1),opacity .7s,visibility .7s; }
+.compact-coverflow__card { position:relative; width:min(92%,30rem); margin:auto; align-self:center; min-width:0; transform-style:preserve-3d; transition:transform .7s cubic-bezier(.22,.68,0,1),opacity .7s,visibility .7s; }
 .compact-coverflow__card > * { width:100%; border-radius:6px; border:1px solid #81b6d54d; background-color:#10151d; box-shadow:0 16px 40px #0008,0 2px 0 #5fbce5; }
 .compact-coverflow__card article > div:first-child { height:12rem; }
 .compact-coverflow__card article { padding:1rem; }
@@ -593,11 +593,11 @@
 @media (prefers-reduced-motion:reduce) { .compact-coverflow__card { transition:none; } }
 
 /* One compact coverflow system for every draw collection. */
-.compact-coverflow__card > .coverflow-draw { padding:0; min-height:26rem; margin:0; }
-.compact-coverflow__card > .coverflow-draw > div.relative { height:auto; min-height:26rem; padding:1rem; }
+.compact-coverflow__card > .coverflow-draw { padding:0; min-height:16rem; margin:0; }
+.compact-coverflow__card > .coverflow-draw > div.relative { height:auto; min-height:16rem; padding:1rem; }
 .compact-coverflow__card > .coverflow-holiday { padding:0; }
 .compact-coverflow__card > .coverflow-holiday > .holiday-card-photo { height:100%; }
-.compact-coverflow__card > .coverflow-holiday h3 { font-size:1.75rem; }
+.compact-coverflow__card > .coverflow-holiday h3 { font-size:1.35rem; }
 .compact-coverflow__card > .coverflow-tier { padding:0; }
 .compact-coverflow__card > .coverflow-tier > div:first-child { height:12rem; }
 .seasonal-snow { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
@@ -767,7 +767,7 @@
 /* Full-bleed destination image remains visible behind all holiday details. */
 .coverflow-holiday .holiday-card-photo { object-position: center top; }
 .holiday-card-shade { background:none; pointer-events:none; }
-.coverflow-holiday .holiday-card-copy { margin-top:12rem; padding-top:1rem; background:transparent; text-shadow:0 2px 5px #000; }
+.coverflow-holiday .holiday-card-copy { margin-top:8rem; padding-top:1rem; background:transparent; text-shadow:0 2px 5px #000; }
 
 /* Shared Luxe identity: typography and chrome only; preserve game-state colours. */
 .luxe-brand-theme { --luxe-gold:#ffe09a; --luxe-edge:#b79a54; background-color:#050403; }
@@ -791,7 +791,7 @@
 .luxe-brand-theme :is(input,select,textarea):focus-visible { outline:2px solid #ffe09a; outline-offset:2px; }
 
 .draw-value-highlights__grid--entry-only { grid-template-columns:minmax(0,1fr); }
-.luxe-brand-theme .cash-prize-heading { font-size:clamp(2.8rem,8vw,4.5rem); line-height:1.06; color:#ffe85c; text-shadow:0 2px 3px #000,0 0 22px #ffd70077; overflow-wrap:anywhere; }
+.luxe-brand-theme .cash-prize-heading { font-size:clamp(1.6rem,4.5vw,2.6rem); line-height:1.06; color:#ffe85c; text-shadow:0 2px 3px #000,0 0 22px #ffd70077; overflow-wrap:anywhere; }
 
 /* Match cash-card entry amounts to the enlarged metallic-gold prize heading. */
 .luxe-brand-theme .coverflow-draw .draw-value-highlights__grid--entry-only dd { font-family:Georgia,'Times New Roman',serif; font-size:clamp(2.6rem,7vw,4rem); line-height:1.06; color:#ffe85c; text-shadow:0 2px 3px #000,0 0 22px #ffd70077; }
@@ -1120,3 +1120,14 @@
 .luxury-holidays .draw-value-highlights :is(dt,dd) { font-family:Georgia,'Times New Roman',serif; }
 .luxury-holidays .draw-value-highlights dt { color:#fff0ae; text-shadow:0 2px 4px #000; }
 .luxury-holidays .draw-value-highlights dd { color:#ffe85c; font-size:clamp(1.5rem,4vw,2.4rem); font-weight:900; text-shadow:0 2px 3px #000,0 0 20px #ffd70077; }
+
+/* Mobile polish: compact carousel cards, no off-screen peek bleed */
+@media (max-width: 640px) {
+  .compact-coverflow { padding:1rem 0; }
+  .compact-coverflow__card { width:96%; }
+  .compact-coverflow__card > .coverflow-draw { min-height:13rem; }
+  .compact-coverflow__card > .coverflow-draw > div.relative { min-height:13rem; }
+  .compact-coverflow__card .cash-swell-card, .compact-coverflow__card article { box-shadow:0 10px 24px #0007; }
+  .coverflow-holiday .holiday-card-copy { margin-top:6rem; }
+  .luxe-brand-theme .cash-prize-heading { font-size:1.45rem; }
+}
