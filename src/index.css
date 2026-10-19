@@ -583,7 +583,7 @@
 
 /* Compact, stable-key coverflow: cards move between slots instead of remounting. */
 .compact-coverflow { display:grid; perspective:1100px; overflow:hidden; padding:2rem 0; }
-.compact-coverflow__card { position:relative; width:min(92%,30rem); margin:auto; align-self:center; min-width:0; transform-style:preserve-3d; transition:transform .7s cubic-bezier(.22,.68,0,1),opacity .7s,visibility .7s; }
+.compact-coverflow__card { position:relative; width:min(88%,26rem); margin:auto; align-self:center; min-width:0; transform-style:preserve-3d; transition:transform .7s cubic-bezier(.22,.68,0,1),opacity .7s,visibility .7s; }
 .compact-coverflow__card > * { width:100%; border-radius:6px; border:1px solid #81b6d54d; background-color:#10151d; box-shadow:0 16px 40px #0008,0 2px 0 #5fbce5; }
 .compact-coverflow__card article > div:first-child { height:12rem; }
 .compact-coverflow__card article { padding:1rem; }
@@ -1126,15 +1126,25 @@
 .luxury-holidays .draw-value-highlights dt { color:#fff0ae; text-shadow:0 2px 4px #000; }
 .luxury-holidays .draw-value-highlights dd { color:#ffe85c; font-size:clamp(1.5rem,4vw,2.4rem); font-weight:900; text-shadow:0 2px 3px #000,0 0 20px #ffd70077; }
 
-/* Mobile polish: compact carousel cards, no off-screen peek bleed */
+/* Mobile polish: compact carousel cards, no off-screen peek bleed — one card must fit the screen */
 @media (max-width: 640px) {
   .compact-coverflow { padding:1rem 0; }
-  .compact-coverflow__card { width:96%; }
-  .compact-coverflow__card > .coverflow-draw { min-height:12rem; }
-  .compact-coverflow__card > .coverflow-draw > div.relative { min-height:12rem; }
+  .compact-coverflow__card { width:88%; }
+  .compact-coverflow__card > .coverflow-draw { min-height:11rem; max-height:64dvh; overflow-y:auto; }
+  .compact-coverflow__card > .coverflow-draw > div.relative { min-height:11rem; }
   .compact-coverflow__card .cash-swell-card, .compact-coverflow__card article { box-shadow:0 10px 24px #0007; }
-  .coverflow-holiday .holiday-card-copy { margin-top:3.5rem; }
-  .luxe-brand-theme .cash-prize-heading { font-size:1.45rem; }
+  .coverflow-holiday .holiday-card-copy { margin-top:2.25rem; }
+  .coverflow-holiday .holiday-card-copy ul { display:none; }
+  .coverflow-holiday .holiday-value-note { display:none; }
+  .luxe-brand-theme .cash-prize-heading { font-size:1.3rem; }
+  .luxury-holidays .draw-value-highlights dd { font-size:1.5rem; }
+  .luxe-brand-theme :is(.coverflow-draw,.coverflow-holiday,.coverflow-tier) .draw-value-highlights dd { font-size:clamp(1.5rem,6vw,2rem); }
+  .compact-coverflow__card .coverflow-draw h3 { font-size:1.35rem; }
+  .compact-coverflow__card .coverflow-draw aside { padding:.9rem; }
+  .compact-coverflow__card .coverflow-draw aside h3 { font-size:1.25rem; }
+  .compact-coverflow__card .coverflow-draw p { font-size:.78rem; }
+  .compact-coverflow__card .coverflow-draw .mt-5 { margin-top:.7rem; }
+  .compact-coverflow__card .coverflow-draw .mt-4 { margin-top:.6rem; }
 }
 
 /* Compact holiday card internals so they match the other draw cards */
@@ -1153,4 +1163,5 @@
 @media (min-width: 641px) {
   .compact-coverflow__card > .coverflow-draw,
   .compact-coverflow__card > .coverflow-draw > div.relative { min-height:14rem; }
+  .compact-coverflow__card > .coverflow-draw { max-height:80vh; overflow-y:auto; }
 }
