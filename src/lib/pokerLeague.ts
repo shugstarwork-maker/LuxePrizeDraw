@@ -47,13 +47,10 @@ export function ensureWeek(): LeagueState {
     if (raw) {
       const prev = JSON.parse(raw) as LeagueState;
       if (prev.week === week) return prev;
-      // New week: finish last week's league — apply promotion/demotion, then reset points.
-      const board = weeklyBoard(prev).map((r) => ({ ...r, points: r.xp }));
-      const tier = LEAGUE_TIERS[prev.tierIndex];
-      const demoteCount = tier.demote > 0 ? COHORT_SIZE - tier.demote : 0;
-      const results = finishLeague(board, prev.tierIndex, tier.promote, demoteCount);
-      const mine = results.find((r) => r.you);
-      const tierIndex = mine ? mine.nextTierIndex : prev.tierIndex;
+      // New week: apply the half-split movement — top half of the cohort promotes, bottom half relegates.
+      const board = weeklyBoard(prev);
+      const rank = board.findIndex((r) => r.you) + 1;
+      const tierIndex = rank > 0 ? halfSplitNextTier(rank, board.length, prev.tierIndex) : prev.tierIndex;
       st = { week, tierIndex, xp: 0, seed: hashStr(week + tierIndex) };
     }
   } catch { /* fresh start */ }
@@ -74,9 +71,10 @@ export function weeklyBoard(st: LeagueState): LeagueRow[] {
 }
 
 export function weeklyCutoffs(board: LeagueRow[], tierIndex: number): { promoteXP: number; demoteXP: number } {
-  const tier = LEAGUE_TIERS[tierIndex];
-  const promoteXP = tier.promote > 0 && board.length > tier.promote ? board[tier.promote - 1].xp : 0;
-  const demoteXP = tier.demote > 0 && board.length > tier.demote ? board[tier.demote].xp : 0;
+  // Half-split zones: top half promotes (unless already at the top tier), bottom half relegates.
+  const half = Math.floor(board.length / 2);
+  const promoteXP = tierIndex < LEAGUE_TIERS.length - 1 && board.length > half ? board[half - 1].xp : 0;
+  const demoteXP = tierIndex > 0 && board.length > half ? board[half].xp : 0;
   return { promoteXP, demoteXP };
 }
 
@@ -115,6 +113,41 @@ export function finishLeague<T extends { points: number }>(
 export function recordTableFinish(place: number): LeagueState {
   return recordWeeklyXP(pointsForFinish(place));
 }
+
+// ── Half-split division movement (top half moves up, bottom half moves down) ──
+export type DivisionPlayer = { name: string; points: number };
+
+/**
+ * Port of the move_players system: divisions ordered lowest → highest.
+ * Each week, the top half of every division moves up a tier and the bottom
+ * half moves down (edges stay). Returns the re-sorted divisions.
+ */
+export function movePlayers<T extends DivisionPlayer>(divisions: Record<string, T[]>): Record<string, T[]> {
+  const names = Object.keys(divisions);
+  const ranked = Object.fromEntries(names.map((d) => [d, [...divisions[d]].sort((a, b) => b.points - a.points)]));
+  const changes: Record<string, T[]> = Object.fromEntries(names.map((d) => [d, []]));
+  for (let i = 0; i < names.length; i++) {
+    const division = names[i];
+    const players = ranked[division];
+    const moveCount = Math.floor(players.length / 2);
+    if (i > 0) changes[names[i - 1]].push(...(moveCount ? players.slice(-moveCount) : [])); // bottom half down
+    if (i < names.length - 1) changes[names[i + 1]].push(...players.slice(0, moveCount));   // top half up
+    const start = i === 0 ? moveCount : 0;                    // lowest division keeps its top half
+    const end = i === names.length - 1 ? players.length - moveCount : players.length; // highest keeps its bottom half
+    changes[division].push(...players.slice(start, end));
+  }
+  return Object.fromEntries(names.map((d) => [d, changes[d].sort((a, b) => b.points - a.points)]));
+}
+
+/** Where a player's rank lands them next week under the half-split rule. */
+export function halfSplitNextTier(rank: number, cohortSize: number, tierIndex: number): number {
+  const moveCount = Math.floor(cohortSize / 2);
+  if (tierIndex < LEAGUE_TIERS.length - 1 && rank > 0 && rank <= moveCount) return tierIndex + 1; // top half up
+  if (tierIndex > 0 && rank > cohortSize - moveCount) return tierIndex - 1;                       // bottom half down
+  return tierIndex;
+}
+
+export const halfSplitCounts = (cohortSize: number) => { const half = Math.floor(cohortSize / 2); return { up: half, down: half }; };
 
 export function recordWeeklyXP(amount: number): LeagueState {
   const st = ensureWeek();

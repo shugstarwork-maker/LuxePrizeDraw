@@ -326,7 +326,7 @@ export const LuxePokerLeague: React.FC = () => {
             <div>
               <p className="text-[10px] font-black uppercase tracking-[.22em]" style={{ color: leagueTier.colour }}>Weekly league · ends in {weekEndsIn()}</p>
               <p className="mt-1 flex items-center gap-2 text-lg font-black" style={{ color: leagueTier.colour }}><Crown className="h-5 w-5" />{leagueTier.name} League</p>
-              <p className="text-xs text-white/55">Top {leagueTier.promote} go up{leagueTier.demote > 0 ? ` · bottom ${30 - leagueTier.demote} drop down` : ""} · #{yourRank || "—"} of {leagueBoard.length}</p>
+              <p className="text-xs text-white/55">{league.tierIndex < 5 ? `Top ${Math.floor(leagueBoard.length / 2)} go up` : "Top division — hold your spot"}{league.tierIndex > 0 ? ` · bottom ${Math.floor(leagueBoard.length / 2)} drop down` : ""} · #{yourRank || "—"} of {leagueBoard.length}</p>
             </div>
             <div className="text-right">
               <p className="font-mono text-2xl font-black" style={{ color: leagueTier.colour }}>{league.xp} XP</p>
@@ -336,7 +336,7 @@ export const LuxePokerLeague: React.FC = () => {
           <div className="mt-3 max-h-64 space-y-1 overflow-y-auto pr-1">
             {leagueBoard.slice(0, leagueOpen ? 30 : 10).map((row, i) => {
               const rank = i + 1;
-              const zone = rank <= leagueTier.promote ? "promote" : leagueTier.demote > 0 && rank > leagueTier.demote ? "demote" : "";
+              const half = Math.floor(leagueBoard.length / 2); const zone = league.tierIndex < 5 && rank <= half ? "promote" : league.tierIndex > 0 && rank > leagueBoard.length - half ? "demote" : "";
               return <div key={row.name} className={`flex items-center gap-3 rounded-xl border px-3 py-2 ${row.you ? "border-amber-300/70 bg-amber-300/15" : zone === "promote" ? "border-emerald-300/25 bg-emerald-300/5" : zone === "demote" ? "border-rose-300/25 bg-rose-300/5" : "border-white/8 bg-black/25"}`}>
                 <span className={`w-7 text-center font-mono text-xs font-black ${zone === "promote" ? "text-emerald-300" : zone === "demote" ? "text-rose-300" : "text-white/40"}`}>{rank}</span>
                 <span className="flex h-7 w-7 items-center justify-center rounded-full border text-[10px] font-black" style={{ borderColor: `${leagueTier.colour}66`, background: "#0008", color: leagueTier.colour }}>{row.you ? "YOU" : row.name.slice(0, 2).toUpperCase()}</span>
@@ -346,7 +346,7 @@ export const LuxePokerLeague: React.FC = () => {
             })}
           </div>
           <button onClick={() => setLeagueOpen((v) => !v)} className="mt-3 w-full rounded-xl border border-white/15 bg-white/5 py-2.5 text-xs font-black uppercase tracking-wider text-white/70">{leagueOpen ? "Show less" : "Show all 30 players"}</button>
-          <p className="mt-3 text-[10px] text-white/35">Earn league XP every hand you play — win pots for bonus XP. Promotion: {cutoffs.promoteXP}+ XP. Weekly leagues are free-play pride only — no prizes, no cash value.</p>
+          <p className="mt-3 text-[10px] text-white/35">Earn league XP every hand you play — win pots for bonus XP. Top half ({cutoffs.promoteXP}+ XP) promotes, bottom half relegates. Weekly leagues are free-play pride only — no prizes, no cash value.</p>
         </div>
         <div className="mt-4 rounded-[1.75rem] border border-amber-200/25 bg-[linear-gradient(145deg,#241a08,#120d06_70%)] p-5">
           <p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">Luxe Lounge leaderboard</p>
