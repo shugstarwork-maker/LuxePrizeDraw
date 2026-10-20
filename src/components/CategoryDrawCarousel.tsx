@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useAudio } from "../audio/AudioProvider";
 import { DrawDetailsPanel } from "./DrawDetailsPanel";
 
-type Category = "Cars" | "Luxe Holidays" | "Cash" | "Bitcoin" | "Gaming Packages" | "Luxe Summer Houses";
+type Category = "Cars" | "Luxe Holidays" | "Cash" | "Bitcoin" | "Gaming Packages" | "Luxe Summer Houses" | "Gold Bullion";
 type Draw = { name: string; image: string; details: [string, string][]; cashAlternative: string; inclusions?: string[] };
 
 type Tier = { entry: string; value: string };
@@ -31,6 +31,9 @@ const images: Record<Category, string[]> = {
   ],
   "Bitcoin": [
     "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1621761191319-c6fb62004040?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1621504450181-5d356f61d307?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1620121692029-d088224ddc74?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1621761191319-c6fb62004040?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1621504450181-5d356f61d307?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1620121692029-d088224ddc74?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?auto=format&fit=crop&w=1400&q=85"
+  ],
+  "Gold Bullion": [
+    "/games/gold-bar.png", "/games/gold-bar.png", "/games/gold-bar.png", "/games/gold-bar.png", "/games/gold-bar.png", "/games/gold-bar.png", "/games/gold-bar.png", "/games/gold-bar.png", "/games/gold-bar.png"
   ]
 };
 
@@ -40,10 +43,11 @@ const names: Record<Category, string[]> = {
   "Gaming Packages": ["Premium home-tech bundle", "Gaming accessory set", "Creator starter kit", "Creator studio setup", "High-end gaming suite", "Home-cinema technology", "Future-tech collection", "Ultimate creator suite", "Smart-home collection"],
   "Luxe Summer Houses": ["Contemporary luxury home", "Coastal residence", "Hillside villa", "City penthouse", "Private estate", "Waterfront home", "Architectural villa", "Country retreat", "Signature residence"],
   "Cash": ["£500 cash prize", "£750 cash prize", "£1,250 cash prize", "£2,500 cash prize", "£5,000 cash prize", "£10,000 cash prize", "£20,000 cash jackpot", "£35,000 cash jackpot", "£50,000 cash jackpot"],
-  "Bitcoin": ["£500 of Bitcoin", "£750 of Bitcoin", "£1,250 of Bitcoin", "£2,500 of Bitcoin", "£5,000 of Bitcoin", "£10,000 of Bitcoin", "£20,000 of Bitcoin", "£35,000 of Bitcoin", "£50,000 of Bitcoin"]
+  "Bitcoin": ["£500 of Bitcoin", "£750 of Bitcoin", "£1,250 of Bitcoin", "£2,500 of Bitcoin", "£5,000 of Bitcoin", "£10,000 of Bitcoin", "£20,000 of Bitcoin", "£35,000 of Bitcoin", "£50,000 of Bitcoin"],
+  "Gold Bullion": ["10g gold bar", "20g gold bar", "50g gold bar", "100g gold bar", "250g gold bar", "500g gold bar", "1kg solid gold bar", "1kg gold bar & display case", "2kg gold bullion collection"]
 };
 
-const categories: Category[] = ["Cars", "Luxe Holidays", "Cash", "Bitcoin", "Gaming Packages", "Luxe Summer Houses"];
+const categories: Category[] = ["Cars", "Luxe Holidays", "Cash", "Bitcoin", "Gold Bullion", "Gaming Packages", "Luxe Summer Houses"];
 
 export function CategoryDrawCarousel({ category, entryBand }: { category: string; entryBand?: string }) {
   const legacyCategories: Record<string, Category> = {

@@ -11,6 +11,7 @@ const draws: Draw[] = [
   { title: "Luxury Supercar Experience", category: "Featured partnership", image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1400&q=85", path: "/prizes/luxury-supercar-experience", prizeValue: "Campaign details pending", entryCost: "Pending approval" },
   { title: "£100K Bitcoin Prize or £100K Cash", category: "Headline prize choice", image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=1400&q=85", path: "/terms", prizeValue: "£100,000 BTC or cash", entryCost: "Pre-launch" },
   { title: "Ferrari 488 GTB", category: "Sports car", image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1400&q=85", path: "/sports-cars", prizeValue: "Pending verified valuation", entryCost: "Pending approval" },
+  { title: "1kg Solid Gold Bar", category: "Bullion prize", image: "/games/gold-bar.png", path: "/draws", prizeValue: "24ct investment gold · valuation pending", entryCost: "Pending approval" },
 ];
 
 function navigate(path: string) { window.history.pushState({}, "", path); window.dispatchEvent(new PopStateEvent("popstate")); }

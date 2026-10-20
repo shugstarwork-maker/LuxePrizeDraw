@@ -29,6 +29,7 @@ import { LegalReadinessNotice } from "./components/LegalReadinessNotice";
 import { LaunchCommitment } from "./components/LaunchCommitment";
 import { IntellectualPropertyNotice } from "./components/IntellectualPropertyNotice";
 import { LuxePokerLeague } from "./components/LuxePokerLeague";
+import { CardLounge } from "./components/CardLounge";
 import { LuxuryHolidaysSection } from "./components/LuxuryHolidaysSection";
 import { LuxeHost } from "./components/LuxeHost";
 import { MembershipPreview } from "./components/MembershipPreview";
@@ -70,6 +71,8 @@ export default function App() {
     : path === "/lobby" ? <><NeonGameLobby /><ScottishHost /><MobileDock /></>
     : path === "/chess" ? <LuxeChessPage />
     : path === "/poker" ? <><LuxePokerLeague /><div className="poker-external-chrome"><ScottishHost /><MobileDock /></div></>
+    : path === "/blackjack" ? <><CardLounge game="blackjack" /><div className="poker-external-chrome"><ScottishHost /><MobileDock /></div></>
+    : path === "/brag" ? <><CardLounge game="brag" /><div className="poker-external-chrome"><ScottishHost /><MobileDock /></div></>
     : path === "/arcade" ? <><ArcadeHome /><ScottishHost /><MobileDock /></>
     : path === "/portal" ? <><PlayerPortal /><ScottishHost /><MobileDock /></>
     : path === "/sports-cars" ? <><CategoryDrawCarousel category="Cars" /><ScottishHost /><MobileDock /></>

@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { Bitcoin, Banknote, CarFront, ChevronDown, Gamepad2, House, Plane, Trophy } from "lucide-react";
+import { Bitcoin, Banknote, CarFront, ChevronDown, Coins, Gamepad2, House, Plane, Trophy } from "lucide-react";
 
-type Category = "Cars" | "Luxe Holidays" | "Cash" | "Bitcoin" | "Gaming Packages" | "Luxe Summer Houses";
+type Category = "Cars" | "Luxe Holidays" | "Cash" | "Bitcoin" | "Gaming Packages" | "Luxe Summer Houses" | "Gold Bullion";
 const entryTiers = ["1p", "2p", "5p", "10p", "20p", "50p", "£1", "£5", "£10"];
 const categories: { name: Category; icon: React.ElementType }[] = [
   { name: "Cars", icon: CarFront }, { name: "Luxe Holidays", icon: Plane }, { name: "Cash", icon: Banknote },
-  { name: "Bitcoin", icon: Bitcoin }, { name: "Gaming Packages", icon: Gamepad2 }, { name: "Luxe Summer Houses", icon: House },
+  { name: "Bitcoin", icon: Bitcoin }, { name: "Gold Bullion", icon: Coins }, { name: "Gaming Packages", icon: Gamepad2 }, { name: "Luxe Summer Houses", icon: House },
 ];
 
 export function PrizeCatalog() {
