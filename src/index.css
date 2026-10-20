@@ -956,13 +956,6 @@
 .player-turn-ring__avatar { position:absolute; inset:5px; display:grid; place-items:center; border-radius:50%; overflow:hidden; background:linear-gradient(#ffecac,#b7892c); color:#160f04; font-size:.65rem; font-weight:900; }
 .player-turn-ring--active { filter:drop-shadow(0 0 8px #ffd75f99); }
 @media (orientation:landscape) and (max-height:700px) { .poker-playing-page .player-turn-ring { width:2.3rem; height:2.3rem; } }
-
-/* Landscape immersive: keep hand-over controls and status visible above the felt. */
-@media (orientation:landscape) and (max-height:700px) {
-  .poker-playing-page .poker-winner-banner { position:fixed; top:max(2.9rem,env(safe-area-inset-top)); left:50%; transform:translateX(-50%); z-index:1150; margin:0; max-width:62%; padding:.45rem .9rem; background:#090703f2; box-shadow:0 0 25px #000b; }
-  .poker-playing-page .poker-thinking-note { position:fixed; bottom:max(.4rem,env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); z-index:1150; margin:0; padding:.45rem .9rem; background:#090703f5; border:1px solid #d9b764; border-radius:1rem; box-shadow:0 0 25px #000b; }
-  .poker-playing-page .poker-leave-btn { display:none; }
-}
 @media(prefers-reduced-motion:reduce) { .player-turn-ring__clock { transition:none; } }
 
 /* Separate lower-right player seat from Theo, the hand and the action dock. */
