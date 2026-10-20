@@ -847,7 +847,7 @@
 }
 
 /* Landscape poker: retain essential game actions, remove surrounding app chrome. */
-@media (orientation:landscape) and (max-height:700px) {
+@media (orientation:landscape) and (max-height:1200px) {
   body:has(.poker-playing-page) .poker-external-chrome,
   .storm-page:has(.poker-playing-page) > .storm-page__content > aside,
   .storm-page:has(.poker-playing-page) > .storm-page__content > footer,
@@ -894,7 +894,7 @@
 }
 
 /* Immersive landscape: table fills viewport; controls overlay rather than add height. */
-@media (orientation:landscape) and (max-height:700px) {
+@media (orientation:landscape) and (max-height:1200px) {
   body:has(.poker-playing-page) { overflow:hidden; }
   .poker-playing-page,.poker-playing-page:fullscreen { position:fixed; inset:0; z-index:1000; width:100vw; height:100dvh; min-height:0; padding:0; overflow:hidden; background:#050403; }
   .poker-playing-page .poker-playing-wrap { width:100%; height:100%; max-width:none; padding:0; }
@@ -916,7 +916,7 @@
   .poker-playing-page .luxe-dealer-bubble { display:none; }
 }
 
-@media (orientation:landscape) and (max-height:700px) {
+@media (orientation:landscape) and (max-height:1200px) {
   .poker-playing-page .poker-deal-dock { background:linear-gradient(#fff0b0,#ffbd22); color:#140c00; font-size:1rem; font-weight:900; min-height:2.75rem; text-shadow:none; }
   .poker-playing-page .poker-deal-dock:focus-visible,.poker-playing-page .poker-action-dock button:focus-visible { outline:3px solid #fff; outline-offset:2px; }
 }
@@ -928,19 +928,19 @@
 /* In-app full-view fallback when native fullscreen is blocked (embeds, iOS). */
 .poker-playing-page.poker-fullscreen-sim { position:fixed; inset:0; z-index:1400; width:100%; height:100dvh; min-height:0; padding:0; overflow:hidden; background:#050403; }
 .poker-playing-page.poker-fullscreen-sim .poker-playing-wrap { width:100%; max-width:none; height:100%; padding:0; }
-@media (orientation:landscape) and (max-height:700px) {
+@media (orientation:landscape) and (max-height:1200px) {
   .poker-playing-page.poker-fullscreen-sim .poker-game-article,.poker-playing-page.poker-fullscreen-sim .poker-surface-frame,.poker-playing-page.poker-fullscreen-sim .poker-table-scroll,.poker-playing-page.poker-fullscreen-sim .poker-table-artwork { position:absolute; inset:0; width:100%; height:100%; margin:0; padding:0; border:0; border-radius:0; overflow:hidden; box-shadow:none; }
   .poker-playing-page.poker-fullscreen-sim .poker-table-artwork > img { width:100%; height:100%; object-fit:cover; }
 }
 
 /* De-crowd the player's area in landscape: cards shift left, avatar badge drops to bottom-right, clear of chips and the board. */
-@media (orientation:landscape) and (max-height:700px) {
+@media (orientation:landscape) and (max-height:1200px) {
   .poker-playing-page .poker-live-hand { top:60%; left:41%; scale:.88; }
   .poker-playing-page .poker-live-seats .poker-seat-you { position:absolute; top:84% !important; left:63% !important; transform:translate(-50%,-50%) scale(.68) !important; }
 }
 
 /* Playability pass: isolate live cards from seat badges and preserve turn feedback. */
-@media (orientation:landscape) and (max-height:700px) {
+@media (orientation:landscape) and (max-height:1200px) {
   .poker-playing-page .poker-live-seats > [data-seat-index="5"] { left:78% !important; top:76% !important; }
   .poker-playing-page .poker-live-hand { top:62%; left:50%; pointer-events:none; }
   .poker-playing-page .poker-live-host { top:16%; pointer-events:none; }
@@ -970,11 +970,11 @@
 .player-turn-ring__clock { fill:none; stroke:#ffe69a; stroke-width:3.5; stroke-linecap:round; transition:stroke-dashoffset 1s linear; }
 .player-turn-ring__avatar { position:absolute; inset:5px; display:grid; place-items:center; border-radius:50%; overflow:hidden; background:linear-gradient(#ffecac,#b7892c); color:#160f04; font-size:.65rem; font-weight:900; }
 .player-turn-ring--active { filter:drop-shadow(0 0 8px #ffd75f99); }
-@media (orientation:landscape) and (max-height:700px) { .poker-playing-page .player-turn-ring { width:2.3rem; height:2.3rem; } }
+@media (orientation:landscape) and (max-height:1200px) { .poker-playing-page .player-turn-ring { width:2.3rem; height:2.3rem; } }
 @media(prefers-reduced-motion:reduce) { .player-turn-ring__clock { transition:none; } }
 
 /* Separate lower-right player seat from Theo, the hand and the action dock. */
-@media (orientation:landscape) and (max-height:700px) {
+@media (orientation:landscape) and (max-height:1200px) {
   .poker-playing-page .poker-live-seats > [data-seat-index="4"] { left:91% !important; top:43% !important; }
   .poker-playing-page .poker-live-seats > [data-seat-index="5"] { left:83% !important; top:78% !important; width:4rem; max-width:4rem; padding:.25rem; transform:translate(-50%,-50%) !important; }
   .poker-playing-page .poker-live-seats > [data-seat-index="5"] b { font-size:.6rem; }
