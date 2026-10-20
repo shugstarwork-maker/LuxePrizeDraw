@@ -17,6 +17,7 @@ export type HoldemPlayer = {
   folded: boolean;
   allIn: boolean;
   sittingOut: boolean;
+  hasActed: boolean;   // acted on the current street (Zynga rule: street ends when everyone has acted AND matched the bet)
 };
 
 export type HoldemAction = "fold" | "check" | "call" | "raise";
@@ -71,10 +72,10 @@ export function createTable(opts: {
   bigBlind: number;
 }): HoldemState {
   const players: HoldemPlayer[] = [
-    { id: "you", name: opts.playerName || "You", initials: initialsOf(opts.playerName || "You"), isBot: false, style: "balanced", chips: opts.playerChips, bet: 0, handBet: 0, cards: [], folded: false, allIn: false, sittingOut: false },
+    { id: "you", name: opts.playerName || "You", initials: initialsOf(opts.playerName || "You"), isBot: false, style: "balanced", chips: opts.playerChips, bet: 0, handBet: 0, cards: [], folded: false, allIn: false, sittingOut: false, hasActed: false },
     ...BOT_POOL.slice(0, Math.max(1, Math.min(5, opts.botCount))).map((bot, i) => ({
       id: `bot-${i}`, name: bot.name, initials: initialsOf(bot.name), isBot: true, style: bot.style,
-      chips: opts.botChips, bet: 0, handBet: 0, cards: [], folded: false, allIn: false, sittingOut: false,
+      chips: opts.botChips, bet: 0, handBet: 0, cards: [], folded: false, allIn: false, sittingOut: false, hasActed: false,
     })),
   ];
   return {
@@ -97,11 +98,12 @@ function nextToAct(s: HoldemState, from: number): number {
 }
 
 function startStreet(s: HoldemState, stage: HoldemStage): HoldemState {
-  const players = s.players.map((p) => ({ ...p, bet: 0 }));
+  const players = s.players.map((p) => ({ ...p, bet: 0, hasActed: false }));
   const next: HoldemState = { ...s, players, stage, currentBet: 0, minRaise: s.bigBlind };
   next.turnIndex = nextToAct(next, next.dealerIndex);
-  if (stage === "flop") next.board = [...s.board, s.deck[0], s.deck[1], s.deck[2]];
-  if (stage === "turn" || stage === "river") next.board = [...s.board, s.deck[0]];
+  // deal from the front of the remaining deck AND consume those cards
+  if (stage === "flop") { next.board = [...s.board, s.deck[0], s.deck[1], s.deck[2]]; next.deck = s.deck.slice(3); }
+  if (stage === "turn" || stage === "river") { next.board = [...s.board, s.deck[0]]; next.deck = s.deck.slice(1); }
   next.lastAction = stage === "flop" ? "Flop dealt." : stage === "turn" ? "Turn card dealt." : "River card dealt.";
   return next;
 }
@@ -116,7 +118,7 @@ export function dealHand(prev: HoldemState): HoldemState {
     return { ...prev, handOver: true, winners: [], lastAction: "Waiting for another player with chips to sit in." };
   }
   const players = prev.players.map((p) => ({
-    ...p, cards: [], bet: 0, handBet: 0, folded: p.chips <= 0 || p.sittingOut, allIn: false, sittingOut: p.sittingOut || p.chips <= 0,
+    ...p, cards: [], bet: 0, handBet: 0, folded: p.chips <= 0 || p.sittingOut, allIn: false, sittingOut: p.sittingOut || p.chips <= 0, hasActed: false,
   }));
   const deck = shuffleHoldem(makeHoldemDeck());
   const dealerIndex = (prev.dealerIndex + 1) % players.length;
@@ -153,27 +155,55 @@ export function dealHand(prev: HoldemState): HoldemState {
 function streetComplete(s: HoldemState): boolean {
   const actors = activePlayers(s).filter((p) => !p.allIn);
   if (actors.length === 0) return true;
-  return actors.every((p) => p.bet === s.currentBet) && actors.every((p) => p.handBet > 0 || s.currentBet === 0);
+  return actors.every((p) => p.bet === s.currentBet) && actors.every((p) => p.handBet > 0 || p.hasActed);
+}
+
+function allInRunOut(s: HoldemState): HoldemState {
+  // Everyone left is all-in — deal the remaining streets then settle, like Zynga's run-out.
+  let out = s;
+  while (out.stage !== "river") {
+    const nextStage: HoldemStage = out.stage === "preflop" ? "flop" : out.stage === "flop" ? "turn" : "river";
+    out = startStreet(out, nextStage);
+  }
+  return settleHand(out);
 }
 
 export function settleHand(s: HoldemState): HoldemState {
-  const contenders = s.players.filter((p) => !p.folded && !p.sittingOut);
-  const scores = contenders.map((p) => ({ p, score: evaluateHand([...p.cards, ...s.board]) }));
-  const best = scores.reduce((a, b) => (compareHands(a.score, b.score) >= 0 ? a : b));
-  const winners = scores.filter((x) => compareHands(x.score, best.score) === 0);
-  const share = Math.floor(s.pot / winners.length);
-  let remainder = s.pot - share * winners.length; // odd chips go to the first winners — nothing leaks
-  const players = s.players.map((p) => {
-    const win = winners.find((w) => w.p.id === p.id);
-    return win ? { ...p, chips: p.chips + share + (remainder-- > 0 ? 1 : 0) } : p;
-  });
-  return {
-    ...s, players, stage: "showdown", handOver: true,
-    winners: winners.map((w) => ({ id: w.p.id, amount: share, label: w.score.label })),
-    lastAction: winners.length > 1
-      ? `Split pot — ${winners.map((w) => w.p.name).join(" & ")} win ${share.toLocaleString()} each with ${best.score.label}.`
-      : `${winners[0].p.name} wins ${share.toLocaleString()} with ${best.score.label}.`,
-  };
+  // Zynga-style settlement: build main + side pots from each player's total commitment.
+  const inHand = s.players.filter((p) => p.handBet > 0);
+  const levels = [...new Set(inHand.map((p) => p.handBet))].sort((a, b) => a - b);
+  type Pot = { amount: number; eligible: string[] };
+  const pots: Pot[] = [];
+  let prev = 0;
+  for (const level of levels) {
+    const contributors = inHand.filter((p) => p.handBet >= level);
+    const amount = (level - prev) * contributors.length;
+    const eligible = contributors.filter((p) => !p.folded && !p.sittingOut).map((p) => p.id);
+    if (amount > 0 && eligible.length > 0) pots.push({ amount, eligible });
+    prev = level;
+  }
+  if (pots.length === 0) pots.push({ amount: s.pot, eligible: s.players.filter((p) => !p.folded && !p.sittingOut).map((p) => p.id) });
+
+  const winnings = new Map<string, number>();
+  const labels = new Map<string, string>();
+  for (const pot of pots) {
+    const contenders = s.players.filter((p) => pot.eligible.includes(p.id));
+    const scores = contenders.map((p) => ({ p, score: evaluateHand([...p.cards, ...s.board]) }));
+    const best = scores.reduce((a, b) => (compareHands(a.score, b.score) >= 0 ? a : b));
+    const winners = scores.filter((x) => compareHands(x.score, best.score) === 0);
+    const share = Math.floor(pot.amount / winners.length);
+    let remainder = pot.amount - share * winners.length; // odd chips go to earliest winners — nothing leaks
+    for (const w of winners) {
+      winnings.set(w.p.id, (winnings.get(w.p.id) ?? 0) + share + (remainder-- > 0 ? 1 : 0));
+      labels.set(w.p.id, w.score.label);
+    }
+  }
+  const players = s.players.map((p) => ({ ...p, chips: p.chips + (winnings.get(p.id) ?? 0) }));
+  const winnersList = [...winnings.entries()].map(([id, amount]) => ({ id, amount, label: labels.get(id) ?? "" }));
+  const headline = winnersList.length === 1
+    ? `${s.players.find((p) => p.id === winnersList[0].id)?.name} wins ${winnersList[0].amount.toLocaleString()} with ${winnersList[0].label}.`
+    : `${winnersList.map((wl) => `${s.players.find((p) => p.id === wl.id)?.name} ${wl.amount.toLocaleString()}`).join(" · ")}${pots.length > 1 ? " (side pots)" : ""}.`;
+  return { ...s, players, stage: "showdown", handOver: true, winners: winnersList, lastAction: headline };
 }
 
 export function applyAction(s: HoldemState, playerId: string, action: HoldemAction, raiseTo = 0): HoldemState {
@@ -183,6 +213,7 @@ export function applyAction(s: HoldemState, playerId: string, action: HoldemActi
   let next: HoldemState = { ...s, players: s.players.map((p) => ({ ...p, cards: [...p.cards] })) };
   const p = next.players[index];
   const toCall = next.currentBet - p.bet;
+  p.hasActed = true;
 
   if (action === "fold") {
     p.folded = true;
@@ -219,14 +250,10 @@ export function applyAction(s: HoldemState, playerId: string, action: HoldemActi
 
   if (streetComplete(next)) {
     if (next.stage === "river") return settleHand(next);
-    let out = next;
-    // advance streets; if everyone is all-in there is nobody left to act — run the board out
-    while (true) {
-      const nextStage: HoldemStage = out.stage === "preflop" ? "flop" : out.stage === "flop" ? "turn" : "river";
-      out = startStreet({ ...out, deck: out.deck.slice(nextStage === "flop" ? 3 : 1) }, nextStage);
-      if (out.stage === "river") return settleHand(out);
-      if (out.turnIndex !== -1) return out; // someone can act on this street
-    }
+    // if nobody can act (everyone all-in), run the board out to showdown like Zynga
+    if (activePlayers(next).every((pl) => pl.allIn)) return allInRunOut(next);
+    const nextStage: HoldemStage = next.stage === "preflop" ? "flop" : next.stage === "flop" ? "turn" : "river";
+    return startStreet(next, nextStage);
   }
 
   next.turnIndex = nextToAct(next, index);
