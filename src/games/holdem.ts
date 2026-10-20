@@ -106,13 +106,17 @@ function startStreet(s: HoldemState, stage: HoldemStage): HoldemState {
   return next;
 }
 
+export function seatPlayer(s: HoldemState, playerId: string): HoldemState {
+  return { ...s, players: s.players.map((p) => p.id === playerId ? { ...p, sittingOut: false, folded: true, cards: [] } : p) };
+}
+
 export function dealHand(prev: HoldemState): HoldemState {
-  const seated = prev.players.filter((p) => p.chips > 0);
+  const seated = prev.players.filter((p) => p.chips > 0 && !p.sittingOut);
   if (seated.length < 2) {
-    return { ...prev, handOver: true, winners: [], lastAction: "Not enough players with chips — rebuy or leave the table." };
+    return { ...prev, handOver: true, winners: [], lastAction: "Waiting for another player with chips to sit in." };
   }
   const players = prev.players.map((p) => ({
-    ...p, cards: [], bet: 0, handBet: 0, folded: p.chips <= 0, allIn: false, sittingOut: p.chips <= 0,
+    ...p, cards: [], bet: 0, handBet: 0, folded: p.chips <= 0 || p.sittingOut, allIn: false, sittingOut: p.sittingOut || p.chips <= 0,
   }));
   const deck = shuffleHoldem(makeHoldemDeck());
   const dealerIndex = (prev.dealerIndex + 1) % players.length;

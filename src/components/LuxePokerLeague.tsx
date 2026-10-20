@@ -7,7 +7,7 @@ import { LuxeDealer } from "./LuxeDealer";
 import { Bot, ChevronLeft, Crown, Gift, MessageCircle, ShieldCheck, Sparkles, Timer, Users, Volume2 } from "lucide-react";
 import { PokerTableArtwork } from "./PokerTableArtwork";
 import { useAudio } from "../audio/AudioProvider";
-import { applyAction, botAction, createTable, dealHand, type HoldemState } from "../games/holdem";
+import { applyAction, botAction, createTable, dealHand, seatPlayer, type HoldemState } from "../games/holdem";
 
 const CardView = LuxePlayingCard;
 const key = (card: { rank: string; suit: string }) => `${card.rank}${card.suit}`;
@@ -70,7 +70,8 @@ export const LuxePokerLeague: React.FC = () => {
   const settledHand = useRef(0);
 
   const you = game?.players.find((p) => p.id === "you");
-  const yourTurn = Boolean(game && !game.handOver && game.players[game.turnIndex]?.id === "you");
+  const youSeated = Boolean(you && !you.sittingOut);
+  const yourTurn = Boolean(game && !game.handOver && youSeated && game.players[game.turnIndex]?.id === "you");
   const toCall = game && you ? game.currentBet - you.bet : 0;
   const minRaiseTo = game && you ? Math.min(game.currentBet + game.minRaise, you.bet + you.chips) : 0;
   const maxRaiseTo = you ? you.bet + you.chips : 0;
@@ -172,10 +173,22 @@ export const LuxePokerLeague: React.FC = () => {
     setActiveTable(table);
     setChips((v) => v - table.buyIn);
     const table0 = createTable({ playerName: "You", playerChips: table.buyIn, botCount: table.bots, botChips: table.buyIn * 2, smallBlind: table.smallBlind, bigBlind: table.bigBlind });
+    table0.players = table0.players.map((p) => (p.id === "you" ? { ...p, sittingOut: true, folded: true } : p));
     settledHand.current = 0;
     setGame(table0);
-    note(`Welcome to ${table.name}. Six seats, real Texas Hold'em — deal the first hand.`);
+    note(`Welcome to ${table.name}. The dealer will shuffle up — take your seat.`);
   };
+  // ── The dealer runs the table: hands deal themselves ──
+  useEffect(() => {
+    if (!game?.handOver) return;
+    const delay = game.handNumber === 0 ? 1800 : 5000;
+    const timer = window.setTimeout(() => {
+      play("cardDeal");
+      setGame((g) => (g?.handOver ? dealHand(g) : g));
+    }, delay);
+    return () => window.clearTimeout(timer);
+  }, [game?.handOver, game?.handNumber]); // eslint-disable-line react-hooks/exhaustive-deps
+  const takeSeat = () => { play("chipStack"); setGame((g) => (g ? seatPlayer(g, "you") : g)); note("Seat taken. You're in from the next hand."); };
   const leaveTable = () => {
     if (game) { const stack = game.players.find((p) => p.id === "you")?.chips ?? 0; setChips((v) => v + stack); }
     setGame(null); setActiveTable(null); setLeaveOpen(false); setScreen("lobby");
@@ -188,7 +201,6 @@ export const LuxePokerLeague: React.FC = () => {
     setGame((g) => g ? { ...g, players: g.players.map((p) => p.id === "you" ? { ...p, chips: p.chips + activeTable.buyIn, sittingOut: false } : p) } : g);
     note(`Rebought ${activeTable.buyIn.toLocaleString()} chips.`);
   };
-  const deal = () => { play("cardDeal"); setGame((g) => (g ? dealHand(g) : g)); };
   const act = (action: "fold" | "check" | "call" | "raise") => {
     if (!game || !yourTurn) return;
     play(pokerActionSound(action));
@@ -252,12 +264,12 @@ export const LuxePokerLeague: React.FC = () => {
                 const slot = SEAT_SLOTS[slotIndex];
                 const isYou = !p.isBot;
                 const isTurn = !game.handOver && game.players[game.turnIndex]?.id === p.id;
-                const isWinner = game.handOver && game.winners.some((w) => w.id === p.id);
+                const isWinner = game.handOver && !p.sittingOut && game.winners.some((w) => w.id === p.id);
                 const showCards = !p.isBot || (game.stage === "showdown" && !p.folded && !p.sittingOut);
                 return <div key={p.id} onClick={() => p.isBot && setSelectedSeat(p.name)} className={`${isYou ? "poker-seat-you " : ""}pointer-events-auto absolute w-[4.9rem] rounded-2xl border px-1.5 py-1 text-center shadow-2xl backdrop-blur-md transition ${p.sittingOut ? "opacity-30" : p.folded ? "opacity-45" : ""} ${isWinner ? "border-emerald-300 bg-emerald-300/20" : isTurn ? "border-amber-200 bg-amber-300/20 poker-turn-ring" : !p.isBot ? "border-amber-200/70 bg-amber-300/10" : selectedSeat === p.name ? "border-fuchsia-300 bg-fuchsia-300/15" : "border-white/15 bg-black/55"}`} style={{ left: `${slot.px}%`, top: `${isYou ? slot.py + 8 : slot.py}%`, zIndex: 10 + Math.round(slot.py), transform: `translate(-50%,-50%) scale(${(isYou ? Math.min(slot.sc, 0.78) : slot.sc).toFixed(2)})` }}>
                   {!p.isBot ? <label className="block cursor-pointer"><PlayerTurnRing active={isTurn} seconds={seconds} name={p.name}>{avatar ? <img src={avatar} alt="Your avatar" className="h-full w-full object-cover" /> : p.initials}</PlayerTurnRing><input aria-label="Upload demo avatar" type="file" accept="image/*" className="hidden" onChange={(e) => chooseAvatar(e.target.files?.[0])} /></label> : <PlayerTurnRing active={isTurn} seconds={20} name={p.name}>{p.initials}</PlayerTurnRing>}
-                  <b className="mt-1 block truncate text-[9px] text-amber-100">{p.name}{game.players[game.dealerIndex]?.id === p.id ? " 🔘" : ""}</b>
-                  <small className="text-[8px] text-white/55">{p.chips.toLocaleString()}{p.allIn ? " · ALL-IN" : ""}</small>
+                  <b className="mt-1 block truncate text-[9px] text-amber-100">{p.name}{!p.sittingOut && game.players[game.dealerIndex]?.id === p.id ? " 🔘" : ""}</b>
+                  <small className="text-[8px] text-white/55">{p.sittingOut ? (p.isBot ? "Away" : "Watching") : p.chips.toLocaleString()}{p.allIn ? " · ALL-IN" : ""}</small>
                   {p.bet > 0 && <span className="mt-0.5 inline-block rounded-full bg-amber-300/90 px-1.5 py-px font-mono text-[8px] font-black text-black">bet {p.bet.toLocaleString()}</span>}
                   {p.cards.length === 2 && !p.sittingOut && !isYou && <span className="mt-1 flex justify-center gap-0.5">{p.cards.map((c) => showCards ? <span key={key(c)} className={`flex h-6 w-[1.1rem] items-center justify-center rounded-sm border border-black/20 bg-white font-mono text-[9px] font-black ${c.suit === "♥" || c.suit === "♦" ? "text-red-600" : "text-zinc-900"}`}>{c.rank}{c.suit}</span> : <span key={key(c)} className="flex h-6 w-[1.1rem] items-center justify-center rounded-sm border border-amber-200/40 bg-gradient-to-br from-amber-900 to-black text-[7px] text-amber-200/70">♛</span>)}</span>}
                 </div>;
@@ -274,13 +286,14 @@ export const LuxePokerLeague: React.FC = () => {
                 <button onClick={() => act("raise")} disabled={maxRaiseTo <= toCall} className="rounded-xl bg-gradient-to-b from-rose-400 to-rose-600 py-4 text-xs font-black text-white shadow-lg shadow-black/50 transition hover:brightness-110 active:scale-95 disabled:opacity-40">{raiseTo >= maxRaiseTo ? "All-in" : "Raise to"} {Math.min(Math.max(raiseTo, minRaiseTo), maxRaiseTo).toLocaleString()}</button>
               </div>
             </div>}
-            {game && !game.handOver && !yourTurn && <p className="mt-5 flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-black/30 py-3 text-xs text-white/55"><Bot className="h-4 w-4 text-amber-200" />{game.players[game.turnIndex]?.name ?? "Table"} is thinking…</p>}
+            {game && !game.handOver && !yourTurn && <p className="poker-thinking-note mt-5 flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-black/30 py-3 text-xs text-white/55"><Bot className="h-4 w-4 text-amber-200" />{game.players[game.turnIndex]?.name ?? "Table"} is thinking…</p>}
+            {game && !game.handOver && !youSeated && <button onClick={takeSeat} className="poker-deal-dock mt-4 w-full rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-4 text-sm font-black text-black shadow-lg active:scale-95">Take your seat — in from the next hand</button>}
             {game?.handOver && <div className="mt-5 grid gap-2">
-              {game.winners.length > 0 && <p className={`rounded-xl border p-3 text-center text-sm font-black ${potWinner === "player" ? "border-emerald-300/40 bg-emerald-300/15 text-emerald-100" : "border-white/15 bg-white/5 text-white/75"}`}>{potWinner === "player" ? "🏆 " : ""}{game.lastAction}</p>}
-              <div className="grid grid-cols-2 gap-2">
-                {busted ? <button onClick={rebuy} className="rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-4 text-xs font-black text-black shadow-lg active:scale-95">Rebuy {activeTable?.buyIn.toLocaleString()}</button> : <button onClick={deal} className="rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-4 text-xs font-black text-black shadow-lg active:scale-95">{game.handNumber === 0 ? "Deal first hand" : "Deal next hand"}</button>}
-                <button onClick={leaveTable} className="rounded-xl bg-zinc-800/90 py-4 text-xs font-black text-zinc-100 shadow-lg active:scale-95">Leave table</button>
-              </div>
+              {game.winners.length > 0 && <p className={`poker-winner-banner rounded-xl border p-3 text-center text-sm font-black ${potWinner === "player" ? "border-emerald-300/40 bg-emerald-300/15 text-emerald-100" : "border-white/15 bg-white/5 text-white/75"}`}>{potWinner === "player" ? "🏆 " : ""}{game.lastAction}</p>}
+              {!youSeated && <button onClick={takeSeat} disabled={Boolean(you && you.chips <= 0)} className="poker-deal-dock rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-4 text-sm font-black text-black shadow-lg active:scale-95 disabled:opacity-40">Take your seat</button>}
+              {youSeated && <p className="poker-thinking-note flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-black/30 py-3 text-xs text-white/55"><Timer className="h-4 w-4 text-amber-200" />Dealer is shuffling — next hand deals automatically.</p>}
+              {busted && <button onClick={rebuy} className="rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-4 text-xs font-black text-black shadow-lg active:scale-95">Rebuy {activeTable?.buyIn.toLocaleString()} to stay seated</button>}
+              <button onClick={leaveTable} className="poker-leave-btn rounded-xl bg-zinc-800/90 py-3 text-xs font-black text-zinc-100 shadow-lg active:scale-95">Leave table</button>
             </div>}
             <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-[10px] text-white/35"><ShieldCheck className="h-3 w-3" /> Free-play table — virtual chips have no cash value and cannot be exchanged.</p>
             </div></article>
