@@ -925,6 +925,17 @@
   .poker-playing-page:fullscreen .poker-landscape-gate { display:none; }
 }
 
+/* In-app full-view fallback when native fullscreen is blocked (embeds, iOS). */
+.poker-playing-page.poker-fullscreen-sim { position:fixed; inset:0; z-index:1400; width:100%; height:100dvh; min-height:0; padding:.4rem; overflow:hidden auto; background:#050403; }
+.poker-playing-page.poker-fullscreen-sim .poker-playing-wrap { width:100%; max-width:none; height:100%; padding:0; }
+.poker-playing-page.poker-fullscreen-sim .poker-game-article { min-height:calc(100dvh - 3.4rem); }
+
+/* De-crowd the player's area in landscape: cards shift left, avatar badge drops to bottom-right, clear of chips and the board. */
+@media (orientation:landscape) and (max-height:700px) {
+  .poker-playing-page .poker-live-hand { top:60%; left:41%; scale:.88; }
+  .poker-playing-page .poker-live-seats .poker-seat-you { position:absolute; top:84% !important; left:63% !important; transform:translate(-50%,-50%) scale(.68) !important; }
+}
+
 /* Playability pass: isolate live cards from seat badges and preserve turn feedback. */
 @media (orientation:landscape) and (max-height:700px) {
   .poker-playing-page .poker-live-seats > [data-seat-index="5"] { left:78% !important; top:76% !important; }
