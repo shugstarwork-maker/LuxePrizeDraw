@@ -94,9 +94,29 @@ export const LuxePokerLeague: React.FC = () => {
     const apply = () => {
       page.classList.toggle("poker-fullscreen-sim", mq.matches);
       if (mq.matches) {
-        const h = Math.max(window.innerHeight, document.documentElement.clientHeight, window.screen.height, window.screen.availHeight);
+        // Break out of any preview wrapper: pin to the real screen size and clear any insets.
+        const dpr = window.devicePixelRatio || 1;
+        const h = Math.max(window.innerHeight, document.documentElement.clientHeight, window.screen.height, window.screen.availHeight, Math.round(window.screen.height * dpr / dpr), window.visualViewport?.height ?? 0);
+        const w = Math.max(window.innerWidth, document.documentElement.clientWidth, window.screen.width, window.screen.availWidth, window.visualViewport?.width ?? 0);
         page.style.height = `${h}px`;
-        page.style.width = `${Math.max(window.innerWidth, document.documentElement.clientWidth, window.screen.availWidth)}px`;
+        page.style.width = `${w}px`;
+        page.style.top = "0";
+        page.style.left = "0";
+        page.style.transform = "none";
+        // If the page sits inside a clipped/offset preview container, neutralise it.
+        let host = page.parentElement;
+        while (host && host !== document.body) {
+          const cs = window.getComputedStyle(host);
+          if (cs.transform !== "none" || cs.overflow === "hidden" || cs.position === "relative" || cs.contain !== "none") {
+            host.style.transform = "none";
+            host.style.overflow = "visible";
+            host.style.position = "static";
+            host.style.contain = "none";
+            host.style.padding = "0";
+            host.style.margin = "0";
+          }
+          host = host.parentElement;
+        }
       } else {
         page.style.height = "";
         page.style.width = "";
