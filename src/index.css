@@ -1180,3 +1180,9 @@
   .compact-coverflow__card > .coverflow-draw > div.relative { min-height:14rem; }
   .compact-coverflow__card > .coverflow-draw { max-height:80vh; overflow-y:auto; }
 }
+
+/* Landscape-only poker: portrait shows the rotate gate; landscape auto-covers the screen (no button). */
+@media (orientation: portrait) {
+  .poker-playing-page .poker-landscape-gate { display:flex; position:fixed; inset:0; z-index:1500; min-height:100dvh; box-sizing:border-box; padding:max(1.5rem,env(safe-area-inset-top)) 1.5rem max(1.5rem,env(safe-area-inset-bottom)); background:radial-gradient(ellipse at center,#302207,#050403 70%); }
+  .poker-playing-page .poker-playing-wrap { visibility:hidden; }
+}

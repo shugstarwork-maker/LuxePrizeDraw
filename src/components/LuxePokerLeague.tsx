@@ -1,7 +1,6 @@
 import { pokerActionSound } from "../audio/pokerActionSound";
 import { PlayerTurnRing } from "./PlayerTurnRing";
 import { LuxePlayingCard } from "./LuxePlayingCard";
-import { PokerFullscreen } from "./PokerFullscreen";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { LuxeDealer } from "./LuxeDealer";
 import { Bot, ChevronLeft, Crown, Gift, MessageCircle, ShieldCheck, Sparkles, Timer, Users, Volume2 } from "lucide-react";
@@ -84,6 +83,18 @@ export const LuxePokerLeague: React.FC = () => {
   const maxRaiseTo = you ? you.bet + you.chips : 0;
 
   useEffect(() => { localStorage.setItem("luxe-demo-poker-chips", String(chips)); localStorage.setItem("luxe-poker-xp", String(xp)); }, [chips, xp]);
+
+  // Landscape-only play: auto-cover the whole screen when rotated; portrait shows the rotate gate.
+  useEffect(() => {
+    if (!game) return;
+    const page = document.getElementById("poker-league");
+    if (!page) return;
+    const mq = window.matchMedia("(orientation: landscape)");
+    const apply = () => page.classList.toggle("poker-fullscreen-sim", mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => { mq.removeEventListener("change", apply); page.classList.remove("poker-fullscreen-sim"); };
+  }, [game]);
 
   const note = (message: string) => { setStatus(message); setFeed((items) => [message, ...items].slice(0, 4)); };
   const awardXp = (amount: number) => {
@@ -293,7 +304,7 @@ export const LuxePokerLeague: React.FC = () => {
 
   // ── Table screen ──
   const botSlots = game ? game.players.filter((p) => p.isBot) : [];
-  return <section id="poker-league" className="poker-playing-page min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-3 py-4 pb-28 text-white"><div className="poker-landscape-gate" role="status"><span aria-hidden="true">↻</span><h2>Turn your phone sideways</h2><p>Poker is played in landscape. Rotate your phone to see your cards and betting controls.</p><button type="button" onClick={leaveTable}>Back to Luxe Lounges</button></div><div className="poker-playing-wrap mx-auto max-w-5xl"><PokerFullscreen /><p className="poker-rotate-prompt" role="status">↻ Turn your phone sideways for a bigger poker table. You can still play in portrait. The whole table fits your screen.</p><header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-3 py-2"><button onClick={() => setLeaveOpen(true)} className="inline-flex items-center gap-1 rounded-lg bg-white/10 px-3 py-2 text-xs font-black"><ChevronLeft className="h-4 w-4" />Lobby</button><span className="font-mono text-sm font-black text-amber-100">{chips.toLocaleString()} wallet · {you?.chips.toLocaleString() ?? 0} at table · <span style={{ color: leagueTier.colour }}>{leagueTier.name} {league.xp}XP</span></span><button onClick={() => setEnabled(!enabled)} className="rounded-lg bg-white/10 p-2"><Volume2 className="h-4 w-4" /></button></header><article className="poker-game-article relative mt-4 overflow-hidden rounded-[2rem] border border-amber-200/50 bg-[radial-gradient(ellipse_at_center,#2a2318,#151009_55%,#090604)] p-4 shadow-[0_0_70px_rgba(212,175,55,.22),inset_0_0_140px_rgba(0,0,0,0.5)] sm:p-6"><div className={`poker-surface-frame relative rounded-[2rem] ${winFlash ? "poker-win-flash" : ""} ${tableTheme === "onyx" ? "ring-4 ring-amber-400/50" : tableTheme === "noir" ? "ring-4 ring-zinc-400/50" : ""}`}>
+  return <section id="poker-league" className="poker-playing-page min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-3 py-4 pb-28 text-white"><div className="poker-landscape-gate" role="status"><span aria-hidden="true">↻</span><h2>Turn your phone sideways</h2><p>Poker is played in landscape. Rotate your phone to see your cards and betting controls.</p><button type="button" onClick={leaveTable}>Back to Luxe Lounges</button></div><div className="poker-playing-wrap mx-auto max-w-5xl"><header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-3 py-2"><button onClick={() => setLeaveOpen(true)} className="inline-flex items-center gap-1 rounded-lg bg-white/10 px-3 py-2 text-xs font-black"><ChevronLeft className="h-4 w-4" />Lobby</button><span className="font-mono text-sm font-black text-amber-100">{chips.toLocaleString()} wallet · {you?.chips.toLocaleString() ?? 0} at table · <span style={{ color: leagueTier.colour }}>{leagueTier.name} {league.xp}XP</span></span><button onClick={() => setEnabled(!enabled)} className="rounded-lg bg-white/10 p-2"><Volume2 className="h-4 w-4" /></button></header><article className="poker-game-article relative mt-4 overflow-hidden rounded-[2rem] border border-amber-200/50 bg-[radial-gradient(ellipse_at_center,#2a2318,#151009_55%,#090604)] p-4 shadow-[0_0_70px_rgba(212,175,55,.22),inset_0_0_140px_rgba(0,0,0,0.5)] sm:p-6"><div className={`poker-surface-frame relative rounded-[2rem] ${winFlash ? "poker-win-flash" : ""} ${tableTheme === "onyx" ? "ring-4 ring-amber-400/50" : tableTheme === "noir" ? "ring-4 ring-zinc-400/50" : ""}`}>
               {winFlash && <div className="pointer-events-none absolute inset-0 z-20 flex items-start justify-center gap-2 pt-14">{[...Array(6)].map((_, i) => <span key={i} className="poker-chip-fly h-4 w-4 rounded-full border border-amber-200/70 bg-gradient-to-br from-amber-300 to-amber-600" style={{ animationDelay: `${i * 90}ms` }} />)}</div>}
               <PokerTableArtwork pot={game?.pot ?? 0} stage={dealerStage} winner={potWinner}><div className="poker-live-seats pointer-events-none absolute inset-0">{game && game.players.map((p) => {
                 const slotIndex = p.isBot ? botSlots.indexOf(p) : 5;
