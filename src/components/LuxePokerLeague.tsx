@@ -90,10 +90,23 @@ export const LuxePokerLeague: React.FC = () => {
     const page = document.getElementById("poker-league");
     if (!page) return;
     const mq = window.matchMedia("(orientation: landscape)");
-    const apply = () => page.classList.toggle("poker-fullscreen-sim", mq.matches);
+    // Cover the full screen regardless of iframe/viewport quirks: use the largest height the device reports.
+    const apply = () => {
+      page.classList.toggle("poker-fullscreen-sim", mq.matches);
+      if (mq.matches) {
+        const h = Math.max(window.innerHeight, document.documentElement.clientHeight, window.screen.height, window.screen.availHeight);
+        page.style.height = `${h}px`;
+        page.style.width = `${Math.max(window.innerWidth, document.documentElement.clientWidth, window.screen.availWidth)}px`;
+      } else {
+        page.style.height = "";
+        page.style.width = "";
+      }
+    };
     apply();
     mq.addEventListener("change", apply);
-    return () => { mq.removeEventListener("change", apply); page.classList.remove("poker-fullscreen-sim"); };
+    window.addEventListener("resize", apply);
+    window.visualViewport?.addEventListener("resize", apply);
+    return () => { mq.removeEventListener("change", apply); window.removeEventListener("resize", apply); window.visualViewport?.removeEventListener("resize", apply); page.classList.remove("poker-fullscreen-sim"); page.style.height = ""; page.style.width = ""; };
   }, [game]);
 
   const note = (message: string) => { setStatus(message); setFeed((items) => [message, ...items].slice(0, 4)); };

@@ -1186,3 +1186,9 @@
   .poker-playing-page .poker-landscape-gate { display:flex; position:fixed; inset:0; z-index:1500; min-height:100dvh; box-sizing:border-box; padding:max(1.5rem,env(safe-area-inset-top)) 1.5rem max(1.5rem,env(safe-area-inset-bottom)); background:radial-gradient(ellipse at center,#302207,#050403 70%); }
   .poker-playing-page .poker-playing-wrap { visibility:hidden; }
 }
+
+/* Height-independent landscape cover: fill even when the visual viewport is taller than the window. */
+@media (orientation:landscape) {
+  .poker-playing-page { height:100svh; height:100lvh; height:100vh; min-height:100vh; }
+  .poker-playing-page .poker-table-artwork > img { height:100vh; }
+}
