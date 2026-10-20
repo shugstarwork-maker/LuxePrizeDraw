@@ -806,6 +806,7 @@
 .poker-table-artwork__live .poker-live-seats { z-index:5; }
 .poker-live-host,.poker-live-board,.poker-live-hand { position:absolute; left:50%; transform:translateX(-50%); z-index:4; }
 .poker-live-host { top:17%; }.poker-live-board { top:39%; width:62%; }.poker-live-hand { top:65%; }
+
 .poker-table-artwork__live .poker-live-seats > div { max-width:18%; }
 .poker-table-artwork__live .poker-live-board > div { width:clamp(1.2rem,5vw,3.5rem); height:clamp(1.9rem,7vw,5rem); }
 @media(max-width:600px) {
