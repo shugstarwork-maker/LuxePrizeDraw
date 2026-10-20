@@ -47,13 +47,13 @@ export function ensureWeek(): LeagueState {
     if (raw) {
       const prev = JSON.parse(raw) as LeagueState;
       if (prev.week === week) return prev;
-      // New week: apply last week's outcome, then reset XP.
-      const board = weeklyBoard(prev);
-      const rank = board.findIndex((r) => r.you) + 1;
+      // New week: finish last week's league — apply promotion/demotion, then reset points.
+      const board = weeklyBoard(prev).map((r) => ({ ...r, points: r.xp }));
       const tier = LEAGUE_TIERS[prev.tierIndex];
-      let tierIndex = prev.tierIndex;
-      if (rank > 0 && rank <= tier.promote) tierIndex = Math.min(LEAGUE_TIERS.length - 1, tierIndex + 1);
-      else if (tier.demote > 0 && rank > tier.demote) tierIndex = Math.max(0, tierIndex - 1);
+      const demoteCount = tier.demote > 0 ? COHORT_SIZE - tier.demote : 0;
+      const results = finishLeague(board, prev.tierIndex, tier.promote, demoteCount);
+      const mine = results.find((r) => r.you);
+      const tierIndex = mine ? mine.nextTierIndex : prev.tierIndex;
       st = { week, tierIndex, xp: 0, seed: hashStr(week + tierIndex) };
     }
   } catch { /* fresh start */ }
@@ -84,6 +84,36 @@ export function tierByIndex(i: number): LeagueTier { return LEAGUE_TIERS[Math.ma
 
 export function leagueXPForHand(won: boolean, pot: number): number {
   return (won ? 15 : 4) + Math.min(10, Math.floor(pot / 250));
+}
+
+// ── Tournament system: points by finishing place, weekly league finish with promote/demote ──
+export const TOURNAMENT_POINTS = [100, 75, 60, 50, 40, 30, 20, 10];
+export function pointsForFinish(place: number): number {
+  return TOURNAMENT_POINTS[place - 1] ?? 5;
+}
+
+export type LeagueFinish<T> = T & { rank: number; nextTierIndex: number; points: 0 };
+
+/** Rank a league board, apply promotion/demotion, reset points for the next league week. */
+export function finishLeague<T extends { points: number }>(
+  players: T[],
+  tierIndex: number,
+  promoteCount: number,
+  demoteCount: number,
+): LeagueFinish<T>[] {
+  const standings = [...players].sort((a, b) => b.points - a.points);
+  return standings.map((player, index) => {
+    const rank = index + 1;
+    let nextTierIndex = tierIndex;
+    if (rank <= promoteCount) nextTierIndex = Math.min(LEAGUE_TIERS.length - 1, tierIndex + 1);
+    else if (demoteCount > 0 && rank > standings.length - demoteCount) nextTierIndex = Math.max(0, tierIndex - 1);
+    return { ...player, rank, nextTierIndex, points: 0 };
+  });
+}
+
+/** Weekly league race points for a tournament/table finish. */
+export function recordTableFinish(place: number): LeagueState {
+  return recordWeeklyXP(pointsForFinish(place));
 }
 
 export function recordWeeklyXP(amount: number): LeagueState {

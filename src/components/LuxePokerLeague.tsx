@@ -7,7 +7,7 @@ import { Bot, ChevronLeft, Crown, Gift, MessageCircle, ShieldCheck, Sparkles, Ti
 import { PokerTableArtwork } from "./PokerTableArtwork";
 import { useAudio } from "../audio/AudioProvider";
 import { applyAction, botAction, createTable, dealHand, seatPlayer, type HoldemState } from "../games/holdem";
-import { ensureWeek, leagueXPForHand, recordWeeklyXP, tierByIndex, weekEndsIn, weeklyBoard, weeklyCutoffs } from "../lib/pokerLeague";
+import { ensureWeek, leagueXPForHand, pointsForFinish, recordWeeklyXP, tierByIndex, weekEndsIn, weeklyBoard, weeklyCutoffs } from "../lib/pokerLeague";
 
 const CardView = LuxePlayingCard;
 const key = (card: { rank: string; suit: string }) => `${card.rank}${card.suit}`;
@@ -74,6 +74,8 @@ export const LuxePokerLeague: React.FC = () => {
   const yourRank = leagueBoard.findIndex((r) => r.you) + 1;
   const cutoffs = weeklyCutoffs(leagueBoard, league.tierIndex);
   const settledHand = useRef(0);
+  const aliveRef = useRef<string[]>([]); // tournament: players still holding chips this table session
+  const finishedRef = useRef(false);
 
   const you = game?.players.find((p) => p.id === "you");
   const youSeated = Boolean(you && !you.sittingOut);
@@ -190,6 +192,27 @@ export const LuxePokerLeague: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game?.handOver, game?.handNumber]);
 
+  // ── Tournament: award league points by finishing place when players bust out ──
+  useEffect(() => {
+    if (!game || !game.handOver) return;
+    const aliveNow = game.players.filter((p) => p.chips > 0).map((p) => p.id);
+    if (aliveRef.current.length === 0) { aliveRef.current = aliveNow; return; }
+    const busted = aliveRef.current.filter((id) => !aliveNow.includes(id));
+    aliveRef.current = aliveNow;
+    if (finishedRef.current) return;
+    // Your finishing place: busted now → remaining players + 1; last one standing → 1st.
+    let place: number | null = null;
+    if (busted.includes("you")) place = aliveNow.length + 1;
+    else if (aliveNow.length === 1 && aliveNow[0] === "you") place = 1;
+    if (place === null) return;
+    finishedRef.current = true;
+    const pts = pointsForFinish(place);
+    setLeague(recordWeeklyXP(pts));
+    play(place === 1 ? "levelUp" : "winnerReveal");
+    note(place === 1 ? `You take the table! 1st place — +${pts} league points.` : `Table run over — finished #${place}, +${pts} league points.`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game?.handOver, game?.handNumber]);
+
   // ── Player turn timer: auto check/fold ──
   useEffect(() => {
     if (!yourTurn) return;
@@ -228,6 +251,8 @@ export const LuxePokerLeague: React.FC = () => {
     const table0 = createTable({ playerName: "You", playerChips: table.buyIn, botCount: table.bots, botChips: 1000, smallBlind: table.smallBlind, bigBlind: table.bigBlind });
     table0.players = table0.players.map((p) => (p.id === "you" ? { ...p, sittingOut: true, folded: true } : p));
     settledHand.current = 0;
+    aliveRef.current = [];
+    finishedRef.current = false;
     setGame(table0);
     note(`Welcome to ${table.name}. The dealer will shuffle up — take your seat.`);
   };
@@ -251,8 +276,10 @@ export const LuxePokerLeague: React.FC = () => {
     if (!activeTable || !game) return;
     if (chips < activeTable.buyIn) return note(`Rebuy needs ${activeTable.buyIn.toLocaleString()} chips — collect daily chips or visit the store.`);
     setChips((v) => v - activeTable.buyIn);
+    finishedRef.current = false; // rebuy re-enters the table race
+    aliveRef.current = [];
     setGame((g) => g ? { ...g, players: g.players.map((p) => p.id === "you" ? { ...p, chips: p.chips + activeTable.buyIn, sittingOut: false } : p) } : g);
-    note(`Rebought ${activeTable.buyIn.toLocaleString()} chips.`);
+    note(`Rebought ${activeTable.buyIn.toLocaleString()} chips. Back in the table race.`);
   };
   const act = (action: "fold" | "check" | "call" | "raise") => {
     if (!game || !yourTurn) return;
@@ -333,7 +360,7 @@ export const LuxePokerLeague: React.FC = () => {
           </div>
           <p className="mt-3 text-[10px] text-white/35">Your private Luxe Lounge record — stored on this device. Realtime multiplayer tables are on the roadmap.</p>
         </div>
-        <div className="mt-7 grid gap-3 sm:grid-cols-3"><button onClick={dailyReward} disabled={!rewardReady} className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-4 text-left disabled:opacity-40"><Gift className="h-5 w-5 text-emerald-200" /><b className="mt-3 block">{rewardReady ? "Daily sign-in: 200 chips" : "Daily chips claimed"}</b><small className="text-white/55">200 free-play chips every day</small></button><button onClick={() => note("Demo leaderboard becomes available after completing a hand.")} className="rounded-2xl border border-violet-300/30 bg-violet-300/10 p-4 text-left"><Crown className="h-5 w-5 text-violet-200" /><b className="mt-3 block">League table</b><small className="text-white/55">Practice ranking</small></button><button onClick={() => note("Demo tournaments use virtual chips and cannot issue tickets.")} className="rounded-2xl border border-amber-200/30 bg-amber-300/10 p-4 text-left"><Sparkles className="h-5 w-5 text-amber-200" /><b className="mt-3 block">Tournament night</b><small className="text-white/55">Demo bracket preview</small></button></div>{status !== "Choose a table to sit down." && <p className="mt-5 rounded-xl border border-amber-200/20 bg-amber-300/10 p-3 text-sm text-amber-100">{status}</p>}</div></section>;
+        <div className="mt-7 grid gap-3 sm:grid-cols-3"><button onClick={dailyReward} disabled={!rewardReady} className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-4 text-left disabled:opacity-40"><Gift className="h-5 w-5 text-emerald-200" /><b className="mt-3 block">{rewardReady ? "Daily sign-in: 200 chips" : "Daily chips claimed"}</b><small className="text-white/55">200 free-play chips every day</small></button><button onClick={() => note("Demo leaderboard becomes available after completing a hand.")} className="rounded-2xl border border-violet-300/30 bg-violet-300/10 p-4 text-left"><Crown className="h-5 w-5 text-violet-200" /><b className="mt-3 block">League table</b><small className="text-white/55">Practice ranking</small></button><button onClick={() => note("Demo tournaments use virtual chips and cannot issue tickets.")} className="rounded-2xl border border-amber-200/30 bg-amber-300/10 p-4 text-left"><Sparkles className="h-5 w-5 text-amber-200" /><b className="mt-3 block">Tournament night</b><small className="text-white/55">Table race points: 1st 100 · 2nd 75 · 3rd 60 · 4th 50 · 5th 40 · 6th 30 — outlast the table to score for your weekly league</small></button></div>{status !== "Choose a table to sit down." && <p className="mt-5 rounded-xl border border-amber-200/20 bg-amber-300/10 p-3 text-sm text-amber-100">{status}</p>}</div></section>;
 
   // ── Table screen ──
   const botSlots = game ? game.players.filter((p) => p.isBot) : [];
