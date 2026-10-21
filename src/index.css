@@ -1318,3 +1318,11 @@
 .headline-luxe-deck .headline-prize-choice__options button[aria-pressed=true] { background:linear-gradient(#fff0b0,#ffbd22); color:#140c00; border-color:#ffe6a0; }
 .headline-luxe-deck .headline-prize-choice--compact > p { margin-top:.15rem; font-size:.68rem; line-height:1.45; color:#ffffffb3; text-shadow:0 1px 4px #000; }
 .headline-luxe-deck .headline-prize-choice--compact > small { display:block; margin-top:.25rem; font-size:.62rem; color:#ffe6a0cc; text-shadow:0 1px 4px #000; }
+
+/* ── Headline deck advertising headline ── */
+.headline-deck__eyebrow { display:flex; align-items:center; gap:.4rem; font-size:.6rem; font-weight:900; letter-spacing:.18em; text-transform:uppercase; color:#ffe6a0; text-shadow:0 1px 5px #000; }
+.headline-deck__eyebrow svg { color:#ffd35c; }
+.headline-deck__headline { font-weight:900; font-size:clamp(1.35rem,6.4vw,1.9rem); line-height:1.08; letter-spacing:.02em; color:#fff; text-shadow:0 2px 12px #000, 0 0 26px #00000088; max-width:88%; }
+.headline-deck__headline b { color:#ffd35c; }
+.headline-deck__headline i { font-style:normal; color:#ffe6a0; font-size:.62em; letter-spacing:.14em; text-transform:uppercase; }
+.headline-luxe-deck .deck-card__stats b { font-size:clamp(.95rem,4vw,1.2rem); }

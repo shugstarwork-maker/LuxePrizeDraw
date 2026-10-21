@@ -18,11 +18,13 @@ function navigate(path: string) { window.history.pushState({}, "", path); window
 export function FeaturedDraws() {
   const { play } = useAudio();
   return <section className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 sm:pt-10">
-    <div className="headline-luxe-deck"><BitcoinCoinRain /><DeckCard image="/prizes/home-luxe-banner.png" title="£100K · Bitcoin or Cash"
-      facts={[["Headline prize preview", Sparkles], ["Bitcoin or cash — your choice", CircleAlert], ["Approval pending", ShieldCheck]]}
-      stats={[{ value: "£100,000", label: "Prize choice" }, { value: "£10", label: "Per entry" }, { value: "500", label: "Max entries" }]}
+    <div className="headline-luxe-deck"><BitcoinCoinRain /><DeckCard image="/prizes/bitcoin-crown.png" title="Win £100K · Bitcoin or Cash"
+      stats={[{ value: "£100,000", label: "Of Bitcoin" }, { value: "or", label: "Your choice" }, { value: "£100K", label: "Cash" }]}
       cta="View draws" onCta={() => { play("button"); navigate("/draws"); }}
-      note="Approval pending · Entries and payments disabled · Availability, eligibility and final terms require approval before any draw opens"><HeadlinePrizeChoice compact /></DeckCard></div>
+      note="Approval pending · Entries and payments disabled · Preview only, no prize entitlement">
+      <p className="headline-deck__eyebrow"><Sparkles className="h-3.5 w-3.5" aria-hidden="true" /> Headline prize preview</p>
+      <h1 className="headline-deck__headline">WIN <b>£100K</b> WORTH OF BITCOIN <i>or</i> £100K CASH</h1>
+      <HeadlinePrizeChoice compact /></DeckCard></div>
     <div className="mt-10 flex items-end justify-between gap-4"><div><p className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[.16em] text-amber-200 sm:text-xs sm:tracking-[.2em]"><Sparkles className="h-4 w-4" /> Featured Top Prizes</p><h2 className="mt-2 text-3xl font-black sm:text-4xl">Top prize previews</h2></div><span className="text-xs text-white/45">Auto-rotates every 5 seconds</span></div>
     <RollingCardCarousel items={draws} getKey={item => item.title} label="featured draw" className="mt-7" renderItem={(draw) => <DeckCard image={draw.image} title={draw.title}
       facts={[[draw.category, Sparkles], ["Pre-launch preview", ShieldCheck], ["Approval pending", CircleAlert]]}
