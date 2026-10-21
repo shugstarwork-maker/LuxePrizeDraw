@@ -19,7 +19,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000; // Railway/Render inject PORT
 const MAX_AI_REQUESTS_PER_INSTANCE = 8;
 let activeAiRequests = 0;
 
