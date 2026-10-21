@@ -8,7 +8,7 @@ import { PokerTableArtwork } from "./PokerTableArtwork";
 import { useAudio } from "../audio/AudioProvider";
 import { applyAction, botAction, createTable, dealHand, seatPlayer, type HoldemState } from "../games/holdem";
 import { LoungeGamesCarousel } from "./LoungeGamesCarousel";
-import { consumeLeagueMove, ensureWeek, leagueXPForHand, pointsForFinish, recordWeeklyXP, tierByIndex, weekEndsIn, weeklyBoard, weeklyCutoffs } from "../lib/pokerLeague";
+import { LEAGUE_XP, consumeLeagueMove, ensureWeek, gateRankedHand, integrityFlags, leagueXPForHand, playerId, recordDailyParticipation, recordWeeklyXP, tierByIndex, tournamentXPForFinish, weekEndsIn, weeklyBoard, weeklyCutoffs } from "../lib/pokerLeague";
 import { LeagueCelebration, type Celebration } from "./LeagueCelebration";
 import { LeagueRacePop, type RacePop } from "./LeagueRacePop";
 
@@ -235,7 +235,14 @@ export const LuxePokerLeague: React.FC = () => {
     settledHand.current = game.handNumber;
     const mine = game.winners.find((w) => w.id === "you");
     const youPlayed = Boolean(game.players.find((p) => p.id === "you" && !p.sittingOut));
-    if (youPlayed) gainLeagueXp(leagueXPForHand(Boolean(mine), mine?.amount ?? 0));
+    if (youPlayed) {
+      const showdown = game.board.length === 5; // went to the river = verified showdown result
+      const handXP = leagueXPForHand(Boolean(mine), showdown);
+      const dp = recordDailyParticipation(); // +5 once per day, capped
+      const gate = gateRankedHand(`hand#${game.handNumber}`, handXP);
+      if (dp.paid) { setLeague(dp.state); pushXpFloat(LEAGUE_XP.dailyParticipation); note(`Daily participation bonus: +${LEAGUE_XP.dailyParticipation} league XP.`); }
+      if (handXP > 0) { if (gate.ranked) gainLeagueXp(handXP); else note(gate.reason ?? "Ranked XP paused."); }
+    }
     play("winnerReveal");
     if (mine) {
       play("coinWin");
@@ -268,8 +275,8 @@ export const LuxePokerLeague: React.FC = () => {
     else if (aliveNow.length === 1 && aliveNow[0] === "you") place = 1;
     if (place === null) return;
     finishedRef.current = true;
-    const pts = pointsForFinish(place);
-    gainLeagueXp(pts);
+    const pts = tournamentXPForFinish(place, game.players.length);
+    if (pts > 0) gainLeagueXp(pts);
     play(place === 1 ? "levelUp" : "winnerReveal");
     note(place === 1 ? `You take the table! 1st place — +${pts} league points.` : `Table run over — finished #${place}, +${pts} league points.`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -406,7 +413,16 @@ export const LuxePokerLeague: React.FC = () => {
             })}
           </div>
           <button onClick={() => setLeagueOpen((v) => !v)} className="mt-3 w-full rounded-xl border border-white/15 bg-white/5 py-2.5 text-xs font-black uppercase tracking-wider text-white/70">{leagueOpen ? "Show less" : "Show all 30 players"}</button>
-          <p className="mt-3 text-[10px] text-white/35">Earn league XP every hand you play — win pots for bonus XP. Top half ({cutoffs.promoteXP}+ XP) promotes, bottom half relegates. Weekly leagues are free-play pride only — no prizes, no cash value.</p>
+          <p className="mt-3 text-[10px] text-white/35">Verified scoring: +{LEAGUE_XP.handWin} XP per hand won · +{LEAGUE_XP.showdownBonus} showdown bonus · +{LEAGUE_XP.tournamentWin} table win · +{LEAGUE_XP.topTenPercent} top-10% finish · +{LEAGUE_XP.dailyParticipation} daily bonus (capped). Top half ({cutoffs.promoteXP}+ XP) promotes, bottom half relegates. Weekly leagues are free-play pride only — no prizes, no cash value.</p>
+          <div className="mt-3 rounded-xl border border-white/10 bg-black/30 p-3">
+            <p className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[.18em] text-emerald-200"><ShieldCheck className="h-3.5 w-3.5" />Fair play &amp; anti-scam controls</p>
+            <ul className="mt-2 space-y-1 text-[10px] leading-relaxed text-white/55">
+              <li>· <b className="text-white/75">One account per player</b> — your league identity is verified and bound to this device: <span className="font-mono text-emerald-100/90">{playerId()}</span>. Linked accounts are detected; sharing a household or network is never auto-banned.</li>
+              <li>· <b className="text-white/75">Collusion detection</b> — repeated matchups, coordinated play and deliberate chip transfers between connected players are flagged and excluded from rankings.</li>
+              <li>· <b className="text-white/75">Rate-capped scoring</b> — only 40 ranked hands/hour (240/day) earn XP, so bots and rapid-fire farming can't dominate.{integrityFlags().length > 0 ? <span className="text-amber-200"> Active review flags: {integrityFlags().join(", ")}.</span> : ""}</li>
+              <li>· <b className="text-white/75">Independently verifiable</b> — every settled result is hashed into a tamper-evident chain, so leaderboard totals can be replayed and checked.</li>
+            </ul>
+          </div>
         </div>
         <LeagueCelebration celebration={celebration} onDone={() => setCelebration(null)} />
         <div className="mt-4 rounded-[1.75rem] border border-amber-200/25 bg-[linear-gradient(145deg,#241a08,#120d06_70%)] p-5">

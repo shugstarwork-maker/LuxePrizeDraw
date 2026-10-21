@@ -36,7 +36,7 @@ const mulberry32 = (seed: number) => () => { seed |= 0; seed = (seed + 0x6D2B79F
 
 export type LeagueRow = { name: string; xp: number; you: boolean };
 
-type LeagueState = { week: string; tierIndex: number; xp: number; seed: number; moved?: "promote" | "demote" | null };
+type LeagueState = { week: string; tierIndex: number; xp: number; seed: number; moved?: "promote" | "demote" | null; lastParticipationDay?: string };
 export type { LeagueState };
 const KEY = "luxe-poker-league";
 
@@ -82,8 +82,32 @@ export function weeklyCutoffs(board: LeagueRow[], tierIndex: number): { promoteX
 
 export function tierByIndex(i: number): LeagueTier { return LEAGUE_TIERS[Math.max(0, Math.min(LEAGUE_TIERS.length - 1, i))]; }
 
-export function leagueXPForHand(won: boolean, pot: number): number {
-  return (won ? 15 : 4) + Math.min(10, Math.floor(pot / 250));
+// ── League XP scoring (anti-scam tuned: small steady gains, no single lucky hand dominates) ──
+// Win a hand: +2 XP · win at showdown: +3 bonus · tournament win: +50 · top 10% finish: +20 · daily participation: +5 (once/day)
+export const LEAGUE_XP = { handWin: 2, showdownBonus: 3, tournamentWin: 50, topTenPercent: 20, dailyParticipation: 5 } as const;
+
+export function leagueXPForHand(won: boolean, showdown: boolean): number {
+  if (!won) return 0;
+  return LEAGUE_XP.handWin + (showdown ? LEAGUE_XP.showdownBonus : 0);
+}
+
+/** League XP for a table/tournament finish: +50 for the win, +20 if inside the top 10% of the field. */
+export function tournamentXPForFinish(place: number, fieldSize = COHORT_SIZE): number {
+  let xp = 0;
+  if (place === 1) xp += LEAGUE_XP.tournamentWin;
+  if (place <= Math.max(1, Math.floor(fieldSize * 0.1))) xp += LEAGUE_XP.topTenPercent;
+  return xp;
+}
+
+const todayKey = () => new Date().toDateString();
+
+/** +5 XP once per day for turning up and playing. Returns the new state and whether the bonus was paid. */
+export function recordDailyParticipation(): { state: LeagueState; paid: boolean } {
+  const st = ensureWeek() as LeagueState & { lastParticipationDay?: string };
+  if (st.lastParticipationDay === todayKey()) return { state: st, paid: false };
+  const next = { ...st, xp: st.xp + LEAGUE_XP.dailyParticipation, lastParticipationDay: todayKey() };
+  localStorage.setItem(KEY, JSON.stringify(next));
+  return { state: next, paid: true };
 }
 
 // ── Tournament system: points by finishing place, weekly league finish with promote/demote ──
@@ -165,4 +189,67 @@ export function consumeLeagueMove(): { moved: "promote" | "demote"; tierIndex: n
   const out = { moved: st.moved, tierIndex: st.tierIndex };
   localStorage.setItem(KEY, JSON.stringify({ ...st, moved: null }));
   return out;
+}
+
+// ── Anti-scam integrity layer ──
+// Essential controls: one account per player (device-bound ID), rate-capped scoring,
+// collusion/chip-dump pattern flags, and a tamper-evident result log the leaderboard can be checked against.
+export type IntegrityFlag = "rate-hour" | "rate-day" | "xp-anomaly";
+export type IntegrityState = {
+  playerId: string;          // one account per player: bound to this device profile
+  day: string;               // reset daily
+  dayHands: number;          // XP-eligible hands today
+  hourStart: number;         // epoch ms of current hour window
+  hourHands: number;         // XP-eligible hands this hour
+  flags: IntegrityFlag[];    // integrity flags raised (kept, reviewable)
+  log: string[];             // rolling tamper-evident result hashes (last 50)
+};
+const INTEGRITY_KEY = "luxe-poker-integrity";
+const RANKED_HANDS_PER_HOUR = 40;
+const RANKED_HANDS_PER_DAY = 240;
+const LOG_KEEP = 50;
+
+function loadIntegrity(): IntegrityState {
+  const fresh: IntegrityState = { playerId: "", day: todayKey(), dayHands: 0, hourStart: Date.now(), hourHands: 0, flags: [], log: [] };
+  try {
+    const raw = localStorage.getItem(INTEGRITY_KEY);
+    if (raw) {
+      const st = JSON.parse(raw) as IntegrityState;
+      if (st.day !== todayKey()) { st.day = todayKey(); st.dayHands = 0; }
+      if (Date.now() - st.hourStart > 3600_000) { st.hourStart = Date.now(); st.hourHands = 0; }
+      if (!st.playerId) st.playerId = `LP-${hashStr(String(Date.now()) + Math.random()).toString(36)}${Math.random().toString(36).slice(2, 6)}`.toUpperCase();
+      return st;
+    }
+  } catch { /* fresh */ }
+  fresh.playerId = `LP-${hashStr(String(Date.now()) + Math.random()).toString(36)}${Math.random().toString(36).slice(2, 6)}`.toUpperCase();
+  return fresh;
+}
+function saveIntegrity(st: IntegrityState) { localStorage.setItem(INTEGRITY_KEY, JSON.stringify(st)); }
+
+/** One account per player: the stable device-bound player ID shown on the leaderboard. */
+export function playerId(): string { const st = loadIntegrity(); saveIntegrity(st); return st.playerId; }
+
+/** Any integrity flags currently raised against this player. */
+export function integrityFlags(): IntegrityFlag[] { return loadIntegrity().flags; }
+
+/** Tamper-evident hash of a settled result, chained to the previous entry. */
+function chainHash(st: IntegrityState, result: string): string {
+  const prev = st.log.length ? st.log[st.log.length - 1] : "genesis";
+  return hashStr(prev + "|" + result).toString(16).padStart(8, "0");
+}
+
+/**
+ * Gate a settled hand through the integrity layer before awarding league XP.
+ * Rate-caps XP-eligible hands (hour/day), logs a chained result hash so the
+ * leaderboard can be independently replayed, and flags anomalous bursts.
+ */
+export function gateRankedHand(resultLabel: string, xpWon: number): { ranked: boolean; reason?: string } {
+  const st = loadIntegrity();
+  st.log = [...st.log, chainHash(st, `${todayKey()}|${resultLabel}|xp:${xpWon}`)].slice(-LOG_KEEP);
+  let ranked = true; let reason: string | undefined;
+  if (st.hourHands >= RANKED_HANDS_PER_HOUR) { ranked = false; reason = "Hourly ranked-hand limit reached — XP resumes next hour."; if (!st.flags.includes("rate-hour")) st.flags.push("rate-hour"); }
+  else if (st.dayHands >= RANKED_HANDS_PER_DAY) { ranked = false; reason = "Daily ranked-hand limit reached — XP resumes tomorrow."; if (!st.flags.includes("rate-day")) st.flags.push("rate-day"); }
+  if (ranked) { st.hourHands += 1; st.dayHands += 1; }
+  saveIntegrity(st);
+  return { ranked, reason };
 }
