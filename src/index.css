@@ -1262,7 +1262,7 @@
 /* Cash prizes — huge scrolling gold banner */
 .cash-banner { position:relative; overflow:hidden; margin:0 0 1.5rem; margin-left:calc(50% - 50vw); margin-right:calc(50% - 50vw); width:100vw; border-block:2px solid #ffdf80; background:linear-gradient(90deg,#1a1204,#3a2a08 30%,#ffe08a 50%,#3a2a08 70%,#1a1204); background-size:220% 100%; animation:cash-banner-sheen 3.2s linear infinite; }
 .cash-banner__track { display:flex; width:max-content; white-space:nowrap; animation:cash-banner-scroll 14s linear infinite; }
-.cash-banner__track span { font-family:Georgia,'Times New Roman',serif; font-size:clamp(4.5rem,20vw,8rem); font-weight:900; letter-spacing:.06em; line-height:1.1; padding:.35em 0; color:#ffd24a; text-shadow:0 0 14px #ffbf00aa, 0 3px 0 #7a5210, 0 0 42px #ffb30066; animation:cash-banner-flash 1.1s ease-in-out infinite; }
+.cash-banner__track span { font-family:Georgia,'Times New Roman',serif; font-size:clamp(1.9rem,8.5vw,3.4rem); font-weight:900; letter-spacing:.06em; line-height:1.1; padding:.4em 0; color:#ffd24a; text-shadow:0 0 14px #ffbf00aa, 0 3px 0 #7a5210, 0 0 42px #ffb30066; animation:cash-banner-flash 1.1s ease-in-out infinite; }
 @keyframes cash-banner-scroll { from { transform:translateX(0); } to { transform:translateX(-50%); } }
 @keyframes cash-banner-sheen { from { background-position:0% 0; } to { background-position:220% 0; } }
 @keyframes cash-banner-flash { 0%,100% { color:#ffd24a; text-shadow:0 0 14px #ffbf00aa,0 3px 0 #7a5210,0 0 42px #ffb30066; } 50% { color:#fff3c4; text-shadow:0 0 26px #ffdf80,0 3px 0 #7a5210,0 0 70px #ffd24a; } }
