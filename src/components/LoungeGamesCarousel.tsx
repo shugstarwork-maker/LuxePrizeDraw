@@ -8,6 +8,8 @@ const LOUNGE_GAMES = [
   { id: "brag", title: "3 Card Brag", sub: "The great British classic", image: "/games/brag-card.png", href: "/brag", seats: "6 seats" },
 ];
 
+const go = (href: string) => { window.history.pushState({}, "", href); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo(0, 0); };
+
 export function LoungeGamesCarousel() {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -34,7 +36,7 @@ export function LoungeGamesCarousel() {
       <div className="lounge-carousel-card__copy">
         <h1>{g.title}</h1>
         <p>{g.sub}</p>
-        <a href={g.href} className="lounge-carousel-card__play">▶ Play now</a>
+        <button onClick={() => go(g.href)} className="lounge-carousel-card__play">▶ Play now</button>
       </div>
       <button aria-label="Previous game" className="lounge-carousel-card__arrow lounge-carousel-card__arrow--l" onClick={() => setActive((v) => (v + LOUNGE_GAMES.length - 1) % LOUNGE_GAMES.length)}><ChevronLeft /></button>
       <button aria-label="Next game" className="lounge-carousel-card__arrow lounge-carousel-card__arrow--r" onClick={() => setActive((v) => (v + 1) % LOUNGE_GAMES.length)}><ChevronRight /></button>

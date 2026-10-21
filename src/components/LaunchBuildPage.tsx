@@ -49,7 +49,7 @@ export function LaunchBuildPage() {
     finally { setBusy(false); }
   };
   return <main className="launch-build"><div className="launch-wrap">
-    <a href="/" className="text-sm text-amber-200 underline">Back to home</a>
+    <button type="button" onClick={() => navGo("/")} className="text-sm text-amber-200 underline">Back to home</button>
     <header className="launch-header"><p className="launch-kicker">LuxePrizeDraw Ltd</p><h1>Launch catalogue</h1><p className="mt-4 text-xl font-bold text-amber-200">Approval pending</p><p className="launch-meta">Cash draws // Luxury holidays // Experiences</p></header>
     <p className="mt-4 rounded-xl border border-amber-200/30 bg-amber-300/10 p-4 text-sm text-amber-100">Pre-launch proposals from the uploaded build. No entries, payments or prize entitlements are created. Prices, grades and targets require reconciliation with approved rules; they do not replace the existing economics model. Proposed per-person limit: 10 per draw.</p>
     <p role="status" className="my-5 text-sm text-amber-100">{message}</p>
@@ -61,7 +61,7 @@ export function LaunchBuildPage() {
     <LaunchCatalogue draws={draws} />
     <section className="mt-10 rounded-2xl border border-white/15 bg-black/40 p-6">
       <h2 className="text-2xl font-black">Protected review controls</h2>
-      <p className="mt-3 text-sm text-white/60">Review notes cannot enable launch. Postal slips continue through the <a href="/postal-intake" className="text-amber-200 underline">existing postal intake</a>. Tokens are held only in this page’s memory.</p>
+      <p className="mt-3 text-sm text-white/60">Review notes cannot enable launch. Postal slips continue through the <button type="button" onClick={() => navGo("/postal-intake")} className="text-amber-200 underline">existing postal intake</button>. Tokens are held only in this page’s memory.</p>
       <form className="mt-4 flex flex-wrap gap-3" onSubmit={event => { event.preventDefault(); void run(); }}>
         <label className="text-sm">Admin token<input type="password" autoComplete="off" value={token} onChange={event => { setToken(event.target.value); setAdmin(null); }} className="ml-3 rounded bg-white/10 p-2" /></label>
         <button disabled={busy || !token} className="rounded bg-amber-300 px-4 py-2 text-black disabled:opacity-40">Load controls</button>
