@@ -253,3 +253,128 @@ export function gateRankedHand(resultLabel: string, xpWon: number): { ranked: bo
   saveIntegrity(st);
   return { ranked, reason };
 }
+
+// ── Fair-play engine: suspicious-pattern detection, trust rating, prize review queue ──
+// XP (league progression), competitive rating (skill) and trust (integrity) are strictly
+// separate: nothing you earn or buy can raise your trust or erase a flagged pattern.
+export type TrustFlag = { kind: string; detail: string; at: number };
+export type TrustState = { score: number; flags: TrustFlag[] };
+export type ReviewItem = { id: string; at: number; kind: "prize-hold"; detail: string; status: "pending" | "cleared" | "voided" };
+
+const TRUST_KEY = "luxe-poker-trust";
+const REVIEW_KEY = "luxe-poker-review";
+const TRUST_FLOOR = 20;         // trust can be lost, never bought back
+const TRUST_START = 100;
+
+function loadTrust(): TrustState {
+  try { const raw = localStorage.getItem(TRUST_KEY); if (raw) return JSON.parse(raw) as TrustState; } catch { /* fresh */ }
+  return { score: TRUST_START, flags: [] };
+}
+function saveTrust(t: TrustState) { localStorage.setItem(TRUST_KEY, JSON.stringify(t)); }
+
+export function trustState(): TrustState { return loadTrust(); }
+
+export function loadReviewQueue(): ReviewItem[] {
+  try { const raw = localStorage.getItem(REVIEW_KEY); if (raw) return JSON.parse(raw) as ReviewItem[]; } catch { /* fresh */ }
+  return [];
+}
+function saveReviewQueue(q: ReviewItem[]) { localStorage.setItem(REVIEW_KEY, JSON.stringify(q)); }
+
+/** Permanently lower trust and record the flag — playing more games never erases it. */
+export function flagTrust(kind: string, detail: string, penalty: number): TrustState {
+  const t = loadTrust();
+  t.score = Math.max(TRUST_FLOOR, t.score - penalty);
+  t.flags = [...t.flags, { kind, detail, at: Date.now() }].slice(-40);
+  saveTrust(t);
+  return t;
+}
+
+// Rolling pattern memory for detection (opponent matchups, win sequences, timing)
+type PatternState = { matchups: Record<string, number>; recentWins: number[]; winStreakLen: number; lastFoldWinAt: number; actionGaps: number[] };
+const PATTERN_KEY = "luxe-poker-patterns";
+function loadPatterns(): PatternState {
+  try { const raw = localStorage.getItem(PATTERN_KEY); if (raw) return JSON.parse(raw) as PatternState; } catch { /* fresh */ }
+  return { matchups: {}, recentWins: [], winStreakLen: 0, lastFoldWinAt: 0, actionGaps: [] };
+}
+function savePatterns(p: PatternState) { localStorage.setItem(PATTERN_KEY, JSON.stringify(p)); }
+
+export type HandSignal = {
+  won: boolean;
+  showdown: boolean;
+  opponents: string[];        // rival names seated this hand
+  pot: number;
+  durationMs: number;         // hand length — instant repeated wins smell scripted
+  handNumber: number;
+};
+
+export type Detection = { suspicious: boolean; flagged: string[] };
+
+/**
+ * Analyse a settled hand for scam patterns and update trust.
+ * Runs before any XP is awarded — suspicious results are logged for review.
+ */
+export function analyzeHand(sig: HandSignal): Detection {
+  const p = loadPatterns();
+  const flagged: string[] = [];
+
+  // Repeated matchups: same rival appearing at your table again and again
+  for (const opp of sig.opponents) {
+    p.matchups[opp] = (p.matchups[opp] ?? 0) + 1;
+    if (p.matchups[opp] === 25) flagged.push(`repeated-matchup:${opp}`);
+  }
+
+  // Suspicious win patterns: long streaks, or repeated instant fold-wins
+  if (sig.won) {
+    p.winStreakLen += 1;
+    if (!sig.showdown) {
+      if (sig.lastFoldWinAt && Date.now() - sig.lastFoldWinAt < 45_000) flagged.push("rapid-fold-wins");
+      p.lastFoldWinAt = Date.now();
+    }
+    if (p.winStreakLen === 8) flagged.push("win-streak-8");
+  } else {
+    p.winStreakLen = 0;
+  }
+
+  // Bot-like timing: hands resolving faster than a human could act, repeatedly
+  if (sig.durationMs < 8_000) {
+    p.actionGaps = [...p.actionGaps, sig.durationMs].slice(-12);
+    if (p.actionGaps.length === 12 && p.actionGaps.every((g) => g < 10_000)) flagged.push("bot-pace");
+  }
+
+  if (flagged.length) {
+    const t = loadTrust();
+    for (const kind of flagged) flagTrust(kind, `Hand #${sig.handNumber}: ${kind}`, kind.startsWith("repeated-matchup") ? 10 : 15);
+    void t;
+  }
+  savePatterns(p);
+  return { suspicious: flagged.length > 0, flagged };
+}
+
+/**
+ * Prize/withdrawal gate: any result that would pay out is held for review when the
+ * player's trust is below clean or the triggering hand was flagged. Prizes are only
+ * awarded after the hold is cleared.
+ */
+export function submitForReview(kind: string, detail: string): ReviewItem | null {
+  const t = loadTrust();
+  if (t.score >= 95 && t.flags.length === 0) return null; // clean record — no hold
+  const item: ReviewItem = { id: `REV-${Date.now().toString(36).toUpperCase()}`, at: Date.now(), kind: "prize-hold", detail: `${kind} — ${detail}`, status: "pending" };
+  saveReviewQueue([...loadReviewQueue(), item]);
+  return item;
+}
+
+/** Competitive rating (Glicko-style), stored apart from XP and trust. */
+export function recordCompetitiveResult(won: boolean, fieldStrength = 1500): { rating: number } {
+  const KEY_R = "luxe-poker-rating";
+  let rating = 1200;
+  try { const raw = localStorage.getItem(KEY_R); if (raw) rating = JSON.parse(raw).rating; } catch { /* fresh */ }
+  const k = 32;
+  const expected = 1 / (1 + Math.pow(10, (fieldStrength - rating) / 400));
+  rating = Math.max(100, Math.round(rating + k * ((won ? 1 : 0) - expected)));
+  localStorage.setItem(KEY_R, JSON.stringify({ rating }));
+  return { rating };
+}
+export function competitiveRating(): number {
+  try { const raw = localStorage.getItem("luxe-poker-rating"); if (raw) return (JSON.parse(raw).rating as number) ?? 1200; } catch { /* fresh */ }
+  return 1200;
+}

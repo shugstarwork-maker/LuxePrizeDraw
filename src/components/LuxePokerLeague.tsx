@@ -8,7 +8,7 @@ import { PokerTableArtwork } from "./PokerTableArtwork";
 import { useAudio } from "../audio/AudioProvider";
 import { applyAction, botAction, createTable, dealHand, seatPlayer, type HoldemState } from "../games/holdem";
 import { LoungeGamesCarousel } from "./LoungeGamesCarousel";
-import { LEAGUE_XP, consumeLeagueMove, ensureWeek, gateRankedHand, integrityFlags, leagueXPForHand, playerId, recordDailyParticipation, recordWeeklyXP, tierByIndex, tournamentXPForFinish, weekEndsIn, weeklyBoard, weeklyCutoffs } from "../lib/pokerLeague";
+import { LEAGUE_XP, analyzeHand, competitiveRating, consumeLeagueMove, ensureWeek, gateRankedHand, integrityFlags, leagueXPForHand, loadReviewQueue, playerId, recordCompetitiveResult, recordDailyParticipation, recordWeeklyXP, submitForReview, tierByIndex, tournamentXPForFinish, trustState, weekEndsIn, weeklyBoard, weeklyCutoffs } from "../lib/pokerLeague";
 import { LeagueCelebration, type Celebration } from "./LeagueCelebration";
 import { LeagueRacePop, type RacePop } from "./LeagueRacePop";
 
@@ -43,8 +43,8 @@ export const LuxePokerLeague: React.FC = () => {
   const [giftsOpen, setGiftsOpen] = useState(false);
   const [avatar, setAvatar] = useState(() => localStorage.getItem("luxe-poker-avatar") || "");
   const [chips, setChips] = useState(() => Number(localStorage.getItem("luxe-demo-poker-chips")) || 1000);
-  const [xp, setXp] = useState(() => Number(localStorage.getItem("luxe-poker-xp")) || 340);
-  const level = Math.floor(xp / 200);
+  const [xp, setXp] = useState(() => competitiveRating()); // competitive rating — separate from league XP and trust
+  const level = Math.floor(competitiveRating() / 200);
 
   type StoreItem = { id: string; type: "chips" | "ticket" | "theme" | "frame"; label: string; badge: string; chips?: number; count?: number };
   const STORE: StoreItem[] = [
@@ -64,7 +64,8 @@ export const LuxePokerLeague: React.FC = () => {
   const [winFlash, setWinFlash] = useState(false);
   const [levelFlash, setLevelFlash] = useState(false);
   const [stats, setStats] = useState(() => { try { return JSON.parse(localStorage.getItem("luxe-poker-stats") || "") ?? { handsWon: 0, biggestPot: 0, streak: 0, bestStreak: 0 }; } catch { return { handsWon: 0, biggestPot: 0, streak: 0, bestStreak: 0 }; } });
-  const vipTier = xp >= 800 ? { name: "Diamond member", benefit: "Priority tables" } : xp >= 400 ? { name: "Gold member", benefit: "1.25x XP" } : xp >= 150 ? { name: "Silver member", benefit: "Daily bonus +" } : { name: "Bronze member", benefit: "Welcome tier" };
+  const cr = competitiveRating();
+  const vipTier = cr >= 1600 ? { name: "Diamond member", benefit: "Priority tables" } : cr >= 1400 ? { name: "Gold member", benefit: "Strong tables" } : cr >= 1200 ? { name: "Silver member", benefit: "Rated player" } : { name: "Bronze member", benefit: "Welcome tier" };
 
   const [seatError, setSeatError] = useState("");
   const [activeTable, setActiveTable] = useState<TableDef | null>(null);
@@ -136,6 +137,7 @@ export const LuxePokerLeague: React.FC = () => {
     }));
   }, [leagueBoard, leagueOpen]);
   const settledHand = useRef(0);
+  const handStartAt = useRef(0);
   const aliveRef = useRef<string[]>([]); // tournament: players still holding chips this table session
   const finishedRef = useRef(false);
 
@@ -146,7 +148,7 @@ export const LuxePokerLeague: React.FC = () => {
   const minRaiseTo = game && you ? Math.min(game.currentBet + game.minRaise, you.bet + you.chips) : 0;
   const maxRaiseTo = you ? you.bet + you.chips : 0;
 
-  useEffect(() => { localStorage.setItem("luxe-demo-poker-chips", String(chips)); localStorage.setItem("luxe-poker-xp", String(xp)); }, [chips, xp]);
+  useEffect(() => { localStorage.setItem("luxe-demo-poker-chips", String(chips)); }, [chips]);
 
   // Landscape-only play: auto-cover the whole screen when rotated; portrait shows the rotate gate.
   useEffect(() => {
@@ -195,11 +197,8 @@ export const LuxePokerLeague: React.FC = () => {
 
   const note = (message: string) => { setStatus(message); setFeed((items) => [message, ...items].slice(0, 4)); };
   const awardXp = (amount: number) => {
-    setXp((prev) => {
-      const next = prev + amount;
-      if (Math.floor(next / 200) > Math.floor(prev / 200)) { play("levelUp"); setLevelFlash(true); window.setTimeout(() => setLevelFlash(false), 1200); }
-      return next;
-    });
+    // Competitive rating moves on results, not purchases — cosmetic/store XP no longer touches it.
+    void amount;
   };
 
   // ── Engine: bot turn loop ──
@@ -237,11 +236,29 @@ export const LuxePokerLeague: React.FC = () => {
     const youPlayed = Boolean(game.players.find((p) => p.id === "you" && !p.sittingOut));
     if (youPlayed) {
       const showdown = game.board.length === 5; // went to the river = verified showdown result
+      // Competitive rating updates on the result itself — separate from league XP and trust
+      recordCompetitiveResult(Boolean(mine));
+      // Fair-play scan runs BEFORE any XP is awarded
+      const det = analyzeHand({
+        won: Boolean(mine),
+        showdown,
+        opponents: game.players.filter((p) => p.id !== "you" && !p.sittingOut).map((p) => p.name),
+        pot: mine?.amount ?? game.pot,
+        durationMs: Date.now() - (handStartAt.current || Date.now()),
+        handNumber: game.handNumber,
+      });
       const handXP = leagueXPForHand(Boolean(mine), showdown);
       const dp = recordDailyParticipation(); // +5 once per day, capped
       const gate = gateRankedHand(`hand#${game.handNumber}`, handXP);
       if (dp.paid) { setLeague(dp.state); pushXpFloat(LEAGUE_XP.dailyParticipation); note(`Daily participation bonus: +${LEAGUE_XP.dailyParticipation} league XP.`); }
-      if (handXP > 0) { if (gate.ranked) gainLeagueXp(handXP); else note(gate.reason ?? "Ranked XP paused."); }
+      if (handXP > 0) {
+        if (!gate.ranked) note(gate.reason ?? "Ranked XP paused.");
+        else if (det.suspicious) {
+          // Suspicious results go to review before anything is credited
+          const hold = submitForReview("league-xp", `+${handXP} XP on hand #${game.handNumber} — ${det.flagged.join(", ")}`);
+          note(hold ? `Result sent for review (${hold.id}) before XP is credited.` : "Result under review.");
+        } else gainLeagueXp(handXP);
+      }
     }
     play("winnerReveal");
     if (mine) {
@@ -276,7 +293,12 @@ export const LuxePokerLeague: React.FC = () => {
     if (place === null) return;
     finishedRef.current = true;
     const pts = tournamentXPForFinish(place, game.players.length);
-    if (pts > 0) gainLeagueXp(pts);
+    if (pts > 0) {
+      if (trustState().score < 95 || trustState().flags.length > 0) {
+        const hold = submitForReview("table-finish", `+${pts} XP for finishing #${place}`);
+        note(hold ? `Table finish (${pts} XP) held for review — ${hold.id}.` : "Table finish under review.");
+      } else gainLeagueXp(pts);
+    }
     play(place === 1 ? "levelUp" : "winnerReveal");
     note(place === 1 ? `You take the table! 1st place — +${pts} league points.` : `Table run over — finished #${place}, +${pts} league points.`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -303,7 +325,7 @@ export const LuxePokerLeague: React.FC = () => {
 
   const chooseAvatar = (file?: File) => { if (!file) return; const reader = new FileReader(); reader.onload = () => { const value = String(reader.result); localStorage.setItem("luxe-poker-avatar", value); setAvatar(value); note("Demo avatar updated on this device."); }; reader.readAsDataURL(file); };
   const buyItem = (item: StoreItem) => {
-    if (item.type === "chips") { setChips((v) => v + (item.chips ?? 0)); awardXp(Math.round((item.chips ?? 0) / 5)); }
+    if (item.type === "chips") { setChips((v) => v + (item.chips ?? 0)); }
     else if (item.type === "ticket") setTickets((v) => v + (item.count ?? 0));
     else if (item.type === "theme") { setOwned((o) => [...new Set([...o, item.id])]); setTableTheme(item.id === "theme-onyx" ? "onyx" : "noir"); }
     else { setOwned((o) => [...new Set([...o, item.id])]); setAvatarFrame(item.id === "frame-gold" ? "gold" : "platinum"); }
@@ -320,6 +342,7 @@ export const LuxePokerLeague: React.FC = () => {
     settledHand.current = 0;
     aliveRef.current = [];
     finishedRef.current = false;
+    handStartAt.current = Date.now();
     setGame(table0);
     note(`Welcome to the ${table.name} — you're seated and the dealer is shuffling.`);
   };
@@ -329,6 +352,7 @@ export const LuxePokerLeague: React.FC = () => {
     const delay = game.handNumber === 0 ? 1800 : 5000;
     const timer = window.setTimeout(() => {
       play("cardDeal");
+      handStartAt.current = Date.now();
       setGame((g) => (g?.handOver ? dealHand(g) : g));
     }, delay);
     return () => window.clearTimeout(timer);
@@ -354,7 +378,7 @@ export const LuxePokerLeague: React.FC = () => {
     setGame((g) => (g ? applyAction(g, "you", action, action === "raise" ? raiseTo : 0) : g));
   };
   const sendGift = (gift: typeof gifts[number]) => { if (chips < gift.cost) return note(`You need ${gift.cost} virtual chips to send ${gift.name}.`); setChips((v) => v - gift.cost); play("success"); setGiftsOpen(false); note(`You sent ${gift.icon} ${gift.name} to ${selectedSeat}. Virtual gift only.`); };
-  const dailyReward = () => { if (!rewardReady) return; setChips((v) => v + 200); awardXp(10); play("chipStack"); setRewardReady(false); localStorage.setItem("luxe-poker-reward", new Date().toDateString()); note("Daily sign-in collected: 200 free-play chips and 10 XP."); };
+  const dailyReward = () => { if (!rewardReady) return; setChips((v) => v + 200); play("chipStack"); setRewardReady(false); localStorage.setItem("luxe-poker-reward", new Date().toDateString()); note("Daily sign-in collected: 200 free-play chips."); };
   const leagueTable = LEAGUE_TABLES[Math.min(league.tierIndex, LEAGUE_TABLES.length - 1)];
 
   const dealerStage = game?.stage === "preflop" ? "pre-flop" : game?.stage ?? "idle";
@@ -368,7 +392,7 @@ export const LuxePokerLeague: React.FC = () => {
           <div className="mt-4 flex items-center gap-3">
             <div className="min-w-0 flex-1">
               <p className={`text-sm font-black text-white ${levelFlash ? "poker-level-flash" : ""}`}>{vipTier.name} · Level {level}{avatarFrame === "gold" ? " 🟡" : avatarFrame === "platinum" ? " ⚪" : ""}</p>
-              <p className="mt-0.5 text-xs text-white/55">{(xp % 200)} / 200 XP this level · {chips.toLocaleString()} chips{tickets > 0 ? ` · ${tickets} tournament ticket${tickets > 1 ? "s" : ""} (2x XP)` : ""}</p>
+              <p className="mt-0.5 text-xs text-white/55">Rating {competitiveRating()} · {chips.toLocaleString()} chips{tickets > 0 ? ` · ${tickets} tournament ticket${tickets > 1 ? "s" : ""}` : ""}</p>
               <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/10">
                 <div className="h-full rounded-full bg-gradient-to-r from-amber-300 to-amber-500 transition-all duration-500" style={{ width: `${Math.min(100, (xp % 200) / 2)}%` }} />
               </div>
@@ -418,9 +442,12 @@ export const LuxePokerLeague: React.FC = () => {
             <p className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[.18em] text-emerald-200"><ShieldCheck className="h-3.5 w-3.5" />Fair play &amp; anti-scam controls</p>
             <ul className="mt-2 space-y-1 text-[10px] leading-relaxed text-white/55">
               <li>· <b className="text-white/75">One account per player</b> — your league identity is verified and bound to this device: <span className="font-mono text-emerald-100/90">{playerId()}</span>. Linked accounts are detected; sharing a household or network is never auto-banned.</li>
-              <li>· <b className="text-white/75">Collusion detection</b> — repeated matchups, coordinated play and deliberate chip transfers between connected players are flagged and excluded from rankings.</li>
-              <li>· <b className="text-white/75">Rate-capped scoring</b> — only 40 ranked hands/hour (240/day) earn XP, so bots and rapid-fire farming can't dominate.{integrityFlags().length > 0 ? <span className="text-amber-200"> Active review flags: {integrityFlags().join(", ")}.</span> : ""}</li>
+              <li>· <b className="text-white/75">Suspicious win patterns</b> — long streaks, repeated instant fold-wins and bot-fast play are detected automatically.</li>
+              <li>· <b className="text-white/75">Connected accounts &amp; collusion</b> — repeated games between linked players and deliberate chip transfers are flagged and excluded from rankings.</li>
+              <li>· <b className="text-white/75">Review before prizes</b> — suspicious results are held for review ({loadReviewQueue().filter((r) => r.status === "pending").length} pending) before any XP or prize is awarded.</li>
+              <li>· <b className="text-white/75">Rate-capped scoring</b> — only 40 ranked hands/hour (240/day) earn XP, so farming can't dominate.{integrityFlags().length > 0 ? <span className="text-amber-200"> Active review flags: {integrityFlags().join(", ")}.</span> : ""}</li>
               <li>· <b className="text-white/75">Independently verifiable</b> — every settled result is hashed into a tamper-evident chain, so leaderboard totals can be replayed and checked.</li>
+              <li>· <b className="text-white/75">Three separate ratings</b> — league XP (progression), competitive rating ({competitiveRating()}) and trust ({trustState().score}/100) never mix: you can't buy a better ranking or erase a flagged pattern by playing more.</li>
             </ul>
           </div>
         </div>
