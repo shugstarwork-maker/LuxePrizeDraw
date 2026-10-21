@@ -748,14 +748,19 @@
 .gold-games h2,.gold-games h3 { font-family:Georgia,'Times New Roman',serif; color:#ffe09a; text-shadow:0 2px #704b13,0 0 22px #e6b84b44; }
 .gold-games h2 { font-size:clamp(2rem,7vw,3.5rem); line-height:1.1; margin:.5rem 0; }
 .gold-games small { display:block; font-size:.75rem; line-height:1.5; color:#f5dfa5; }
-.gold-games__card { overflow:hidden; border:1px solid #c4a25c; border-radius:1.75rem; background:linear-gradient(130deg,#2a1e08,#050505 45%,#211806); box-shadow:inset 0 0 25px #e8bb4622,0 15px 35px #0009; }
-.gold-games__top { display:flex; justify-content:space-between; gap:.5rem; padding:.8rem 1rem; border-bottom:1px solid #a78a4744; text-transform:uppercase; font-size:.7rem; font-weight:900; }
-.gold-games__art { position:relative; height:clamp(10rem,35vw,18rem); overflow:hidden; }
-.gold-games__art img { width:100%; height:100%; object-fit:cover; }.gold-games__art::after { content:''; position:absolute; inset:0; background:linear-gradient(transparent 45%,#080603); pointer-events:none; }
-.gold-games__art > span { position:absolute; right:1rem; top:1rem; display:grid; place-items:center; width:3rem; height:3rem; border:1px solid #dfbf70; border-radius:50%; background:#080603; font-size:2rem; }
-.gold-games__copy { position:relative; text-align:center; padding:0 1rem 1.5rem; }.gold-games__copy h3 { font-size:clamp(1.7rem,5vw,2.7rem); line-height:1.15; margin:.6rem 0; }.gold-games__copy > p { font-size:.85rem; }
-.gold-games__badge { display:inline-block; border:1px solid #b89b50; border-radius:2rem; padding:.3rem .8rem; text-transform:uppercase; letter-spacing:.12em; }
-.gold-games__play { display:flex; justify-content:center; align-items:center; max-width:19rem; min-height:3.5rem; margin:1.25rem auto .8rem; border:1px solid #fff0aa; border-radius:1rem; background:linear-gradient(#ffeaa0,#ffb600); color:#120c00; font-size:1.1rem; font-weight:900; text-transform:uppercase; box-shadow:0 4px #805012; }
+.gold-games__card { position:relative; overflow:hidden; height:26rem; border:1px solid #c4a25c88; border-radius:1.75rem; background:#0a0805; box-shadow:0 22px 48px #000c, 0 0 34px #e8bb4622; }
+.gold-games__bg { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.gold-games__shade { position:absolute; inset:0; background:linear-gradient(180deg,#0006 0%,#0000 26%,#0000 55%,#000c 88%,#000 100%); pointer-events:none; }
+.gold-games__vertical { position:absolute; right:.45rem; top:50%; transform:translateY(-50%); writing-mode:vertical-rl; font-family:Georgia,'Times New Roman',serif; font-size:1.35rem; letter-spacing:.14em; color:#fff; text-shadow:0 2px 10px #000, 0 0 18px #000; }
+.gold-games__panel { position:absolute; left:.8rem; top:16%; display:flex; flex-direction:column; gap:.15rem; padding:.8rem .85rem; border-radius:1.1rem; background:#ffffff14; border:1px solid #ffffff2b; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
+.gold-games__panel p { display:flex; align-items:center; gap:.5rem; padding:.28rem .15rem; font-size:.66rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:#fff; }
+.gold-games__panel p svg { color:#ffe6a0; flex:none; }
+.gold-games__bottom { position:absolute; left:0; right:0; bottom:0; padding:0 1rem 1rem; display:flex; flex-direction:column; gap:.7rem; }
+.gold-games__stats { display:flex; justify-content:space-between; gap:.5rem; }
+.gold-games__stats span { display:flex; flex-direction:column; min-width:0; }
+.gold-games__stats b { font-size:1.2rem; font-weight:900; color:#fff; text-shadow:0 1px 6px #000; }
+.gold-games__stats small { font-size:.56rem; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:#ffe6a0; text-shadow:0 1px 4px #000; }
+.gold-games__play { display:flex; justify-content:center; align-items:center; gap:.35rem; padding:.75rem 1rem; border-radius:999px; background:linear-gradient(#fff0b0,#ffbd22); color:#140c00; font-size:1rem; font-weight:900; box-shadow:0 10px 24px rgba(251,191,36,.35); }
 .gold-games__play:focus-visible { outline:3px solid white; outline-offset:4px; }
 
 /* Arcade and Poker Lounge share typography, but remain separate destinations. */
@@ -1195,21 +1200,30 @@
 }
 
 /* ── Lounge carousel card (featured table design) ── */
-.lounge-carousel { max-width:36rem; margin:1.5rem auto 0; }
-.lounge-carousel-card { position:relative; overflow:hidden; border:1px solid #c4a25c; border-radius:1.75rem; background:linear-gradient(130deg,#2a1e08,#050505 45%,#211806); box-shadow:inset 0 0 25px #e8bb4622,0 15px 35px #0009; }
-.lounge-carousel-card__top { display:flex; justify-content:space-between; padding:.8rem 1rem; border-bottom:1px solid #a78a4744; text-transform:uppercase; font-size:.7rem; font-weight:900; color:#ffeab1; }
-.lounge-carousel-card__art { position:relative; height:clamp(11rem,32vw,15rem); overflow:hidden; }
-.lounge-carousel-card__art img { width:100%; height:100%; object-fit:cover; }
-.lounge-carousel-card__pill { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); padding:.45rem 1.1rem; border:1px solid #ffe6a0; border-radius:999px; background:#00000099; color:#ffe6a0; font-size:.7rem; font-weight:900; text-transform:uppercase; letter-spacing:.12em; backdrop-filter:blur(4px); }
-.lounge-carousel-card__copy { padding:1rem 1.25rem 1.25rem; text-align:center; }
-.lounge-carousel-card__copy h1 { font-family:Georgia,'Times New Roman',serif; font-size:clamp(1.6rem,6vw,2.3rem); line-height:1.05; color:#ffe09a; text-shadow:0 2px #704b13,0 0 22px #e6b84b44; }
-.lounge-carousel-card__copy p { margin-top:.3rem; font-size:.8rem; color:#f5dfa5; text-transform:uppercase; letter-spacing:.18em; }
-.lounge-carousel-card__play { display:inline-block; margin-top:.9rem; padding:.8rem 2.4rem; border-radius:1rem; background:linear-gradient(#fff0b0,#ffbd22); color:#140c00; font-weight:900; font-size:1rem; box-shadow:0 10px 24px rgba(251,191,36,.3); }
-.lounge-carousel-card__arrow { position:absolute; top:38%; transform:translateY(-50%); display:grid; place-items:center; width:2.6rem; height:2.6rem; border-radius:999px; border:1px solid #ffe6a088; background:#000000a6; color:#ffe6a0; z-index:5; }
-.lounge-carousel-card__arrow--l { left:.7rem; } .lounge-carousel-card__arrow--r { right:.7rem; }
-.lounge-carousel-card__dots { display:flex; justify-content:center; gap:.4rem; padding-bottom:.9rem; }
-.lounge-carousel-card__dots button { width:.6rem; height:.6rem; border-radius:999px; background:#ffffff40; transition:all .2s; }
-.lounge-carousel-card__dots button.on { width:1.6rem; background:#ffe6a0; }
+/* Stacked 3D deck carousel (travel-card style) */
+.lounge-stack { max-width:34rem; margin:1.5rem auto 0; }
+.lounge-stack__stage { position:relative; height:clamp(24rem,118vw,30rem); }
+.lounge-stack__card { position:absolute; top:0; left:50%; width:74%; height:100%; overflow:hidden; border-radius:1.75rem; border:1px solid #c4a25c88; background:#0a0805; box-shadow:0 22px 48px #000c, 0 0 34px #e8bb4622; transition:transform .55s cubic-bezier(.22,.8,.28,1), opacity .55s, filter .55s; }
+.lounge-stack__card--c { transform:translateX(-50%) scale(1); z-index:3; opacity:1; }
+.lounge-stack__card--l { transform:translateX(-118%) scale(.82); z-index:2; opacity:.75; filter:brightness(.7) saturate(.85); cursor:pointer; }
+.lounge-stack__card--r { transform:translateX(18%) scale(.82); z-index:2; opacity:.75; filter:brightness(.7) saturate(.85); cursor:pointer; }
+.lounge-stack__bg { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.lounge-stack__shade { position:absolute; inset:0; background:linear-gradient(180deg,#0006 0%,#0000 26%,#0000 55%,#000c 88%,#000 100%); }
+.lounge-stack__vertical { position:absolute; right:.45rem; top:50%; transform:translateY(-50%); writing-mode:vertical-rl; font-family:Georgia,'Times New Roman',serif; font-size:clamp(1.15rem,4.6vw,1.7rem); letter-spacing:.14em; color:#fff; text-shadow:0 2px 10px #000, 0 0 18px #000; z-index:2; }
+.lounge-stack__panel { position:absolute; left:.8rem; top:18%; display:flex; flex-direction:column; gap:.15rem; padding:.8rem .85rem; border-radius:1.1rem; background:#ffffff14; border:1px solid #ffffff2b; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); z-index:2; }
+.lounge-stack__panel p { display:flex; align-items:center; gap:.5rem; padding:.28rem .15rem; font-size:.66rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:#fff; }
+.lounge-stack__panel p svg { color:#ffe6a0; flex:none; }
+.lounge-stack__bottom { position:absolute; left:0; right:0; bottom:0; padding:0 1.1rem 1.1rem; display:flex; flex-direction:column; gap:.7rem; z-index:2; }
+.lounge-stack__stats { display:flex; justify-content:space-between; gap:.5rem; }
+.lounge-stack__stats span { display:flex; flex-direction:column; min-width:0; }
+.lounge-stack__stats b { font-size:clamp(1rem,4.4vw,1.35rem); font-weight:900; color:#fff; text-shadow:0 1px 6px #000; }
+.lounge-stack__stats small { font-size:.56rem; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:#ffe6a0; text-shadow:0 1px 4px #000; }
+.lounge-stack__play { display:flex; align-items:center; justify-content:center; gap:.35rem; padding:.75rem 1rem; border-radius:999px; background:linear-gradient(#fff0b0,#ffbd22); color:#140c00; font-weight:900; font-size:.95rem; box-shadow:0 10px 24px rgba(251,191,36,.35); }
+.lounge-stack__arrow { position:absolute; top:50%; transform:translateY(-50%); display:grid; place-items:center; width:2.5rem; height:2.5rem; border-radius:999px; border:1px solid #ffe6a088; background:#000000a6; color:#ffe6a0; z-index:6; }
+.lounge-stack__arrow--l { left:.15rem; } .lounge-stack__arrow--r { right:.15rem; }
+.lounge-stack__dots { display:flex; justify-content:center; gap:.4rem; padding:.9rem 0 .2rem; }
+.lounge-stack__dots button { width:.6rem; height:.6rem; border-radius:999px; background:#ffffff40; transition:all .2s; }
+.lounge-stack__dots button.on { width:1.6rem; background:#ffe6a0; }
 
 /* ── Lounge table (blackjack / brag) ── */
 .lounge-table-felt { position:relative; min-height:60dvh; border-radius:2rem; overflow:hidden; display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding:1rem; }
