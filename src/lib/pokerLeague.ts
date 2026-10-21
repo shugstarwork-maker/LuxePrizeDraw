@@ -36,7 +36,8 @@ const mulberry32 = (seed: number) => () => { seed |= 0; seed = (seed + 0x6D2B79F
 
 export type LeagueRow = { name: string; xp: number; you: boolean };
 
-type LeagueState = { week: string; tierIndex: number; xp: number; seed: number };
+type LeagueState = { week: string; tierIndex: number; xp: number; seed: number; moved?: "promote" | "demote" | null };
+export type { LeagueState };
 const KEY = "luxe-poker-league";
 
 export function ensureWeek(): LeagueState {
@@ -51,7 +52,8 @@ export function ensureWeek(): LeagueState {
       const board = weeklyBoard(prev);
       const rank = board.findIndex((r) => r.you) + 1;
       const tierIndex = rank > 0 ? halfSplitNextTier(rank, board.length, prev.tierIndex) : prev.tierIndex;
-      st = { week, tierIndex, xp: 0, seed: hashStr(week + tierIndex) };
+      const moved = tierIndex > prev.tierIndex ? "promote" : tierIndex < prev.tierIndex ? "demote" : null;
+      st = { week, tierIndex, xp: 0, seed: hashStr(week + tierIndex), moved };
     }
   } catch { /* fresh start */ }
   localStorage.setItem(KEY, JSON.stringify(st));
@@ -154,4 +156,13 @@ export function recordWeeklyXP(amount: number): LeagueState {
   const next = { ...st, xp: st.xp + amount };
   localStorage.setItem(KEY, JSON.stringify(next));
   return next;
+}
+
+/** Consume (and clear) the weekly promotion/relegation flag so it shows once. */
+export function consumeLeagueMove(): { moved: "promote" | "demote"; tierIndex: number } | null {
+  const st = ensureWeek();
+  if (st.moved !== "promote" && st.moved !== "demote") return null;
+  const out = { moved: st.moved, tierIndex: st.tierIndex };
+  localStorage.setItem(KEY, JSON.stringify({ ...st, moved: null }));
+  return out;
 }

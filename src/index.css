@@ -1207,6 +1207,8 @@
 /* Stacked 3D deck carousel (travel-card style) */
 .lounge-stack { max-width:34rem; margin:1.5rem auto 0; }
 .lounge-stack__stage { position:relative; height:clamp(24rem,118vw,30rem); }
+/* Stacked side cards intentionally bleed past the stage; clip at the page edge so they never force horizontal zoom/scroll */
+.salon-selection { overflow-x:clip; }
 .lounge-stack__card { position:absolute; top:0; left:50%; width:74%; height:100%; overflow:hidden; border-radius:1.75rem; border:1px solid #c4a25c88; background:#0a0805; box-shadow:0 22px 48px #000c, 0 0 34px #e8bb4622; transition:transform .55s cubic-bezier(.22,.8,.28,1), opacity .55s, filter .55s; }
 .lounge-stack__card--c { transform:translateX(-50%) scale(1); z-index:3; opacity:1; }
 .lounge-stack__card--l { transform:translateX(-118%) scale(.82); z-index:2; opacity:.75; filter:brightness(.7) saturate(.85); cursor:pointer; }
@@ -1267,3 +1269,42 @@
 @keyframes cash-banner-sheen { from { background-position:0% 0; } to { background-position:220% 0; } }
 @keyframes cash-banner-flash { 0%,100% { color:#ffd24a; text-shadow:0 0 14px #ffbf00aa,0 3px 0 #7a5210,0 0 42px #ffb30066; } 50% { color:#fff3c4; text-shadow:0 0 26px #ffdf80,0 3px 0 #7a5210,0 0 70px #ffd24a; } }
 @media (prefers-reduced-motion:reduce) { .cash-banner__track,.cash-banner,.cash-banner__track span { animation:none; } }
+
+/* Duolingo-style league race FX */
+.league-board__row { transition:transform .6s cubic-bezier(.22,.8,.28,1), background .4s, border-color .4s; }
+.league-board__row--you { animation:league-you-pulse 2.4s ease-in-out infinite; }
+@keyframes league-you-pulse { 0%,100% { box-shadow:0 0 0 0 rgba(251,191,36,.0); } 50% { box-shadow:0 0 22px 2px rgba(251,191,36,.28); } }
+.xp-float { position:absolute; right:0; bottom:100%; pointer-events:none; font-family:Georgia,serif; font-weight:900; font-size:.85rem; color:#7ee787; text-shadow:0 0 10px #22c55e88; animation:xp-float-up 1.5s ease-out forwards; white-space:nowrap; }
+@keyframes xp-float-up { 0% { opacity:0; transform:translateY(6px) scale(.8); } 18% { opacity:1; transform:translateY(-2px) scale(1.08); } 100% { opacity:0; transform:translateY(-2.6rem) scale(1); } }
+
+/* Weekly promote / relegate celebration overlay */
+.league-celebration { position:fixed; inset:0; z-index:3000; display:grid; place-items:center; padding:1.5rem; background:rgba(5,4,2,.72); backdrop-filter:blur(6px); opacity:0; transition:opacity .45s; }
+.league-celebration--in { opacity:1; }
+.league-celebration--out { opacity:0; }
+.league-celebration__card { position:relative; width:100%; max-width:min(22rem, calc(100vw - 2.5rem)); box-sizing:border-box; text-align:center; border:2px solid; border-radius:2rem; background:linear-gradient(160deg,#1c150b,#0a0704 70%); padding:2.2rem 1.6rem 1.8rem; animation:league-pop .55s cubic-bezier(.2,1.4,.4,1); }
+@keyframes league-pop { 0% { transform:scale(.6) translateY(2rem); opacity:0; } 100% { transform:scale(1) translateY(0); opacity:1; } }
+.league-celebration__icon { display:inline-grid; place-items:center; }
+.league-celebration__kicker { margin-top:.8rem; font-family:Georgia,serif; font-size:2rem; font-weight:900; color:#fff; letter-spacing:.02em; }
+.league-celebration__tiers { margin-top:.7rem; display:flex; align-items:center; justify-content:center; gap:.6rem; font-weight:900; font-size:1.05rem; }
+.league-celebration__sub { margin-top:.8rem; font-size:.8rem; line-height:1.5; color:#ffffffb0; }
+.league-celebration__confetti { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+.league-celebration__confetti span { position:absolute; top:-1rem; width:.55rem; height:.9rem; border-radius:2px; background:linear-gradient(#ffe08a,#e8a71c); animation:league-confetti-fall 2.6s linear infinite; }
+.league-celebration__confetti span:nth-child(3n) { background:linear-gradient(#a7f3d0,#10b981); }
+.league-celebration__confetti span:nth-child(3n+1) { background:linear-gradient(#fecdd3,#f43f5e); }
+@keyframes league-confetti-fall { to { transform:translateY(110vh) rotate(540deg); } }
+@media (prefers-reduced-motion:reduce) { .league-board__row,.league-board__row--you,.xp-float,.league-celebration__card,.league-celebration__confetti span { animation:none; } }
+
+/* ── Duolingo-style XP race pop (floats over the table when league XP lands) ── */
+.race-pop { position:fixed; left:50%; bottom:5.5rem; transform:translateX(-50%); z-index:1500; width:min(19rem, calc(100vw - 2rem)); border:1px solid rgba(246,201,69,.45); border-radius:1.25rem; background:linear-gradient(165deg, rgba(28,21,11,.96), rgba(10,7,4,.96)); box-shadow:0 18px 50px rgba(0,0,0,.6), 0 0 30px rgba(246,201,69,.18); padding:.8rem .9rem .7rem; animation:race-pop-in .4s cubic-bezier(.2,1.3,.4,1); backdrop-filter:blur(8px); }
+@keyframes race-pop-in { 0% { transform:translate(-50%, 2.5rem) scale(.85); opacity:0; } 100% { transform:translate(-50%, 0) scale(1); opacity:1; } }
+.race-pop__burst { display:flex; align-items:center; justify-content:center; gap:.4rem; font-weight:900; font-size:1.05rem; letter-spacing:.03em; animation:race-burst .5s cubic-bezier(.2,1.6,.4,1); }
+@keyframes race-burst { 0% { transform:scale(.4); } 100% { transform:scale(1); } }
+.race-pop__board { margin-top:.55rem; display:grid; gap:4px; }
+.race-pop__row { display:flex; align-items:center; gap:.5rem; height:30px; border-radius:.6rem; border:1px solid rgba(255,255,255,.08); background:rgba(0,0,0,.35); padding:0 .6rem; font-size:.75rem; color:#ffffffc0; will-change:transform; }
+.race-pop__row b { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.race-pop__row--you { border-color:rgba(246,201,69,.7); background:rgba(246,201,69,.16); color:#ffe9a8; animation:league-you-pulse 1.1s ease-in-out infinite; }
+.race-pop__rank { font-family:ui-monospace,monospace; font-size:.65rem; font-weight:900; color:rgba(255,255,255,.45); }
+.race-pop__row--you .race-pop__rank { color:#f6c945; }
+.race-pop__xp { font-family:ui-monospace,monospace; font-size:.65rem; font-weight:900; }
+.race-pop__note { margin:.5rem 0 0; text-align:center; font-size:.68rem; font-weight:800; color:#f6c945; }
+@media (prefers-reduced-motion: reduce) { .race-pop, .race-pop__burst, .race-pop__row--you { animation:none; } .race-pop__row { transition:none !important; } }
