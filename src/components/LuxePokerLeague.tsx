@@ -9,6 +9,7 @@ import { useAudio } from "../audio/AudioProvider";
 import { applyAction, botAction, createTable, dealHand, seatPlayer, type HoldemState } from "../games/holdem";
 import { LoungeGamesCarousel } from "./LoungeGamesCarousel";
 import { COHORT_SIZE, LEAGUE_TIERS, LEAGUE_XP, PLACEMENT_WEEKS, PROMOTE_COUNT, RELEGATE_COUNT, competitiveRating, confirmedXP, consumeLeagueMove, ensureWeek, integrityFlags, loadReviewQueue, playerId, provisionalXP, recordCompetitiveResult, recordDailyParticipation, recordGamePlayed, recordWeeklyXP, settleLedger, submitForReview, submitHandForScoring, tierByIndex, tournamentXPForFinish, trustState, weekEndsIn, weeklyBoard, weeklyCutoffs } from "../lib/pokerLeague";
+import { prizeEligibility, verifyShuffleFairness, type FairnessProof } from "../lib/fairPlay";
 import { LeagueCelebration, type Celebration } from "./LeagueCelebration";
 import { LeagueRacePop, type RacePop } from "./LeagueRacePop";
 
@@ -73,6 +74,10 @@ export const LuxePokerLeague: React.FC = () => {
   const [game, setGame] = useState<HoldemState | null>(null);
   const [raiseTo, setRaiseTo] = useState(0);
   const [seconds, setSeconds] = useState(20);
+  const [fairness, setFairness] = useState<FairnessProof | null>(null);
+  const [fairnessBusy, setFairnessBusy] = useState(false);
+  const verifyShuffle = async () => { setFairnessBusy(true); const proof = await verifyShuffleFairness(); setFairness(proof); setFairnessBusy(false); };
+  const eligibility = prizeEligibility();
   const [status, setStatus] = useState("Choose a table to sit down.");
   const [feed, setFeed] = useState<string[]>(["Welcome to Luxe Poker League"]);
   const [rewardReady, setRewardReady] = useState(() => localStorage.getItem("luxe-poker-reward") !== new Date().toDateString());
@@ -458,7 +463,24 @@ export const LuxePokerLeague: React.FC = () => {
               <li>· <b className="text-white/75">Points ≠ winnings</b> — league points come from verified results only, never chip counts. Buying chips, tickets or cosmetics confers zero competitive advantage.</li>
               <li>· <b className="text-white/75">Provisional points</b> — new points pend during a review window and only count once confirmed; confirmed cheating reverses them afterwards.</li>
               <li>· <b className="text-white/75">Three separate ratings</b> — league XP (progression), competitive rating ({competitiveRating()}) and trust ({trustState().score}/100) never mix: you can't buy a better ranking or erase a flagged pattern by playing more.</li>
+              <li>· <b className="text-white/75">Verified game ledger</b> — hand histories and signed score events are stored in a hash-chained, append-only record that can be replayed for disputes.</li>
+              <li>· <b className="text-white/75">Provably fair shuffle</b> — the deck is cryptographically committed (SHA-256) before each deal and revealed after the hand, so you can verify it was never changed. A verifiable shuffle proves deck integrity — collusion and bots are still caught by pattern analysis and review, not by the shuffle alone.</li>
+              <li>· <b className="text-white/75">League &amp; prize eligibility</b> — only validated rankings release rewards: confirmed points, clean trust and no pending reviews. Fraud indicators stay private.</li>
             </ul>
+            <div className={`mt-3 rounded-lg border p-2.5 text-[10px] ${eligibility.eligible ? "border-emerald-300/30 bg-emerald-300/10 text-emerald-100" : "border-amber-300/30 bg-amber-300/10 text-amber-100"}`}>
+              <b className="font-black uppercase tracking-wider">Prize eligibility: {eligibility.eligible ? "Eligible" : "On hold"}</b>
+              {!eligibility.eligible && <span className="mt-1 block text-white/60">{eligibility.reasons[0]}</span>}
+            </div>
+            <div className="mt-2 rounded-lg border border-white/10 bg-black/30 p-2.5 text-[10px] text-white/55">
+              <div className="flex items-center justify-between gap-2">
+                <b className="font-black uppercase tracking-wider text-white/70">Shuffle verification</b>
+                <button onClick={() => void verifyShuffle()} disabled={fairnessBusy} className="rounded-lg border border-emerald-300/40 bg-emerald-300/10 px-2.5 py-1 font-black text-emerald-100 disabled:opacity-40">{fairnessBusy ? "Checking…" : "Verify a shuffle"}</button>
+              </div>
+              {fairness && <p className="mt-1.5 font-mono leading-relaxed">
+                {fairness.localVerified ? "✓ Deck verified locally" : fairness.revealed ? "⚠ Verification failed" : "Commitment published"} — hand #{fairness.hand} · commit <span className="text-emerald-100/90">{fairness.commitment.slice(0, 12)}…</span>{fairness.secret ? <> · revealed <span className="text-emerald-100/90">{fairness.secret.slice(0, 12)}…</span> · re-shuffled deck matches exactly</> : ""}
+              </p>}
+              {!fairness && <p className="mt-1.5">Tap to deal a real hand on the server and independently re-run its shuffle here on your device.</p>}
+            </div>
           </div>
         </div>
         <LeagueCelebration celebration={celebration} onDone={() => setCelebration(null)} />

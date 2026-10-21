@@ -834,8 +834,16 @@ app.post("/api/poker/tables/:id/action", (req, res) => {
 app.get("/api/poker/tables/:id", (req, res) => {
   const t = pokerApi.getTable(req.params.id);
   if (!t) return res.status(404).json({ error: "table_not_found" });
-  res.json({ league: t.league, blinds: t.blinds, hand: t.state.handNumber, handOver: t.state.handOver, status: t.state.lastAction, pendingXP: t.pendingXP, trust: t.trust, reviewHolds: t.reviewHolds.length });
+  res.json({ league: t.league, blinds: t.blinds, hand: t.state.handNumber, handOver: t.state.handOver, status: t.state.lastAction, pendingXP: t.pendingXP, trust: t.trust, reviewHolds: t.reviewHolds.length, commitment: pokerApi.currentCommitment(t) ?? undefined });
 });
+// Provably fair shuffle: commitment is published before the deal; after the hand settles the
+// secret and full deck are revealed so anyone can re-run the identical shuffle and verify it.
+app.get("/api/poker/tables/:id/fairness", (req, res) => {
+  const out = pokerApi.verifyHandFairness(req.params.id, Number(req.query.hand ?? 0));
+  if (!out) return res.status(404).json({ error: "table_not_found" });
+  res.json(out);
+});
+app.get("/api/poker/fairness/demo", (_req, res) => res.json(pokerApi.demoFairness()));
 // Permanent records: audit trail integrity + dispute replay. Read-only — no endpoint can edit them.
 // Score verification channel: the app reports a settled hand; the server re-checks rate
 // limits and pattern signals, then decides the XP. Client-submitted scores are never trusted.

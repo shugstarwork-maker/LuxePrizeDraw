@@ -4,7 +4,7 @@
 // score change is written to an append-only, hash-chained record that can be replayed
 // for disputes and that administrators cannot quietly edit.
 import crypto from "crypto";
-import { applyAction, botAction, createTable, dealHand, type HoldemAction, type HoldemState } from "../src/games/holdem";
+import { applyAction, botAction, createTable, dealHand, makeHoldemDeck, shuffleHoldem, type HoldemAction, type HoldemCard, type HoldemState } from "../src/games/holdem";
 
 const VALID_ACTIONS: HoldemAction[] = ["fold", "check", "call", "raise"];
 
@@ -12,6 +12,17 @@ function mulberry32(seed: number) {
   return () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
 }
 const hash = (s: string) => crypto.createHash("sha256").update(s).digest("hex");
+
+// ── Provably fair shuffle (commit–reveal) ──
+// Before each hand the server publishes commitment = SHA-256(handSecret). The shuffle
+// is seeded from that secret. After the hand, the secret and full deck are revealed, so
+// anyone can re-run the identical shuffle and prove the deck wasn't changed after dealing
+// began. (This proves deck integrity — collusion and bots are caught by pattern analysis.)
+const cardCode = (c: HoldemCard) => `${c.rank}${c.suit}`;
+const seedFromSecret = (secret: string) => parseInt(secret.slice(0, 8), 16);
+function deckFromSecret(secret: string): string[] {
+  return shuffleHoldem(makeHoldemDeck(), mulberry32(seedFromSecret(secret))).map(cardCode);
+}
 
 // ── Append-only game record (hash-chained; any edit breaks every later link) ──
 type RecordEntry = { seq: number; at: number; kind: string; data: unknown; prevHash: string; hash: string };
@@ -56,6 +67,9 @@ export type PokerTableSession = {
   reviewHolds: { id: string; detail: string; at: number; status: "pending" }[];
   trust: number;
   patterns: { winStreak: number; lastFoldWinAt: number; actionGaps: number[]; matchups: Record<string, number> };
+  handSecrets: Record<number, string>;      // revealed only after the hand settles
+  handCommitments: Record<number, string>;  // published before the deal
+  handDecks: Record<number, string[]>;      // full shuffled deck, recorded for reveal/audit
 };
 
 const tables = new Map<string, PokerTableSession>();
@@ -137,7 +151,9 @@ function settleXP(t: PokerTableSession): { xpAwarded: number; held: string[]; no
     xp = 0;
   }
   if (xp > 0) t.pendingXP += xp;
-  appendRecord("hand", { table: t.id, hand: st.handNumber, winners: st.winners.map((w) => ({ id: w.id, amount: w.amount })), showdown, xpAwarded: xp, held, trust: t.trust });
+  // Hand is over — reveal the shuffle secret and deck so the deal is publicly verifiable.
+  const hn = st.handNumber;
+  appendRecord("hand", { table: t.id, hand: hn, winners: st.winners.map((w) => ({ id: w.id, amount: w.amount })), showdown, xpAwarded: xp, held, trust: t.trust, reveal: t.handSecrets[hn] ? { secret: t.handSecrets[hn], deck: t.handDecks[hn] } : undefined });
   return { xpAwarded: xp, held, notes };
 }
 
@@ -152,17 +168,23 @@ export function createPokerTable(playerId: string, tierIndex: number): PokerTabl
     handCounts: { hourStart: Date.now(), hourHands: 0, day: dayKey(), dayHands: 0 },
     pendingXP: 0, reviewHolds: [], trust: 100,
     patterns: { winStreak: 0, lastFoldWinAt: 0, actionGaps: [], matchups: {} },
+    handSecrets: {}, handCommitments: {}, handDecks: {},
   };
   tables.set(t.id, t);
-  appendRecord("table-open", { table: t.id, player: playerId, league: def.league, seed });
+  appendRecord("table-open", { table: t.id, player: playerId, league: def.league });
   return t;
 }
 
 export function dealServerHand(t: PokerTableSession) {
-  const rng = mulberry32(t.seed + t.state.handNumber * 7919);
-  t.state = dealHand(t.state, rng);
+  const nextHand = t.state.handNumber + 1;
+  // Commit to the deck before any card is dealt; the secret stays hidden until the hand settles.
+  const secret = crypto.randomBytes(16).toString("hex");
+  t.handSecrets[nextHand] = secret;
+  t.handCommitments[nextHand] = hash(secret);
+  t.handDecks[nextHand] = deckFromSecret(secret);
+  t.state = dealHand(t.state, mulberry32(seedFromSecret(secret)));
   t.handStartedAt = Date.now();
-  appendRecord("deal", { table: t.id, hand: t.state.handNumber, seedOffset: t.seed + t.state.handNumber * 7919 });
+  appendRecord("deal", { table: t.id, hand: nextHand, commitment: t.handCommitments[nextHand] });
   runBots(t);
 }
 
@@ -184,6 +206,53 @@ export function playerAct(t: PokerTableSession, action: string, raiseTo: number)
 }
 
 export function getTable(id: string) { return tables.get(id); }
+
+/** Commitment for the hand currently being dealt/played (safe to publish mid-hand). */
+export function currentCommitment(t: PokerTableSession): { hand: number; commitment: string } | null {
+  const c = t.handCommitments[t.state.handNumber];
+  return c ? { hand: t.state.handNumber, commitment: c } : null;
+}
+
+/**
+ * Verify a hand's shuffle. Mid-hand only the commitment is public; once the hand has
+ * settled, the secret and full deck are revealed and re-checked server-side, and the
+ * client can independently re-run the same shuffle from the secret.
+ */
+export function verifyHandFairness(tableId: string, handNumber: number) {
+  const t = tables.get(tableId);
+  if (!t) return null;
+  const commitment = t.handCommitments[handNumber];
+  if (!commitment) return { ok: false as const, error: "unknown_hand" };
+  const settled = handNumber < t.state.handNumber || t.state.handOver;
+  if (!settled) return { ok: true as const, hand: handNumber, commitment, revealed: false as const };
+  const secret = t.handSecrets[handNumber];
+  const deck = t.handDecks[handNumber];
+  const verified = hash(secret) === commitment && JSON.stringify(deckFromSecret(secret)) === JSON.stringify(deck);
+  appendRecord("fairness-check", { table: tableId, hand: handNumber, verified });
+  return { ok: true as const, hand: handNumber, commitment, revealed: true as const, secret, deck, verified };
+}
+
+/** One-tap demonstration: open a throwaway table, deal a hand, fold out, reveal and verify. */
+export function demoFairness() {
+  const t = createPokerTable("fairness-demo", 0);
+  dealServerHand(t);
+  const hand = t.state.handNumber;
+  const commitment = t.handCommitments[hand];
+  // settle the hand: fold whenever it's your turn, bots play the rest out
+  let guard = 0;
+  while (!t.state.handOver && guard++ < 200) {
+    const actor = t.state.players[t.state.turnIndex];
+    if (actor && actor.id === "you") { try { t.state = applyAction(t.state, "you", "fold", 0); } catch { break; } }
+    runBots(t);
+  }
+  settleXP(t);
+  tables.delete(t.id);
+  const secret = t.handSecrets[hand];
+  const deck = t.handDecks[hand];
+  const verified = hash(secret) === commitment && JSON.stringify(deckFromSecret(secret)) === JSON.stringify(deck);
+  appendRecord("fairness-demo", { hand, commitment, verified });
+  return { hand, commitment, secret, deck, verified };
+}
 
 /** Replay a table's record entries to reconstruct outcomes for disputes. */
 export function replayTable(tableId: string): { entries: RecordEntry[]; summary: { hands: number; actions: number; xpAwarded: number; holds: number } } {
