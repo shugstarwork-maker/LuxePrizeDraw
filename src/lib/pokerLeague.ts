@@ -363,6 +363,21 @@ export function submitForReview(kind: string, detail: string): ReviewItem | null
   return item;
 }
 
+// ── Server-authoritative scoring channel ──
+// League XP is only credited when the server confirms the result. The app never
+// submits a score directly; it reports the settled hand and asks the server to verify.
+export async function submitHandForScoring(signal: { won: boolean; showdown: boolean; opponents: string[]; pot: number; durationMs: number; handNumber: number }): Promise<{ xp: number; confirmed: boolean; held?: string } | null> {
+  try {
+    const res = await fetch("/api/poker/score-hand", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-player-id": playerId() },
+      body: JSON.stringify(signal),
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as { xp: number; confirmed: boolean; held?: string };
+  } catch { return null; }
+}
+
 /** Competitive rating (Glicko-style), stored apart from XP and trust. */
 export function recordCompetitiveResult(won: boolean, fieldStrength = 1500): { rating: number } {
   const KEY_R = "luxe-poker-rating";

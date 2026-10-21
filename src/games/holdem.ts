@@ -112,7 +112,7 @@ export function seatPlayer(s: HoldemState, playerId: string): HoldemState {
   return { ...s, players: s.players.map((p) => p.id === playerId ? { ...p, sittingOut: false, folded: true, cards: [] } : p) };
 }
 
-export function dealHand(prev: HoldemState): HoldemState {
+export function dealHand(prev: HoldemState, rng: () => number = Math.random): HoldemState {
   const seated = prev.players.filter((p) => p.chips > 0 && !p.sittingOut);
   if (seated.length < 2) {
     return { ...prev, handOver: true, winners: [], lastAction: "Waiting for another player with chips to sit in." };
@@ -120,7 +120,7 @@ export function dealHand(prev: HoldemState): HoldemState {
   const players = prev.players.map((p) => ({
     ...p, cards: [], bet: 0, handBet: 0, folded: p.chips <= 0 || p.sittingOut, allIn: false, sittingOut: p.sittingOut || p.chips <= 0, hasActed: false,
   }));
-  const deck = shuffleHoldem(makeHoldemDeck());
+  const deck = shuffleHoldem(makeHoldemDeck(), rng);
   const dealerIndex = (prev.dealerIndex + 1) % players.length;
   let s: HoldemState = {
     ...prev, players, deck, board: [], pot: 0, stage: "preflop", dealerIndex,

@@ -10,6 +10,7 @@ import { createGateway, generateText } from "ai";
 import { neon } from "@neondatabase/serverless";
 import { Redis } from "@upstash/redis";
 import { newConnectFour, playConnectFour, type ConnectFourState } from "./src/games/connectFour";
+import * as pokerApi from "./api/poker";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -808,6 +809,70 @@ app.get("/api/arcade/profile", async (req, res) => {
   try { await ensureArcadeTables(); const sql = getAuditDatabase(); await sql`INSERT INTO arcade_players (id) VALUES (${playerId}) ON CONFLICT (id) DO NOTHING`; const rows = await sql`SELECT * FROM arcade_players WHERE id = ${playerId}`; return res.json(rows[0]); } catch { return res.status(503).json({ error: "Arcade profile storage is unavailable." }); }
 });
 app.get("/api/arcade/readiness", (_req, res) => res.json({ onlinePlayEnabled: Boolean(process.env.ARCADE_PLAYER_AUTH_HMAC_SECRET && process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN), requirements: ["authenticated player identity", "Neon match storage", "Upstash Redis room coordination"] }));
+
+// ── Server-authoritative Luxe Poker: cards, actions, outcomes and points are decided here ──
+const pokerPlayer = (req: express.Request) => limitedText(req.header("x-player-id"), 24) || "anon";
+app.post("/api/poker/tables", (req, res) => {
+  const tierIndex = Math.max(0, Math.min(5, Number(req.body?.tierIndex ?? 0)));
+  const t = pokerApi.createPokerTable(pokerPlayer(req), tierIndex);
+  res.json({ tableId: t.id, league: t.league, blinds: t.blinds, buyIn: t.buyIn, trust: t.trust });
+});
+app.post("/api/poker/tables/:id/deal", (req, res) => {
+  const t = pokerApi.getTable(req.params.id);
+  if (!t) return res.status(404).json({ error: "table_not_found" });
+  if (!t.state.handOver) return res.status(409).json({ error: "hand_in_progress" });
+  pokerApi.dealServerHand(t);
+  res.json({ hand: t.state.handNumber, status: t.state.lastAction });
+});
+app.post("/api/poker/tables/:id/action", (req, res) => {
+  const t = pokerApi.getTable(req.params.id);
+  if (!t) return res.status(404).json({ error: "table_not_found" });
+  const result = pokerApi.playerAct(t, String(req.body?.action ?? ""), Number(req.body?.raiseTo ?? 0));
+  if (!result.ok) return res.status(400).json(result);
+  res.json(result);
+});
+app.get("/api/poker/tables/:id", (req, res) => {
+  const t = pokerApi.getTable(req.params.id);
+  if (!t) return res.status(404).json({ error: "table_not_found" });
+  res.json({ league: t.league, blinds: t.blinds, hand: t.state.handNumber, handOver: t.state.handOver, status: t.state.lastAction, pendingXP: t.pendingXP, trust: t.trust, reviewHolds: t.reviewHolds.length });
+});
+// Permanent records: audit trail integrity + dispute replay. Read-only — no endpoint can edit them.
+// Score verification channel: the app reports a settled hand; the server re-checks rate
+// limits and pattern signals, then decides the XP. Client-submitted scores are never trusted.
+const scoreShadow = new Map<string, { hourStart: number; hourHands: number; day: string; dayHands: number; winStreak: number; lastFoldWinAt: number; gaps: number[]; matchups: Record<string, number>; trust: number }>();
+app.post("/api/poker/score-hand", (req, res) => {
+  const pid = pokerPlayer(req);
+  const body = req.body ?? {};
+  const won = Boolean(body.won), showdown = Boolean(body.showdown);
+  const durationMs = Number(body.durationMs ?? 99999), handNumber = Number(body.handNumber ?? 0);
+  if (!Number.isFinite(handNumber) || handNumber < 0) return res.status(400).json({ error: "bad_signal" });
+  const day = new Date().toDateString();
+  let sh = scoreShadow.get(pid);
+  if (!sh) { sh = { hourStart: Date.now(), hourHands: 0, day, dayHands: 0, winStreak: 0, lastFoldWinAt: 0, gaps: [], matchups: {}, trust: 100 }; scoreShadow.set(pid, sh); }
+  if (sh.day !== day) { sh.day = day; sh.dayHands = 0; }
+  if (Date.now() - sh.hourStart > 3600_000) { sh.hourStart = Date.now(); sh.hourHands = 0; }
+  let xp = won ? 2 + (showdown ? 3 : 0) : 0;
+  const held: string[] = [];
+  if (won) {
+    sh.winStreak += 1;
+    if (!showdown) { if (sh.lastFoldWinAt && Date.now() - sh.lastFoldWinAt < 45_000) held.push("rapid-fold-wins"); sh.lastFoldWinAt = Date.now(); }
+    if (sh.winStreak === 8) held.push("win-streak-8");
+  } else sh.winStreak = 0;
+  if (durationMs < 8000) { sh.gaps = [...sh.gaps, durationMs].slice(-12); if (sh.gaps.length === 12 && sh.gaps.every((g) => g < 10000)) held.push("bot-pace"); }
+  for (const opp of Array.isArray(body.opponents) ? body.opponents.slice(0, 6) : []) {
+    const name = String(opp).slice(0, 24);
+    sh.matchups[name] = (sh.matchups[name] ?? 0) + 1;
+    if (sh.matchups[name] === 25) held.push(`repeated-matchup:${name}`);
+  }
+  if (held.length) sh.trust = Math.max(20, sh.trust - 10 * held.length);
+  if (xp > 0 && (sh.hourHands >= 40 || sh.dayHands >= 240)) xp = 0;
+  if (xp > 0 && held.length) { pokerApi.appendRecord("review-hold", { player: pid, detail: `+${xp} XP hand #${handNumber} — ${held.join(", ")}` }); xp = 0; }
+  if (xp > 0) { sh.hourHands += 1; sh.dayHands += 1; }
+  pokerApi.appendRecord("hand", { player: pid, hand: handNumber, won, showdown, xpAwarded: xp, held, trust: sh.trust });
+  res.json({ xp, confirmed: true, held: held.length ? held.join(",") : undefined, trust: sh.trust });
+});
+app.get("/api/poker/audit", (_req, res) => res.json(pokerApi.auditRecordChain()));
+app.get("/api/poker/tables/:id/replay", (req, res) => res.json(pokerApi.replayTable(req.params.id)));
 
 
 type ArcadeProfile = { id: string; displayName: string; elo: number; gamesPlayed: number; wins: number; losses: number; draws: number; winStreak: number; highestElo: number; tournamentWins: number };

@@ -8,7 +8,7 @@ import { PokerTableArtwork } from "./PokerTableArtwork";
 import { useAudio } from "../audio/AudioProvider";
 import { applyAction, botAction, createTable, dealHand, seatPlayer, type HoldemState } from "../games/holdem";
 import { LoungeGamesCarousel } from "./LoungeGamesCarousel";
-import { LEAGUE_XP, analyzeHand, competitiveRating, consumeLeagueMove, ensureWeek, gateRankedHand, integrityFlags, leagueXPForHand, loadReviewQueue, playerId, recordCompetitiveResult, recordDailyParticipation, recordWeeklyXP, submitForReview, tierByIndex, tournamentXPForFinish, trustState, weekEndsIn, weeklyBoard, weeklyCutoffs } from "../lib/pokerLeague";
+import { LEAGUE_XP, competitiveRating, consumeLeagueMove, ensureWeek, integrityFlags, loadReviewQueue, playerId, recordCompetitiveResult, recordDailyParticipation, recordWeeklyXP, submitForReview, submitHandForScoring, tierByIndex, tournamentXPForFinish, trustState, weekEndsIn, weeklyBoard, weeklyCutoffs } from "../lib/pokerLeague";
 import { LeagueCelebration, type Celebration } from "./LeagueCelebration";
 import { LeagueRacePop, type RacePop } from "./LeagueRacePop";
 
@@ -238,27 +238,23 @@ export const LuxePokerLeague: React.FC = () => {
       const showdown = game.board.length === 5; // went to the river = verified showdown result
       // Competitive rating updates on the result itself — separate from league XP and trust
       recordCompetitiveResult(Boolean(mine));
-      // Fair-play scan runs BEFORE any XP is awarded
-      const det = analyzeHand({
+      const signal = {
         won: Boolean(mine),
         showdown,
         opponents: game.players.filter((p) => p.id !== "you" && !p.sittingOut).map((p) => p.name),
         pot: mine?.amount ?? game.pot,
         durationMs: Date.now() - (handStartAt.current || Date.now()),
         handNumber: game.handNumber,
-      });
-      const handXP = leagueXPForHand(Boolean(mine), showdown);
+      };
       const dp = recordDailyParticipation(); // +5 once per day, capped
-      const gate = gateRankedHand(`hand#${game.handNumber}`, handXP);
       if (dp.paid) { setLeague(dp.state); pushXpFloat(LEAGUE_XP.dailyParticipation); note(`Daily participation bonus: +${LEAGUE_XP.dailyParticipation} league XP.`); }
-      if (handXP > 0) {
-        if (!gate.ranked) note(gate.reason ?? "Ranked XP paused.");
-        else if (det.suspicious) {
-          // Suspicious results go to review before anything is credited
-          const hold = submitForReview("league-xp", `+${handXP} XP on hand #${game.handNumber} — ${det.flagged.join(", ")}`);
-          note(hold ? `Result sent for review (${hold.id}) before XP is credited.` : "Result under review.");
-        } else gainLeagueXp(handXP);
-      }
+      // Server-authoritative scoring: the server verifies the hand and decides the XP.
+      // If the server can't be reached or rejects it, no XP is credited locally.
+      void submitHandForScoring(signal).then((verdict) => {
+        if (!verdict || !verdict.confirmed) { note("Hand could not be verified by the server — no league XP credited."); return; }
+        if (verdict.held) { note(`Result sent for review before XP is credited (${verdict.held}).`); return; }
+        if (verdict.xp > 0) gainLeagueXp(verdict.xp);
+      });
     }
     play("winnerReveal");
     if (mine) {
@@ -447,6 +443,9 @@ export const LuxePokerLeague: React.FC = () => {
               <li>· <b className="text-white/75">Review before prizes</b> — suspicious results are held for review ({loadReviewQueue().filter((r) => r.status === "pending").length} pending) before any XP or prize is awarded.</li>
               <li>· <b className="text-white/75">Rate-capped scoring</b> — only 40 ranked hands/hour (240/day) earn XP, so farming can't dominate.{integrityFlags().length > 0 ? <span className="text-amber-200"> Active review flags: {integrityFlags().join(", ")}.</span> : ""}</li>
               <li>· <b className="text-white/75">Independently verifiable</b> — every settled result is hashed into a tamper-evident chain, so leaderboard totals can be replayed and checked.</li>
+              <li>· <b className="text-white/75">Server-controlled scoring</b> — cards, valid actions, outcomes and points are decided by the server; the app can never submit its own score.</li>
+              <li>· <b className="text-white/75">Permanent records</b> — every hand, action and score change is written to an append-only, hash-chained log that admins can't quietly edit and that can be replayed for disputes.</li>
+              <li>· <b className="text-white/75">Bot &amp; automation signals</b> — timing and consistency patterns are analysed together; suspicious play goes to review — fast play or frequent wins alone never ban anyone.</li>
               <li>· <b className="text-white/75">Three separate ratings</b> — league XP (progression), competitive rating ({competitiveRating()}) and trust ({trustState().score}/100) never mix: you can't buy a better ranking or erase a flagged pattern by playing more.</li>
             </ul>
           </div>
