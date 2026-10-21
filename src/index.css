@@ -1308,3 +1308,13 @@
 .race-pop__xp { font-family:ui-monospace,monospace; font-size:.65rem; font-weight:900; }
 .race-pop__note { margin:.5rem 0 0; text-align:center; font-size:.68rem; font-weight:800; color:#f6c945; }
 @media (prefers-reduced-motion: reduce) { .race-pop, .race-pop__burst, .race-pop__row--you { animation:none; } .race-pop__row { transition:none !important; } }
+
+/* ── Headline prize deck card — matches the poker lounge carousel cards ── */
+.headline-luxe-deck { position:relative; }
+.headline-luxe-deck .deck-card { height:clamp(29rem,132vw,33rem); }
+.headline-luxe-deck .headline-prize-choice--compact { text-align:left; }
+.headline-luxe-deck .headline-prize-choice__options { justify-content:flex-start; }
+.headline-luxe-deck .headline-prize-choice__options button { min-height:2.4rem; padding:.5rem .9rem; border-radius:999px; border:1px solid #ffffff2e; background:#00000066; color:#ffe6a0; font-weight:800; font-size:.78rem; backdrop-filter:blur(8px); box-shadow:none; }
+.headline-luxe-deck .headline-prize-choice__options button[aria-pressed=true] { background:linear-gradient(#fff0b0,#ffbd22); color:#140c00; border-color:#ffe6a0; }
+.headline-luxe-deck .headline-prize-choice--compact > p { margin-top:.15rem; font-size:.68rem; line-height:1.45; color:#ffffffb3; text-shadow:0 1px 4px #000; }
+.headline-luxe-deck .headline-prize-choice--compact > small { display:block; margin-top:.25rem; font-size:.62rem; color:#ffe6a0cc; text-shadow:0 1px 4px #000; }
