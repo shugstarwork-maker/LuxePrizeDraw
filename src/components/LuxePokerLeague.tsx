@@ -25,8 +25,11 @@ const LEAGUE_TABLES: TableDef[] = [
   { name: "Bronze League Table", image: "/games/luxe-poker-table.png", blinds: "10 / 20", smallBlind: 10, bigBlind: 20, buyIn: 200, bots: 5, tone: "from-amber-200 to-amber-500" },
   { name: "Silver League Table", image: "/games/luxe-poker-table.png", blinds: "25 / 50", smallBlind: 25, bigBlind: 50, buyIn: 500, bots: 5, tone: "from-amber-200 to-amber-500" },
   { name: "Gold League Table", image: "/games/luxe-poker-table.png", blinds: "50 / 100", smallBlind: 50, bigBlind: 100, buyIn: 1000, bots: 5, tone: "from-yellow-200 to-amber-600" },
+  { name: "Platinum League Table", image: "/games/luxe-poker-table.png", blinds: "75 / 150", smallBlind: 75, bigBlind: 150, buyIn: 1500, bots: 5, tone: "from-teal-200 to-emerald-400" },
   { name: "Sapphire League Table", image: "/games/luxe-poker-table.png", blinds: "100 / 200", smallBlind: 100, bigBlind: 200, buyIn: 2000, bots: 5, tone: "from-yellow-200 to-amber-600" },
-  { name: "Ruby League Table", image: "/games/luxe-poker-table.png", blinds: "200 / 400", smallBlind: 200, bigBlind: 400, buyIn: 4000, bots: 5, tone: "from-amber-300 to-orange-500" },
+  { name: "Ruby League Table", image: "/games/luxe-poker-table.png", blinds: "150 / 300", smallBlind: 150, bigBlind: 300, buyIn: 3000, bots: 5, tone: "from-amber-300 to-orange-500" },
+  { name: "Emerald League Table", image: "/games/luxe-poker-table.png", blinds: "200 / 400", smallBlind: 200, bigBlind: 400, buyIn: 4000, bots: 5, tone: "from-emerald-300 to-green-600" },
+  { name: "Amethyst League Table", image: "/games/luxe-poker-table.png", blinds: "300 / 600", smallBlind: 300, bigBlind: 600, buyIn: 6000, bots: 5, tone: "from-purple-300 to-fuchsia-500" },
   { name: "Diamond League Table", image: "/games/luxe-poker-table.png", blinds: "400 / 800", smallBlind: 400, bigBlind: 800, buyIn: 8000, bots: 5, tone: "from-amber-300 to-orange-500" },
   { name: "Luxe Elite Table", image: "/games/luxe-poker-table.png", blinds: "800 / 1,600", smallBlind: 800, bigBlind: 1600, buyIn: 16000, bots: 5, tone: "from-amber-100 to-yellow-500" },
 ];

@@ -3,9 +3,12 @@ export type LeagueTier = { name: string; colour: string; glow: string; promote: 
 export const LEAGUE_TIERS: LeagueTier[] = [
   { name: "Bronze", colour: "#c98a4b", glow: "rgba(201,138,75,.4)", promote: 20, demote: 0, blurb: "New players · placement period" },
   { name: "Silver", colour: "#c7cbd4", glow: "rgba(199,203,212,.4)", promote: 15, demote: 25, blurb: "Regulars · weekly race" },
-  { name: "Gold", colour: "#f6c945", glow: "rgba(246,201,69,.45)", promote: 10, demote: 22, blurb: "Experienced players · Qualifying tournaments" },
+  { name: "Gold", colour: "#f6c945", glow: "rgba(246,201,69,.45)", promote: 10, demote: 22, blurb: "Experienced players · weekly race" },
+  { name: "Platinum", colour: "#bfe3e0", glow: "rgba(191,227,224,.45)", promote: 8, demote: 21, blurb: "Established players · weekly race" },
   { name: "Sapphire", colour: "#5ec2e8", glow: "rgba(94,194,232,.45)", promote: 7, demote: 20, blurb: "Seasoned players · weekly race" },
-  { name: "Ruby", colour: "#e85e7a", glow: "rgba(232,94,122,.45)", promote: 5, demote: 18, blurb: "Top division race" },
+  { name: "Ruby", colour: "#e85e7a", glow: "rgba(232,94,122,.45)", promote: 6, demote: 19, blurb: "Strong division race" },
+  { name: "Emerald", colour: "#3fd08c", glow: "rgba(63,208,140,.45)", promote: 5, demote: 18, blurb: "Top division race" },
+  { name: "Amethyst", colour: "#b78ae8", glow: "rgba(183,138,232,.45)", promote: 4, demote: 16, blurb: "High roller race" },
   { name: "Diamond", colour: "#9be8ff", glow: "rgba(155,232,255,.5)", promote: 3, demote: 15, blurb: "Elite race" },
   { name: "Luxe Elite", colour: "#ffe9a8", glow: "rgba(255,233,168,.5)", promote: 0, demote: 10, blurb: "Top performers · Verified competitive ranking" },
 ];
