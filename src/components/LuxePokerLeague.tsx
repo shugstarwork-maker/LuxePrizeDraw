@@ -15,11 +15,15 @@ import { LeagueRacePop, type RacePop } from "./LeagueRacePop";
 const CardView = LuxePlayingCard;
 const key = (card: { rank: string; suit: string }) => `${card.rank}${card.suit}`;
 
-type TableDef = { name: string; image: string; blinds: string; smallBlind: number; bigBlind: number; buyIn: number; bots: number; tone: string; minLevel: number };
-const tables: TableDef[] = [
-  { name: "Onyx Luxe Lounge", image: "/games/luxe-poker-table.png", blinds: "25 / 50", smallBlind: 25, bigBlind: 50, buyIn: 500, bots: 5, tone: "from-amber-200 to-amber-500", minLevel: 0 },
-  { name: "Noir Lounge", image: "/games/luxe-deck-preview.svg", blinds: "100 / 200", smallBlind: 100, bigBlind: 200, buyIn: 1500, bots: 5, tone: "from-yellow-200 to-amber-600", minLevel: 0 },
-  { name: "Gilded Room", image: "/games/luxe-chips-preview.svg", blinds: "250 / 500", smallBlind: 250, bigBlind: 500, buyIn: 5000, bots: 5, tone: "from-amber-300 to-orange-500", minLevel: 2 },
+type TableDef = { name: string; image: string; blinds: string; smallBlind: number; bigBlind: number; buyIn: number; bots: number; tone: string };
+// Duolingo-style: no lounge picking — your weekly league auto-assigns your table.
+const LEAGUE_TABLES: TableDef[] = [
+  { name: "Bronze League Table", image: "/games/luxe-poker-table.png", blinds: "10 / 20", smallBlind: 10, bigBlind: 20, buyIn: 200, bots: 5, tone: "from-amber-200 to-amber-500" },
+  { name: "Silver League Table", image: "/games/luxe-poker-table.png", blinds: "25 / 50", smallBlind: 25, bigBlind: 50, buyIn: 500, bots: 5, tone: "from-amber-200 to-amber-500" },
+  { name: "Gold League Table", image: "/games/luxe-poker-table.png", blinds: "50 / 100", smallBlind: 50, bigBlind: 100, buyIn: 1000, bots: 5, tone: "from-yellow-200 to-amber-600" },
+  { name: "Sapphire League Table", image: "/games/luxe-poker-table.png", blinds: "100 / 200", smallBlind: 100, bigBlind: 200, buyIn: 2000, bots: 5, tone: "from-yellow-200 to-amber-600" },
+  { name: "Ruby League Table", image: "/games/luxe-poker-table.png", blinds: "200 / 400", smallBlind: 200, bigBlind: 400, buyIn: 4000, bots: 5, tone: "from-amber-300 to-orange-500" },
+  { name: "Diamond League Table", image: "/games/luxe-poker-table.png", blinds: "400 / 800", smallBlind: 400, bigBlind: 800, buyIn: 8000, bots: 5, tone: "from-amber-300 to-orange-500" },
 ];
 const emotes = ["Nice hand", "Good luck", "Well played", "Thinking..."];
 const gifts = [{ name: "Lucky chip", cost: 25, icon: "🪙" }, { name: "Gold crown", cost: 75, icon: "👑" }, { name: "Luxe sparkle", cost: 150, icon: "✨" }];
@@ -34,7 +38,7 @@ export const LuxePokerLeague: React.FC = () => {
   const { enabled, setEnabled, play, musicEnabled, setMusicEnabled } = useAudio();
   const [screen, setScreen] = useState<"lobby" | "table">("lobby");
   const [leaveOpen, setLeaveOpen] = useState(false);
-  const [stakeFilter, setStakeFilter] = useState<"all" | "starter" | "high">("all");
+
   const [selectedSeat, setSelectedSeat] = useState("Amelia K.");
   const [giftsOpen, setGiftsOpen] = useState(false);
   const [avatar, setAvatar] = useState(() => localStorage.getItem("luxe-poker-avatar") || "");
@@ -300,19 +304,17 @@ export const LuxePokerLeague: React.FC = () => {
     note(`${item.label} — acquired. Demo store, no cash value.`);
   };
   const join = (table: TableDef) => {
-    if (level < table.minLevel) { const message = `${table.name} opens at level ${table.minLevel}. You are level ${level} — win hands to level up.`; setSeatError(message); note(message); return; }
-    if (chips < table.buyIn) { const message = `${table.name} needs ${table.buyIn.toLocaleString()} free-play chips. You have ${chips.toLocaleString()}. Choose a lower entry or collect free daily chips below.`; setSeatError(message); note(message); return; }
+    if (chips < table.buyIn) { const message = `${table.name} needs ${table.buyIn.toLocaleString()} free-play chips. You have ${chips.toLocaleString()} — collect free daily chips below.`; setSeatError(message); note(message); return; }
     setSeatError("");
     setScreen("table");
     setActiveTable(table);
     setChips((v) => v - table.buyIn);
     const table0 = createTable({ playerName: "You", playerChips: table.buyIn, botCount: table.bots, botChips: 1000, smallBlind: table.smallBlind, bigBlind: table.bigBlind });
-    table0.players = table0.players.map((p) => (p.id === "you" ? { ...p, sittingOut: true, folded: true } : p));
     settledHand.current = 0;
     aliveRef.current = [];
     finishedRef.current = false;
     setGame(table0);
-    note(`Welcome to ${table.name}. The dealer will shuffle up — take your seat.`);
+    note(`Welcome to the ${table.name} — you're seated and the dealer is shuffling.`);
   };
   // ── The dealer runs the table: hands deal themselves ──
   useEffect(() => {
@@ -346,14 +348,14 @@ export const LuxePokerLeague: React.FC = () => {
   };
   const sendGift = (gift: typeof gifts[number]) => { if (chips < gift.cost) return note(`You need ${gift.cost} virtual chips to send ${gift.name}.`); setChips((v) => v - gift.cost); play("success"); setGiftsOpen(false); note(`You sent ${gift.icon} ${gift.name} to ${selectedSeat}. Virtual gift only.`); };
   const dailyReward = () => { if (!rewardReady) return; setChips((v) => v + 200); awardXp(10); play("chipStack"); setRewardReady(false); localStorage.setItem("luxe-poker-reward", new Date().toDateString()); note("Daily sign-in collected: 200 free-play chips and 10 XP."); };
-  const visibleTables = tables.filter((table) => stakeFilter === "all" || (stakeFilter === "starter" ? table.buyIn <= 1500 : table.buyIn > 1500));
+  const leagueTable = LEAGUE_TABLES[Math.min(league.tierIndex, LEAGUE_TABLES.length - 1)];
 
   const dealerStage = game?.stage === "preflop" ? "pre-flop" : game?.stage ?? "idle";
   const potWinner: "player" | "host" | "split" | null = !game?.handOver || !game.winners.length ? null : game.winners.length > 1 ? "split" : game.winners[0].id === "you" ? "player" : "host";
   const dealerMood: "idle" | "win" | "lose" = potWinner === "player" || potWinner === "split" ? "win" : potWinner === "host" ? "lose" : "idle";
   const busted = Boolean(game?.handOver && you && you.chips <= 0);
 
-  if (screen === "lobby") return <section id="poker-league" className="salon-selection min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-4 py-6 pb-28 text-white"><div className="mx-auto max-w-5xl"><header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-4 py-3"><span className="inline-flex items-center gap-2 font-black text-amber-100"><Crown className="h-5 w-5" />LUXE POKER LOUNGE</span><span className="rounded-full border border-amber-200/35 bg-amber-300/10 px-3 py-1.5 font-mono text-sm font-black text-amber-100">{chips.toLocaleString()} chips</span><button onClick={() => setEnabled(!enabled)} className="rounded-lg bg-white/10 p-2"><Volume2 className="h-4 w-4" /></button></header><div className="mt-8 text-center"><p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">Members’ casino · no cash value</p><h2 className="mt-3 text-4xl font-black">Choose your Luxe Lounge</h2><p className="mt-3 text-sm text-white/60">Full six-seat Texas Hold’em against five Luxe regulars — blinds, raises, all-ins and split pots. Free-play chips only, pure experience.</p></div><LoungeGamesCarousel /><div className="mt-7 flex flex-wrap items-center justify-between gap-3"><div className="flex gap-2">{(["all", "starter", "high"] as const).map((filter) => <button key={filter} onClick={() => setStakeFilter(filter)} className={`rounded-full px-3 py-2 text-xs font-black capitalize ${stakeFilter === filter ? "bg-amber-300 text-black" : "border border-white/15 bg-white/5 text-white/70"}`}>{filter === "all" ? "All stakes" : filter === "starter" ? "Starter stakes" : "High stakes"}</button>)}</div><button onClick={() => join(tables[0])} className="rounded-xl border border-amber-200/35 bg-amber-300/10 px-4 py-2 text-xs font-black text-amber-100">Host private table</button></div>{seatError && <p role="alert" className="poker-seat-error">{seatError}</p>}<div className="mt-4 grid gap-4 sm:grid-cols-3">{visibleTables.map((table) => { const locked = level < table.minLevel; const poor = chips < table.buyIn; return <button key={table.name} onClick={() => join(table)} className={`group overflow-hidden rounded-2xl border text-left transition active:scale-[.98] ${locked || poor ? "border-white/10 opacity-70" : "border-amber-200/30 hover:border-amber-200/70"} bg-black/40`}><div className={`relative h-28 bg-gradient-to-br ${table.tone}`}><img src={table.image} alt="" className="h-full w-full object-cover opacity-80 mix-blend-luminosity" /><span className="absolute right-2 top-2 rounded-full bg-black/70 px-2 py-1 text-[9px] font-black uppercase tracking-wider text-amber-100">{locked ? `Level ${table.minLevel}+` : poor ? "Need chips" : "Open"}</span></div><div className="p-4"><p className="font-black text-amber-100">{table.name}</p><p className="mt-1 flex items-center gap-1 text-[11px] text-white/55"><Users className="h-3 w-3" /> 6 seats · blinds {table.blinds}</p><p className="mt-2 font-mono text-sm font-black text-white">Buy-in {table.buyIn.toLocaleString()}</p></div></button>; })}</div>
+  if (screen === "lobby") return <section id="poker-league" className="salon-selection min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-4 py-6 pb-28 text-white"><div className="mx-auto max-w-5xl"><header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-4 py-3"><span className="inline-flex items-center gap-2 font-black text-amber-100"><Crown className="h-5 w-5" />LUXE POKER LOUNGE</span><span className="rounded-full border border-amber-200/35 bg-amber-300/10 px-3 py-1.5 font-mono text-sm font-black text-amber-100">{chips.toLocaleString()} chips</span><button onClick={() => setEnabled(!enabled)} className="rounded-lg bg-white/10 p-2"><Volume2 className="h-4 w-4" /></button></header><div className="mt-8 text-center"><p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">Members’ casino · no cash value</p><h2 className="mt-3 text-4xl font-black">Your Weekly League</h2><p className="mt-3 text-sm text-white/60">Pick a card game and you're seated straight at your {leagueTier.name} League table — no lobbies, no waiting. Win hands to climb the divisions. Free-play chips only, pure experience.</p></div><LoungeGamesCarousel /><button onClick={() => join(leagueTable)} className="group mt-7 block w-full overflow-hidden rounded-2xl border text-left transition active:scale-[.98] border-amber-200/40 hover:border-amber-200/80 bg-black/40"><div className={`relative h-32 bg-gradient-to-br ${leagueTable.tone}`}><img src={leagueTable.image} alt="" className="h-full w-full object-cover opacity-80 mix-blend-luminosity" /><span className="absolute right-2 top-2 rounded-full bg-black/70 px-2 py-1 text-[9px] font-black uppercase tracking-wider" style={{ color: leagueTier.colour }}>{leagueTier.name} League · your table</span></div><div className="flex items-center justify-between gap-3 p-4"><div><p className="font-black text-amber-100">{leagueTable.name}</p><p className="mt-1 flex items-center gap-1 text-[11px] text-white/55"><Users className="h-3 w-3" /> 6 seats · blinds {leagueTable.blinds} · buy-in {leagueTable.buyIn.toLocaleString()}</p></div><span className="rounded-full bg-gradient-to-b from-amber-300 to-amber-500 px-5 py-2.5 text-sm font-black text-black shadow-lg">Play now</span></div></button>{seatError && <p role="alert" className="poker-seat-error">{seatError}</p>}
         <div className="mt-8 rounded-[1.75rem] border border-amber-200/25 bg-[linear-gradient(145deg,#241a08,#120d06_70%)] p-5">
           <p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">VIP ladder &amp; chip store</p>
           <div className="mt-4 flex items-center gap-3">
