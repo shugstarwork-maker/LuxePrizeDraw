@@ -1,10 +1,6 @@
-import { CashPoundRain } from "./CashPoundRain";
-import { DrawValueHighlights } from "./DrawValueHighlights";
-import { TicketDrawProgress } from "./TicketDrawProgress";
-import { ticketTarget } from "../lib/ticketProgress";
-import { prizeUnlock } from "../lib/prizeUnlock";
 import { RollingCardCarousel } from "./RollingCardCarousel";
-import { Banknote, CircleAlert, Sparkles } from "lucide-react";
+import { Banknote, CircleAlert, Ticket } from "lucide-react";
+import { DeckCard, deckGo } from "./DeckCard";
 
 // Proposed display catalogue only; this does not create competitions or change entry gates.
 export const CASH_DRAW_PROPOSALS = [
@@ -32,8 +28,14 @@ export const CASH_DRAW_PROPOSALS = [
   { id: "cash-preview-1000p", entryPence: 1000, valueGBP: 250000, title: "£250,000 Cash Prize", image: "/prizes/higher-cash-notes.jpg" },
  ];
 
+const formatGBP = (v: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 }).format(v);
+
 export const formatCashEntry = (pence: number) => pence < 100 ? `${pence}p` : new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", minimumFractionDigits: pence % 100 === 0 ? 0 : 2 }).format(pence / 100);
 
 export function CashPrizesCarousel() {
-  return <section className="relative overflow-hidden border-y border-emerald-200/15 bg-[radial-gradient(circle_at_80%_10%,rgba(16,185,129,.15),transparent_32%),rgba(1,12,8,.72)] py-14 sm:py-20"><div className="mx-auto max-w-5xl px-4 sm:px-6"><header className="max-w-3xl"><p className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[.22em] text-emerald-200"><Banknote className="h-4 w-4" /> Cash prizes</p><h2 className="mt-4 text-4xl font-black tracking-tight sm:text-6xl">Cash, presented clearly.</h2><p className="mt-5 text-sm leading-relaxed text-white/65 sm:text-base">Explore 22 proposed cash draws with entries from 1p to £10. Approval pending — entries and payments remain disabled. Prize values and prices are proposals, subject to approved rules and funding.</p></header><RollingCardCarousel items={CASH_DRAW_PROPOSALS} getKey={item => item.id} label="cash prize" className="mt-7" renderItem={(prize) => <article className="cash-swell-card coverflow-draw group relative mt-7 min-h-[12rem] overflow-hidden rounded-[2rem] border border-emerald-100/30 bg-black/50 shadow-[0_28px_65px_rgba(0,0,0,.48)]"><img key={prize.image} src={prize.image} alt={`${prize.title} preview`} className="absolute inset-0 h-full w-full object-cover brightness-110 saturate-125 transition duration-700 group-hover:scale-105" /><div className="absolute inset-0 bg-gradient-to-r from-black via-black/65 to-black/15" /><CashPoundRain /><div className="relative z-10 flex min-h-[12rem] flex-col justify-end p-5 pt-16 sm:p-7 sm:pt-16"><p className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-100/30 bg-black/45 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.16em] text-emerald-100"><Sparkles className="h-3.5 w-3.5" /> {formatCashEntry(prize.entryPence)} proposed entry</p><DrawValueHighlights hidePrize entry={formatCashEntry(prize.entryPence)} prize={new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 }).format(prize.valueGBP)} prizeLabel="Proposed cash prize" /><h3 className="cash-prize-heading mt-3 font-black">{prize.title}</h3><p className="mt-4 max-w-xl text-sm leading-relaxed text-white/70">Cash prize proposal, subject to verified funding and final approved rules.</p><TicketDrawProgress drawId={prize.id} proposedTarget={ticketTarget(prizeUnlock(prize.valueGBP)!.targetGBP, prize.entryPence / 100)} /><p className="mt-5 flex max-w-xl gap-2 rounded-xl border border-amber-200/20 bg-black/35 p-3 text-xs leading-relaxed text-amber-50"><CircleAlert className="h-4 w-4 shrink-0 text-amber-200" />Approval pending. Preview only. No entry, payment, prize claim, guaranteed value, or draw date is created here.</p></div></article>} /></div></section>;
+  return <section className="relative overflow-hidden border-y border-emerald-200/15 bg-[radial-gradient(circle_at_80%_10%,rgba(16,185,129,.15),transparent_32%),rgba(1,12,8,.72)] py-14 sm:py-20"><div className="mx-auto max-w-5xl px-4 sm:px-6"><header className="max-w-3xl"><p className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[.22em] text-emerald-200"><Banknote className="h-4 w-4" /> Cash prizes</p><h2 className="mt-4 text-4xl font-black tracking-tight sm:text-6xl">Cash, presented clearly.</h2><p className="mt-5 text-sm leading-relaxed text-white/65 sm:text-base">Explore 22 proposed cash draws with entries from 1p to £10. Approval pending — entries and payments remain disabled. Prize values and prices are proposals, subject to approved rules and funding.</p></header><RollingCardCarousel items={CASH_DRAW_PROPOSALS} getKey={item => item.id} label="cash prize" className="mt-7" renderItem={(prize) => <DeckCard image={prize.image} title={prize.title}
+      facts={[[`${formatCashEntry(prize.entryPence)} proposed entry`, Ticket], ["Cash prize proposal", Banknote], ["Approval pending", CircleAlert]]}
+      stats={[{ value: formatGBP(prize.valueGBP), label: "Proposed prize" }, { value: formatCashEntry(prize.entryPence), label: "Entry" }, { value: "Pending", label: "Status" }]}
+      cta="View preview" onCta={() => deckGo("/launch-build")}
+      note="Preview only · entries & payments disabled" />} /></div></section>;
 }

@@ -53,7 +53,7 @@ export const EXPERIENCE_GALLERY_ITEMS: ExperienceGalleryPhoto[] = [
     subtitle: "Superyachts, casinos and Grand Prix glamour",
     category: "Venture & Tech",
     location: "Monte Carlo, Monaco",
-    imageUrl: "https://images.unsplash.com/photo-1523409070585-7f2a86b4b9c7?auto=format&fit=crop&w=1200&q=85",
+    imageUrl: "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=1200&q=85",
     description: "The playground of the Riviera — harbour-front suites, private terraces and Mediterranean sunsets.",
     tag: "Riviera Glamour",
   },

@@ -63,7 +63,8 @@ export function RollingCardCarousel<T>({ items, getKey, renderItem, label, class
             gridArea: "1 / 1", zIndex: items.length - distance,
             opacity: distance > 2 ? 0 : offset === 0 ? 1 : .45,
             visibility: distance > 2 ? "hidden" : "visible",
-            transform: `translateX(${offset * 82}%) translateZ(${-distance * 100}px) rotateY(${offset === 0 ? 0 : offset < 0 ? 28 : -28}deg) scale(${1 - Math.min(distance, 3) * .12})`,
+            transform: `translateX(${offset * 58}%) scale(${1 - Math.min(distance, 3) * .16})`,
+            filter: offset === 0 ? "none" : "brightness(.65) saturate(.85)",
           }}>{renderItem(item, index)}</div>;
         })}
       </div>
