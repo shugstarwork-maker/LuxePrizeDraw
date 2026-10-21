@@ -77,6 +77,9 @@ export function weeklyBoard(st: LeagueState): LeagueRow[] {
     const games = 4 + Math.floor(rng() * 40);
     return { name, xp, you: false, games, delta: 0 };
   });
+  // reconcile: weekly XP is derived from the confirmed ledger (chips never count)
+  const yourConfirmed = confirmedXP();
+  st.xp = yourConfirmed;
   // approximate last-week ranks for movement indicators
   const prevRng = mulberry32(st.seed + st.tierIndex * 977 + 41);
   const prevScores = rivals.map((r) => ({ name: r.name, s: Math.round((60 + prevRng() * prevRng() * 900) * tierBoost) }));
@@ -89,11 +92,67 @@ export function weeklyBoard(st: LeagueState): LeagueRow[] {
   return board;
 }
 
+// ── Provisional points ledger ──
+// Newly earned points are provisional for a review window; only confirmed points count
+// for standings/promotion. Confirmed cheating voids entries and reverses their points.
+export type PointsEntry = { id: string; at: number; amount: number; label: string; status: "provisional" | "confirmed" | "voided" };
+const LEDGER_KEY = "luxe-poker-ledger";
+const PROVISIONAL_MS = 60_000; // review window before points confirm
+
+export function loadLedger(): PointsEntry[] {
+  try { const raw = localStorage.getItem(LEDGER_KEY); if (raw) return JSON.parse(raw) as PointsEntry[]; } catch { /* fresh */ }
+  return [];
+}
+function saveLedger(l: PointsEntry[]) { localStorage.setItem(LEDGER_KEY, JSON.stringify(l.slice(-200))); }
+
+/** Add points as provisional — they confirm automatically after the review window. */
+export function addProvisionalPoints(amount: number, label: string): PointsEntry {
+  const entry: PointsEntry = { id: `PTS-${Date.now().toString(36).toUpperCase()}`, at: Date.now(), amount, label, status: "provisional" };
+  saveLedger([...loadLedger(), entry]);
+  return entry;
+}
+
+/** Provisional entries past their review window become confirmed. Returns newly confirmed XP. */
+export function settleLedger(): number {
+  const ledger = loadLedger();
+  let newlyConfirmed = 0;
+  const next = ledger.map((e) => {
+    if (e.status === "provisional" && Date.now() - e.at > PROVISIONAL_MS) { newlyConfirmed += e.amount; return { ...e, status: "confirmed" as const }; }
+    return e;
+  });
+  if (newlyConfirmed > 0) saveLedger(next);
+  return newlyConfirmed;
+}
+
+/** Points currently counting toward standings (confirmed only). */
+export function confirmedXP(): number {
+  settleLedger();
+  return loadLedger().filter((e) => e.status === "confirmed").reduce((n, e) => n + e.amount, 0);
+}
+
+/** Provisional points awaiting the review window. */
+export function provisionalXP(): number {
+  return loadLedger().filter((e) => e.status === "provisional").reduce((n, e) => n + e.amount, 0);
+}
+
+/** Void entries — confirmed cheating reverses their points, even after confirmation. */
+export function voidEntries(ids: string[]): number {
+  const ledger = loadLedger();
+  let reversed = 0;
+  const next = ledger.map((e) => {
+    if (ids.includes(e.id) && e.status !== "voided") { reversed += e.amount; return { ...e, status: "voided" as const }; }
+    return e;
+  });
+  saveLedger(next);
+  return reversed;
+}
+
 export function weeklyCutoffs(board: LeagueRow[], tierIndex: number): { promoteXP: number; demoteXP: number } {
   // Top 10 promote, middle group stays, bottom 10 relegate.
-  const promoteXP = tierIndex < LEAGUE_TIERS.length - 1 && board.length > PROMOTE_COUNT ? board[PROMOTE_COUNT - 1].xp : 0;
-  const demoteIdx = board.length - RELEGATE_COUNT;
-  const demoteXP = tierIndex > 0 && demoteIdx > 0 && demoteIdx < board.length ? board[demoteIdx - 1].xp : 0;
+  const effective = board.map((r) => (r.you ? { ...r, xp: confirmedXP() } : r)); // standings use confirmed points only
+  const promoteXP = tierIndex < LEAGUE_TIERS.length - 1 && effective.length > PROMOTE_COUNT ? effective[PROMOTE_COUNT - 1].xp : 0;
+  const demoteIdx = effective.length - RELEGATE_COUNT;
+  const demoteXP = tierIndex > 0 && demoteIdx > 0 && demoteIdx < effective.length ? effective[demoteIdx - 1].xp : 0;
   return { promoteXP, demoteXP };
 }
 
@@ -192,8 +251,10 @@ export function weeklyMovementNextTier(rank: number, cohortSize: number, tierInd
 export const weeklyMovementCounts = () => ({ up: PROMOTE_COUNT, down: RELEGATE_COUNT });
 
 export function recordWeeklyXP(amount: number): LeagueState {
+  // Points land as provisional first; standings only count confirmed entries.
+  addProvisionalPoints(amount, "league-xp");
   const st = ensureWeek();
-  const next = { ...st, xp: st.xp + amount };
+  const next = { ...st, xp: confirmedXP() + provisionalXP() };
   localStorage.setItem(KEY, JSON.stringify(next));
   return next;
 }

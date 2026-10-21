@@ -8,7 +8,7 @@ import { PokerTableArtwork } from "./PokerTableArtwork";
 import { useAudio } from "../audio/AudioProvider";
 import { applyAction, botAction, createTable, dealHand, seatPlayer, type HoldemState } from "../games/holdem";
 import { LoungeGamesCarousel } from "./LoungeGamesCarousel";
-import { COHORT_SIZE, LEAGUE_TIERS, LEAGUE_XP, PLACEMENT_WEEKS, PROMOTE_COUNT, RELEGATE_COUNT, competitiveRating, consumeLeagueMove, ensureWeek, integrityFlags, loadReviewQueue, playerId, recordCompetitiveResult, recordDailyParticipation, recordGamePlayed, recordWeeklyXP, submitForReview, submitHandForScoring, tierByIndex, tournamentXPForFinish, trustState, weekEndsIn, weeklyBoard, weeklyCutoffs } from "../lib/pokerLeague";
+import { COHORT_SIZE, LEAGUE_TIERS, LEAGUE_XP, PLACEMENT_WEEKS, PROMOTE_COUNT, RELEGATE_COUNT, competitiveRating, confirmedXP, consumeLeagueMove, ensureWeek, integrityFlags, loadReviewQueue, playerId, provisionalXP, recordCompetitiveResult, recordDailyParticipation, recordGamePlayed, recordWeeklyXP, settleLedger, submitForReview, submitHandForScoring, tierByIndex, tournamentXPForFinish, trustState, weekEndsIn, weeklyBoard, weeklyCutoffs } from "../lib/pokerLeague";
 import { LeagueCelebration, type Celebration } from "./LeagueCelebration";
 import { LeagueRacePop, type RacePop } from "./LeagueRacePop";
 
@@ -79,6 +79,11 @@ export const LuxePokerLeague: React.FC = () => {
   const [league, setLeague] = useState(() => ensureWeek());
   const [leagueOpen, setLeagueOpen] = useState(false);
   const leagueTier = tierByIndex(league.tierIndex);
+  // Provisional points confirm after their review window; refresh standings when they do.
+  useEffect(() => {
+    const timer = window.setInterval(() => { if (settleLedger() > 0) setLeague((l) => ({ ...l, xp: confirmedXP() + provisionalXP() })); }, 5000);
+    return () => window.clearInterval(timer);
+  }, []);
   const leagueBoard = useMemo(() => weeklyBoard(league), [league]);
   const yourRank = leagueBoard.findIndex((r) => r.you) + 1;
   const cutoffs = weeklyCutoffs(leagueBoard, league.tierIndex);
@@ -418,8 +423,8 @@ export const LuxePokerLeague: React.FC = () => {
               <p className="text-xs text-white/55">{leagueTier.blurb ?? ""} · {league.tierIndex < LEAGUE_TIERS.length - 1 ? `Top ${PROMOTE_COUNT} go up` : "Top division — hold your spot"} · middle group stays{league.tierIndex > 0 ? ` · bottom ${RELEGATE_COUNT} drop` : ""} · #{yourRank || "—"} of {leagueBoard.length}{(league.weeksInLeague ?? 1) <= PLACEMENT_WEEKS ? " · Placement week — promotion unlocks next week" : ""}</p>
             </div>
             <div className="text-right">
-              <p className="font-mono text-2xl font-black" style={{ color: leagueTier.colour }}>{league.xp} XP</p>
-              <p className="text-[10px] font-black uppercase tracking-wider text-white/45">This week</p>
+              <p className="font-mono text-2xl font-black" style={{ color: leagueTier.colour }}>{confirmedXP()} XP</p>
+              <p className="text-[10px] font-black uppercase tracking-wider text-white/45">Confirmed{provisionalXP() > 0 ? ` · ${provisionalXP()} provisional` : ""}</p>
             </div>
           </div>
           <div ref={boardRef} className="league-board mt-3 max-h-64 space-y-1 overflow-y-auto pr-1">
@@ -450,6 +455,8 @@ export const LuxePokerLeague: React.FC = () => {
               <li>· <b className="text-white/75">Server-controlled scoring</b> — cards, valid actions, outcomes and points are decided by the server; the app can never submit its own score.</li>
               <li>· <b className="text-white/75">Permanent records</b> — every hand, action and score change is written to an append-only, hash-chained log that admins can't quietly edit and that can be replayed for disputes.</li>
               <li>· <b className="text-white/75">Bot &amp; automation signals</b> — timing and consistency patterns are analysed together; suspicious play goes to review — fast play or frequent wins alone never ban anyone.</li>
+              <li>· <b className="text-white/75">Points ≠ winnings</b> — league points come from verified results only, never chip counts. Buying chips, tickets or cosmetics confers zero competitive advantage.</li>
+              <li>· <b className="text-white/75">Provisional points</b> — new points pend during a review window and only count once confirmed; confirmed cheating reverses them afterwards.</li>
               <li>· <b className="text-white/75">Three separate ratings</b> — league XP (progression), competitive rating ({competitiveRating()}) and trust ({trustState().score}/100) never mix: you can't buy a better ranking or erase a flagged pattern by playing more.</li>
             </ul>
           </div>
