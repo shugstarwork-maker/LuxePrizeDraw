@@ -11,6 +11,8 @@ import { LoungeGamesCarousel } from "./LoungeGamesCarousel";
 import { COHORT_SIZE, LEAGUE_TIERS, LEAGUE_XP, PLACEMENT_WEEKS, PROMOTE_COUNT, RELEGATE_COUNT, competitiveRating, confirmedXP, consumeLeagueMove, ensureWeek, integrityFlags, loadReviewQueue, playerId, provisionalXP, recordCompetitiveResult, recordDailyParticipation, recordGamePlayed, recordWeeklyXP, settleLedger, submitForReview, submitHandForScoring, tierByIndex, tournamentXPForFinish, trustState, weekEndsIn, weeklyBoard, weeklyCutoffs } from "../lib/pokerLeague";
 import { prizeEligibility, verifyShuffleFairness, type FairnessProof } from "../lib/fairPlay";
 import { useMultiplayerPoker, type MpTableInfo } from "../lib/useMultiplayerPoker";
+import { AccountCard } from "./AccountCard";
+import { useAccount } from "../lib/useAccount";
 import { LeagueCelebration, type Celebration } from "./LeagueCelebration";
 import { LeagueRacePop, type RacePop } from "./LeagueRacePop";
 
@@ -41,6 +43,7 @@ export const LuxePokerLeague: React.FC = () => {
   const { enabled, setEnabled, play, musicEnabled, setMusicEnabled } = useAudio();
   const [screen, setScreen] = useState<"lobby" | "table" | "mp">("lobby");
   const mp = useMultiplayerPoker(playerId(), "You");
+  const acct = useAccount();
   const [mpTables, setMpTables] = useState<MpTableInfo[]>([]);
   const [mpLoading, setMpLoading] = useState(false);
   const refreshMpTables = async () => {
@@ -60,6 +63,7 @@ export const LuxePokerLeague: React.FC = () => {
   const [giftsOpen, setGiftsOpen] = useState(false);
   const [avatar, setAvatar] = useState(() => localStorage.getItem("luxe-poker-avatar") || "");
   const [chips, setChips] = useState(() => Number(localStorage.getItem("luxe-demo-poker-chips")) || 1000);
+  useEffect(() => { if (acct.profile) acct.syncChips(chips); }, [chips, acct.profile]); // keep server copy of chips in step with this device
   const [xp, setXp] = useState(() => competitiveRating()); // competitive rating — separate from league XP and trust
   const level = Math.floor(competitiveRating() / 200);
 
@@ -410,6 +414,7 @@ export const LuxePokerLeague: React.FC = () => {
   const busted = Boolean(game?.handOver && you && you.chips <= 0);
 
   if (screen === "lobby") return <section id="poker-league" className="salon-selection min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-4 py-6 pb-28 text-white"><div className="mx-auto max-w-5xl"><header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-4 py-3"><span className="inline-flex items-center gap-2 font-black text-amber-100"><Crown className="h-5 w-5" />LUXE POKER LOUNGE</span><span className="rounded-full border border-amber-200/35 bg-amber-300/10 px-3 py-1.5 font-mono text-sm font-black text-amber-100">{chips.toLocaleString()} chips</span><button onClick={() => setEnabled(!enabled)} className="rounded-lg bg-white/10 p-2"><Volume2 className="h-4 w-4" /></button></header><div className="mt-8 text-center"><p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">Members’ casino · no cash value</p><h2 className="mt-3 text-4xl font-black">Your Weekly League</h2><p className="mt-3 text-sm text-white/60">Pick a card game and you're seated straight at your {leagueTier.name} League table — no lobbies, no waiting. Win hands to climb the divisions. Free-play chips only, pure experience.</p></div><LoungeGamesCarousel /><button onClick={() => join(leagueTable)} className="group mt-7 block w-full overflow-hidden rounded-2xl border text-left transition active:scale-[.98] border-amber-200/40 hover:border-amber-200/80 bg-black/40"><div className={`relative h-32 bg-gradient-to-br ${leagueTable.tone}`}><img src={leagueTable.image} alt="" className="h-full w-full object-cover opacity-80 mix-blend-luminosity" /><span className="absolute right-2 top-2 rounded-full bg-black/70 px-2 py-1 text-[9px] font-black uppercase tracking-wider" style={{ color: leagueTier.colour }}>{leagueTier.name} League · your table</span></div><div className="flex items-center justify-between gap-3 p-4"><div><p className="font-black text-amber-100">{leagueTable.name}</p><p className="mt-1 flex items-center gap-1 text-[11px] text-white/55"><Users className="h-3 w-3" /> 6 seats · blinds {leagueTable.blinds} · buy-in {leagueTable.buyIn.toLocaleString()}</p></div><span className="rounded-full bg-gradient-to-b from-amber-300 to-amber-500 px-5 py-2.5 text-sm font-black text-black shadow-lg">Play now</span></div></button>{seatError && <p role="alert" className="poker-seat-error">{seatError}</p>}
+        <AccountCard chips={chips} />
         <div className="mt-8 rounded-[1.75rem] border border-emerald-200/25 bg-[linear-gradient(145deg,#06240f,#0a1206_70%)] p-5">
           <div className="flex items-center justify-between gap-3">
             <div>

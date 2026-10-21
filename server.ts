@@ -12,6 +12,7 @@ import { Redis } from "@upstash/redis";
 import { newConnectFour, playConnectFour, type ConnectFourState } from "./src/games/connectFour";
 import * as pokerApi from "./api/poker";
 import * as mpPoker from "./api/pokerMultiplayer";
+import * as accounts from "./api/accounts";
 import http from "http";
 import dotenv from "dotenv";
 
@@ -813,6 +814,42 @@ app.get("/api/arcade/profile", async (req, res) => {
   try { await ensureArcadeTables(); const sql = getAuditDatabase(); await sql`INSERT INTO arcade_players (id) VALUES (${playerId}) ON CONFLICT (id) DO NOTHING`; const rows = await sql`SELECT * FROM arcade_players WHERE id = ${playerId}`; return res.json(rows[0]); } catch { return res.status(503).json({ error: "Arcade profile storage is unavailable." }); }
 });
 app.get("/api/arcade/readiness", (_req, res) => res.json({ onlinePlayEnabled: Boolean(process.env.ARCADE_PLAYER_AUTH_HMAC_SECRET && process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN), requirements: ["authenticated player identity", "Neon match storage", "Upstash Redis room coordination"] }));
+
+
+// ── Player accounts (free-play identity; sessions via bearer token) ──
+app.post("/api/accounts/signup", async (req, res) => {
+  try {
+    const out = await accounts.createAccount(String(req.body?.email ?? ""), String(req.body?.password ?? ""), String(req.body?.name ?? ""));
+    if (!out.ok) return res.status(400).json({ error: out.error });
+    return res.json(out);
+  } catch { return res.status(503).json({ error: "account_storage_unavailable" }); }
+});
+app.post("/api/accounts/login", async (req, res) => {
+  try {
+    const out = await accounts.login(String(req.body?.email ?? ""), String(req.body?.password ?? ""));
+    if (!out.ok) return res.status(401).json({ error: out.error });
+    return res.json(out);
+  } catch { return res.status(503).json({ error: "account_storage_unavailable" }); }
+});
+app.get("/api/accounts/me", async (req, res) => {
+  try {
+    const profile = await accounts.profileForToken(String(req.header("authorization") ?? "").replace(/^Bearer\s+/i, ""));
+    if (!profile) return res.status(401).json({ error: "not_signed_in" });
+    return res.json({ profile });
+  } catch { return res.status(503).json({ error: "account_storage_unavailable" }); }
+});
+app.post("/api/accounts/logout", async (req, res) => {
+  await accounts.logout(String(req.header("authorization") ?? "").replace(/^Bearer\s+/i, ""));
+  res.json({ ok: true });
+});
+app.post("/api/accounts/chips", async (req, res) => {
+  try {
+    const profile = await accounts.profileForToken(String(req.header("authorization") ?? "").replace(/^Bearer\s+/i, ""));
+    if (!profile) return res.status(401).json({ error: "not_signed_in" });
+    await accounts.saveChips(profile.id, Number(req.body?.chips ?? 0));
+    res.json({ ok: true });
+  } catch { res.status(503).json({ error: "account_storage_unavailable" }); }
+});
 
 // ── Server-authoritative Luxe Poker: cards, actions, outcomes and points are decided here ──
 const pokerPlayer = (req: express.Request) => limitedText(req.header("x-player-id"), 24) || "anon";
