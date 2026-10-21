@@ -813,7 +813,7 @@ app.get("/api/arcade/readiness", (_req, res) => res.json({ onlinePlayEnabled: Bo
 // ── Server-authoritative Luxe Poker: cards, actions, outcomes and points are decided here ──
 const pokerPlayer = (req: express.Request) => limitedText(req.header("x-player-id"), 24) || "anon";
 app.post("/api/poker/tables", (req, res) => {
-  const tierIndex = Math.max(0, Math.min(5, Number(req.body?.tierIndex ?? 0)));
+  const tierIndex = Math.max(0, Math.min(6, Number(req.body?.tierIndex ?? 0)));
   const t = pokerApi.createPokerTable(pokerPlayer(req), tierIndex);
   res.json({ tableId: t.id, league: t.league, blinds: t.blinds, buyIn: t.buyIn, trust: t.trust });
 });

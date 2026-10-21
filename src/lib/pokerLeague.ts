@@ -1,14 +1,18 @@
-// Duolingo-style weekly leagues: 30-player cohorts, XP race, promotion/relegation.
-export type LeagueTier = { name: string; colour: string; glow: string; promote: number; demote: number };
+// Duolingo-style weekly leagues: ~40-player groups, top 10 up / middle stay / bottom 10 down.
+export type LeagueTier = { name: string; colour: string; glow: string; promote: number; demote: number; blurb?: string };
 export const LEAGUE_TIERS: LeagueTier[] = [
-  { name: "Bronze", colour: "#c98a4b", glow: "rgba(201,138,75,.4)", promote: 20, demote: 0 },
-  { name: "Silver", colour: "#c7cbd4", glow: "rgba(199,203,212,.4)", promote: 15, demote: 25 },
-  { name: "Gold", colour: "#f6c945", glow: "rgba(246,201,69,.45)", promote: 10, demote: 22 },
-  { name: "Sapphire", colour: "#5ec2e8", glow: "rgba(94,194,232,.45)", promote: 7, demote: 20 },
-  { name: "Ruby", colour: "#e85e7a", glow: "rgba(232,94,122,.45)", promote: 5, demote: 18 },
-  { name: "Diamond", colour: "#9be8ff", glow: "rgba(155,232,255,.5)", promote: 3, demote: 15 },
+  { name: "Bronze", colour: "#c98a4b", glow: "rgba(201,138,75,.4)", promote: 20, demote: 0, blurb: "New players · placement period" },
+  { name: "Silver", colour: "#c7cbd4", glow: "rgba(199,203,212,.4)", promote: 15, demote: 25, blurb: "Regulars · weekly race" },
+  { name: "Gold", colour: "#f6c945", glow: "rgba(246,201,69,.45)", promote: 10, demote: 22, blurb: "Experienced players · Qualifying tournaments" },
+  { name: "Sapphire", colour: "#5ec2e8", glow: "rgba(94,194,232,.45)", promote: 7, demote: 20, blurb: "Seasoned players · weekly race" },
+  { name: "Ruby", colour: "#e85e7a", glow: "rgba(232,94,122,.45)", promote: 5, demote: 18, blurb: "Top division race" },
+  { name: "Diamond", colour: "#9be8ff", glow: "rgba(155,232,255,.5)", promote: 3, demote: 15, blurb: "Elite race" },
+  { name: "Luxe Elite", colour: "#ffe9a8", glow: "rgba(255,233,168,.5)", promote: 0, demote: 10, blurb: "Top performers · Verified competitive ranking" },
 ];
-export const COHORT_SIZE = 30;
+export const COHORT_SIZE = 40; // weekly groups of ~30–50
+export const PROMOTE_COUNT = 10; // top 10 go up
+export const RELEGATE_COUNT = 10; // bottom 10 drop; the middle group stays
+export const PLACEMENT_WEEKS = 1; // new players complete a placement week before promotion is possible
 
 export function weekKey(d = new Date()): string {
   // ISO-style week starting Monday: "2026-W42"
@@ -30,13 +34,13 @@ export function weekEndsIn(d = new Date()): string {
   return days > 0 ? `${days}d ${hours}h` : `${hours}h`;
 }
 
-const LEAGUE_NAMES = ["Aria", "Dex", "Priya", "Kofi", "Lena", "Marco", "Zara", "Owen", "Ines", "Ravi", "Tessa", "Hugo", "Nina", "Felix", "Amber", "Silas", "Maya", "Ruben", "Cleo", "Jude", "Farah", "Nico", "Isla", "Otto", "Wren", "Kai", "Noor", "Elio", "Suki", "Vlad", "Opal", "Reece"];
+const LEAGUE_NAMES = ["Aria", "Dex", "Priya", "Kofi", "Lena", "Marco", "Zara", "Owen", "Ines", "Ravi", "Tessa", "Hugo", "Nina", "Felix", "Amber", "Silas", "Maya", "Ruben", "Cleo", "Jude", "Farah", "Nico", "Isla", "Otto", "Wren", "Kai", "Noor", "Elio", "Suki", "Vlad", "Opal", "Reece", "Ivy", "Rafe", "Mila", "Jonas", "Sana", "Theo", "Lila", "Emre", "Nadia", "Cato"];
 const hashStr = (s: string) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
 const mulberry32 = (seed: number) => () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
 
-export type LeagueRow = { name: string; xp: number; you: boolean };
+export type LeagueRow = { name: string; xp: number; you: boolean; games: number; delta: number };
 
-type LeagueState = { week: string; tierIndex: number; xp: number; seed: number; moved?: "promote" | "demote" | null; lastParticipationDay?: string };
+type LeagueState = { week: string; tierIndex: number; xp: number; seed: number; moved?: "promote" | "demote" | null; lastParticipationDay?: string; games?: number; prevRank?: number; weeksInLeague?: number };
 export type { LeagueState };
 const KEY = "luxe-poker-league";
 
@@ -48,12 +52,13 @@ export function ensureWeek(): LeagueState {
     if (raw) {
       const prev = JSON.parse(raw) as LeagueState;
       if (prev.week === week) return prev;
-      // New week: apply the half-split movement — top half of the cohort promotes, bottom half relegates.
+      // New week: promote the top 10, keep the middle group, relegate the bottom 10.
       const board = weeklyBoard(prev);
       const rank = board.findIndex((r) => r.you) + 1;
-      const tierIndex = rank > 0 ? halfSplitNextTier(rank, board.length, prev.tierIndex) : prev.tierIndex;
+      const inPlacement = (prev.weeksInLeague ?? 0) < PLACEMENT_WEEKS; // placement period: can't be promoted yet
+      const tierIndex = rank > 0 ? weeklyMovementNextTier(rank, board.length, prev.tierIndex, inPlacement) : prev.tierIndex;
       const moved = tierIndex > prev.tierIndex ? "promote" : tierIndex < prev.tierIndex ? "demote" : null;
-      st = { week, tierIndex, xp: 0, seed: hashStr(week + tierIndex), moved };
+      st = { week, tierIndex, xp: 0, seed: hashStr(week + tierIndex), moved, games: 0, prevRank: rank > 0 ? rank : undefined, weeksInLeague: (prev.weeksInLeague ?? 0) + 1 };
     }
   } catch { /* fresh start */ }
   localStorage.setItem(KEY, JSON.stringify(st));
@@ -65,18 +70,30 @@ export function currentLeague(): LeagueState { return ensureWeek(); }
 export function weeklyBoard(st: LeagueState): LeagueRow[] {
   const rng = mulberry32(st.seed + st.tierIndex * 977);
   const tierBoost = 1 + st.tierIndex * 0.55;
-  const rivals: LeagueRow[] = LEAGUE_NAMES.slice(0, COHORT_SIZE - 1).map((name) => {
+  const size = COHORT_SIZE;
+  const rivals: LeagueRow[] = LEAGUE_NAMES.slice(0, size - 1).map((name) => {
     const base = 60 + rng() * rng() * 900; // skewed: a few grinders, many casuals
-    return { name, xp: Math.round(base * tierBoost), you: false };
+    const xp = Math.round(base * tierBoost);
+    const games = 4 + Math.floor(rng() * 40);
+    return { name, xp, you: false, games, delta: 0 };
   });
-  return [...rivals, { name: "You", xp: st.xp, you: true }].sort((a, b) => b.xp - a.xp);
+  // approximate last-week ranks for movement indicators
+  const prevRng = mulberry32(st.seed + st.tierIndex * 977 + 41);
+  const prevScores = rivals.map((r) => ({ name: r.name, s: Math.round((60 + prevRng() * prevRng() * 900) * tierBoost) }));
+  const prevOrder = [...prevScores].sort((a, b) => b.s - a.s).map((r) => r.name);
+  const board: LeagueRow[] = [...rivals, { name: "You", xp: st.xp, you: true, games: st.games ?? 0, delta: 0 }].sort((a, b) => b.xp - a.xp);
+  board.forEach((row, idx) => {
+    const prevIdx = row.you ? (st.prevRank ?? idx + 1) - 1 : prevOrder.indexOf(row.name);
+    row.delta = prevIdx - idx; // positive = moved up
+  });
+  return board;
 }
 
 export function weeklyCutoffs(board: LeagueRow[], tierIndex: number): { promoteXP: number; demoteXP: number } {
-  // Half-split zones: top half promotes (unless already at the top tier), bottom half relegates.
-  const half = Math.floor(board.length / 2);
-  const promoteXP = tierIndex < LEAGUE_TIERS.length - 1 && board.length > half ? board[half - 1].xp : 0;
-  const demoteXP = tierIndex > 0 && board.length > half ? board[half].xp : 0;
+  // Top 10 promote, middle group stays, bottom 10 relegate.
+  const promoteXP = tierIndex < LEAGUE_TIERS.length - 1 && board.length > PROMOTE_COUNT ? board[PROMOTE_COUNT - 1].xp : 0;
+  const demoteIdx = board.length - RELEGATE_COUNT;
+  const demoteXP = tierIndex > 0 && demoteIdx > 0 && demoteIdx < board.length ? board[demoteIdx - 1].xp : 0;
   return { promoteXP, demoteXP };
 }
 
@@ -165,19 +182,26 @@ export function movePlayers<T extends DivisionPlayer>(divisions: Record<string, 
   return Object.fromEntries(names.map((d) => [d, changes[d].sort((a, b) => b.points - a.points)]));
 }
 
-/** Where a player's rank lands them next week under the half-split rule. */
-export function halfSplitNextTier(rank: number, cohortSize: number, tierIndex: number): number {
-  const moveCount = Math.floor(cohortSize / 2);
-  if (tierIndex < LEAGUE_TIERS.length - 1 && rank > 0 && rank <= moveCount) return tierIndex + 1; // top half up
-  if (tierIndex > 0 && rank > cohortSize - moveCount) return tierIndex - 1;                       // bottom half down
-  return tierIndex;
+/** Where a player's rank lands them next week: top 10 up, middle stays, bottom 10 down. */
+export function weeklyMovementNextTier(rank: number, cohortSize: number, tierIndex: number, inPlacement = false): number {
+  if (!inPlacement && tierIndex < LEAGUE_TIERS.length - 1 && rank > 0 && rank <= PROMOTE_COUNT) return tierIndex + 1; // top 10 up
+  if (tierIndex > 0 && rank > cohortSize - RELEGATE_COUNT) return tierIndex - 1;                                     // bottom 10 down
+  return tierIndex;                                                                                                  // middle group stays
 }
 
-export const halfSplitCounts = (cohortSize: number) => { const half = Math.floor(cohortSize / 2); return { up: half, down: half }; };
+export const weeklyMovementCounts = () => ({ up: PROMOTE_COUNT, down: RELEGATE_COUNT });
 
 export function recordWeeklyXP(amount: number): LeagueState {
   const st = ensureWeek();
   const next = { ...st, xp: st.xp + amount };
+  localStorage.setItem(KEY, JSON.stringify(next));
+  return next;
+}
+
+/** Count a played (ranked-attempted) game toward the weekly leaderboard. */
+export function recordGamePlayed(): LeagueState {
+  const st = ensureWeek();
+  const next = { ...st, games: (st.games ?? 0) + 1 };
   localStorage.setItem(KEY, JSON.stringify(next));
   return next;
 }

@@ -8,7 +8,7 @@ import { PokerTableArtwork } from "./PokerTableArtwork";
 import { useAudio } from "../audio/AudioProvider";
 import { applyAction, botAction, createTable, dealHand, seatPlayer, type HoldemState } from "../games/holdem";
 import { LoungeGamesCarousel } from "./LoungeGamesCarousel";
-import { LEAGUE_XP, competitiveRating, consumeLeagueMove, ensureWeek, integrityFlags, loadReviewQueue, playerId, recordCompetitiveResult, recordDailyParticipation, recordWeeklyXP, submitForReview, submitHandForScoring, tierByIndex, tournamentXPForFinish, trustState, weekEndsIn, weeklyBoard, weeklyCutoffs } from "../lib/pokerLeague";
+import { COHORT_SIZE, LEAGUE_TIERS, LEAGUE_XP, PLACEMENT_WEEKS, PROMOTE_COUNT, RELEGATE_COUNT, competitiveRating, consumeLeagueMove, ensureWeek, integrityFlags, loadReviewQueue, playerId, recordCompetitiveResult, recordDailyParticipation, recordGamePlayed, recordWeeklyXP, submitForReview, submitHandForScoring, tierByIndex, tournamentXPForFinish, trustState, weekEndsIn, weeklyBoard, weeklyCutoffs } from "../lib/pokerLeague";
 import { LeagueCelebration, type Celebration } from "./LeagueCelebration";
 import { LeagueRacePop, type RacePop } from "./LeagueRacePop";
 
@@ -24,6 +24,7 @@ const LEAGUE_TABLES: TableDef[] = [
   { name: "Sapphire League Table", image: "/games/luxe-poker-table.png", blinds: "100 / 200", smallBlind: 100, bigBlind: 200, buyIn: 2000, bots: 5, tone: "from-yellow-200 to-amber-600" },
   { name: "Ruby League Table", image: "/games/luxe-poker-table.png", blinds: "200 / 400", smallBlind: 200, bigBlind: 400, buyIn: 4000, bots: 5, tone: "from-amber-300 to-orange-500" },
   { name: "Diamond League Table", image: "/games/luxe-poker-table.png", blinds: "400 / 800", smallBlind: 400, bigBlind: 800, buyIn: 8000, bots: 5, tone: "from-amber-300 to-orange-500" },
+  { name: "Luxe Elite Table", image: "/games/luxe-poker-table.png", blinds: "800 / 1,600", smallBlind: 800, bigBlind: 1600, buyIn: 16000, bots: 5, tone: "from-amber-100 to-yellow-500" },
 ];
 const emotes = ["Nice hand", "Good luck", "Well played", "Thinking..."];
 const gifts = [{ name: "Lucky chip", cost: 25, icon: "🪙" }, { name: "Gold crown", cost: 75, icon: "👑" }, { name: "Luxe sparkle", cost: 150, icon: "✨" }];
@@ -246,6 +247,7 @@ export const LuxePokerLeague: React.FC = () => {
         durationMs: Date.now() - (handStartAt.current || Date.now()),
         handNumber: game.handNumber,
       };
+      setLeague(recordGamePlayed()); // games-played counter for the leaderboard
       const dp = recordDailyParticipation(); // +5 once per day, capped
       if (dp.paid) { setLeague(dp.state); pushXpFloat(LEAGUE_XP.dailyParticipation); note(`Daily participation bonus: +${LEAGUE_XP.dailyParticipation} league XP.`); }
       // Server-authoritative scoring: the server verifies the hand and decides the XP.
@@ -413,7 +415,7 @@ export const LuxePokerLeague: React.FC = () => {
             <div>
               <p className="text-[10px] font-black uppercase tracking-[.22em]" style={{ color: leagueTier.colour }}>Weekly league · ends in {weekEndsIn()}</p>
               <p className="mt-1 flex items-center gap-2 text-lg font-black" style={{ color: leagueTier.colour }}><Crown className="h-5 w-5" />{leagueTier.name} League</p>
-              <p className="text-xs text-white/55">{league.tierIndex < 5 ? `Top ${Math.floor(leagueBoard.length / 2)} go up` : "Top division — hold your spot"}{league.tierIndex > 0 ? ` · bottom ${Math.floor(leagueBoard.length / 2)} drop down` : ""} · #{yourRank || "—"} of {leagueBoard.length}</p>
+              <p className="text-xs text-white/55">{leagueTier.blurb ?? ""} · {league.tierIndex < LEAGUE_TIERS.length - 1 ? `Top ${PROMOTE_COUNT} go up` : "Top division — hold your spot"} · middle group stays{league.tierIndex > 0 ? ` · bottom ${RELEGATE_COUNT} drop` : ""} · #{yourRank || "—"} of {leagueBoard.length}{(league.weeksInLeague ?? 1) <= PLACEMENT_WEEKS ? " · Placement week — promotion unlocks next week" : ""}</p>
             </div>
             <div className="text-right">
               <p className="font-mono text-2xl font-black" style={{ color: leagueTier.colour }}>{league.xp} XP</p>
@@ -421,18 +423,20 @@ export const LuxePokerLeague: React.FC = () => {
             </div>
           </div>
           <div ref={boardRef} className="league-board mt-3 max-h-64 space-y-1 overflow-y-auto pr-1">
-            {leagueBoard.slice(0, leagueOpen ? 30 : 10).map((row, i) => {
+            {leagueBoard.slice(0, leagueOpen ? COHORT_SIZE : 10).map((row, i) => {
               const rank = i + 1;
-              const half = Math.floor(leagueBoard.length / 2); const zone = league.tierIndex < 5 && rank <= half ? "promote" : league.tierIndex > 0 && rank > leagueBoard.length - half ? "demote" : "";
-              return <div key={row.name} data-name={row.name} className={`league-board__row flex items-center gap-3 rounded-xl border px-3 py-2 ${row.you ? "league-board__row--you border-amber-300/70 bg-amber-300/15" : zone === "promote" ? "border-emerald-300/25 bg-emerald-300/5" : zone === "demote" ? "border-rose-300/25 bg-rose-300/5" : "border-white/8 bg-black/25"}`}>
-                <span className={`w-7 text-center font-mono text-xs font-black ${zone === "promote" ? "text-emerald-300" : zone === "demote" ? "text-rose-300" : "text-white/40"}`}>{rank}</span>
+              const zone = league.tierIndex < LEAGUE_TIERS.length - 1 && rank <= PROMOTE_COUNT ? "promote" : league.tierIndex > 0 && rank > leagueBoard.length - RELEGATE_COUNT ? "demote" : "";
+              return <div key={row.name} data-name={row.name} className={`league-board__row flex items-center gap-2 rounded-xl border px-3 py-2 ${row.you ? "league-board__row--you border-amber-300/70 bg-amber-300/15" : zone === "promote" ? "border-emerald-300/25 bg-emerald-300/5" : zone === "demote" ? "border-rose-300/25 bg-rose-300/5" : "border-white/8 bg-black/25"}`}>
+                <span className={`w-6 text-center font-mono text-xs font-black ${zone === "promote" ? "text-emerald-300" : zone === "demote" ? "text-rose-300" : "text-white/40"}`}>{rank}</span>
+                <span className={`w-5 text-center text-[10px] font-black ${row.delta > 0 ? "text-emerald-300" : row.delta < 0 ? "text-rose-300" : "text-white/25"}`} title={row.delta > 0 ? `Up ${row.delta}` : row.delta < 0 ? `Down ${-row.delta}` : "No change"}>{row.delta > 0 ? `▲${row.delta}` : row.delta < 0 ? `▼${-row.delta}` : "–"}</span>
                 <span className="flex h-7 w-7 items-center justify-center rounded-full border text-[10px] font-black" style={{ borderColor: `${leagueTier.colour}66`, background: "#0008", color: leagueTier.colour }}>{row.you ? "YOU" : row.name.slice(0, 2).toUpperCase()}</span>
                 <b className={`flex-1 truncate text-sm ${row.you ? "text-amber-100" : "text-white/80"}`}>{row.name}{row.you ? " — you" : ""}</b>
+                <span className="font-mono text-[10px] text-white/40">{row.games}g</span>
                 <span className="relative font-mono text-xs font-black text-white/70">{row.xp} XP{row.you && xpFloats.map((f) => <span key={f.id} className="xp-float">+{f.amount} XP</span>)}</span>
               </div>;
             })}
           </div>
-          <button onClick={() => setLeagueOpen((v) => !v)} className="mt-3 w-full rounded-xl border border-white/15 bg-white/5 py-2.5 text-xs font-black uppercase tracking-wider text-white/70">{leagueOpen ? "Show less" : "Show all 30 players"}</button>
+          <button onClick={() => setLeagueOpen((v) => !v)} className="mt-3 w-full rounded-xl border border-white/15 bg-white/5 py-2.5 text-xs font-black uppercase tracking-wider text-white/70">{leagueOpen ? "Show less" : `Show all ${COHORT_SIZE} players`}</button>
           <p className="mt-3 text-[10px] text-white/35">Verified scoring: +{LEAGUE_XP.handWin} XP per hand won · +{LEAGUE_XP.showdownBonus} showdown bonus · +{LEAGUE_XP.tournamentWin} table win · +{LEAGUE_XP.topTenPercent} top-10% finish · +{LEAGUE_XP.dailyParticipation} daily bonus (capped). Top half ({cutoffs.promoteXP}+ XP) promotes, bottom half relegates. Weekly leagues are free-play pride only — no prizes, no cash value.</p>
           <div className="mt-3 rounded-xl border border-white/10 bg-black/30 p-3">
             <p className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[.18em] text-emerald-200"><ShieldCheck className="h-3.5 w-3.5" />Fair play &amp; anti-scam controls</p>

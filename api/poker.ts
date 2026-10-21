@@ -70,6 +70,7 @@ export const LEAGUE_TABLES = [
   { league: "Sapphire", smallBlind: 100, bigBlind: 200, buyIn: 2000 },
   { league: "Ruby", smallBlind: 200, bigBlind: 400, buyIn: 4000 },
   { league: "Diamond", smallBlind: 400, bigBlind: 800, buyIn: 8000 },
+  { league: "Luxe Elite", smallBlind: 800, bigBlind: 1600, buyIn: 16000 },
 ];
 
 function dayKey() { return new Date().toDateString(); }
