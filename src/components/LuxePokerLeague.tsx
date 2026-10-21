@@ -3,7 +3,7 @@ import { PlayerTurnRing } from "./PlayerTurnRing";
 import { LuxePlayingCard } from "./LuxePlayingCard";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { LuxeDealer } from "./LuxeDealer";
-import { Bot, ChevronLeft, Crown, Gift, MessageCircle, ShieldCheck, Sparkles, Timer, Users, Volume2 } from "lucide-react";
+import { Bot, ChevronLeft, Crown, Gift, MessageCircle, Scale, ShieldCheck, Sparkles, Timer, Users, Volume2 } from "lucide-react";
 import { PokerTableArtwork } from "./PokerTableArtwork";
 import { useAudio } from "../audio/AudioProvider";
 import { applyAction, botAction, createTable, dealHand, seatPlayer, type HoldemState } from "../games/holdem";
@@ -481,6 +481,15 @@ export const LuxePokerLeague: React.FC = () => {
               </p>}
               {!fairness && <p className="mt-1.5">Tap to deal a real hand on the server and independently re-run its shuffle here on your device.</p>}
             </div>
+          </div>
+          <div className="mt-3 rounded-xl border border-sky-300/20 bg-sky-300/5 p-3">
+            <p className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[.18em] text-sky-200"><Scale className="h-3.5 w-3.5" />Product positioning &amp; legal review</p>
+            <ul className="mt-2 space-y-1.5 text-[10px] leading-relaxed text-white/55">
+              <li>· <b className="text-white/75">Free-to-play entertainment</b> — this build: virtual chips, leagues and non-cash progression only. No stakes, no cash value, nothing to withdraw.</li>
+              <li>· <b className="text-white/75">A skill competition with prizes</b> — any future move here needs careful legal review of eligibility and game design before launch.</li>
+              <li>· <b className="text-white/75">A real-money poker product</b> — potentially subject to gambling licensing and other regulatory obligations.</li>
+            </ul>
+            <p className="mt-2.5 rounded-lg border border-amber-300/25 bg-amber-300/10 p-2 text-[10px] leading-relaxed text-amber-100">Calling something a skill competition doesn't automatically make it lawful. UK specialist legal advice is required before linking paid entries, poker performance and valuable prizes — the precise mechanics matter.</p>
           </div>
         </div>
         <LeagueCelebration celebration={celebration} onDone={() => setCelebration(null)} />
