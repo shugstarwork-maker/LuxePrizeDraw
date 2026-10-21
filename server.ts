@@ -11,6 +11,8 @@ import { neon } from "@neondatabase/serverless";
 import { Redis } from "@upstash/redis";
 import { newConnectFour, playConnectFour, type ConnectFourState } from "./src/games/connectFour";
 import * as pokerApi from "./api/poker";
+import * as mpPoker from "./api/pokerMultiplayer";
+import http from "http";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -782,8 +784,10 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`LuxePrizeDraw Ltd server running on http://0.0.0.0:${PORT}`);
+  const httpServer = http.createServer(app);
+  mpPoker.attachMultiplayerPoker(httpServer);
+  httpServer.listen(PORT, "0.0.0.0", () => {
+    console.log(`LuxePrizeDraw Ltd server running on http://0.0.0.0:${PORT} (multiplayer poker ws on /ws/poker)`);
   });
 }
 
@@ -878,6 +882,11 @@ app.post("/api/poker/score-hand", (req, res) => {
   if (xp > 0) { sh.hourHands += 1; sh.dayHands += 1; }
   pokerApi.appendRecord("hand", { player: pid, hand: handNumber, won, showdown, xpAwarded: xp, held, trust: sh.trust });
   res.json({ xp, confirmed: true, held: held.length ? held.join(",") : undefined, trust: sh.trust });
+});
+app.get("/api/poker/mp/tables", (_req, res) => res.json({ tables: mpPoker.listMpTables() }));
+app.post("/api/poker/mp/tables", (req, res) => {
+  const t = mpPoker.createMpTable(String(req.body?.name ?? "Luxe multiplayer table"));
+  res.json({ tableId: t.id, name: t.name, blinds: `${t.smallBlind} / ${t.bigBlind}`, buyIn: t.buyIn });
 });
 app.get("/api/poker/audit", (_req, res) => res.json(pokerApi.auditRecordChain()));
 app.get("/api/poker/tables/:id/replay", (req, res) => res.json(pokerApi.replayTable(req.params.id)));

@@ -10,6 +10,7 @@ import { applyAction, botAction, createTable, dealHand, seatPlayer, type HoldemS
 import { LoungeGamesCarousel } from "./LoungeGamesCarousel";
 import { COHORT_SIZE, LEAGUE_TIERS, LEAGUE_XP, PLACEMENT_WEEKS, PROMOTE_COUNT, RELEGATE_COUNT, competitiveRating, confirmedXP, consumeLeagueMove, ensureWeek, integrityFlags, loadReviewQueue, playerId, provisionalXP, recordCompetitiveResult, recordDailyParticipation, recordGamePlayed, recordWeeklyXP, settleLedger, submitForReview, submitHandForScoring, tierByIndex, tournamentXPForFinish, trustState, weekEndsIn, weeklyBoard, weeklyCutoffs } from "../lib/pokerLeague";
 import { prizeEligibility, verifyShuffleFairness, type FairnessProof } from "../lib/fairPlay";
+import { useMultiplayerPoker, type MpTableInfo } from "../lib/useMultiplayerPoker";
 import { LeagueCelebration, type Celebration } from "./LeagueCelebration";
 import { LeagueRacePop, type RacePop } from "./LeagueRacePop";
 
@@ -38,7 +39,21 @@ const SEAT_SLOTS = [180, 55, 125, 235, 305, 270].map((deg) => {
 
 export const LuxePokerLeague: React.FC = () => {
   const { enabled, setEnabled, play, musicEnabled, setMusicEnabled } = useAudio();
-  const [screen, setScreen] = useState<"lobby" | "table">("lobby");
+  const [screen, setScreen] = useState<"lobby" | "table" | "mp">("lobby");
+  const mp = useMultiplayerPoker(playerId(), "You");
+  const [mpTables, setMpTables] = useState<MpTableInfo[]>([]);
+  const [mpLoading, setMpLoading] = useState(false);
+  const refreshMpTables = async () => {
+    setMpLoading(true);
+    try { const r = await fetch("/api/poker/mp/tables"); if (r.ok) setMpTables(((await r.json()) as { tables: MpTableInfo[] }).tables); } catch { /* offline */ }
+    setMpLoading(false);
+  };
+  const createMpTable = async () => {
+    setMpLoading(true);
+    try { await fetch("/api/poker/mp/tables", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: "Luxe open table" }) }); await refreshMpTables(); } catch { /* offline */ }
+    setMpLoading(false);
+  };
+  const joinMp = (tableId: string) => { mp.join(tableId); setScreen("mp"); };
   const [leaveOpen, setLeaveOpen] = useState(false);
 
   const [selectedSeat, setSelectedSeat] = useState("Amelia K.");
@@ -395,6 +410,30 @@ export const LuxePokerLeague: React.FC = () => {
   const busted = Boolean(game?.handOver && you && you.chips <= 0);
 
   if (screen === "lobby") return <section id="poker-league" className="salon-selection min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-4 py-6 pb-28 text-white"><div className="mx-auto max-w-5xl"><header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-4 py-3"><span className="inline-flex items-center gap-2 font-black text-amber-100"><Crown className="h-5 w-5" />LUXE POKER LOUNGE</span><span className="rounded-full border border-amber-200/35 bg-amber-300/10 px-3 py-1.5 font-mono text-sm font-black text-amber-100">{chips.toLocaleString()} chips</span><button onClick={() => setEnabled(!enabled)} className="rounded-lg bg-white/10 p-2"><Volume2 className="h-4 w-4" /></button></header><div className="mt-8 text-center"><p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">Members’ casino · no cash value</p><h2 className="mt-3 text-4xl font-black">Your Weekly League</h2><p className="mt-3 text-sm text-white/60">Pick a card game and you're seated straight at your {leagueTier.name} League table — no lobbies, no waiting. Win hands to climb the divisions. Free-play chips only, pure experience.</p></div><LoungeGamesCarousel /><button onClick={() => join(leagueTable)} className="group mt-7 block w-full overflow-hidden rounded-2xl border text-left transition active:scale-[.98] border-amber-200/40 hover:border-amber-200/80 bg-black/40"><div className={`relative h-32 bg-gradient-to-br ${leagueTable.tone}`}><img src={leagueTable.image} alt="" className="h-full w-full object-cover opacity-80 mix-blend-luminosity" /><span className="absolute right-2 top-2 rounded-full bg-black/70 px-2 py-1 text-[9px] font-black uppercase tracking-wider" style={{ color: leagueTier.colour }}>{leagueTier.name} League · your table</span></div><div className="flex items-center justify-between gap-3 p-4"><div><p className="font-black text-amber-100">{leagueTable.name}</p><p className="mt-1 flex items-center gap-1 text-[11px] text-white/55"><Users className="h-3 w-3" /> 6 seats · blinds {leagueTable.blinds} · buy-in {leagueTable.buyIn.toLocaleString()}</p></div><span className="rounded-full bg-gradient-to-b from-amber-300 to-amber-500 px-5 py-2.5 text-sm font-black text-black shadow-lg">Play now</span></div></button>{seatError && <p role="alert" className="poker-seat-error">{seatError}</p>}
+        <div className="mt-8 rounded-[1.75rem] border border-emerald-200/25 bg-[linear-gradient(145deg,#06240f,#0a1206_70%)] p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[.22em] text-emerald-200">Multiplayer tables · live</p>
+              <p className="mt-1 text-xs text-white/55">Real opponents, free-play chips. The server deals from a committed deck and validates every action.</p>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => void refreshMpTables()} disabled={mpLoading} className="rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-[11px] font-black text-white/70 disabled:opacity-40">Refresh</button>
+              <button onClick={() => void createMpTable()} disabled={mpLoading} className="rounded-xl border border-emerald-300/40 bg-emerald-300/15 px-3 py-2 text-[11px] font-black text-emerald-100 disabled:opacity-40">+ New table</button>
+            </div>
+          </div>
+          <div className="mt-4 space-y-2">
+            {mpTables.length === 0 && <button onClick={() => void refreshMpTables()} className="w-full rounded-xl border border-dashed border-white/15 bg-black/30 p-4 text-xs text-white/50">No live tables yet — tap to load, or create the first one and share the table name with a friend.</button>}
+            {mpTables.map((t) => <button key={t.id} onClick={() => joinMp(t.id)} className="flex w-full items-center justify-between gap-3 rounded-xl border border-white/10 bg-black/30 p-3.5 text-left transition hover:border-emerald-300/40 active:scale-[.99]">
+              <div>
+                <p className="text-sm font-black text-white/85">{t.name} <span className="font-mono text-[10px] text-emerald-200/70">{t.id}</span></p>
+                <p className="mt-0.5 text-[11px] text-white/50">Blinds {t.blinds} · buy-in {t.buyIn.toLocaleString()} · {t.seats}/{t.maxSeats} seated{t.playing ? " · hand in play" : ""}</p>
+              </div>
+              <span className="rounded-full bg-gradient-to-b from-emerald-300 to-emerald-500 px-4 py-2 text-xs font-black text-black">Join</span>
+            </button>)}
+          </div>
+          {mp.error && <p role="alert" className="mt-2 text-[11px] text-rose-200">{mp.error}</p>}
+          <p className="mt-3 text-[10px] text-white/35">Same integrity stack as solo tables: provably fair committed shuffle, append-only records, review before any league credit.</p>
+        </div>
         <div className="mt-8 rounded-[1.75rem] border border-amber-200/25 bg-[linear-gradient(145deg,#241a08,#120d06_70%)] p-5">
           <p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">VIP ladder &amp; chip store</p>
           <div className="mt-4 flex items-center gap-3">
@@ -506,6 +545,66 @@ export const LuxePokerLeague: React.FC = () => {
           <p className="mt-3 text-[10px] text-white/35">Your private Luxe Lounge record — stored on this device. Realtime multiplayer tables are on the roadmap.</p>
         </div>
         <div className="mt-7 grid gap-3 sm:grid-cols-3"><button onClick={dailyReward} disabled={!rewardReady} className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-4 text-left disabled:opacity-40"><Gift className="h-5 w-5 text-emerald-200" /><b className="mt-3 block">{rewardReady ? "Daily sign-in: 200 chips" : "Daily chips claimed"}</b><small className="text-white/55">200 free-play chips every day</small></button><button onClick={() => note("Demo leaderboard becomes available after completing a hand.")} className="rounded-2xl border border-violet-300/30 bg-violet-300/10 p-4 text-left"><Crown className="h-5 w-5 text-violet-200" /><b className="mt-3 block">League table</b><small className="text-white/55">Practice ranking</small></button><button onClick={() => note("Demo tournaments use virtual chips and cannot issue tickets.")} className="rounded-2xl border border-amber-200/30 bg-amber-300/10 p-4 text-left"><Sparkles className="h-5 w-5 text-amber-200" /><b className="mt-3 block">Tournament night</b><small className="text-white/55">Table race points: 1st 100 · 2nd 75 · 3rd 60 · 4th 50 · 5th 40 · 6th 30 — outlast the table to score for your weekly league</small></button></div>{status !== "Choose a table to sit down." && <p className="mt-5 rounded-xl border border-amber-200/20 bg-amber-300/10 p-3 text-sm text-amber-100">{status}</p>}<LeagueRacePop pop={racePop} /></div></section>;
+
+  // ── Multiplayer table screen ──
+  if (screen === "mp") {
+    const v = mp.view;
+    const myId = playerId();
+    const g = v?.state ?? null;
+    const me = g?.players.find((p) => p.id === myId);
+    const mpToCall = g && me ? g.currentBet - me.bet : 0;
+    const mpMinRaise = g && me ? Math.min(g.currentBet + g.minRaise, me.bet + me.chips) : 0;
+    const mpMaxRaise = me ? me.bet + me.chips : 0;
+    return <section className="poker-playing-page min-h-screen bg-[radial-gradient(circle_at_top,#0a2a14,#050a06_52%)] px-3 py-4 pb-28 text-white">
+      <div className="mx-auto max-w-3xl">
+        <header className="flex items-center justify-between rounded-2xl border border-emerald-200/30 bg-black/35 px-3 py-2">
+          <button onClick={() => { mp.leave(); setScreen("lobby"); }} className="inline-flex items-center gap-1 rounded-lg bg-white/10 px-3 py-2 text-xs font-black"><ChevronLeft className="h-4 w-4" />Lobby</button>
+          <span className="font-mono text-xs font-black text-emerald-100">{v ? `${v.name} · Hand #${v.handNumber}` : "Connecting…"}</span>
+          <span className={`rounded-full px-2.5 py-1 text-[10px] font-black ${mp.connected ? "bg-emerald-300/20 text-emerald-100" : "bg-rose-300/20 text-rose-100"}`}>{mp.connected ? "LIVE" : "OFFLINE"}</span>
+        </header>
+        {mp.error && <p role="alert" className="mt-3 rounded-xl border border-rose-300/30 bg-rose-300/10 p-3 text-xs text-rose-100">{mp.error}</p>}
+        {!v && <p className="mt-10 text-center text-sm text-white/50">Joining table…</p>}
+        {v && g && <>
+          <div className="mt-4 overflow-hidden rounded-[1.5rem] border border-emerald-200/25 bg-[radial-gradient(ellipse_at_center,#0f2a16,#071208_60%)] p-4">
+            <p className="text-center font-mono text-xs text-emerald-100">Pot {g.pot.toLocaleString()} · Blinds {v.blinds}</p>
+            <div className="mt-2 flex justify-center gap-1">{[0, 1, 2, 3, 4].map((i) => g.board[i] ? <CardView key={key(g.board[i])} card={g.board[i]} /> : <div key={i} className="h-14 w-10 rounded-lg border border-dashed border-emerald-100/25 bg-black/40" />)}</div>
+            <div className="mt-4 space-y-1.5">
+              {g.players.map((p) => {
+                const isMe = p.id === myId;
+                const isTurn = !g.handOver && g.players[g.turnIndex]?.id === p.id;
+                const won = g.handOver && g.winners.some((w) => w.id === p.id);
+                const seat = v.seats.find((x) => x.id === p.id);
+                return <div key={p.id} className={`flex items-center gap-3 rounded-xl border px-3 py-2 ${won ? "border-emerald-300/60 bg-emerald-300/15" : isTurn ? "border-amber-200/70 bg-amber-300/10" : "border-white/10 bg-black/30"} ${p.folded ? "opacity-45" : ""}`}>
+                  <span className={`flex h-8 w-8 items-center justify-center rounded-full border text-[10px] font-black ${isMe ? "border-emerald-300/60 bg-emerald-300/15 text-emerald-100" : "border-white/20 bg-black/50 text-white/70"}`}>{p.initials}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-xs font-black text-white/85">{p.name}{isMe ? " — you" : ""}{!seat?.connected && <span className="text-rose-300"> · offline</span>}{g.players[g.dealerIndex]?.id === p.id ? " 🔘" : ""}</p>
+                    <p className="text-[10px] text-white/45">{p.chips.toLocaleString()} chips{p.bet > 0 ? ` · bet ${p.bet.toLocaleString()}` : ""}{p.allIn ? " · ALL-IN" : ""}{p.folded ? " · folded" : ""}</p>
+                  </div>
+                  <span className="flex gap-1">{p.cards.map((c, i) => c ? <CardView key={`${p.id}-${i}`} card={c as { rank: string; suit: string }} /> : <span key={`${p.id}-${i}`} className="flex h-10 w-7 items-center justify-center rounded-md border border-emerald-200/30 bg-gradient-to-br from-emerald-950 to-black text-[9px] text-emerald-200/70">♛</span>)}</span>
+                </div>;
+              })}
+            </div>
+            <p role="status" className="mt-3 rounded-xl bg-black/35 p-2.5 text-center text-xs text-emerald-50">{g.lastAction}</p>
+          </div>
+          {g.handOver && <>
+            {g.winners.length > 0 && <p className="mt-3 rounded-xl border border-emerald-300/40 bg-emerald-300/15 p-3 text-center text-sm font-black text-emerald-100">{g.winners.some((w) => w.id === myId) ? "🏆 " : ""}{g.winners.map((w) => `${g.players.find((p) => p.id === w.id)?.name ?? w.id} wins ${w.amount.toLocaleString()}`).join(" · ")}</p>}
+            {v.reveal && <p className="mt-2 rounded-xl border border-white/10 bg-black/30 p-2.5 font-mono text-[9px] leading-relaxed text-white/45">Provably fair — hand #{v.reveal.hand} · commit {v.commitment?.slice(0, 14)}… · revealed {v.reveal.secret.slice(0, 14)}… · full deck on record</p>}
+            {g.handNumber > 0 && <button onClick={mp.nextHand} className="mt-3 w-full rounded-xl bg-gradient-to-b from-emerald-300 to-emerald-500 py-4 text-sm font-black text-black shadow-lg active:scale-95">Next hand</button>}
+          </>}
+          {!g.handOver && v.yourTurn && <div className="mt-4" role="group" aria-label="Poker actions">
+            <div className="flex items-center gap-3"><input aria-label="Raise amount" type="range" min={mpMinRaise} max={mpMaxRaise} step={g.bigBlind} value={Math.min(Math.max(raiseTo, mpMinRaise), mpMaxRaise)} onChange={(e) => setRaiseTo(Number(e.target.value))} className="w-full accent-emerald-300" disabled={mpMaxRaise <= mpToCall} /><span className="w-24 text-right font-mono text-xs font-black text-emerald-100">{Math.min(Math.max(raiseTo, mpMinRaise), mpMaxRaise).toLocaleString()}</span></div>
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              <button onClick={() => mp.act("fold")} className="rounded-xl bg-zinc-800/90 py-4 text-xs font-black text-zinc-100 active:scale-95">Fold</button>
+              {mpToCall > 0 ? <button onClick={() => mp.act("call")} className="rounded-xl bg-gradient-to-b from-emerald-300 to-emerald-500 py-4 text-xs font-black text-black active:scale-95">Call {Math.min(mpToCall, me?.chips ?? 0).toLocaleString()}</button> : <button onClick={() => mp.act("check")} className="rounded-xl bg-gradient-to-b from-emerald-300 to-emerald-500 py-4 text-xs font-black text-black active:scale-95">Check</button>}
+              <button onClick={() => mp.act("raise", Math.min(Math.max(raiseTo, mpMinRaise), mpMaxRaise))} disabled={mpMaxRaise <= mpToCall} className="rounded-xl bg-gradient-to-b from-rose-400 to-rose-600 py-4 text-xs font-black text-white active:scale-95 disabled:opacity-40">{Math.min(Math.max(raiseTo, mpMinRaise), mpMaxRaise) >= mpMaxRaise ? "All-in" : "Raise to"} {Math.min(Math.max(raiseTo, mpMinRaise), mpMaxRaise).toLocaleString()}</button>
+            </div>
+          </div>}
+          {!g.handOver && !v.yourTurn && <p className="mt-4 flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-black/30 py-3 text-xs text-white/55"><Timer className="h-4 w-4 text-emerald-200" />{g.players[g.turnIndex]?.name ?? "Table"} is thinking…</p>}
+          <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-[10px] text-white/35"><ShieldCheck className="h-3 w-3" /> Free-play multiplayer — virtual chips only, no cash value. Server deals and validates; every action is on the permanent record.</p>
+        </>}
+      </div>
+    </section>;
+  }
 
   // ── Table screen ──
   const botSlots = game ? game.players.filter((p) => p.isBot) : [];
