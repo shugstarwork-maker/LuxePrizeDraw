@@ -1328,3 +1328,76 @@
 .headline-deck__headline b { color:#ffd35c; }
 .headline-deck__headline i { font-style:normal; color:#ffe6a0; font-size:.62em; letter-spacing:.14em; text-transform:uppercase; }
 .headline-luxe-deck .deck-card__stats b { font-size:clamp(.95rem,4vw,1.2rem); }
+
+/* ── Cinematic Connect Four ── */
+.c4-scene .board3d-tilt { transform: rotateX(30deg); }
+.c4-scene .board3d-tilt:hover { transform: rotateX(24deg); }
+.c4-frame {
+  background: linear-gradient(160deg, #1c150c, #0d0a06 55%, #17110a);
+  border: 3px solid rgba(212, 175, 55, .55);
+  box-shadow: 0 40px 70px rgba(0, 0, 0, .65), 0 12px 22px rgba(0, 0, 0, .5), inset 0 2px 0 rgba(255, 223, 130, .35), 0 0 44px rgba(212, 175, 55, .14);
+}
+.c4-column {
+  display: flex; flex-direction: column; gap: .375rem;
+  border-radius: .9rem; padding: .3rem;
+  background: linear-gradient(180deg, rgba(255, 215, 120, .07), rgba(0, 0, 0, .35));
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, .55);
+  transition: background .25s ease, box-shadow .25s ease;
+}
+.c4-column:hover { background: linear-gradient(180deg, rgba(255, 215, 120, .2), rgba(0, 0, 0, .3)); box-shadow: inset 0 2px 6px rgba(0, 0, 0, .55), 0 0 16px rgba(251, 191, 36, .3); }
+.c4-drop-hint { display: block; height: 1.15rem; font-size: .85rem; line-height: 1; opacity: 0; transform: translateY(4px); transition: opacity .2s ease, transform .2s ease; }
+.c4-column:hover .c4-drop-hint { opacity: .95; transform: translateY(0); }
+.c4-slot { border: 2px solid rgba(0, 0, 0, .65); }
+.c4-empty { background: radial-gradient(circle at 40% 35%, #3a2f1e, #17110a 70%); box-shadow: inset 0 4px 8px rgba(0, 0, 0, .8), inset 0 -2px 3px rgba(255, 220, 140, .12); }
+.c4-disc { animation: c4-drop .38s cubic-bezier(.3, 1.6, .5, 1) backwards; }
+.c4-disc--landed { animation: c4-drop .45s cubic-bezier(.3, 1.7, .5, 1); }
+@keyframes c4-drop { from { transform: translateY(-46px) scale(.8); opacity: 0; } 70% { transform: translateY(3px) scale(1.04); opacity: 1; } to { transform: translateY(0) scale(1); } }
+.c4-disc--win { animation: c4-win-pulse 1s ease-in-out infinite alternate; border-color: rgba(255, 230, 150, .95); box-shadow: 0 0 20px rgba(251, 191, 36, .85), 0 0 44px rgba(251, 191, 36, .4), inset 0 -5px 7px rgba(0, 0, 0, .4), inset 0 5px 7px rgba(255, 255, 255, .55); }
+@keyframes c4-win-pulse { from { transform: scale(1); } to { transform: scale(1.12); } }
+.c4-victory { text-shadow: 0 0 18px rgba(251, 191, 36, .7); animation: c4-victory-in .5s ease backwards; }
+@keyframes c4-victory-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .c4-disc, .c4-disc--win, .c4-victory { animation: none; } }
+
+/* ── Cinematic Draughts ── */
+.draughts-scene .board3d-tilt { transform: rotateX(30deg); }
+.draughts-scene .board3d-tilt:hover { transform: rotateX(24deg); }
+.draughts-frame {
+  border: 4px solid rgba(212, 175, 55, .6);
+  background: #1a1208;
+  box-shadow: 0 40px 70px rgba(0, 0, 0, .65), 0 12px 22px rgba(0, 0, 0, .5), inset 0 2px 0 rgba(255, 223, 130, .3), 0 0 44px rgba(212, 175, 55, .14);
+}
+.draughts-square { position: relative; display: grid; place-items: center; transition: filter .2s ease; }
+.draughts-square--light { background: linear-gradient(145deg, #f0d9ac, #d9b678); }
+.draughts-square--dark { background: linear-gradient(145deg, #5c3d1c, #3d2712); }
+.draughts-square--selected { filter: brightness(1.25); box-shadow: inset 0 0 0 4px rgba(103, 232, 249, .95), inset 0 0 18px rgba(103, 232, 249, .5); z-index: 2; }
+.draughts-square--forced { box-shadow: inset 0 0 0 4px rgba(251, 191, 36, .95), inset 0 0 18px rgba(251, 191, 36, .55); animation: draughts-forced 1s ease-in-out infinite alternate; z-index: 2; }
+@keyframes draughts-forced { from { filter: brightness(1.05); } to { filter: brightness(1.35); } }
+.draughts-square--move { box-shadow: inset 0 0 0 3px rgba(52, 211, 153, .75); }
+.draughts-square--capture { box-shadow: inset 0 0 0 3px rgba(244, 63, 94, .9), inset 0 0 14px rgba(244, 63, 94, .4); }
+.draughts-square--last:not(.draughts-square--selected):not(.draughts-square--forced) { box-shadow: inset 0 0 0 3px rgba(251, 191, 36, .45); }
+.draughts-piece {
+  display: grid; place-items: center; width: 74%; height: 74%; border-radius: 9999px;
+  font-size: clamp(.9rem, 2.6vw, 1.5rem); line-height: 1;
+  transition: transform .2s ease;
+  animation: draughts-place .3s cubic-bezier(.3, 1.5, .5, 1) backwards;
+}
+@keyframes draughts-place { from { transform: scale(.55); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.draughts-piece--white {
+  background: radial-gradient(circle at 34% 26%, #ffffff, #e8e4da 48%, #a8a294);
+  border: 2px solid #8f8a7d; color: #44403c;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, .5), inset 0 -5px 8px rgba(0, 0, 0, .22), inset 0 4px 6px rgba(255, 255, 255, .9);
+}
+.draughts-piece--black {
+  background: radial-gradient(circle at 34% 26%, #57534e, #1c1917 52%, #000000);
+  border: 2px solid rgba(212, 175, 55, .55); color: #fbbf24;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, .6), inset 0 -5px 8px rgba(0, 0, 0, .6), inset 0 4px 6px rgba(255, 255, 255, .18);
+}
+.draughts-piece--king { text-shadow: 0 0 10px rgba(251, 191, 36, .9); }
+.draughts-piece--black.draughts-piece--king { box-shadow: 0 6px 10px rgba(0, 0, 0, .6), 0 0 16px rgba(251, 191, 36, .55), inset 0 4px 6px rgba(255, 255, 255, .18); }
+.draughts-square:hover .draughts-piece { transform: translateY(-3px); }
+.draughts-dot { width: 26%; height: 26%; border-radius: 9999px; background: rgba(52, 211, 153, .85); box-shadow: 0 0 10px rgba(52, 211, 153, .8); }
+.draughts-dot--capture { background: rgba(244, 63, 94, .9); box-shadow: 0 0 12px rgba(244, 63, 94, .9); }
+.draughts-mini { display: inline-block; width: .8rem; height: .8rem; border-radius: 9999px; }
+.draughts-mini--white { background: radial-gradient(circle at 34% 26%, #fff, #d6d0c4); }
+.draughts-mini--black { background: radial-gradient(circle at 34% 26%, #57534e, #000); border: 1px solid rgba(212, 175, 55, .55); }
+@media (prefers-reduced-motion: reduce) { .draughts-piece, .draughts-square--forced { animation: none; } }
