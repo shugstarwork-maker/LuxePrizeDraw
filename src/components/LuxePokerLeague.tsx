@@ -171,6 +171,35 @@ export const LuxePokerLeague: React.FC = () => {
       moved.forEach(({ el }) => { el.style.transition = "transform .55s cubic-bezier(.22,.9,.28,1)"; el.style.transform = "translateY(0)"; });
     }));
   }, [leagueBoard, leagueOpen]);
+  // ── Exit glide: leaving a table after climbing ranks — the board auto-appears
+  // edge-to-edge and your row glides up to its new position.
+  const rankAtJoin = useRef<number | null>(null);
+  const [glide, setGlide] = useState<{ from: number; to: number } | null>(null);
+  const boardCardRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!glide) return;
+    setLeagueOpen(true); // show the full board so the climb is visible
+    const frame = requestAnimationFrame(() => {
+      boardCardRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      const row = boardRef.current?.querySelector<HTMLElement>('[data-name="You"]');
+      if (row) {
+        const rowH = row.offsetHeight + 4; // row + space-y-1 gap
+        const dy = (glide.from - glide.to) * rowH; // start rendered at the OLD rank
+        row.style.transition = "none";
+        row.style.transform = `translateY(${dy}px)`;
+        row.style.zIndex = "30";
+        row.style.position = "relative";
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          row.style.transition = "transform 1.8s cubic-bezier(.16,.84,.24,1)";
+          row.style.transform = "translateY(0)";
+        }));
+      }
+    });
+    play("levelUp");
+    const done = window.setTimeout(() => setGlide(null), 2400);
+    return () => { cancelAnimationFrame(frame); window.clearTimeout(done); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [glide]);
   const settledHand = useRef(0);
   const handStartAt = useRef(0);
   const aliveRef = useRef<string[]>([]); // tournament: players still holding chips this table session
@@ -373,6 +402,7 @@ export const LuxePokerLeague: React.FC = () => {
   const join = (table: TableDef) => {
     if (chips < table.buyIn) { const message = `${table.name} needs ${table.buyIn.toLocaleString()} free-play chips. You have ${chips.toLocaleString()} — collect free daily chips below.`; setSeatError(message); note(message); return; }
     setSeatError("");
+    rankAtJoin.current = weeklyBoard(league).findIndex((r) => r.you) + 1; // for the exit glide
     setScreen("table");
     setActiveTable(table);
     setChips((v) => v - table.buyIn);
@@ -398,7 +428,12 @@ export const LuxePokerLeague: React.FC = () => {
   const takeSeat = () => { play("chipStack"); setGame((g) => (g ? seatPlayer(g, "you") : g)); note("Seat taken. You're in from the next hand."); };
   const leaveTable = () => {
     if (game) { const stack = game.players.find((p) => p.id === "you")?.chips ?? 0; setChips((v) => v + stack); }
+    // Exit glide: if the session moved you up the weekly board, glide the row up on return.
+    const before = rankAtJoin.current;
+    rankAtJoin.current = null;
+    const after = weeklyBoard(ensureWeek()).findIndex((r) => r.you) + 1;
     setGame(null); setActiveTable(null); setLeaveOpen(false); setScreen("lobby");
+    if (before && after && after < before) setGlide({ from: before, to: after });
     note("You left the table. Your remaining stack returned to your wallet.");
   };
   const rebuy = () => {
@@ -475,7 +510,7 @@ export const LuxePokerLeague: React.FC = () => {
           <button type="button" onClick={() => setMusicEnabled(!musicEnabled)} className="inline-flex items-center gap-2 rounded-xl border border-amber-200/25 bg-black/40 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-amber-100 transition hover:border-amber-200/60"><Volume2 className="h-4 w-4" />{musicEnabled ? "Lounge music on" : "Lounge music off"}</button>
           <span className="text-[10px] text-white/35">Ambient Luxe Lounge loop — synthesized in-house, no licensing needed.</span>
         </div>
-        <div className="mt-4 rounded-[1.75rem] border p-5" style={{ borderColor: `${leagueTier.colour}55`, background: `linear-gradient(145deg,#1c150b, #0d0904 70%)`, boxShadow: `0 0 34px ${leagueTier.glow}` }}>
+        <div ref={boardCardRef} className={`mt-4 border p-5 transition-all duration-700 ${glide ? "-mx-4 rounded-none border-x-0" : "rounded-[1.75rem]"}`} style={{ borderColor: `${leagueTier.colour}55`, background: `linear-gradient(145deg,#1c150b, #0d0904 70%)`, boxShadow: glide ? `0 0 70px ${leagueTier.glow}` : `0 0 34px ${leagueTier.glow}` }}>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-[10px] font-black uppercase tracking-[.22em]" style={{ color: leagueTier.colour }}>Weekly league · ends in {weekEndsIn()}</p>
@@ -491,7 +526,7 @@ export const LuxePokerLeague: React.FC = () => {
             {leagueBoard.slice(0, leagueOpen ? COHORT_SIZE : 10).map((row, i) => {
               const rank = i + 1;
               const zone = league.tierIndex < LEAGUE_TIERS.length - 1 && rank <= PROMOTE_COUNT ? "promote" : league.tierIndex > 0 && rank > leagueBoard.length - RELEGATE_COUNT ? "demote" : "";
-              return <div key={row.name} data-name={row.name} className={`league-board__row flex items-center gap-2 rounded-xl border px-3 py-2 ${row.you ? "league-board__row--you border-amber-300/70 bg-amber-300/15" : zone === "promote" ? "border-emerald-300/25 bg-emerald-300/5" : zone === "demote" ? "border-rose-300/25 bg-rose-300/5" : "border-white/8 bg-black/25"}`}>
+              return <div key={row.name} data-name={row.name} className={`league-board__row flex items-center gap-2 rounded-xl border px-3 py-2 ${row.you ? `league-board__row--you border-amber-300/70 bg-amber-300/15 ${glide ? "shadow-[0_0_24px_rgba(246,201,69,.55)]" : ""}` : zone === "promote" ? "border-emerald-300/25 bg-emerald-300/5" : zone === "demote" ? "border-rose-300/25 bg-rose-300/5" : "border-white/8 bg-black/25"}`}>
                 <span className={`w-6 text-center font-mono text-xs font-black ${zone === "promote" ? "text-emerald-300" : zone === "demote" ? "text-rose-300" : "text-white/40"}`}>{rank}</span>
                 <span className={`w-5 text-center text-[10px] font-black ${row.delta > 0 ? "text-emerald-300" : row.delta < 0 ? "text-rose-300" : "text-white/25"}`} title={row.delta > 0 ? `Up ${row.delta}` : row.delta < 0 ? `Down ${-row.delta}` : "No change"}>{row.delta > 0 ? `▲${row.delta}` : row.delta < 0 ? `▼${-row.delta}` : "–"}</span>
                 <span className="flex h-7 w-7 items-center justify-center rounded-full border text-[10px] font-black" style={{ borderColor: `${leagueTier.colour}66`, background: "#0008", color: leagueTier.colour }}>{row.you ? "YOU" : row.name.slice(0, 2).toUpperCase()}</span>
