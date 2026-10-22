@@ -4,11 +4,12 @@ import { Crown, Gamepad2, Heart, Home, Menu, Trophy, UserRound } from "lucide-re
 const primaryItems = [
   { href: "/", label: "Home", icon: Home },
   { href: "/draws", label: "Draws", icon: Trophy },
-  { href: "/arcade", label: "Arcade", icon: Gamepad2 },
+  { href: "/challenge", label: "Games", icon: Gamepad2 },
   { href: "/portal", label: "Portal", icon: UserRound },
 ];
 const moreItems = [
   { href: "/poker", label: "Poker", icon: Crown },
+  { href: "/arcade", label: "Arcade", icon: Gamepad2 },
   { href: "/community", label: "Community", icon: Heart },
 ];
 

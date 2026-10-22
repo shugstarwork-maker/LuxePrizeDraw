@@ -45,7 +45,7 @@ function winningLine(state: ConnectFourState): C4Cell[] {
   return [];
 }
 const PIECE_ART: Record<string, string> = { red: "radial-gradient(circle at 34% 28%, #fda4af, #e11d48 52%, #7f1d1d)", yellow: "radial-gradient(circle at 34% 28%, #fef3c7, #f59e0b 52%, #78350f)" };
-function ConnectFourBoard({ sound }: { sound: (s: "button" | "ticketSelect" | "success" | "error") => void }) {
+export function ConnectFourBoard({ sound }: { sound: (s: "button" | "ticketSelect" | "success" | "error") => void }) {
   const [state, setState] = useState<ConnectFourState>(newConnectFour);
   const lastCol = state.moves[state.moves.length - 1];
   const win = winningLine(state);
@@ -73,7 +73,7 @@ function ConnectFourBoard({ sound }: { sound: (s: "button" | "ticketSelect" | "s
     <OnlineConnectFour />
   </GameShell>;
 }
-function DraughtsBoard({ sound }: { sound: (s: "button" | "ticketSelect" | "success" | "error") => void }) {
+export function DraughtsBoard({ sound }: { sound: (s: "button" | "ticketSelect" | "success" | "error") => void }) {
   const [state, setState] = useState<DraughtsState>(newDraughts);
   const [selected, setSelected] = useState<[number, number] | null>(null);
   const [lastMove, setLastMove] = useState<{ from: [number, number]; to: [number, number] } | null>(null);

@@ -30,6 +30,7 @@ import { LegalReadinessNotice } from "./components/LegalReadinessNotice";
 import { LaunchCommitment } from "./components/LaunchCommitment";
 import { IntellectualPropertyNotice } from "./components/IntellectualPropertyNotice";
 import { LuxePokerLeague } from "./components/LuxePokerLeague";
+import { ChallengeLounge } from "./components/ChallengeLounge";
 import { CardLounge } from "./components/CardLounge";
 import { LuxuryHolidaysSection } from "./components/LuxuryHolidaysSection";
 import { LuxeHost } from "./components/LuxeHost";
@@ -76,6 +77,7 @@ export default function App() {
     : path === "/brag" ? <><CardLounge game="brag" /><div className="poker-external-chrome"><ScottishHost /><MobileDock /></div></>
     : path === "/arcade" ? <><ArcadeHome /><ScottishHost /><MobileDock /></>
     : path === "/portal" ? <><PlayerPortal /><ScottishHost /><MobileDock /></>
+    : path === "/challenge" ? <><ChallengeLounge /><ScottishHost /><MobileDock /></>
     : path === "/sports-cars" ? <><CategoryDrawCarousel category="Cars" /><ScottishHost /><MobileDock /></>
     : path === "/prizes/luxury-supercar-experience" ? <><ExperienceNav /><PartnershipCampaignPage /><MobileDock /></>
     : path === "/category" ? <><CategoryDrawCarousel category={new URLSearchParams(window.location.search).get("name") || "Cash"} entryBand={new URLSearchParams(window.location.search).get("band") || undefined} /><ScottishHost /><MobileDock /></>
@@ -86,7 +88,21 @@ export default function App() {
   return <div className="storm-page luxe-brand-theme"><div className="storm-page__content"><OwnershipNotice />{page}<footer className="border-t border-white/10 bg-black/60 px-4 py-6 pb-28 text-center text-xs text-white/65 sm:pb-6"><a href="/terms" onClick={(e) => { e.preventDefault(); go("/terms"); }} className="font-bold text-amber-200 underline underline-offset-4">General terms for all draws</a><p className="mt-2">Pre-launch · Draft rules require legal approval before entries open.</p></footer><IntellectualPropertyNotice /></div><StormBackdrop theme={backdropTheme} />{path !== "/lobby" && <AudioControls />}<InstallAppPrompt /></div>;
 }
 
+function HomeComingSoon() {
+  return <main className="flex min-h-[70vh] flex-col items-center justify-center px-6 text-center">
+    <p className="text-[10px] font-black uppercase tracking-[.3em] text-amber-200">LuxePrizeDraw</p>
+    <h1 className="mt-4 text-4xl font-black text-white sm:text-5xl">A new home experience is on its way</h1>
+    <p className="mt-4 max-w-md text-sm leading-relaxed text-white/60">We're designing something special for this space. In the meantime, everything lives exactly where you expect it:</p>
+    <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+      <button type="button" onClick={() => go("/draws")} className="rounded-full bg-gradient-to-b from-amber-300 to-amber-500 px-6 py-3 text-sm font-black text-black shadow-lg transition active:scale-95">Browse the draws</button>
+      <button type="button" onClick={() => go("/challenge")} className="rounded-full border border-amber-200/40 bg-black/40 px-6 py-3 text-sm font-black text-amber-100 transition hover:border-amber-200/80 active:scale-95">Challenge Lounge</button>
+      <button type="button" onClick={() => go("/poker")} className="rounded-full border border-amber-200/40 bg-black/40 px-6 py-3 text-sm font-black text-amber-100 transition hover:border-amber-200/80 active:scale-95">Poker Lounge</button>
+    </div>
+    <p className="mt-10 text-[10px] text-white/35">Free-play only · No deposits, cash wagering or cash-out</p>
+  </main>;
+}
+
 function SiteContent({ path }: { path: string }) {
-  const content = path === "/draws" ? <><LuxuryHolidaysSection /><PrestigeCarsDraws /><PartnerShowcase /><PrizeExperience /><PrizeStandings /><MembershipPreview /></> : path === "/community" ? <><LaunchCommitment /><CommunitySuggestionBoard /><CommunityLeaderboards /></> : path === "/play" ? <><CompetitiveHub /><GamesArena /></> : <>{path === "/" && <HomeBrandBanner />}<FeaturedDraws /><CashPrizesCarousel /><LuxuryHolidaysSection /><PrizePlatform /><TrustBadges /><PartnerShowcase /><CashLaunchReadiness /><div className="px-4 py-5 text-center"><button type="button" onClick={() => go("/launch-build")} className="text-sm text-amber-200 underline">Review the proposed launch catalogue</button></div><LaunchCommitment /></>;
+  const content = path === "/" ? <HomeComingSoon /> : path === "/community" ? <><LaunchCommitment /><CommunitySuggestionBoard /><CommunityLeaderboards /></> : path === "/play" ? <><CompetitiveHub /><GamesArena /></> : <><HomeBrandBanner /><FeaturedDraws /><CashPrizesCarousel /><LuxuryHolidaysSection /><PrestigeCarsDraws /><PrizePlatform /><TrustBadges /><PartnerShowcase /><PrizeExperience /><PrizeStandings /><MembershipPreview /><CashLaunchReadiness /><div className="px-4 py-5 text-center"><button type="button" onClick={() => go("/launch-build")} className="text-sm text-amber-200 underline">Review the proposed launch catalogue</button></div><LaunchCommitment /></>;
   return <><LegalReadinessNotice /><ExperienceNav /><CommunityTicker /><main className="animate-page-enter pb-24 sm:pb-0">{content}</main><ScottishHost /><MobileDock /></>;
 }
