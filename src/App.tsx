@@ -30,7 +30,6 @@ import { LegalReadinessNotice } from "./components/LegalReadinessNotice";
 import { LaunchCommitment } from "./components/LaunchCommitment";
 import { IntellectualPropertyNotice } from "./components/IntellectualPropertyNotice";
 import { LuxePokerLeague } from "./components/LuxePokerLeague";
-import { CardGamesGate, ChallengeGamesGate } from "./components/GameGate";
 import { CardLounge } from "./components/CardLounge";
 import { LuxuryHolidaysSection } from "./components/LuxuryHolidaysSection";
 import { LuxeHost } from "./components/LuxeHost";
@@ -76,8 +75,6 @@ export default function App() {
     : path === "/blackjack" ? <><CardLounge game="blackjack" /><div className="poker-external-chrome"><ScottishHost /><MobileDock /></div></>
     : path === "/brag" ? <><CardLounge game="brag" /><div className="poker-external-chrome"><ScottishHost /><MobileDock /></div></>
     : path === "/arcade" ? <><ArcadeHome /><ScottishHost /><MobileDock /></>
-    : path === "/cards" ? <><CardGamesGate /><MobileDock /></>
-    : path === "/games" ? <><ChallengeGamesGate /><MobileDock /></>
     : path === "/portal" ? <><PlayerPortal /><ScottishHost /><MobileDock /></>
     : path === "/sports-cars" ? <><CategoryDrawCarousel category="Cars" /><ScottishHost /><MobileDock /></>
     : path === "/prizes/luxury-supercar-experience" ? <><ExperienceNav /><PartnershipCampaignPage /><MobileDock /></>
