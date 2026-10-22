@@ -920,6 +920,27 @@ app.post("/api/poker/score-hand", (req, res) => {
   pokerApi.appendRecord("hand", { player: pid, hand: handNumber, won, showdown, xpAwarded: xp, held, trust: sh.trust });
   res.json({ xp, confirmed: true, held: held.length ? held.join(",") : undefined, trust: sh.trust });
 });
+// Challenge-games scoring: board games report a finished match; the server rate-caps
+// and decides the XP so client-reported scores are never trusted blindly.
+const challengeShadow = new Map<string, { day: string; dayGames: number }>();
+const CHALLENGE_XP = { win: 3, draw: 1 } as const;
+const CHALLENGE_DAILY_CAP = 30; // games per day that can earn XP
+app.post("/api/challenge/score-game", (req, res) => {
+  const pid = pokerPlayer(req);
+  const body = req.body ?? {};
+  const game = String(body.game ?? "").slice(0, 24);
+  if (!["chess", "connect4", "draughts"].includes(game)) return res.status(400).json({ error: "bad_game" });
+  const result = body.result === "draw" ? "draw" : "win";
+  const day = new Date().toDateString();
+  let sh = challengeShadow.get(pid);
+  if (!sh) { sh = { day, dayGames: 0 }; challengeShadow.set(pid, sh); }
+  if (sh.day !== day) { sh.day = day; sh.dayGames = 0; }
+  let xp: number = CHALLENGE_XP[result];
+  if (sh.dayGames >= CHALLENGE_DAILY_CAP) xp = 0;
+  else sh.dayGames += 1;
+  pokerApi.appendRecord("challenge-game", { player: pid, game, result, xpAwarded: xp });
+  res.json({ xp, confirmed: true });
+});
 app.get("/api/poker/mp/tables", (_req, res) => res.json({ tables: mpPoker.listMpTables() }));
 app.post("/api/poker/mp/tables", (req, res) => {
   const t = mpPoker.createMpTable(String(req.body?.name ?? "Luxe multiplayer table"));

@@ -1,12 +1,15 @@
 // Challenge-games lounge — chess, connect four and draughts with the same
 // Duolingo-style weekly league experience as the poker lounge.
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Bot, ChevronLeft, Crown, Gift, ShieldCheck, Swords, Users, Volume2 } from "lucide-react";
 import { useAudio } from "../audio/AudioProvider";
 import { ChallengeGamesCarousel, type ChallengeGameId } from "./ChallengeGamesCarousel";
 import { ChessBoard, ConnectFourBoard, DraughtsBoard } from "./GamesArena";
-import { COHORT_SIZE, LEAGUE_TIERS, LEAGUE_XP, PROMOTE_COUNT, RELEGATE_COUNT, confirmedXP, currentLeague, provisionalXP, recordDailyParticipation, recordGamePlayed, tierByIndex, weekEndsIn, weeklyBoard, weeklyCutoffs } from "../lib/pokerLeague";
+import { CHALLENGE_XP, COHORT_SIZE, LEAGUE_TIERS, LEAGUE_XP, PROMOTE_COUNT, RELEGATE_COUNT, confirmedXP, currentLeague, provisionalXP, recordDailyParticipation, recordGamePlayed, recordWeeklyXP, submitChallengeGameForScoring, tierByIndex, weekEndsIn, weeklyBoard, weeklyCutoffs } from "../lib/pokerLeague";
 import { divisionProgress, getSeason } from "../lib/pokerSeason";
+import { LeagueGlideOverlay, type GlideEvent } from "./LeagueGlideOverlay";
+
+const nav = (href: string) => { window.history.pushState({}, "", href); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); };
 
 const GAME_META: Record<ChallengeGameId, { title: string; image: string; detail: string }> = {
   chess: { title: "Chess", image: "/games/chess.svg", detail: "Full legal rules · 10-minute clock" },
@@ -21,6 +24,8 @@ export const ChallengeLounge: React.FC = () => {
   const [leagueOpen, setLeagueOpen] = useState(false);
   const [notice, setNotice] = useState("");
   const [rewardReady, setRewardReady] = useState(() => localStorage.getItem("luxe-challenge-reward") !== new Date().toDateString());
+  const [glide, setGlide] = useState<GlideEvent>(null);
+  const glideId = useRef(0);
   const leagueTier = tierByIndex(league.tierIndex);
   const leagueBoard = useMemo(() => weeklyBoard(league), [league]);
   const cutoffs = weeklyCutoffs(leagueBoard, league.tierIndex);
@@ -31,6 +36,28 @@ export const ChallengeLounge: React.FC = () => {
   useEffect(() => { const onFocus = () => setLeague(currentLeague()); window.addEventListener("focus", onFocus); return () => window.removeEventListener("focus", onFocus); }, []);
 
   const sound = (s: "button" | "ticketSelect" | "success" | "error") => play(s);
+
+  // Award league XP with the Duolingo-style full-screen glide when you climb.
+  const gainLeagueXp = (amount: number) => {
+    const before = weeklyBoard(league);
+    const next = recordWeeklyXP(amount);
+    setLeague(next);
+    const after = weeklyBoard(next);
+    const oldRank = before.findIndex((r) => r.you) + 1 || before.length;
+    const newRank = after.findIndex((r) => r.you) + 1 || after.length;
+    if (newRank < oldRank) setGlide({ id: ++glideId.current, amount, before, after, tierName: leagueTier.name, tierColour: leagueTier.colour });
+    else setNotice(`+${amount} league XP banked.`);
+    play("levelUp");
+  };
+
+  // A finished board game scores XP — server-verified when reachable, local credit otherwise.
+  const reportResult = (game: ChallengeGameId) => (result: "win" | "draw") => {
+    void submitChallengeGameForScoring(game, result).then((verdict) => {
+      const xp = verdict ? verdict.xp : CHALLENGE_XP[result];
+      if (xp > 0) gainLeagueXp(xp);
+      else if (verdict) setNotice("Daily challenge XP cap reached — results still count as games played.");
+    });
+  };
 
   const sitDown = (id: ChallengeGameId) => {
     play("ticketSelect");
@@ -61,9 +88,10 @@ export const ChallengeLounge: React.FC = () => {
           <span className="rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-wider" style={{ borderColor: `${leagueTier.colour}55`, color: leagueTier.colour }}>{leagueTier.name} League</span>
         </header>
         <div className="mt-6 rounded-[2rem] border border-amber-200/30 bg-black/30 p-4 shadow-[0_0_60px_rgba(212,175,55,.14)] sm:p-7">
-          {screen === "chess" ? <ChessBoard sound={sound} /> : screen === "connect4" ? <ConnectFourBoard sound={sound} /> : <DraughtsBoard sound={sound} />}
+          {screen === "chess" ? <ChessBoard sound={sound} onResult={reportResult("chess")} /> : screen === "connect4" ? <ConnectFourBoard sound={sound} onResult={reportResult("connect4")} /> : <DraughtsBoard sound={sound} onResult={reportResult("draughts")} />}
         </div>
-        <p className="mt-4 flex items-center gap-2 text-xs text-white/45"><ShieldCheck className="h-4 w-4 text-emerald-300" />Free-play only — no deposits, no cash wagering, no cash-out. Results count toward your shared weekly league.</p>
+        <p className="mt-4 flex items-center gap-2 text-xs text-white/45"><ShieldCheck className="h-4 w-4 text-emerald-300" />Free-play only — no deposits, no cash wagering, no cash-out. Finish a game: +{CHALLENGE_XP.win} XP for a win, +{CHALLENGE_XP.draw} for a draw, into your shared weekly league.</p>
+        {glide && <LeagueGlideOverlay event={glide} onDone={() => setGlide(null)} />}
       </div>
     </section>;
   }
@@ -75,6 +103,12 @@ export const ChallengeLounge: React.FC = () => {
         <span className="rounded-full border border-amber-200/35 bg-amber-300/10 px-3 py-1.5 font-mono text-sm font-black text-amber-100">{confirmedXP()} XP</span>
         <button onClick={() => setEnabled(!enabled)} className="rounded-lg bg-white/10 p-2" aria-label="Toggle sound"><Volume2 className="h-4 w-4" /></button>
       </header>
+
+      <nav className="mt-3 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[.18em]">
+        <span className="rounded-full border border-amber-200/50 bg-amber-300/15 px-3.5 py-1.5 text-amber-100">⚔ Challenge</span>
+        <button type="button" onClick={() => nav("/poker")} className="rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-white/55 transition hover:border-amber-200/50 hover:text-amber-100">♠ Card Lounge</button>
+        <button type="button" onClick={() => nav("/portal")} className="rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-white/55 transition hover:border-amber-200/50 hover:text-amber-100">Portal</button>
+      </nav>
 
       <div className="mt-8 text-center">
         <p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">Members’ games room · no cash value</p>
@@ -127,7 +161,7 @@ export const ChallengeLounge: React.FC = () => {
           })}
         </div>
         <button onClick={() => setLeagueOpen((v) => !v)} className="mt-3 w-full rounded-xl border border-white/15 bg-white/5 py-2.5 text-xs font-black uppercase tracking-wider text-white/70">{leagueOpen ? "Show less" : `Show all ${COHORT_SIZE} players`}</button>
-        <p className="mt-3 text-[10px] text-white/35">Verified scoring: +{LEAGUE_XP.dailyParticipation} XP daily participation bonus (capped). Top {PROMOTE_COUNT} ({cutoffs.promoteXP}+ XP) promote, bottom {RELEGATE_COUNT} relegate. Weekly leagues are free-play pride only — no prizes, no cash value.</p>
+        <p className="mt-3 text-[10px] text-white/35">Verified scoring: +{CHALLENGE_XP.win} XP per game won · +{CHALLENGE_XP.draw} per draw · +{LEAGUE_XP.dailyParticipation} daily participation bonus (capped). Top {PROMOTE_COUNT} ({cutoffs.promoteXP}+ XP) promote, bottom {RELEGATE_COUNT} relegate. Weekly leagues are free-play pride only — no prizes, no cash value.</p>
       </div>
 
       <div className="mt-7 grid gap-3 sm:grid-cols-3">
@@ -143,6 +177,7 @@ export const ChallengeLounge: React.FC = () => {
       </div>
 
       <p className="mt-6 rounded-xl border border-white/10 bg-black/30 p-3 text-[10px] leading-relaxed text-white/50"><ShieldCheck className="mr-1 inline h-3.5 w-3.5 text-emerald-300" />Free-to-play entertainment only. Challenge games share the same weekly league as the Luxe Poker Lounge — one division, one ladder, no stakes and nothing to withdraw.</p>
+      {glide && <LeagueGlideOverlay event={glide} onDone={() => setGlide(null)} />}
     </div>
   </section>;
 };

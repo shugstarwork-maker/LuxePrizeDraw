@@ -2,7 +2,7 @@ import { LuxeChessFrame } from "./LuxeChessFrame";
 import { initialBoardGame } from "./GoldGamesCarousel";
 import { Chess } from "chess.js";
 import { Crown, Gamepad2, RotateCcw, ShieldCheck, Trophy, Volume2, VolumeX } from "lucide-react";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useAudio } from "../audio/AudioProvider";
 import { chessLegalMoves, newChess, playChess, type ChessMatch } from "../games/chess";
 import { newConnectFour, playConnectFour, type ConnectFourState } from "../games/connectFour";
@@ -23,8 +23,22 @@ export function GamesArena() {
   const sound = (effect: "button" | "ticketSelect" | "success" | "error") => { if (!muted) play(effect); };
   return <section id="games" className="game-arena-stage luxe-gold border-y border-amber-200/20 py-14 sm:py-20"><div className="mx-auto max-w-6xl px-4 sm:px-6"><div className="flex flex-wrap items-end justify-between gap-4"><div><p className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[.2em] text-indigo-200"><Gamepad2 className="h-4 w-4" /> Playable arcade</p><h2 className="mt-3 text-3xl font-black sm:text-5xl">Choose a board. Play to the end.</h2><p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/60">Local two-player matches run against shared rules engines. Online ranking, matchmaking, tournaments, and ticket rewards stay locked until authenticated server-authoritative match services are configured.</p></div><button onClick={() => setMuted((value) => !value)} className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-xs font-black">{muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}{muted ? "Sound off" : "Sound on"}</button></div><div className="mt-7 grid gap-3 sm:grid-cols-3">{games.map((item) => <button key={item.id} onClick={() => { setGame(item.id); sound("button"); }} className={`arcade-card-fx arcade-card-fx--${item.id} overflow-hidden rounded-2xl border text-left transition ${game === item.id ? "border-amber-200 bg-amber-300/10" : "border-white/10 bg-white/[.035]"}`}><img src={item.image} alt="" className="h-24 w-full object-cover opacity-75" /><span className="block p-4"><b>{item.title}</b><small className="mt-1 block text-white/55">{item.detail}</small></span></button>)}</div><div className="mt-7 rounded-[2rem] border border-white/15 bg-[#090b16] p-4 shadow-2xl sm:p-7">{game === "chess" ? <><button type="button" className="luxe-chess-open" onClick={() => { window.history.pushState({}, "", "/chess"); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo(0, 0); }}>Open full Luxe Chess table →</button><ChessBoard sound={sound} /></> : game === "connect4" ? <ConnectFourBoard sound={sound} /> : <DraughtsBoard sound={sound} />}</div></div></section>;
 }
-export function ChessBoard({ sound }: { sound: (s: "button" | "ticketSelect" | "success" | "error") => void }) {
+type BoardResult = "win" | "draw";
+type BoardSound = (s: "button" | "ticketSelect" | "success" | "error") => void;
+// Fires exactly once per finished game (decisive result or draw) — used for league scoring.
+function useResultReport(status: string, onResult?: (result: BoardResult) => void) {
+  const wasPlaying = useRef(false);
+  useEffect(() => {
+    if (status === "playing") { wasPlaying.current = true; return; }
+    if (!wasPlaying.current || !onResult) return;
+    wasPlaying.current = false;
+    onResult(status === "draw" ? "draw" : "win");
+  }, [status, onResult]);
+}
+
+export function ChessBoard({ sound, onResult }: { sound: BoardSound; onResult?: (result: BoardResult) => void }) {
   const [match, setMatch] = useState<ChessMatch>(newChess); const [selected, setSelected] = useState<string | null>(null); const [clock, setClock] = useState({ w: 600, b: 600 });
+  useResultReport(match.status, onResult);
   const chess = useMemo(() => new Chess(match.fen), [match.fen]); const turn = chess.turn(); const legal = selected ? chessLegalMoves(match, selected as never).map((move) => move.to) : [];
   useEffect(() => { if (match.status !== "playing") return; const id = window.setInterval(() => setClock((value) => ({ ...value, [turn]: Math.max(0, value[turn] - 1) })), 1000); return () => clearInterval(id); }, [turn, match.status]);
   useEffect(() => { if (clock.w === 0 || clock.b === 0) setMatch((value) => ({ ...value, status: clock.w === 0 ? "black_won" : "white_won" })); }, [clock]);
@@ -45,8 +59,9 @@ function winningLine(state: ConnectFourState): C4Cell[] {
   return [];
 }
 const PIECE_ART: Record<string, string> = { red: "radial-gradient(circle at 34% 28%, #fda4af, #e11d48 52%, #7f1d1d)", yellow: "radial-gradient(circle at 34% 28%, #fef3c7, #f59e0b 52%, #78350f)" };
-export function ConnectFourBoard({ sound }: { sound: (s: "button" | "ticketSelect" | "success" | "error") => void }) {
+export function ConnectFourBoard({ sound, onResult }: { sound: BoardSound; onResult?: (result: BoardResult) => void }) {
   const [state, setState] = useState<ConnectFourState>(newConnectFour);
+  useResultReport(state.status, onResult);
   const lastCol = state.moves[state.moves.length - 1];
   const win = winningLine(state);
   const winSet = new Set(win.map((c) => `${c.row}-${c.col}`));
@@ -73,8 +88,9 @@ export function ConnectFourBoard({ sound }: { sound: (s: "button" | "ticketSelec
     <OnlineConnectFour />
   </GameShell>;
 }
-export function DraughtsBoard({ sound }: { sound: (s: "button" | "ticketSelect" | "success" | "error") => void }) {
+export function DraughtsBoard({ sound, onResult }: { sound: BoardSound; onResult?: (result: BoardResult) => void }) {
   const [state, setState] = useState<DraughtsState>(newDraughts);
+  useResultReport(state.status, onResult);
   const [selected, setSelected] = useState<[number, number] | null>(null);
   const [lastMove, setLastMove] = useState<{ from: [number, number]; to: [number, number] } | null>(null);
   const legal = selected ? draughtsMoves(state, selected) : draughtsMoves(state);
