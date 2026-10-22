@@ -77,10 +77,11 @@ export const LeagueGlideOverlay: React.FC<{ event: GlideEvent; onDone: () => voi
               } : { opacity: settled || !isYou ? 1 : 1 }),
             }}>
             <span className={`w-6 text-center font-mono text-sm font-black ${isYou ? "text-emerald-200" : zone === "promote" ? "text-emerald-300" : "text-white/45"}`}>{rank}</span>
-            <span className={`flex h-10 w-10 items-center justify-center rounded-full border text-xs font-black ${isYou ? "border-emerald-300/70 bg-emerald-400/20 text-emerald-100" : "border-white/20 bg-black/40 text-white/60"}`}>
+            <span className={`relative flex h-10 w-10 items-center justify-center rounded-full border text-xs font-black ${isYou ? "border-emerald-300/70 bg-emerald-400/20 text-emerald-100" : "border-white/20 bg-black/40 text-white/60"}`}>
               {row.you ? "YOU" : row.name.slice(0, 2).toUpperCase()}
+              <span className="absolute -bottom-1 -right-1 text-xs leading-none drop-shadow">{row.flag}</span>
             </span>
-            <b className={`flex-1 truncate text-base ${isYou ? "text-white" : "text-white/75"}`}>{row.name}{row.you ? " — you" : ""}</b>
+            <b className={`flex-1 truncate text-base ${isYou ? "text-white" : "text-white/75"}`}>{row.name}{row.you ? " — you" : ""} <span className="ml-0.5 text-sm">{row.flag}</span></b>
             <span className={`relative font-mono text-sm font-black ${isYou ? "text-emerald-200" : "text-white/55"}`}>
               {row.xp} XP
               {isYou && xpPop && <span className="league-glide__xp-pop">+{amount} XP</span>}

@@ -5,9 +5,11 @@ import {
 } from "lucide-react";
 import { EntrantLookup } from "./EntrantLookup";
 import {
-  confirmedXP, currentLeague, loadLedger, provisionalXP, tierByIndex, weeklyBoard, weeklyCutoffs,
+  confirmedXP, currentLeague, loadLedger, playerFlag, provisionalXP, setPlayerFlag, tierByIndex, weeklyBoard, weeklyCutoffs,
   PROMOTE_COUNT, RELEGATE_COUNT,
 } from "../lib/pokerLeague";
+
+const FLAG_CHOICES = ["🇬🇧", "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "🏴󠁧󠁢󠁳󠁣󠁴󠁿", "🏴󠁧󠁢󠁷󠁬󠁳󠁿", "🇮🇪", "🇺🇸", "🇨🇦", "🇦🇺", "🇳🇿", "🇿🇦", "🇦🇪", "🇮🇳", "🇵🇰", "🇳🇬", "🇬🇭", "🇰🇪", "🇯🇲", "🇵🇭", "🇵🇱", "🇷🇴", "🇪🇸", "🇫🇷", "🇩🇪", "🇮🇹", "🇵🇹", "🇳🇱", "🇸🇪", "🇳🇴", "🇩🇰", "🇫🇮", "🇧🇷", "🇦🇷", "🇲🇽", "🇨🇴", "🇯🇵", "🇰🇷", "🇹🇷", "🇪🇬", "🇲🇦"];
 import { developmentStats, divisionProgress, getSeason, weekFixtures } from "../lib/pokerSeason";
 
 const navigate = (href: string) => { window.history.pushState({}, "", href); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); };
@@ -18,6 +20,8 @@ const loadGameStats = (): GameStats => { try { return JSON.parse(localStorage.ge
 /** Duolingo-style player portal: identity, league position, quests, achievements — all from the real league/season state. */
 export function PlayerPortal() {
   const [avatar] = useState(() => localStorage.getItem("luxe-poker-avatar") || "");
+  const [flag, setFlag] = useState(() => playerFlag());
+  const [flagOpen, setFlagOpen] = useState(false);
   const chips = Number(localStorage.getItem("luxe-poker-chips")) || 5000;
   const stats = useMemo(loadGameStats, []);
 
@@ -70,9 +74,15 @@ export function PlayerPortal() {
         <header className="rounded-[2rem] border border-amber-200/25 bg-[radial-gradient(circle_at_top_right,rgba(251,191,36,.2),transparent_35%),linear-gradient(135deg,#17120a,#0c0d16_55%,#151025)] p-6 shadow-2xl sm:p-9">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
-              {avatar
-                ? <img src={avatar} alt="Your avatar" className="h-20 w-20 rounded-3xl border-2 border-amber-300/60 object-cover" />
-                : <div className="grid h-20 w-20 place-items-center rounded-3xl border-2 border-amber-300/60 bg-gradient-to-br from-amber-200 to-amber-500 text-2xl font-black text-black">LP</div>}
+              <div className="relative">
+                {avatar
+                  ? <img src={avatar} alt="Your avatar" className="h-20 w-20 rounded-3xl border-2 border-amber-300/60 object-cover" />
+                  : <div className="grid h-20 w-20 place-items-center rounded-3xl border-2 border-amber-300/60 bg-gradient-to-br from-amber-200 to-amber-500 text-2xl font-black text-black">LP</div>}
+                <button type="button" onClick={() => setFlagOpen((v) => !v)} title="Pick your country flag" className="absolute -bottom-1.5 -right-1.5 grid h-8 w-8 place-items-center rounded-full border-2 border-[#0c0d16] bg-black/80 text-base shadow-lg transition hover:scale-110">{flag}</button>
+                {flagOpen && <div className="absolute left-0 top-full z-20 mt-2 grid w-56 grid-cols-8 gap-1 rounded-2xl border border-white/15 bg-[#0b0c14] p-2 shadow-2xl">
+                  {FLAG_CHOICES.map((f) => <button key={f} type="button" onClick={() => { setPlayerFlag(f); setFlag(f); setFlagOpen(false); }} className={`rounded-lg p-1 text-lg transition hover:bg-white/10 ${f === flag ? "bg-amber-300/20 ring-1 ring-amber-300/60" : ""}`}>{f}</button>)}
+                </div>}
+              </div>
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[.2em] text-amber-200">Player portal</p>
                 <h1 className="mt-1 text-3xl font-black sm:text-4xl">Luxe Player</h1>
@@ -241,13 +251,13 @@ export function PlayerPortal() {
   );
 }
 
-const BoardRow: React.FC<{ row: { name: string; xp: number; you: boolean; delta: number }; rank: number; zone: "promote" | "safe" | "demote" }> = ({ row, rank, zone }) => {
+const BoardRow: React.FC<{ row: { name: string; xp: number; you: boolean; delta: number; flag: string }; rank: number; zone: "promote" | "safe" | "demote" }> = ({ row, rank, zone }) => {
   const zoneClass = zone === "promote" ? "border-l-2 border-emerald-400/70" : zone === "demote" ? "border-l-2 border-rose-400/70" : "border-l-2 border-transparent";
   return (
     <li className={`flex items-center gap-3 px-4 py-2.5 text-sm ${zoneClass} ${row.you ? "bg-amber-300/10 font-black text-amber-100" : "text-white/75"}`}>
       <span className="w-6 text-center text-xs font-black text-white/40">{rank}</span>
-      <span className={`grid h-7 w-7 place-items-center rounded-full text-[10px] font-black ${row.you ? "bg-amber-300 text-black" : "bg-white/10 text-white/60"}`}>{row.name.slice(0, 2).toUpperCase()}</span>
-      <span className="flex-1 truncate">{row.name}{row.you && " — you"}</span>
+      <span className={`relative grid h-7 w-7 place-items-center rounded-full text-[10px] font-black ${row.you ? "bg-amber-300 text-black" : "bg-white/10 text-white/60"}`}>{row.name.slice(0, 2).toUpperCase()}<span className="absolute -bottom-1 -right-1 text-[10px] leading-none drop-shadow">{row.flag}</span></span>
+      <span className="flex-1 truncate">{row.name}{row.you && " — you"} <span className="ml-0.5">{row.flag}</span></span>
       <span className={`text-[10px] font-black ${row.delta > 0 ? "text-emerald-300" : row.delta < 0 ? "text-rose-300" : "text-white/30"}`}>{row.delta > 0 ? `▲${row.delta}` : row.delta < 0 ? `▼${-row.delta}` : "–"}</span>
       <span className="w-14 text-right font-black">{row.xp} <span className="text-[9px] font-bold text-white/40">XP</span></span>
     </li>

@@ -41,7 +41,17 @@ const LEAGUE_NAMES = ["Aria", "Dex", "Priya", "Kofi", "Lena", "Marco", "Zara", "
 const hashStr = (s: string) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
 const mulberry32 = (seed: number) => () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
 
-export type LeagueRow = { name: string; xp: number; you: boolean; games: number; delta: number };
+export type LeagueRow = { name: string; xp: number; you: boolean; games: number; delta: number; flag: string };
+
+// Each rival has a home country — flags show beside their name in every league table.
+const LEAGUE_FLAGS = ["🇮🇹", "🇺🇸", "🇮🇳", "🇬🇭", "🇩🇪", "🇪🇸", "🇳🇱", "🇬🇧", "🇫🇷", "🇧🇷", "🇵🇹", "🇦🇷", "🇯🇵", "🇨🇦", "🇮🇪", "🇵🇱", "🇲🇽", "🇧🇪", "🇬🇷", "🇰🇪", "🇦🇪", "🇨🇴", "🇸🇪", "🇦🇹", "🇳🇴", "🇳🇿", "🇵🇰", "🇹🇷", "🇰🇷", "🇷🇸", "🇩🇰", "🇿🇦", "🇨🇮", "🇨🇭", "🇨🇿", "🇦🇺", "🇵🇭", "🇳🇬", "🇫🇮", "🇭🇷", "🇹🇭", "🇷🇴"];
+
+/** Your flag — picked in the player portal, stored on this device. */
+export function playerFlag(): string {
+  try { const f = localStorage.getItem("luxe-player-flag"); if (f) return f; } catch { /* default */ }
+  return "🇬🇧";
+}
+export function setPlayerFlag(flag: string): void { try { localStorage.setItem("luxe-player-flag", flag); } catch { /* noop */ } }
 
 type LeagueState = { week: string; tierIndex: number; xp: number; seed: number; moved?: "promote" | "demote" | null; lastParticipationDay?: string; games?: number; prevRank?: number; weeksInLeague?: number };
 export type { LeagueState };
@@ -74,11 +84,11 @@ export function weeklyBoard(st: LeagueState): LeagueRow[] {
   const rng = mulberry32(st.seed + st.tierIndex * 977);
   const tierBoost = 1 + st.tierIndex * 0.55;
   const size = COHORT_SIZE;
-  const rivals: LeagueRow[] = LEAGUE_NAMES.slice(0, size - 1).map((name) => {
+  const rivals: LeagueRow[] = LEAGUE_NAMES.slice(0, size - 1).map((name, i) => {
     const base = 60 + rng() * rng() * 900; // skewed: a few grinders, many casuals
     const xp = Math.round(base * tierBoost);
     const games = 4 + Math.floor(rng() * 40);
-    return { name, xp, you: false, games, delta: 0 };
+    return { name, xp, you: false, games, delta: 0, flag: LEAGUE_FLAGS[i % LEAGUE_FLAGS.length] };
   });
   // reconcile: weekly XP is derived from the confirmed ledger (chips never count)
   const yourConfirmed = confirmedXP();
@@ -87,7 +97,7 @@ export function weeklyBoard(st: LeagueState): LeagueRow[] {
   const prevRng = mulberry32(st.seed + st.tierIndex * 977 + 41);
   const prevScores = rivals.map((r) => ({ name: r.name, s: Math.round((60 + prevRng() * prevRng() * 900) * tierBoost) }));
   const prevOrder = [...prevScores].sort((a, b) => b.s - a.s).map((r) => r.name);
-  const board: LeagueRow[] = [...rivals, { name: "You", xp: st.xp, you: true, games: st.games ?? 0, delta: 0 }].sort((a, b) => b.xp - a.xp);
+  const board: LeagueRow[] = [...rivals, { name: "You", xp: st.xp, you: true, games: st.games ?? 0, delta: 0, flag: playerFlag() }].sort((a, b) => b.xp - a.xp);
   board.forEach((row, idx) => {
     const prevIdx = row.you ? (st.prevRank ?? idx + 1) - 1 : prevOrder.indexOf(row.name);
     row.delta = prevIdx - idx; // positive = moved up
