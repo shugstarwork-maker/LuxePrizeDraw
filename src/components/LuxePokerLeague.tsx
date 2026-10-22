@@ -12,6 +12,8 @@ import { COHORT_SIZE, LEAGUE_TIERS, LEAGUE_XP, PLACEMENT_WEEKS, PROMOTE_COUNT, R
 import { prizeEligibility, verifyShuffleFairness, type FairnessProof } from "../lib/fairPlay";
 import { useMultiplayerPoker, type MpTableInfo } from "../lib/useMultiplayerPoker";
 import { AccountCard } from "./AccountCard";
+import { SeasonHub } from "./SeasonHub";
+import { recordEventResult, weekFixtures } from "../lib/pokerSeason";
 import { useAccount } from "../lib/useAccount";
 import { LeagueCelebration, type Celebration } from "./LeagueCelebration";
 import { LeagueRacePop, type RacePop } from "./LeagueRacePop";
@@ -329,6 +331,12 @@ export const LuxePokerLeague: React.FC = () => {
         note(hold ? `Table finish (${pts} XP) held for review — ${hold.id}.` : "Table finish under review.");
       } else gainLeagueXp(pts);
     }
+    // Season: a registered, unplayed club event consumes this run as its tournament result
+    const openEvent = weekFixtures().find((e) => e.registered && e.place == null && !e.finished);
+    if (openEvent) {
+      const done = recordEventResult(openEvent.id, place);
+      if (done) note(`${openEvent.name}: official result #${place} — +${done.points} season points recorded.`);
+    }
     play(place === 1 ? "levelUp" : "winnerReveal");
     note(place === 1 ? `You take the table! 1st place — +${pts} league points.` : `Table run over — finished #${place}, +${pts} league points.`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -539,6 +547,7 @@ export const LuxePokerLeague: React.FC = () => {
             <p className="mt-2.5 rounded-lg border border-amber-300/25 bg-amber-300/10 p-2 text-[10px] leading-relaxed text-amber-100">Calling something a skill competition doesn't automatically make it lawful. UK specialist legal advice is required before linking paid entries, poker performance and valuable prizes — the precise mechanics matter.</p>
           </div>
         </div>
+        <SeasonHub onPlayEvent={(label) => { note(`${label}: you're registered — your table run counts as your tournament result.`); join(leagueTable); }} />
         <LeagueCelebration celebration={celebration} onDone={() => setCelebration(null)} />
         <div className="mt-4 rounded-[1.75rem] border border-amber-200/25 bg-[linear-gradient(145deg,#241a08,#120d06_70%)] p-5">
           <p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">Luxe Lounge leaderboard</p>
