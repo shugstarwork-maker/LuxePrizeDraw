@@ -8,7 +8,7 @@ import { PokerTableArtwork } from "./PokerTableArtwork";
 import { useAudio } from "../audio/AudioProvider";
 import { applyAction, botAction, createTable, dealHand, seatPlayer, type HoldemState } from "../games/holdem";
 import { LoungeGamesCarousel } from "./LoungeGamesCarousel";
-import { COHORT_SIZE, LEAGUE_TIERS, LEAGUE_XP, PLACEMENT_WEEKS, PROMOTE_COUNT, RELEGATE_COUNT, competitiveRating, confirmedXP, consumeLeagueMove, ensureWeek, integrityFlags, loadReviewQueue, playerId, provisionalXP, recordCompetitiveResult, recordDailyParticipation, recordGamePlayed, recordWeeklyXP, settleLedger, submitForReview, submitHandForScoring, tierByIndex, tournamentXPForFinish, trustState, weekEndsIn, weeklyBoard, weeklyCutoffs } from "../lib/pokerLeague";
+import { COHORT_SIZE, LEAGUE_TIERS, LEAGUE_XP, PLACEMENT_WEEKS, PROMOTE_COUNT, RELEGATE_COUNT, competitiveRating, confirmedXP, consumeLeagueMove, ensureWeek, integrityFlags, leagueXPForHand, loadReviewQueue, playerId, provisionalXP, recordCompetitiveResult, recordDailyParticipation, recordGamePlayed, recordWeeklyXP, settleLedger, submitForReview, submitHandForScoring, tierByIndex, tournamentXPForFinish, trustState, weekEndsIn, weeklyBoard, weeklyCutoffs } from "../lib/pokerLeague";
 import { prizeEligibility, verifyShuffleFairness, type FairnessProof } from "../lib/fairPlay";
 import { useMultiplayerPoker, type MpTableInfo } from "../lib/useMultiplayerPoker";
 import { AccountCard } from "./AccountCard";
@@ -18,6 +18,7 @@ import { recordEventResult, weekFixtures } from "../lib/pokerSeason";
 import { useAccount } from "../lib/useAccount";
 import { LeagueCelebration, type Celebration } from "./LeagueCelebration";
 import { LeagueRacePop, type RacePop } from "./LeagueRacePop";
+import { LeagueGlideOverlay, type GlideEvent } from "./LeagueGlideOverlay";
 
 const CardView = LuxePlayingCard;
 const key = (card: { rank: string; suit: string }) => `${card.rank}${card.suit}`;
@@ -132,13 +133,24 @@ export const LuxePokerLeague: React.FC = () => {
   };
   const [racePop, setRacePop] = useState<RacePop>(null);
   const racePopId = useRef(0);
+  const [leagueGlide, setLeagueGlide] = useState<GlideEvent>(null);
+  const glideId = useRef(0);
   const gainLeagueXp = (amount: number) => {
     pushXpFloat(amount);
     const before = weeklyBoard(league);
     const next = recordWeeklyXP(amount);
     setLeague(next);
+    const after = weeklyBoard(next);
+    const oldRank = before.findIndex((r) => r.you) + 1 || before.length;
+    const newRank = after.findIndex((r) => r.you) + 1 || after.length;
+    if (newRank < oldRank) {
+      // Duolingo-style: climbing the table takes over the full screen, then glides you to your new spot.
+      setLeagueGlide({ id: ++glideId.current, amount, before, after, tierName: leagueTier.name, tierColour: leagueTier.colour });
+      play("levelUp");
+      return;
+    }
     const id = ++racePopId.current;
-    setRacePop({ id, amount, before, after: weeklyBoard(next), tierColour: leagueTier.colour });
+    setRacePop({ id, amount, before, after, tierColour: leagueTier.colour });
     window.setTimeout(() => setRacePop((p) => (p && p.id === id ? null : p)), 3000);
     play("levelUp");
   };
@@ -318,7 +330,14 @@ export const LuxePokerLeague: React.FC = () => {
       // Server-authoritative scoring: the server verifies the hand and decides the XP.
       // If the server can't be reached or rejects it, no XP is credited locally.
       void submitHandForScoring(signal).then((verdict) => {
-        if (!verdict || !verdict.confirmed) { note("Hand could not be verified by the server — no league XP credited."); return; }
+        if (!verdict) {
+          // Server scoring unreachable (offline / static preview) — credit locally instead of blocking the league race.
+          const xp = leagueXPForHand(signal.won, signal.showdown);
+          if (xp > 0) gainLeagueXp(xp);
+          note("Preview mode — scoring server unreachable, XP credited locally on this device.");
+          return;
+        }
+        if (!verdict.confirmed) { note("Hand could not be verified by the server — no league XP credited."); return; }
         if (verdict.held) { note(`Result sent for review before XP is credited (${verdict.held}).`); return; }
         if (verdict.xp > 0) gainLeagueXp(verdict.xp);
       });
@@ -598,7 +617,7 @@ export const LuxePokerLeague: React.FC = () => {
           </div>
           <p className="mt-3 text-[10px] text-white/35">Your private Luxe Lounge record — stored on this device. Realtime multiplayer tables are on the roadmap.</p>
         </div>
-        <div className="mt-7 grid gap-3 sm:grid-cols-3"><button onClick={dailyReward} disabled={!rewardReady} className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-4 text-left disabled:opacity-40"><Gift className="h-5 w-5 text-emerald-200" /><b className="mt-3 block">{rewardReady ? "Daily sign-in: 200 chips" : "Daily chips claimed"}</b><small className="text-white/55">200 free-play chips every day</small></button><button onClick={() => note("Demo leaderboard becomes available after completing a hand.")} className="rounded-2xl border border-violet-300/30 bg-violet-300/10 p-4 text-left"><Crown className="h-5 w-5 text-violet-200" /><b className="mt-3 block">League table</b><small className="text-white/55">Practice ranking</small></button><button onClick={() => note("Demo tournaments use virtual chips and cannot issue tickets.")} className="rounded-2xl border border-amber-200/30 bg-amber-300/10 p-4 text-left"><Sparkles className="h-5 w-5 text-amber-200" /><b className="mt-3 block">Tournament night</b><small className="text-white/55">Table race points: 1st 100 · 2nd 75 · 3rd 60 · 4th 50 · 5th 40 · 6th 30 — outlast the table to score for your weekly league</small></button></div>{status !== "Choose a table to sit down." && <p className="mt-5 rounded-xl border border-amber-200/20 bg-amber-300/10 p-3 text-sm text-amber-100">{status}</p>}<LeagueRacePop pop={racePop} /></div></section>;
+        <div className="mt-7 grid gap-3 sm:grid-cols-3"><button onClick={dailyReward} disabled={!rewardReady} className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-4 text-left disabled:opacity-40"><Gift className="h-5 w-5 text-emerald-200" /><b className="mt-3 block">{rewardReady ? "Daily sign-in: 200 chips" : "Daily chips claimed"}</b><small className="text-white/55">200 free-play chips every day</small></button><button onClick={() => note("Demo leaderboard becomes available after completing a hand.")} className="rounded-2xl border border-violet-300/30 bg-violet-300/10 p-4 text-left"><Crown className="h-5 w-5 text-violet-200" /><b className="mt-3 block">League table</b><small className="text-white/55">Practice ranking</small></button><button onClick={() => note("Demo tournaments use virtual chips and cannot issue tickets.")} className="rounded-2xl border border-amber-200/30 bg-amber-300/10 p-4 text-left"><Sparkles className="h-5 w-5 text-amber-200" /><b className="mt-3 block">Tournament night</b><small className="text-white/55">Table race points: 1st 100 · 2nd 75 · 3rd 60 · 4th 50 · 5th 40 · 6th 30 — outlast the table to score for your weekly league</small></button></div>{status !== "Choose a table to sit down." && <p className="mt-5 rounded-xl border border-amber-200/20 bg-amber-300/10 p-3 text-sm text-amber-100">{status}</p>}<LeagueRacePop pop={racePop} />{leagueGlide && <LeagueGlideOverlay event={leagueGlide} onDone={() => setLeagueGlide(null)} />}</div></section>;
 
   // ── Multiplayer table screen ──
   if (screen === "mp") {
@@ -718,6 +737,7 @@ export const LuxePokerLeague: React.FC = () => {
             <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-[10px] text-white/35"><ShieldCheck className="h-3 w-3" /> Free-play table — virtual chips have no cash value and cannot be exchanged.</p>
             </div></article>
       <LeagueRacePop pop={racePop} />
+      {leagueGlide && <LeagueGlideOverlay event={leagueGlide} onDone={() => setLeagueGlide(null)} />}
       {leaveOpen && <div className="fixed inset-0 z-[1300] flex items-center justify-center bg-black/70 p-6" role="dialog" aria-modal="true"><div className="w-full max-w-sm rounded-2xl border border-amber-200/30 bg-zinc-950 p-5 text-center"><MessageCircle className="mx-auto h-6 w-6 text-amber-200" /><h3 className="mt-3 font-black text-amber-100">Leave {activeTable?.name}?</h3><p className="mt-2 text-xs text-white/60">Your remaining stack of {you?.chips.toLocaleString() ?? 0} chips returns to your wallet.</p><div className="mt-4 grid grid-cols-2 gap-2"><button onClick={() => setLeaveOpen(false)} className="rounded-xl bg-white/10 py-3 text-xs font-black">Stay</button><button onClick={leaveTable} className="rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-3 text-xs font-black text-black">Leave</button></div></div></div>}
     </div></section>;
 };

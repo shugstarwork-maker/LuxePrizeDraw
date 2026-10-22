@@ -461,7 +461,7 @@ export async function submitHandForScoring(signal: { won: boolean; showdown: boo
       headers: { "content-type": "application/json", "x-player-id": playerId() },
       body: JSON.stringify(signal),
     });
-    if (!res.ok) return null;
+    if (!res.ok || !(res.headers.get("content-type") ?? "").includes("application/json")) return null;
     return (await res.json()) as { xp: number; confirmed: boolean; held?: string };
   } catch { return null; }
 }

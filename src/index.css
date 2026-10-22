@@ -1401,3 +1401,13 @@
 .draughts-mini--white { background: radial-gradient(circle at 34% 26%, #fff, #d6d0c4); }
 .draughts-mini--black { background: radial-gradient(circle at 34% 26%, #57534e, #000); border: 1px solid rgba(212, 175, 55, .55); }
 @media (prefers-reduced-motion: reduce) { .draughts-piece, .draughts-square--forced { animation: none; } }
+
+/* ── Full-screen league climb (Duolingo-style glide) ── */
+.league-glide { position: fixed; inset: 0; z-index: 90; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow-y: auto; padding: 2rem 1rem 6rem; background: radial-gradient(circle at 50% 0%, #2c2107, #0a0805 55%, #050403); animation: league-glide-in .35s ease-out; }
+@keyframes league-glide-in { from { opacity: 0; } to { opacity: 1; } }
+.league-glide__gem { position: relative; width: 9rem; height: 9rem; border-radius: 38% 62% 55% 45% / 45% 40% 60% 55%; overflow: hidden; animation: league-gem-pop .8s cubic-bezier(.22,1.6,.36,1); }
+.league-glide__gem-shine { position: absolute; inset: 12% 55% 55% 12%; border-radius: 9999px; background: radial-gradient(circle, #ffffffe6, transparent 70%); }
+@keyframes league-gem-pop { 0% { transform: scale(0) rotate(-18deg); opacity: 0; } 60% { transform: scale(1.15) rotate(6deg); opacity: 1; } 100% { transform: scale(1) rotate(0); } }
+.league-glide__xp-pop { position: absolute; right: 0; bottom: 100%; font-size: .8rem; font-weight: 900; color: #6ee7b7; text-shadow: 0 2px 8px #000; animation: league-xp-rise 1.6s ease-out forwards; pointer-events: none; }
+@keyframes league-xp-rise { 0% { transform: translateY(8px); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(-26px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .league-glide__gem { animation: none; } }
