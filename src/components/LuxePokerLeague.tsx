@@ -62,7 +62,7 @@ export const LuxePokerLeague: React.FC = () => {
     try { await fetch("/api/poker/mp/tables", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: "Luxe open table" }) }); await refreshMpTables(); } catch { /* offline */ }
     setMpLoading(false);
   };
-  const joinMp = (tableId: string) => { mp.join(tableId); setScreen("mp"); };
+  const joinMp = (tableId: string) => { mp.spectate(tableId); setScreen("mp"); };
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [gateDismissed, setGateDismissed] = useState(false);
 
@@ -609,51 +609,66 @@ export const LuxePokerLeague: React.FC = () => {
     const mpToCall = g && me ? g.currentBet - me.bet : 0;
     const mpMinRaise = g && me ? Math.min(g.currentBet + g.minRaise, me.bet + me.chips) : 0;
     const mpMaxRaise = me ? me.bet + me.chips : 0;
-    return <section className="poker-playing-page min-h-screen bg-[radial-gradient(circle_at_top,#0a2a14,#050a06_52%)] px-3 py-4 pb-28 text-white">
-      <div className="mx-auto max-w-3xl">
-        <header className="flex items-center justify-between rounded-2xl border border-emerald-200/30 bg-black/35 px-3 py-2">
+    const mpStage = g?.stage === "preflop" ? "pre-flop" : g?.stage ?? "idle";
+    const mpWinner: "player" | "host" | "split" | null = !g?.handOver || !g.winners.length ? null : g.winners.length > 1 ? "split" : g.winners[0].id === myId ? "player" : "host";
+    const mpMood: "idle" | "win" | "lose" = mpWinner === "player" || mpWinner === "split" ? "win" : mpWinner === "host" ? "lose" : "idle";
+    const mpSeated = Boolean(me && !me.sittingOut);
+    return <section id="poker-league" className={`poker-playing-page${gateDismissed ? " poker-gate-dismissed" : ""} min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-3 py-4 pb-28 text-white`}>
+      {!gateDismissed && <div className="poker-landscape-gate" role="status"><span aria-hidden="true">↻</span><h2>Turn your phone sideways for a bigger poker table</h2><p>You can still play in portrait — rotate whenever you're ready for the full table view.</p><button type="button" onClick={() => setGateDismissed(true)}>Continue in portrait</button><button type="button" onClick={() => { mp.leave(); setScreen("lobby"); }}>Back to Luxe Lounges</button></div>}
+      <div className="poker-playing-wrap mx-auto max-w-5xl">
+        <header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-3 py-2">
           <button onClick={() => { mp.leave(); setScreen("lobby"); }} className="inline-flex items-center gap-1 rounded-lg bg-white/10 px-3 py-2 text-xs font-black"><ChevronLeft className="h-4 w-4" />Lobby</button>
-          <span className="font-mono text-xs font-black text-emerald-100">{v ? `${v.name} · Hand #${v.handNumber}` : "Connecting…"}</span>
+          <span className="font-mono text-sm font-black text-amber-100">{v ? `${v.name} · Hand #${v.handNumber}` : "Connecting…"}</span>
           <span className={`rounded-full px-2.5 py-1 text-[10px] font-black ${mp.connected ? "bg-emerald-300/20 text-emerald-100" : "bg-rose-300/20 text-rose-100"}`}>{mp.connected ? "LIVE" : "OFFLINE"}</span>
         </header>
         {mp.error && <p role="alert" className="mt-3 rounded-xl border border-rose-300/30 bg-rose-300/10 p-3 text-xs text-rose-100">{mp.error}</p>}
         {!v && <p className="mt-10 text-center text-sm text-white/50">Joining table…</p>}
         {v && g && <>
-          <div className="mt-4 overflow-hidden rounded-[1.5rem] border border-emerald-200/25 bg-[radial-gradient(ellipse_at_center,#0f2a16,#071208_60%)] p-4">
-            <p className="text-center font-mono text-xs text-emerald-100">Pot {g.pot.toLocaleString()} · Blinds {v.blinds}</p>
-            <div className="mt-2 flex justify-center gap-1">{[0, 1, 2, 3, 4].map((i) => g.board[i] ? <CardView key={key(g.board[i])} card={g.board[i]} /> : <div key={i} className="h-14 w-10 rounded-lg border border-dashed border-emerald-100/25 bg-black/40" />)}</div>
-            <div className="mt-4 space-y-1.5">
-              {g.players.map((p) => {
-                const isMe = p.id === myId;
-                const isTurn = !g.handOver && g.players[g.turnIndex]?.id === p.id;
-                const won = g.handOver && g.winners.some((w) => w.id === p.id);
-                const seat = v.seats.find((x) => x.id === p.id);
-                return <div key={p.id} className={`flex items-center gap-3 rounded-xl border px-3 py-2 ${won ? "border-emerald-300/60 bg-emerald-300/15" : isTurn ? "border-amber-200/70 bg-amber-300/10" : "border-white/10 bg-black/30"} ${p.folded ? "opacity-45" : ""}`}>
-                  <span className={`flex h-8 w-8 items-center justify-center rounded-full border text-[10px] font-black ${isMe ? "border-emerald-300/60 bg-emerald-300/15 text-emerald-100" : "border-white/20 bg-black/50 text-white/70"}`}>{p.initials}</span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-xs font-black text-white/85">{p.name}{isMe ? " — you" : ""}{!seat?.connected && <span className="text-rose-300"> · offline</span>}{g.players[g.dealerIndex]?.id === p.id ? " 🔘" : ""}</p>
-                    <p className="text-[10px] text-white/45">{p.chips.toLocaleString()} chips{p.bet > 0 ? ` · bet ${p.bet.toLocaleString()}` : ""}{p.allIn ? " · ALL-IN" : ""}{p.folded ? " · folded" : ""}</p>
-                  </div>
-                  <span className="flex gap-1">{p.cards.map((c, i) => c ? <CardView key={`${p.id}-${i}`} card={c as { rank: string; suit: string }} /> : <span key={`${p.id}-${i}`} className="flex h-10 w-7 items-center justify-center rounded-md border border-emerald-200/30 bg-gradient-to-br from-emerald-950 to-black text-[9px] text-emerald-200/70">♛</span>)}</span>
-                </div>;
-              })}
+          <article className="poker-game-article relative mt-4 overflow-hidden rounded-[2rem] border border-amber-200/50 bg-[radial-gradient(ellipse_at_center,#2a2318,#151009_55%,#090604)] p-4 shadow-[0_0_70px_rgba(212,175,55,.22),inset_0_0_140px_rgba(0,0,0,0.5)] sm:p-6">
+            <div className="poker-surface-frame relative rounded-[2rem]">
+              <PokerTableArtwork pot={g.pot} stage={mpStage} winner={mpWinner}>
+                <div className="poker-live-seats pointer-events-none absolute inset-0">{g.players.map((p, i) => {
+                  const slot = SEAT_SLOTS[Math.min(i, SEAT_SLOTS.length - 1)];
+                  const isMe = p.id === myId;
+                  const isTurn = !g.handOver && g.players[g.turnIndex]?.id === p.id;
+                  const isWinner = g.handOver && !p.sittingOut && g.winners.some((w) => w.id === p.id);
+                  const seat = v.seats.find((x) => x.id === p.id);
+                  const showCards = Boolean(p.cards[0]) && (isMe || (g.stage === "showdown" && !p.folded && !p.sittingOut));
+                  return <div key={p.id} className={`pointer-events-auto absolute w-[4.9rem] rounded-2xl border px-1.5 py-1 text-center shadow-2xl backdrop-blur-md transition ${p.sittingOut ? "opacity-30" : p.folded ? "opacity-45" : ""} ${isWinner ? "border-emerald-300 bg-emerald-300/20" : isTurn ? "border-amber-200 bg-amber-300/20 poker-turn-ring" : isMe ? "poker-seat-you border-amber-200/70 bg-amber-300/10" : "border-white/15 bg-black/55"}`} style={{ left: `${slot.px}%`, top: `${isMe ? slot.py + 8 : slot.py}%`, zIndex: 10 + Math.round(slot.py), transform: `translate(-50%,-50%) scale(${slot.sc})` }}>
+                    <PlayerTurnRing active={isTurn} seconds={isTurn ? 20 : 20} name={p.name}>{isMe && avatar ? <img src={avatar} alt="Your avatar" className="h-full w-full object-cover" /> : p.initials}</PlayerTurnRing>
+                    <b className="mt-1 block truncate text-[9px] text-amber-100">{p.name}{isMe ? " — you" : ""}{g.players[g.dealerIndex]?.id === p.id ? " 🔘" : ""}{!seat?.connected && <span className="text-rose-300"> · offline</span>}</b>
+                    <small className="block text-[8px] text-white/55">{p.sittingOut ? "Watching" : p.chips.toLocaleString()}{p.allIn ? " · ALL-IN" : ""}{p.folded ? " · folded" : ""}</small>
+                    {p.bet > 0 && <span className="mt-0.5 inline-block rounded-full bg-amber-300/90 px-1.5 py-px font-mono text-[8px] font-black text-black">bet {p.bet.toLocaleString()}</span>}
+                    {p.cards.length === 2 && !p.sittingOut && !isMe && <span className="mt-1 flex justify-center gap-0.5">{p.cards.map((c, ci) => showCards && c ? <span key={`${p.id}-${ci}`} className={`flex h-6 w-[1.1rem] items-center justify-center rounded-sm border border-black/20 bg-white font-mono text-[9px] font-black ${c.suit === "♥" || c.suit === "♦" ? "text-red-600" : "text-zinc-900"}`}>{c.rank}{c.suit}</span> : <span key={`${p.id}-${ci}`} className="flex h-6 w-[1.1rem] items-center justify-center rounded-sm border border-amber-200/40 bg-gradient-to-br from-amber-900 to-black text-[7px] text-amber-200/70">♛</span>)}</span>}
+                  </div>;
+                })}</div>
+                <div className="poker-live-board flex justify-center gap-1">{[0, 1, 2, 3, 4].map((i) => g.board[i] ? <CardView key={key(g.board[i])} card={g.board[i]} /> : <div key={i} className="h-16 w-11 rounded-lg border border-dashed border-amber-100/30 bg-black/40 sm:h-20 sm:w-14" />)}</div>
+                <div className="poker-live-hand flex justify-center gap-2">{me?.cards.some(Boolean) ? me.cards.map((c, i) => c ? <CardView key={`me-${i}`} card={c} /> : <CardView key={`me-${i}`} hidden />) : <><CardView hidden /><CardView hidden /></>}</div>
+              </PokerTableArtwork>
+              <LuxeDealer stage={mpStage} active={Boolean(v.yourTurn)} mood={mpMood} />
             </div>
-            <p role="status" className="mt-3 rounded-xl bg-black/35 p-2.5 text-center text-xs text-emerald-50">{g.lastAction}</p>
-          </div>
-          {g.handOver && <>
-            {g.winners.length > 0 && <p className="mt-3 rounded-xl border border-emerald-300/40 bg-emerald-300/15 p-3 text-center text-sm font-black text-emerald-100">{g.winners.some((w) => w.id === myId) ? "🏆 " : ""}{g.winners.map((w) => `${g.players.find((p) => p.id === w.id)?.name ?? w.id} wins ${w.amount.toLocaleString()}`).join(" · ")}</p>}
-            {v.reveal && <p className="mt-2 rounded-xl border border-white/10 bg-black/30 p-2.5 font-mono text-[9px] leading-relaxed text-white/45">Provably fair — hand #{v.reveal.hand} · commit {v.commitment?.slice(0, 14)}… · revealed {v.reveal.secret.slice(0, 14)}… · full deck on record</p>}
-            {g.handNumber > 0 && <button onClick={mp.nextHand} className="mt-3 w-full rounded-xl bg-gradient-to-b from-emerald-300 to-emerald-500 py-4 text-sm font-black text-black shadow-lg active:scale-95">Next hand</button>}
-          </>}
-          {!g.handOver && v.yourTurn && <div className="mt-4" role="group" aria-label="Poker actions">
-            <div className="flex items-center gap-3"><input aria-label="Raise amount" type="range" min={mpMinRaise} max={mpMaxRaise} step={g.bigBlind} value={Math.min(Math.max(raiseTo, mpMinRaise), mpMaxRaise)} onChange={(e) => setRaiseTo(Number(e.target.value))} className="w-full accent-emerald-300" disabled={mpMaxRaise <= mpToCall} /><span className="w-24 text-right font-mono text-xs font-black text-emerald-100">{Math.min(Math.max(raiseTo, mpMinRaise), mpMaxRaise).toLocaleString()}</span></div>
-            <div className="mt-3 grid grid-cols-3 gap-2">
-              <button onClick={() => mp.act("fold")} className="rounded-xl bg-zinc-800/90 py-4 text-xs font-black text-zinc-100 active:scale-95">Fold</button>
-              {mpToCall > 0 ? <button onClick={() => mp.act("call")} className="rounded-xl bg-gradient-to-b from-emerald-300 to-emerald-500 py-4 text-xs font-black text-black active:scale-95">Call {Math.min(mpToCall, me?.chips ?? 0).toLocaleString()}</button> : <button onClick={() => mp.act("check")} className="rounded-xl bg-gradient-to-b from-emerald-300 to-emerald-500 py-4 text-xs font-black text-black active:scale-95">Check</button>}
-              <button onClick={() => mp.act("raise", Math.min(Math.max(raiseTo, mpMinRaise), mpMaxRaise))} disabled={mpMaxRaise <= mpToCall} className="rounded-xl bg-gradient-to-b from-rose-400 to-rose-600 py-4 text-xs font-black text-white active:scale-95 disabled:opacity-40">{Math.min(Math.max(raiseTo, mpMinRaise), mpMaxRaise) >= mpMaxRaise ? "All-in" : "Raise to"} {Math.min(Math.max(raiseTo, mpMinRaise), mpMaxRaise).toLocaleString()}</button>
+            <div className="poker-below-table relative">
+              <div className="mb-3 flex justify-center"><PokerFullscreen /></div>
+              <div className="poker-round-meta flex justify-between text-[10px] font-black uppercase tracking-wider text-white/60"><span>{v.name} · Hand #{g.handNumber} · Blinds {v.blinds}</span><span className="inline-flex items-center gap-1"><Timer className="h-3 w-3" />{v.yourTurn ? "Your turn" : g.handOver ? "Hand over" : "Playing"}</span></div>
+              <div className="poker-round-status mt-5 rounded-xl bg-black/35 p-3 text-center text-sm text-emerald-100" role="status">{g.lastAction}</div>
+              {g.handOver && <>
+                {g.winners.length > 0 && <p className={`poker-winner-banner mt-4 rounded-xl border p-3 text-center text-sm font-black ${mpWinner === "player" ? "border-emerald-300/40 bg-emerald-300/15 text-emerald-100" : "border-white/15 bg-white/5 text-white/75"}`}>{mpWinner === "player" ? "🏆 " : ""}{g.winners.map((w) => `${g.players.find((p) => p.id === w.id)?.name ?? w.id} wins ${w.amount.toLocaleString()}`).join(" · ")}</p>}
+                {v.reveal && <p className="mt-2 rounded-xl border border-white/10 bg-black/30 p-2.5 font-mono text-[9px] leading-relaxed text-white/45">Provably fair — hand #{v.reveal.hand} · commit {v.commitment?.slice(0, 14)}… · revealed {v.reveal.secret.slice(0, 14)}… · full deck on record</p>}
+                {mpSeated && g.handNumber > 0 && <button onClick={mp.nextHand} className="poker-deal-dock mt-4 w-full rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-4 text-sm font-black text-black shadow-lg active:scale-95">Deal the next hand</button>}
+                {!mpSeated && <button onClick={() => mp.takeSeat()} className="poker-deal-dock mt-4 w-full rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-4 text-sm font-black text-black shadow-lg active:scale-95">Take your seat — in from the next hand</button>}
+              </>}
+              {!g.handOver && v.yourTurn && <div className="poker-action-dock mt-5" role="group" aria-label="Poker actions">
+                <div className="flex items-center gap-3"><input aria-label="Raise amount" type="range" min={mpMinRaise} max={mpMaxRaise} step={g.bigBlind} value={Math.min(Math.max(raiseTo, mpMinRaise), mpMaxRaise)} onChange={(e) => setRaiseTo(Number(e.target.value))} className="w-full accent-amber-300" disabled={mpMaxRaise <= mpToCall} /><span className="w-24 text-right font-mono text-xs font-black text-amber-100">{Math.min(Math.max(raiseTo, mpMinRaise), mpMaxRaise).toLocaleString()}</span></div>
+                <div className="mt-3 grid grid-cols-3 gap-2">
+                  <button onClick={() => mp.act("fold")} className="rounded-xl bg-zinc-800/90 py-4 text-xs font-black text-zinc-100 shadow-lg shadow-black/60 transition hover:bg-zinc-700 active:scale-95">Fold</button>
+                  {mpToCall > 0 ? <button onClick={() => mp.act("call")} className="rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-4 text-xs font-black text-black shadow-lg shadow-black/50 transition hover:brightness-110 active:scale-95">Call {Math.min(mpToCall, me?.chips ?? 0).toLocaleString()}</button> : <button onClick={() => mp.act("check")} className="rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-4 text-xs font-black text-black shadow-lg shadow-black/50 transition hover:brightness-110 active:scale-95">Check</button>}
+                  <button onClick={() => mp.act("raise", Math.min(Math.max(raiseTo, mpMinRaise), mpMaxRaise))} disabled={mpMaxRaise <= mpToCall} className="rounded-xl bg-gradient-to-b from-rose-400 to-rose-600 py-4 text-xs font-black text-white shadow-lg shadow-black/50 transition hover:brightness-110 active:scale-95 disabled:opacity-40">{Math.min(Math.max(raiseTo, mpMinRaise), mpMaxRaise) >= mpMaxRaise ? "All-in" : "Raise to"} {Math.min(Math.max(raiseTo, mpMinRaise), mpMaxRaise).toLocaleString()}</button>
+                </div>
+              </div>}
+              {!g.handOver && !v.yourTurn && mpSeated && <p className="poker-thinking-note mt-5 flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-black/30 py-3 text-xs text-white/55"><Bot className="h-4 w-4 text-amber-200" />{g.players[g.turnIndex]?.name ?? "Table"} is thinking…</p>}
+              {!g.handOver && !mpSeated && <button onClick={() => mp.takeSeat()} className="poker-deal-dock mt-4 w-full rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-4 text-sm font-black text-black shadow-lg active:scale-95">Take your seat — in from the next hand</button>}
             </div>
-          </div>}
-          {!g.handOver && !v.yourTurn && <p className="mt-4 flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-black/30 py-3 text-xs text-white/55"><Timer className="h-4 w-4 text-emerald-200" />{g.players[g.turnIndex]?.name ?? "Table"} is thinking…</p>}
+          </article>
           <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-[10px] text-white/35"><ShieldCheck className="h-3 w-3" /> Free-play multiplayer — virtual chips only, no cash value. Server deals and validates; every action is on the permanent record.</p>
         </>}
       </div>

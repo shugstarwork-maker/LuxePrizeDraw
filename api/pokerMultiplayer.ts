@@ -5,7 +5,7 @@
 import crypto from "crypto";
 import { WebSocketServer, WebSocket } from "ws";
 import type { Server } from "http";
-import { applyAction, createTable, dealHand, makeHoldemDeck, shuffleHoldem, type HoldemAction, type HoldemCard, type HoldemState } from "../src/games/holdem";
+import { applyAction, botAction, createTable, dealHand, makeHoldemDeck, shuffleHoldem, type BotStyle, type HoldemAction, type HoldemCard, type HoldemState } from "../src/games/holdem";
 import { appendRecord } from "./poker";
 
 const hash = (s: string) => crypto.createHash("sha256").update(s).digest("hex");
@@ -30,6 +30,7 @@ export type MpTable = {
   handDecks: Record<number, string[]>;
   lastActionAt: number;
   createdAt: number;
+  pendingSeats?: { playerId: string; name: string }[];
 };
 
 const mpTables = new Map<string, MpTable>();
@@ -85,6 +86,8 @@ function startHand(t: MpTable) {
 
 function settleIfOver(t: MpTable) {
   if (!t.state.handOver) return;
+  for (const pending of t.pendingSeats ?? []) seatHuman(t, pending.playerId, pending.name);
+  t.pendingSeats = [];
   const hn = t.state.handNumber;
   appendRecord("mp-hand", {
     table: t.id, hand: hn,
@@ -92,6 +95,53 @@ function settleIfOver(t: MpTable) {
     showdown: t.state.board.length === 5,
     reveal: t.handSecrets[hn] ? { secret: t.handSecrets[hn], deck: t.handDecks[hn] } : undefined,
   });
+}
+
+
+// House bots keep a multiplayer table playable even when a human is alone —
+// clearly marked, same committed deck, same append-only record as human seats.
+const MP_BOT_POOL: { name: string; style: BotStyle }[] = [
+  { name: "Amelia K.", style: "tight" },
+  { name: "Ruby C.", style: "loose" },
+  { name: "Theo M.", style: "balanced" },
+];
+
+function ensureBots(t: MpTable) {
+  const humans = t.players.filter((p) => !p.id.startsWith("bot-")).length;
+  const wanted = Math.min(MP_BOT_POOL.length, Math.max(0, 2 - humans));
+  const have = t.players.filter((p) => p.id.startsWith("bot-")).length;
+  for (let i = have; i < wanted; i++) {
+    const spec = MP_BOT_POOL[i];
+    const id = `bot-${t.id}-${i}`;
+    if (t.players.some((p) => p.id === id)) continue;
+    t.players.push({ id, name: spec.name, seatIndex: t.players.length, connected: true });
+    t.state = { ...t.state, players: [...t.state.players, {
+      id, name: spec.name, initials: spec.name.split(/\s+/).map((w) => w[0]).join("").slice(0, 3).toUpperCase(),
+      isBot: true, style: spec.style, chips: t.buyIn, bet: 0, handBet: 0, cards: [], folded: false, allIn: false, sittingOut: true, hasActed: false,
+    }] };
+  }
+}
+
+function markReady(t: MpTable) {
+  t.state = { ...t.state, players: t.state.players.map((x) => ({ ...x, sittingOut: false })) };
+}
+
+function runBotTurns(t: MpTable, depth = 0) {
+  // Let house bots act immediately (with realistic pacing done client-side).
+  while (!t.state.handOver && depth < 40) {
+    const actor = t.state.players[t.state.turnIndex];
+    if (!actor || !actor.isBot) break;
+    const rng = mulberry32(seedFromSecret(`${t.id}:${t.state.handNumber}:${depth}`));
+    const move = botAction(t.state, actor, rng);
+    try {
+      t.state = applyAction(t.state, actor.id, move.action, move.raiseTo ?? 0);
+      t.lastActionAt = Date.now();
+      appendRecord("mp-action", { table: t.id, hand: t.state.handNumber, player: actor.id, action: move.action, raiseTo: move.raiseTo, auto: true });
+      depth += 1;
+    } catch { break; }
+  }
+  settleIfOver(t);
+  broadcast(t);
 }
 
 export function listMpTables() {
@@ -107,7 +157,7 @@ export function createMpTable(name: string, smallBlind = 10, bigBlind = 20, buyI
   const t: MpTable = {
     id, name: name.slice(0, 32) || "Luxe multiplayer table", smallBlind, bigBlind, buyIn,
     state: createTable({ playerName: "_empty_", playerChips: 0, botCount: 5, botChips: 0, smallBlind, bigBlind }),
-    players: [], handSecrets: {}, handCommitments: {}, handDecks: {},
+    players: [], pendingSeats: [], handSecrets: {}, handCommitments: {}, handDecks: {},
     lastActionAt: Date.now(), createdAt: Date.now(),
   };
   // strip the placeholder players — multiplayer tables start empty
@@ -131,13 +181,10 @@ function seatHuman(t: MpTable, playerId: string, name: string): { ok: boolean; e
     }],
   };
   appendRecord("mp-seat", { table: t.id, player: playerId, name, seatIndex });
-  // auto-start when 2+ players are seated and no hand is running
-  if (t.state.handOver && t.players.filter((p) => t.state.players.find((x) => x.id === p.id)?.chips! > 0).length >= 2) {
-    for (const p of t.players) {
-      t.state = { ...t.state, players: t.state.players.map((x) => x.id === p.id ? { ...x, sittingOut: false } : x) };
-    }
-    startHand(t);
-  }
+  // seat house bots so a lone human still gets a real game, then start
+  ensureBots(t);
+  markReady(t);
+  if (t.state.handOver && t.players.length >= 2) { startHand(t); runBotTurns(t); }
   return { ok: true };
 }
 
@@ -191,7 +238,34 @@ export function attachMultiplayerPoker(server: Server) {
       const playerId = String(msg.playerId ?? meta?.playerId ?? "").slice(0, 24);
       if (!playerId) { ws.send(JSON.stringify({ type: "error", error: "missing_player_id" })); return; }
 
+      if (msg.type === "spectate") {
+        const t = mpTables.get(String(msg.tableId ?? ""));
+        if (!t) { ws.send(JSON.stringify({ type: "error", error: "table_not_found" })); return; }
+        sockets.set(ws, { playerId, tableId: t.id });
+        ws.send(JSON.stringify({ type: "joined", view: publicState(t, playerId) }));
+        return;
+      }
       if (msg.type === "join") {
+        const t = mpTables.get(String(msg.tableId ?? ""));
+        if (!t) { ws.send(JSON.stringify({ type: "error", error: "table_not_found" })); return; }
+        if (t.state.handOver) {
+          // Between hands: seat immediately so the player is in from the next deal.
+          const seated = seatHuman(t, playerId, String(msg.name ?? "Player"));
+          if (!seated.ok) { ws.send(JSON.stringify({ type: "error", error: seated.error })); return; }
+          sockets.set(ws, { playerId, tableId: t.id });
+          ws.send(JSON.stringify({ type: "joined", view: publicState(t, playerId) }));
+          broadcast(t);
+          return;
+        }
+        // Mid-hand: entering chips now would be unfair — queue for the next hand.
+        t.pendingSeats = (t.pendingSeats ?? []).filter((p) => p.playerId !== playerId);
+        t.pendingSeats!.push({ playerId, name: String(msg.name ?? "Player") });
+        sockets.set(ws, { playerId, tableId: t.id });
+        ws.send(JSON.stringify({ type: "joined", view: publicState(t, playerId) }));
+        broadcast(t);
+        return;
+      }
+      if (false) {
         const t = mpTables.get(String(msg.tableId ?? ""));
         if (!t) { ws.send(JSON.stringify({ type: "error", error: "table_not_found" })); return; }
         const seated = seatHuman(t, playerId, String(msg.name ?? "Player"));
@@ -208,8 +282,13 @@ export function attachMultiplayerPoker(server: Server) {
         const r = humanAct(t, meta.playerId, String(msg.action ?? ""), Number(msg.raiseTo ?? 0));
         if (!r.ok) ws.send(JSON.stringify({ type: "error", error: r.error }));
         broadcast(t);
+        runBotTurns(t);
       }
-      if (msg.type === "next-hand" && t.state.handOver) startHand(t);
+      if (msg.type === "next-hand" && t.state.handOver) {
+        markReady(t);
+        startHand(t);
+        runBotTurns(t);
+      }
     });
     ws.on("close", () => {
       const meta = sockets.get(ws);

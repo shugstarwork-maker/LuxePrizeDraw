@@ -43,7 +43,7 @@ export function useMultiplayerPoker(playerId: string, playerName: string) {
 
   useEffect(() => () => { wsRef.current?.close(); }, []);
 
-  const join = (tableId: string) => {
+  const connect = (tableId: string, seated: boolean) => {
     leave();
     setError("");
     const proto = location.protocol === "https:" ? "wss" : "ws";
@@ -51,7 +51,7 @@ export function useMultiplayerPoker(playerId: string, playerName: string) {
     wsRef.current = ws;
     ws.onopen = () => {
       setConnected(true);
-      ws.send(JSON.stringify({ type: "join", tableId, playerId, name: playerName }));
+      ws.send(JSON.stringify({ type: seated ? "join" : "spectate", tableId, playerId, name: playerName }));
     };
     ws.onmessage = (ev) => {
       try {
@@ -63,10 +63,17 @@ export function useMultiplayerPoker(playerId: string, playerName: string) {
     ws.onclose = () => { setConnected(false); };
   };
 
+  const join = (tableId: string) => connect(tableId, true);
+  const spectate = (tableId: string) => connect(tableId, false);
+  const takeSeat = () => {
+    const tableId = view?.tableId;
+    if (tableId) wsRef.current?.send(JSON.stringify({ type: "join", tableId, playerId, name: playerName }));
+  };
+
   const act = (action: "fold" | "check" | "call" | "raise", raiseTo = 0) => {
     wsRef.current?.send(JSON.stringify({ type: "action", action, raiseTo }));
   };
   const nextHand = () => wsRef.current?.send(JSON.stringify({ type: "next-hand" }));
 
-  return { view, error, connected, join, act, nextHand, leave };
+  return { view, error, connected, join, spectate, takeSeat, act, nextHand, leave };
 }
