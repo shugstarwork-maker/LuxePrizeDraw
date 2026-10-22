@@ -6,8 +6,9 @@ import type { ReactNode } from "react";
 export type DeckFact = [string, LucideIcon];
 export type DeckStat = { value: string; label: string };
 
-export function DeckCard({ image, title, facts = [], stats = [], cta, onCta, note, children }: {
+export function DeckCard({ image, title, facts = [], stats = [], cta, onCta, note, className, children }: {
   image?: string;
+  className?: string;
   title: string;
   facts?: readonly DeckFact[];
   stats?: readonly DeckStat[];
@@ -16,7 +17,7 @@ export function DeckCard({ image, title, facts = [], stats = [], cta, onCta, not
   note?: string;
   children?: ReactNode;
 }) {
-  return <article className="deck-card">
+  return <article className={`deck-card${className ? ` ${className}` : ""}`}>
     {image ? <img className="deck-card__bg" src={image} alt={`${title} preview`} loading="lazy" decoding="async" /> : <div className="deck-card__bg deck-card__bg--plain" aria-hidden="true" />}
     <div className="deck-card__shade" aria-hidden="true" />
     <span className="deck-card__vertical" aria-hidden="true">{title}</span>

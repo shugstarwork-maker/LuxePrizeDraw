@@ -7,6 +7,8 @@ type State = { draws: LaunchDraw[]; proofNotes: { proof_key: string; reviewed: b
 const proofKeys = ["officialRules", "prizeFunding", "fundSafeguards", "paymentControls", "counselSignoff"];
 export { LaunchDrawCard } from "./LaunchShowcase";
 
+const navGo = (href: string) => { window.history.pushState({}, "", href); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo(0, 0); };
+
 export function LaunchBuildPage() {
   const [readiness, setReadiness] = useState<Readiness | null>(null);
   const [readinessError, setReadinessError] = useState(false);

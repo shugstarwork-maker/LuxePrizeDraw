@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { ArrowRight, Building2, CarFront, ChevronLeft, ChevronRight, CircleAlert, Heart, Play, ShieldCheck, Sparkles, Ticket, Users } from "lucide-react";
 import { LUXE_AUTOMOTIVE_CAMPAIGN, type PartnershipCampaign } from "../data/partnershipCampaigns";
 
+const navGo = (href: string) => { window.history.pushState({}, "", href); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo(0, 0); };
+
 const vehicleCategories = [
   { name: "Ferrari", image: "https://images.unsplash.com/photo-1592198084033-aade902d1aae?auto=format&fit=crop&w=1200&q=80", detail: "Italian performance icons and grand touring." },
   { name: "Lamborghini", image: "https://images.unsplash.com/photo-1544829099-b9a0c07fad1a?auto=format&fit=crop&w=1200&q=80", detail: "Unmistakable design and theatre." },

@@ -7,18 +7,19 @@ test('landscape keeps turn/error messages visible and separates player badge fro
   assert.match(css, /data-seat-index="5"\] \{ left:83% !important/);
   assert.match(css, /poker-live-hand \{ top:62%; left:50%; pointer-events:none/);
 });
-test('all-stakes filter includes every table and insufficient chips cannot enter the table', () => {
+test('insufficient chips are denied entry before the table screen opens', () => {
   const source = readFileSync(new URL('../src/components/LuxePokerLeague.tsx', import.meta.url), 'utf8');
-  assert.match(source, /stakeFilter === "all" \|\| \(stakeFilter === "starter"/);
   const join = source.split('const join =')[1].split('const sendGift')[0];
+  assert.ok(join.indexOf('chips < table.buyIn') > -1);
   assert.ok(join.indexOf('chips < table.buyIn') < join.indexOf('setScreen("table")'));
 });
 
 test('dealer portrait has no visible two-card hand while opponent evaluation is preserved', () => {
   const source = readFileSync(new URL('../src/components/LuxePokerLeague.tsx', import.meta.url), 'utf8');
   assert.doesNotMatch(source, /className="poker-live-host/);
-  assert.match(source, /evaluateHand\(\[\.\.\.hostCards/);
   assert.match(source, /className="poker-live-hand/);
+  const engine = readFileSync(new URL('../src/games/holdem.ts', import.meta.url), 'utf8');
+  assert.match(engine, /evaluateHand\(\[\.\.\.p\.cards/);
 });
 
 

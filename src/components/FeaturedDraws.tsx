@@ -18,7 +18,7 @@ function navigate(path: string) { window.history.pushState({}, "", path); window
 export function FeaturedDraws() {
   const { play } = useAudio();
   return <section className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 sm:pt-10">
-    <div className="headline-luxe-deck"><BitcoinCoinRain /><DeckCard image="/prizes/bitcoin-crown.png" title="Win £100K · Bitcoin or Cash"
+    <div className="headline-luxe-deck"><BitcoinCoinRain /><DeckCard className="headline-luxe-card" image="/prizes/bitcoin-crown.png" title="Win £100K · Bitcoin or Cash"
       stats={[{ value: "£100,000", label: "Of Bitcoin" }, { value: "or", label: "Your choice" }, { value: "£100K", label: "Cash" }]}
       cta="View draws" onCta={() => { play("button"); navigate("/draws"); }}
       note="Approval pending · Entries and payments disabled · Preview only, no prize entitlement">

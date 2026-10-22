@@ -800,7 +800,7 @@
 .luxe-brand-theme :is(input,select,textarea):focus-visible { outline:2px solid #ffe09a; outline-offset:2px; }
 
 .draw-value-highlights__grid--entry-only { grid-template-columns:minmax(0,1fr); }
-.luxe-brand-theme .cash-prize-heading { font-size:clamp(1.6rem,4.5vw,2.6rem); line-height:1.06; color:#ffe85c; text-shadow:0 2px 3px #000,0 0 22px #ffd70077; overflow-wrap:anywhere; }
+.luxe-brand-theme .cash-prize-heading { font-size:clamp(2.8rem,8vw,4.5rem); line-height:1.06; color:#ffe85c; text-shadow:0 2px 3px #000,0 0 22px #ffd70077; overflow-wrap:anywhere; }
 
 /* Match cash-card entry amounts to the enlarged metallic-gold prize heading. */
 .luxe-brand-theme .coverflow-draw .draw-value-highlights__grid--entry-only dd { font-family:Georgia,'Times New Roman',serif; font-size:clamp(2.6rem,7vw,4rem); line-height:1.06; color:#ffe85c; text-shadow:0 2px 3px #000,0 0 22px #ffd70077; }
@@ -930,9 +930,10 @@
   .poker-playing-page .poker-deal-dock { background:linear-gradient(#fff0b0,#ffbd22); color:#140c00; font-size:1rem; font-weight:900; min-height:2.75rem; text-shadow:none; }
   .poker-playing-page .poker-deal-dock:focus-visible,.poker-playing-page .poker-action-dock button:focus-visible { outline:3px solid #fff; outline-offset:2px; }
 }
-/* Portrait stays playable; the rotate hint is a suggestion, not a block. */
+/* Full-screen on a portrait phone keeps the rotate gate instead of a squeezed table. */
 @media (orientation:portrait) and (max-width:900px) {
-  .poker-playing-page:fullscreen .poker-landscape-gate { display:none; }
+  .poker-playing-page:fullscreen .poker-playing-wrap { display:none; }
+  .poker-playing-page:fullscreen .poker-landscape-gate { display:flex; }
 }
 
 /* In-app full-view fallback when native fullscreen is blocked (embeds, iOS). */
@@ -1191,10 +1192,11 @@
   .compact-coverflow__card > .coverflow-draw { max-height:80vh; overflow-y:auto; }
 }
 
-/* Landscape-only poker: portrait shows the rotate gate; landscape auto-covers the screen (no button). */
+/* Landscape-preferred poker: portrait shows a dismissible rotate gate; landscape auto-covers the screen. */
 @media (orientation: portrait) {
-  .poker-playing-page .poker-landscape-gate { display:flex; position:fixed; inset:0; z-index:1500; min-height:100dvh; box-sizing:border-box; padding:max(1.5rem,env(safe-area-inset-top)) 1.5rem max(1.5rem,env(safe-area-inset-bottom)); background:radial-gradient(ellipse at center,#302207,#050403 70%); }
-  .poker-playing-page .poker-playing-wrap { visibility:hidden; }
+  .poker-playing-page .poker-landscape-gate { position:fixed; inset:0; z-index:85; min-height:100dvh; box-sizing:border-box; padding:max(1.5rem,env(safe-area-inset-top)) 1.5rem max(1.5rem,env(safe-area-inset-bottom)); background:radial-gradient(ellipse at center,#302207,#050403 70%); }
+  .poker-playing-page .poker-landscape-gate { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem; text-align:center; color:#ffe095; }
+  .poker-playing-page:not(.poker-gate-dismissed) .poker-playing-wrap { visibility:hidden; }
 }
 
 /* Height-independent landscape cover: fill even when the visual viewport is taller than the window. */

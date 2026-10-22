@@ -13,5 +13,5 @@ test('Luxe deck displays branded backs and accessible face-up ranks', () => {
 test('player cards sit above seats and portrait phones get rotation gate', () => {
   const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
   assert.match(css, /poker-live-hand \{ top:57%; left:50%; z-index:100/);
-  assert.match(css, /poker-playing-page \.poker-playing-wrap \{ display:none/);
+  assert.match(css, /poker-playing-page:not\(\.poker-gate-dismissed\) \.poker-playing-wrap \{ visibility:hidden/);
 });

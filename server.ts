@@ -820,14 +820,14 @@ app.get("/api/arcade/readiness", (_req, res) => res.json({ onlinePlayEnabled: Bo
 app.post("/api/accounts/signup", async (req, res) => {
   try {
     const out = await accounts.createAccount(String(req.body?.email ?? ""), String(req.body?.password ?? ""), String(req.body?.name ?? ""));
-    if (!out.ok) return res.status(400).json({ error: out.error });
+    if (!out.ok) return res.status(400).json({ error: (out as { ok: false; error: string }).error });
     return res.json(out);
   } catch { return res.status(503).json({ error: "account_storage_unavailable" }); }
 });
 app.post("/api/accounts/login", async (req, res) => {
   try {
     const out = await accounts.login(String(req.body?.email ?? ""), String(req.body?.password ?? ""));
-    if (!out.ok) return res.status(401).json({ error: out.error });
+    if (!out.ok) return res.status(401).json({ error: (out as { ok: false; error: string }).error });
     return res.json(out);
   } catch { return res.status(503).json({ error: "account_storage_unavailable" }); }
 });

@@ -12,8 +12,8 @@ test('shared luxury theme covers headings without recolouring game pieces', () =
 test('poker salon replaces purple panels with gold identity and preserves seating actions', () => {
   const source = readFileSync(new URL('../src/components/LuxePokerLeague.tsx', import.meta.url), 'utf8');
   assert.match(source, /LUXE POKER LOUNGE/);
-  assert.match(source, /salon-table-preview/);
-  assert.match(source, /onClick=\{\(\) => join\(table\)\}/);
+  assert.match(source, /salon-selection/);
+  assert.match(source, /onClick=\{\(\) => join\(leagueTable\)\}/);
   assert.match(source, /no cash value/);
   assert.doesNotMatch(source, /#451256/);
 });

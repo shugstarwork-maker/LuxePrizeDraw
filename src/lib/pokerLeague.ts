@@ -415,7 +415,7 @@ export function analyzeHand(sig: HandSignal): Detection {
   if (sig.won) {
     p.winStreakLen += 1;
     if (!sig.showdown) {
-      if (sig.lastFoldWinAt && Date.now() - sig.lastFoldWinAt < 45_000) flagged.push("rapid-fold-wins");
+      if (p.lastFoldWinAt && Date.now() - p.lastFoldWinAt < 45_000) flagged.push("rapid-fold-wins");
       p.lastFoldWinAt = Date.now();
     }
     if (p.winStreakLen === 8) flagged.push("win-streak-8");

@@ -30,12 +30,12 @@ function useWallet() {
   return [chips, setChips] as const;
 }
 
-function CardFace({ c, hidden }: { c?: { rank: string; suit: string }; hidden?: boolean }) {
+const CardFace: React.FC<{ c?: { rank: string; suit: string }; hidden?: boolean }> = ({ c, hidden }) => {
   if (hidden || !c) return <span className="lounge-card lounge-card--back" aria-label="Face-down card">♛</span>;
   const red = c.suit === "♥" || c.suit === "♦" || c.suit === "hearts" || c.suit === "diamonds";
   const suitGlyph: Record<string, string> = { "♠": "♠", "♥": "♥", "♦": "♦", "♣": "♣", spades: "♠", hearts: "♥", diamonds: "♦", clubs: "♣" };
   return <span className={`lounge-card ${red ? "lounge-card--red" : ""}`}><b>{c.rank}</b><i>{suitGlyph[c.suit] ?? c.suit}</i></span>;
-}
+};
 
 export function CardLounge({ game }: { game: LoungeGame }) {
   const meta = GAME_META[game];
@@ -121,7 +121,7 @@ export function CardLounge({ game }: { game: LoungeGame }) {
     const back = you.chips; // engine returns winnings to seat chips
     setChips((v) => v + back);
     const won = back > committed;
-    if (committed > 0) setLeague(recordWeeklyXP(leagueXPForHand(won, committed)));
+    if (committed > 0) setLeague(recordWeeklyXP(leagueXPForHand(won, committed > 0)));
     note(s.lastAction);
     // reset seat chips so next hand re-seeds from wallet
     if (game === "blackjack") setBj((g) => g ? { ...g, seats: g.seats.map((p) => p.id === "you" ? { ...p, chips: 0 } : p) } : g);

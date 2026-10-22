@@ -32,6 +32,7 @@ export function GoldGamesCarousel() {
         <button type="button" className="gold-games__play" onClick={() => go(game.href)}>Play now <ChevronRight className="h-4 w-4" aria-hidden="true" /></button>
       </div>
     </article>} />
+    <p className="gold-games__limits">Free-play social games · No deposits, cash wagering or cash-out</p>
   </section>;
 }
 export function initialBoardGame(search: string): 'chess' | 'connect4' | 'draughts' {

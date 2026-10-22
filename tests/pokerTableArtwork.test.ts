@@ -14,8 +14,8 @@ test('original table imagery keeps pot and game stage live, not embedded in the 
 });
 test('game uses artwork without removing dealer or betting handlers', () => {
   const source = readFileSync(new URL('../src/components/LuxePokerLeague.tsx', import.meta.url), 'utf8');
-  assert.match(source, /PokerTableArtwork pot=\{pot\} stage=\{stage\}/);
-  for (const handler of ['<LuxeDealer', 'onClick={deal}', 'act("fold")', 'act("raise")']) assert.ok(source.includes(handler));
+  assert.match(source, /PokerTableArtwork pot=\{game\?\.pot \?\? 0\} stage=\{dealerStage\}/);
+  for (const handler of ['<LuxeDealer', 'onClick={takeSeat}', 'act("fold")', 'act("raise")']) assert.ok(source.includes(handler));
 });
 
 
