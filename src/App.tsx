@@ -75,13 +75,13 @@ export default function App() {
     : path === "/standards" ? <ParticipationStandardsPage />
     : path === "/duel" ? <><DuelRoom /><ScottishHost /><MobileDock /></>
     : path === "/lobby" ? <NeonGameLobby soundEnabled={audio.enabled} onToggleSound={() => audio.setEnabled(!audio.enabled)} />
-    : path === "/poker" ? <><LuxePokerLeague /><div className="poker-external-chrome"><ScottishHost /><MobileDock /></div></>
+    : path === "/poker" ? <><LuxePokerLeague /><ScottishHost /></>
     : path === "/chess" ? <LuxeChessPage />
     : path === "/blackjack" ? <><CardLounge game="blackjack" /><div className="poker-external-chrome"><ScottishHost /><MobileDock /></div></>
     : path === "/brag" ? <><CardLounge game="brag" /><div className="poker-external-chrome"><ScottishHost /><MobileDock /></div></>
     : path === "/arcade" ? <><ArcadeHome /><ScottishHost /><MobileDock /></>
     : path === "/portal" ? <><PlayerPortal /><ScottishHost /><MobileDock /></>
-    : path === "/challenge" ? <><ChallengeLounge /><ScottishHost /><MobileDock /></>
+    : path === "/challenge" ? <><ChallengeLounge /><ScottishHost /></>
     : path === "/sports-cars" ? <><CategoryDrawCarousel category="Cars" /><ScottishHost /><MobileDock /></>
     : path === "/prizes/luxury-supercar-experience" ? <><ExperienceNav /><PartnershipCampaignPage /><MobileDock /></>
     : path === "/category" ? <><CategoryDrawCarousel category={new URLSearchParams(window.location.search).get("name") || "Cash"} entryBand={new URLSearchParams(window.location.search).get("band") || undefined} /><ScottishHost /><MobileDock /></>

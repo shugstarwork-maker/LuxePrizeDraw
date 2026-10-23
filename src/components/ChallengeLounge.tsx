@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Bot, ChevronLeft, Crown, Gift, ShieldCheck, Swords, Users, Volume2 } from "lucide-react";
 import { LoungeTabBar } from "./LoungeTabBar";
+import { LoungeWelcome } from "./LoungeWelcome";
 import { useAudio } from "../audio/AudioProvider";
 import { ChallengeGamesCarousel, type ChallengeGameId } from "./ChallengeGamesCarousel";
 import { ChessBoard, ConnectFourBoard, DraughtsBoard } from "./GamesArena";
@@ -20,7 +21,7 @@ const GAME_META: Record<ChallengeGameId, { title: string; image: string; detail:
 
 export const ChallengeLounge: React.FC = () => {
   const { enabled, setEnabled, play } = useAudio();
-  const [screen, setScreen] = useState<"lobby" | ChallengeGameId>("lobby");
+  const [screen, setScreen] = useState<"welcome" | "lobby" | ChallengeGameId>("welcome");
   const [league, setLeague] = useState(() => currentLeague());
   const [leagueOpen, setLeagueOpen] = useState(false);
   const [notice, setNotice] = useState("");
@@ -79,6 +80,17 @@ export const ChallengeLounge: React.FC = () => {
     setLeague(currentLeague());
     setNotice(dp.paid ? `Daily sign-in collected: +${LEAGUE_XP.dailyParticipation} league XP.` : "Daily sign-in collected — participation XP already banked today.");
   };
+
+  if (screen === "welcome") return <LoungeWelcome
+    brand="Luxe Challenge League"
+    tagline="Cinematic board games — chess, connect four and draughts. Finish games to bank league XP and climb the same weekly divisions as the card lounge."
+    art="/games/arena-panorama.svg"
+    icon="⚔"
+    chipsLabel={`${confirmedXP()} XP`}
+    tab={tab}
+    onTab={(t) => { play("button"); setTab(t); setScreen("lobby"); }}
+    onEnter={() => { play("ticketSelect"); setTab("play"); setScreen("lobby"); }}
+  />;
 
   if (screen !== "lobby") {
     const meta = GAME_META[screen];

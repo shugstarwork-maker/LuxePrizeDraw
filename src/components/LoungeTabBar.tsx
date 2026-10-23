@@ -11,8 +11,8 @@ const TABS: { id: LoungeTab; label: string; icon: typeof Trophy }[] = [
   { id: "rewards", label: "Rewards", icon: Gift },
 ];
 
-export const LoungeTabBar: React.FC<{ tab: LoungeTab; onTab: (tab: LoungeTab) => void; accent?: string }> = ({ tab, onTab }) => (
-  <nav aria-label="Lounge sections" className="fixed inset-x-3 bottom-[4.6rem] z-[55] rounded-2xl border border-amber-200/25 bg-[#0d0a06]/95 p-1.5 shadow-2xl backdrop-blur-xl sm:inset-x-auto sm:left-1/2 sm:w-[26rem] sm:-translate-x-1/2">
+export const LoungeTabBar: React.FC<{ tab: LoungeTab; onTab: (tab: LoungeTab) => void; inline?: boolean }> = ({ tab, onTab, inline }) => (
+  <nav aria-label="Lounge sections" className={inline ? "rounded-2xl border border-amber-200/25 bg-[#0d0a06]/95 p-1.5 shadow-2xl backdrop-blur-xl" : "fixed inset-x-3 bottom-3 z-[65] rounded-2xl border border-amber-200/25 bg-[#0d0a06]/95 p-1.5 shadow-2xl backdrop-blur-xl sm:inset-x-auto sm:left-1/2 sm:w-[26rem] sm:-translate-x-1/2"}>
     <div className="grid grid-cols-4 gap-1">
       {TABS.map(({ id, label, icon: Icon }) => {
         const active = tab === id;
