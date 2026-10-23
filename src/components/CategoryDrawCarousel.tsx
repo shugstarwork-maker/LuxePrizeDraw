@@ -1,6 +1,5 @@
 import { DeckCard } from "./DeckCard";
 import { RollingCardCarousel } from "./RollingCardCarousel";
-import { EntryTermsDialog, type EntryPrize } from "./EntryTermsDialog";
 import { CircleAlert, Gift, Ticket } from "lucide-react";
 import { useState } from "react";
 import { useAudio } from "../audio/AudioProvider";
@@ -57,15 +56,11 @@ export function CategoryDrawCarousel({ category, entryBand }: { category: string
   const tierFromQuery = Number(new URLSearchParams(window.location.search).get("tier"));
   const initialTier = Number.isInteger(tierFromQuery) && tierFromQuery >= 0 && tierFromQuery < tiers.length ? tierFromQuery : Math.max(0, tiers.findIndex((tier) => tier.entry === entryBand));
   const [tierIndex, setTierIndex] = useState(initialTier);
-  const [entering, setEntering] = useState<EntryPrize | null>(null);
   const { play } = useAudio();
-  const isGaming = parsedCategory === "Gaming Packages";
-
+  
   return <section className="min-h-screen bg-[#08090f] py-8 sm:py-12"><div className="mx-auto max-w-3xl px-4 sm:px-6"><button onClick={() => { window.history.pushState({}, "", "/draws"); window.dispatchEvent(new PopStateEvent("popstate")); }} className="text-xs font-black uppercase tracking-wider text-amber-200">All prize collections</button><p className="mt-5 text-xs font-black uppercase tracking-[.2em] text-amber-200">{parsedCategory}</p><h1 className="mt-2 text-3xl font-black sm:text-5xl">Choose your entry tier.</h1><p className="mt-2 text-sm text-white/60">Each tier increases the planned prize value in this collection. Browse every prize choice now; entries and payments remain disabled until launch approval.</p><RollingCardCarousel items={tiers} getKey={item => item.entry} label="entry tier" activeIndex={tierIndex} onActiveChange={setTierIndex} renderItem={(tier, tierIndex) => <DeckCard image={images[parsedCategory][tierIndex]} title={names[parsedCategory][tierIndex]}
     facts={[[parsedCategory, Gift], [`${tier.entry} proposed entry`, Ticket], ["Entry not open", CircleAlert]]}
     stats={[{ value: `Up to ${tier.value}`, label: "Prize value" }, { value: tier.entry, label: "Entry" }, { value: "Pending", label: "Status" }]}
-    cta={isGaming ? `${tier.entry} entry` : undefined}
-    onCta={isGaming ? () => { play("ticketSelect"); setEntering({ name: names[parsedCategory][tierIndex], value: `Up to ${tier.value}`, entry: `${tier.entry} entry`, partner: "Veno Scorp" }); } : undefined}
     note="Subject to approved rules & prize verification" />
-} />{entering && <EntryTermsDialog prize={entering} onClose={() => setEntering(null)} />}</div></section>;
+} /></div></section>;
 }
