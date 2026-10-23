@@ -447,18 +447,6 @@ export const LuxePokerLeague: React.FC = () => {
   const dailyReward = () => { if (!rewardReady) return; setChips((v) => v + 200); play("chipStack"); setRewardReady(false); localStorage.setItem("luxe-poker-reward", new Date().toDateString()); note("Daily sign-in collected: 200 free-play chips."); };
   const leagueTable = LEAGUE_TABLES[Math.min(league.tierIndex, LEAGUE_TABLES.length - 1)];
 
-  // One-tap flow: /poker seats you straight at your league table — no welcome
-  // screen, no lobby in between. Portrait shows the rotate gate first.
-  // Short on chips? Fall back to the lobby where the daily free chips live.
-  const autoJoined = useRef(false);
-  useEffect(() => {
-    if (autoJoined.current) return;
-    autoJoined.current = true;
-    if (chips >= leagueTable.buyIn) join(leagueTable);
-    else setScreen("lobby");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   // Smart HUD at live tables: hands seen + showdown outcomes from server snapshots.
   const mpHandRef = useRef<{ n: number; ended: boolean }>({ n: 0, ended: false });
   useEffect(() => {
