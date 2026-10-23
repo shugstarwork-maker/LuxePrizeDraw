@@ -1,14 +1,15 @@
 import React from "react";
-import { Crown, Gamepad2, Heart, Home, Menu, Trophy, UserRound } from "lucide-react";
+import { Crown, Flower2, Gamepad2, Heart, Home, Menu, Trophy, UserRound } from "lucide-react";
 
 const primaryItems = [
   { href: "/", label: "Home", icon: Home },
   { href: "/draws", label: "Draws", icon: Trophy },
   { href: "/challenge", label: "Games", icon: Gamepad2 },
-  { href: "/portal", label: "Portal", icon: UserRound },
+  { href: "/serenity", label: "Serenity", icon: Flower2 },
 ];
 const moreItems = [
   { href: "/poker", label: "Poker", icon: Crown },
+  { href: "/portal", label: "Portal", icon: UserRound },
   { href: "/arcade", label: "Arcade", icon: Gamepad2 },
   { href: "/community", label: "Community", icon: Heart },
 ];
