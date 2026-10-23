@@ -21,14 +21,14 @@ test('board links select the matching existing engine and reject unknown games',
 });
 
 
-test('Arcade library keeps poker separate and links to the styled lounge', async () => {
+test('Arcade library keeps poker separate and has a single Play games CTA', async () => {
   const { ArcadeHome } = await import('../src/components/ArcadeHome');
   const previous = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
   Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: { getItem: () => null } });
   try {
     const html = renderToStaticMarkup(createElement(ArcadeHome));
-    assert.match(html, /Luxe Poker Lounge/);
-    assert.doesNotMatch(html, /poker-neon.svg|Free-play Hold/);
+    assert.match(html, /Play games/);
+    assert.doesNotMatch(html, /Luxe Poker Lounge|poker-neon.svg|Free-play Hold/);
   } finally {
     if (previous) Object.defineProperty(globalThis, 'localStorage', previous);
     else delete (globalThis as any).localStorage;
