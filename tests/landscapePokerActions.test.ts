@@ -12,7 +12,8 @@ test('landscape hides app chrome only during active table view', () => {
   assert.match(css, /orientation:landscape\) and \(max-height:1200px/);
   assert.match(css, /body:has\(\.poker-playing-page\) \.poker-external-chrome/);
   assert.match(css, /poker-action-dock,\.poker-deal-dock \{ position:fixed/);
-  assert.match(css, /app-audio-controls \{ display:none/);
+  assert.match(css, /app-audio-controls,/);
+  assert.match(css, /Install the LuxePrizeDraw app"\] \{ display:none/);
 });
 
 test('landscape table fills viewport with overlay controls and no page scrolling', () => {
