@@ -7,6 +7,7 @@ const houses = readFileSync(new URL('../src/components/GardenSummerHouseDraws.ts
 const veno = readFileSync(new URL('../src/components/VenoScorpDraws.tsx', import.meta.url), 'utf8');
 const dialog = readFileSync(new URL('../src/components/EntryTermsDialog.tsx', import.meta.url), 'utf8');
 const app = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8');
+const category = readFileSync(new URL('../src/components/CategoryDrawCarousel.tsx', import.meta.url), 'utf8');
 
 test('all three partner carousels open the entry terms dialog from the entry-fee button', () => {
   for (const src of [car, houses, veno]) {
@@ -45,4 +46,13 @@ test('dialog shows terms summary, final enter button with fee, and stays pre-lau
 test('both new sections mount on the draws page', () => {
   assert.match(app, /<GardenSummerHouseDraws \/>/);
   assert.match(app, /<VenoScorpDraws \/>/);
+});
+
+test('gaming packages category carousel opens the same entry terms dialog from the fee button', () => {
+  assert.match(category, /EntryTermsDialog/);
+  assert.match(category, /parsedCategory === "Gaming Packages"/);
+  assert.match(category, /cta=\{isGaming \? `\$\{tier\.entry\} entry` : undefined\}/);
+  assert.match(category, /onCta=\{isGaming \? \(\) => \{ play\("ticketSelect"\); setEntering\(/);
+  assert.match(category, /partner: "Veno Scorp"/);
+  assert.match(category, /\{entering && <EntryTermsDialog prize=\{entering\} onClose=\{\(\) => setEntering\(null\)\} \/>\}/);
 });
