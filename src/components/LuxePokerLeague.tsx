@@ -21,6 +21,8 @@ import { LeagueRacePop, type RacePop } from "./LeagueRacePop";
 import { LeagueGlideOverlay, type GlideEvent } from "./LeagueGlideOverlay";
 import { LoungeTabBar } from "./LoungeTabBar";
 import { LoungeWelcome } from "./LoungeWelcome";
+import { PokerSmartHud } from "./PokerSmartHud";
+import { HUD_STORAGE_KEY, HudTracker } from "../lib/pokerHud";
 
 const CardView = LuxePlayingCard;
 const key = (card: { rank: string; suit: string }) => `${card.rank}${card.suit}`;
@@ -70,6 +72,11 @@ export const LuxePokerLeague: React.FC = () => {
 
   const [selectedSeat, setSelectedSeat] = useState("Amelia K.");
   const [giftsOpen, setGiftsOpen] = useState(false);
+  // Smart HUD — built-in, open stats for every seat (third-party trackers banned).
+  const hud = useRef<HudTracker | null>(null);
+  if (!hud.current) hud.current = new HudTracker(localStorage.getItem(HUD_STORAGE_KEY));
+  const [hudSeat, setHudSeat] = useState<{ id: string; name: string; initials: string; live?: boolean } | null>(null);
+  const saveHud = () => { try { localStorage.setItem(HUD_STORAGE_KEY, hud.current!.toJSON()); } catch { /* storage full/blocked */ } };
   const [avatar, setAvatar] = useState(() => localStorage.getItem("luxe-poker-avatar") || "");
   const [chips, setChips] = useState(() => Number(localStorage.getItem("luxe-poker-chips") ?? localStorage.getItem("luxe-demo-poker-chips")) || 1000);
   useEffect(() => { if (acct.profile) acct.syncChips(chips); }, [chips, acct.profile]); // keep server copy of chips in step with this device
@@ -252,6 +259,7 @@ export const LuxePokerLeague: React.FC = () => {
         const bot = g.players[g.turnIndex];
         if (!bot?.isBot) return g;
         const decision = botAction(g, bot);
+        hud.current?.recordAction(g, bot.id, decision.action); saveHud();
         const next = applyAction(g, bot.id, decision.action, decision.raiseTo);
         if (next.lastAction !== g.lastAction) play(decision.action === "fold" ? "tableKnock" : "chipDrop");
         return next;
@@ -272,6 +280,8 @@ export const LuxePokerLeague: React.FC = () => {
     if (!game || !game.handOver || game.winners.length === 0) return;
     if (settledHand.current === game.handNumber) return;
     settledHand.current = game.handNumber;
+    hud.current?.handEnd(game); // Smart HUD: showdown stats
+    saveHud();
     const mine = game.winners.find((w) => w.id === "you");
     const youPlayed = Boolean(game.players.find((p) => p.id === "you" && !p.sittingOut));
     if (youPlayed) {
@@ -365,7 +375,7 @@ export const LuxePokerLeague: React.FC = () => {
     if (!yourTurn || seconds > 0 || !game || !you) return;
     const auto = toCall > 0 ? "fold" : "check";
     play(pokerActionSound(auto));
-    setGame((g) => (g ? applyAction(g, "you", auto) : g));
+    setGame((g) => { if (!g) return g; hud.current?.recordAction(g, "you", auto); saveHud(); return applyAction(g, "you", auto); });
     note(`Time expired — auto ${auto}.`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seconds, yourTurn]);
@@ -404,7 +414,7 @@ export const LuxePokerLeague: React.FC = () => {
     const timer = window.setTimeout(() => {
       play("cardDeal");
       handStartAt.current = Date.now();
-      setGame((g) => (g?.handOver ? dealHand(g) : g));
+      setGame((g) => { if (!g?.handOver) return g; const next = dealHand(g); hud.current?.handStart(next); saveHud(); return next; });
     }, delay);
     return () => window.clearTimeout(timer);
   }, [game?.handOver, game?.handNumber]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -431,7 +441,7 @@ export const LuxePokerLeague: React.FC = () => {
   const act = (action: "fold" | "check" | "call" | "raise") => {
     if (!game || !yourTurn) return;
     play(pokerActionSound(action));
-    setGame((g) => (g ? applyAction(g, "you", action, action === "raise" ? raiseTo : 0) : g));
+    setGame((g) => { if (!g) return g; hud.current?.recordAction(g, "you", action); saveHud(); return applyAction(g, "you", action, action === "raise" ? raiseTo : 0); });
   };
   const sendGift = (gift: typeof gifts[number]) => { if (chips < gift.cost) return note(`You need ${gift.cost} virtual chips to send ${gift.name}.`); setChips((v) => v - gift.cost); play("success"); setGiftsOpen(false); note(`You sent ${gift.icon} ${gift.name} to ${selectedSeat}. Virtual gift only.`); };
   const dailyReward = () => { if (!rewardReady) return; setChips((v) => v + 200); play("chipStack"); setRewardReady(false); localStorage.setItem("luxe-poker-reward", new Date().toDateString()); note("Daily sign-in collected: 200 free-play chips."); };
@@ -448,6 +458,22 @@ export const LuxePokerLeague: React.FC = () => {
     else setScreen("lobby");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Smart HUD at live tables: hands seen + showdown outcomes from server snapshots.
+  const mpHandRef = useRef<{ n: number; ended: boolean }>({ n: 0, ended: false });
+  useEffect(() => {
+    const g = mp.view?.state;
+    if (!g || screen !== "mp") return;
+    if (g.handNumber !== mpHandRef.current.n) {
+      mpHandRef.current = { n: g.handNumber, ended: false };
+      if (!g.handOver && g.handNumber > 0) { hud.current?.handStart(g); saveHud(); }
+    } else if (g.handOver && g.winners.length > 0 && !mpHandRef.current.ended) {
+      mpHandRef.current.ended = true;
+      hud.current?.handEnd(g);
+      saveHud();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mp.view?.state, screen]);
 
   const dealerStage = game?.stage === "preflop" ? "pre-flop" : game?.stage ?? "idle";
   const potWinner: "player" | "host" | "split" | null = !game?.handOver || !game.winners.length ? null : game.winners.length > 1 ? "split" : game.winners[0].id === "you" ? "player" : "host";
@@ -643,7 +669,7 @@ export const LuxePokerLeague: React.FC = () => {
                   const isWinner = g.handOver && !p.sittingOut && g.winners.some((w) => w.id === p.id);
                   const seat = v.seats.find((x) => x.id === p.id);
                   const showCards = Boolean(p.cards[0]) && (isMe || (g.stage === "showdown" && !p.folded && !p.sittingOut));
-                  return <div key={p.id} className={`pointer-events-auto absolute w-[4.9rem] rounded-2xl border px-1.5 py-1 text-center shadow-2xl backdrop-blur-md transition ${p.sittingOut ? "opacity-30" : p.folded ? "opacity-45" : ""} ${isWinner ? "border-emerald-300 bg-emerald-300/20" : isTurn ? "border-amber-200 bg-amber-300/20 poker-turn-ring" : isMe ? "poker-seat-you border-amber-200/70 bg-amber-300/10" : "border-white/15 bg-black/55"}`} style={{ left: `${slot.px}%`, top: `${isMe ? slot.py + 8 : slot.py}%`, zIndex: 10 + Math.round(slot.py), transform: `translate(-50%,-50%) scale(${slot.sc})` }}>
+                  return <div key={p.id} onClick={() => setHudSeat({ id: p.id, name: p.name, initials: p.initials, live: true })} className={`pointer-events-auto absolute w-[4.9rem] cursor-pointer rounded-2xl border px-1.5 py-1 text-center shadow-2xl backdrop-blur-md transition ${p.sittingOut ? "opacity-30" : p.folded ? "opacity-45" : ""} ${isWinner ? "border-emerald-300 bg-emerald-300/20" : isTurn ? "border-amber-200 bg-amber-300/20 poker-turn-ring" : isMe ? "poker-seat-you border-amber-200/70 bg-amber-300/10" : "border-white/15 bg-black/55"}`} style={{ left: `${slot.px}%`, top: `${isMe ? slot.py + 8 : slot.py}%`, zIndex: 10 + Math.round(slot.py), transform: `translate(-50%,-50%) scale(${slot.sc})` }}>
                     <PlayerTurnRing active={isTurn} seconds={isTurn ? 20 : 20} name={p.name}>{isMe && avatar ? <img src={avatar} alt="Your avatar" className="h-full w-full object-cover" /> : p.initials}</PlayerTurnRing>
                     <b className="mt-1 block truncate text-[9px] text-amber-100">{p.name}{isMe ? " — you" : ""}{g.players[g.dealerIndex]?.id === p.id ? " 🔘" : ""}{!seat?.connected && <span className="text-rose-300"> · offline</span>}</b>
                     <small className="block text-[8px] text-white/55">{p.sittingOut ? "Watching" : p.chips.toLocaleString()}{p.allIn ? " · ALL-IN" : ""}{p.folded ? " · folded" : ""}</small>
@@ -655,6 +681,7 @@ export const LuxePokerLeague: React.FC = () => {
                 <div className="poker-live-hand flex justify-center gap-2">{me?.cards.some(Boolean) ? me.cards.map((c, i) => c ? <CardView key={`me-${i}`} card={c} /> : <CardView key={`me-${i}`} hidden />) : <><CardView hidden /><CardView hidden /></>}</div>
               </PokerTableArtwork>
               <LuxeDealer stage={mpStage} active={Boolean(v.yourTurn)} mood={mpMood} />
+              {hudSeat && <PokerSmartHud name={hudSeat.name} initials={hudSeat.initials} live={hudSeat.live} entry={hud.current!.statsFor(hudSeat.name)} onClose={() => setHudSeat(null)} />}
             </div>
             <div className="poker-below-table relative">
               <div className="mb-3 flex justify-center"><PokerFullscreen /></div>
@@ -695,7 +722,7 @@ export const LuxePokerLeague: React.FC = () => {
                 const isTurn = !game.handOver && game.players[game.turnIndex]?.id === p.id;
                 const isWinner = game.handOver && !p.sittingOut && game.winners.some((w) => w.id === p.id);
                 const showCards = !p.isBot || (game.stage === "showdown" && !p.folded && !p.sittingOut);
-                return <div key={p.id} onClick={() => p.isBot && setSelectedSeat(p.name)} className={`${isYou ? "poker-seat-you " : ""}pointer-events-auto absolute w-[4.9rem] rounded-2xl border px-1.5 py-1 text-center shadow-2xl backdrop-blur-md transition ${p.sittingOut ? "opacity-30" : p.folded ? "opacity-45" : ""} ${isWinner ? "border-emerald-300 bg-emerald-300/20" : isTurn ? "border-amber-200 bg-amber-300/20 poker-turn-ring" : !p.isBot ? "border-amber-200/70 bg-amber-300/10" : selectedSeat === p.name ? "border-fuchsia-300 bg-fuchsia-300/15" : "border-white/15 bg-black/55"}`} style={{ left: `${slot.px}%`, top: `${isYou ? slot.py + 8 : slot.py}%`, zIndex: 10 + Math.round(slot.py), transform: `translate(-50%,-50%) scale(${(isYou ? Math.min(slot.sc, 0.78) : slot.sc).toFixed(2)})` }}>
+                return <div key={p.id} onClick={(e) => { if (!p.isBot && (e.target as HTMLElement).closest("label")) return; if (p.isBot) setSelectedSeat(p.name); setHudSeat({ id: p.id, name: p.name, initials: p.initials }); }} className={`${isYou ? "poker-seat-you " : ""}pointer-events-auto absolute w-[4.9rem] cursor-pointer rounded-2xl border px-1.5 py-1 text-center shadow-2xl backdrop-blur-md transition ${p.sittingOut ? "opacity-30" : p.folded ? "opacity-45" : ""} ${isWinner ? "border-emerald-300 bg-emerald-300/20" : isTurn ? "border-amber-200 bg-amber-300/20 poker-turn-ring" : !p.isBot ? "border-amber-200/70 bg-amber-300/10" : selectedSeat === p.name ? "border-fuchsia-300 bg-fuchsia-300/15" : "border-white/15 bg-black/55"}`} style={{ left: `${slot.px}%`, top: `${isYou ? slot.py + 8 : slot.py}%`, zIndex: 10 + Math.round(slot.py), transform: `translate(-50%,-50%) scale(${(isYou ? Math.min(slot.sc, 0.78) : slot.sc).toFixed(2)})` }}>
                   {!p.isBot ? <label className="block cursor-pointer"><PlayerTurnRing active={isTurn} seconds={seconds} name={p.name}>{avatar ? <img src={avatar} alt="Your avatar" className="h-full w-full object-cover" /> : p.initials}</PlayerTurnRing><input aria-label="Upload avatar" type="file" accept="image/*" className="hidden" onChange={(e) => chooseAvatar(e.target.files?.[0])} /></label> : <PlayerTurnRing active={isTurn} seconds={20} name={p.name}>{p.initials}</PlayerTurnRing>}
                   <b className="mt-1 block truncate text-[9px] text-amber-100">{p.name}{!p.sittingOut && game.players[game.dealerIndex]?.id === p.id ? " 🔘" : ""}</b>
                   <small className="text-[8px] text-white/55">{p.sittingOut ? (p.isBot ? "Away" : "Watching") : p.chips.toLocaleString()}{p.allIn ? " · ALL-IN" : ""}</small>
@@ -704,7 +731,8 @@ export const LuxePokerLeague: React.FC = () => {
                 </div>;
               })}</div><div className="poker-live-board flex justify-center gap-1">{[0, 1, 2, 3, 4].map((i) => game?.board[i] ? <CardView key={key(game.board[i])} card={game.board[i]} /> : <div key={i} className="h-16 w-11 rounded-lg border border-dashed border-amber-100/30 bg-black/40 sm:h-20 sm:w-14" />)}</div><div className="poker-live-hand flex justify-center gap-2">{you?.cards.length ? you.cards.map((card) => <CardView key={key(card)} card={card} />) : <><CardView hidden /><CardView hidden /></>}</div></PokerTableArtwork>
               <LuxeDealer stage={dealerStage} active={yourTurn} mood={dealerMood} />
-            </div><div className="poker-below-table relative"><div className="mb-3 flex justify-center"><PokerFullscreen /></div><div className="poker-round-meta flex justify-between text-[10px] font-black uppercase tracking-wider text-white/60"><span>{activeTable?.name} · Hand #{game?.handNumber ?? 0} · Blinds {activeTable?.blinds}</span><span className="inline-flex items-center gap-1"><Timer className="h-3 w-3" />{yourTurn ? `00:${String(seconds).padStart(2, "0")}` : game?.handOver ? "Hand over" : "Playing"}</span></div><div className="poker-round-status mt-5 rounded-xl bg-black/35 p-3 text-center text-sm text-emerald-100" role="status">{status}</div>
+              {hudSeat && <PokerSmartHud name={hudSeat.name} initials={hudSeat.initials} entry={hud.current!.statsFor(hudSeat.name)} onClose={() => setHudSeat(null)} />}
+            </div><div className="poker-below-table relative"><div className="mb-3 flex justify-center"><PokerFullscreen /></div><div className="poker-round-meta flex justify-between text-[10px] font-black uppercase tracking-wider text-white/60"><span>{activeTable?.name} · Hand #{game?.handNumber ?? 0} · Blinds {activeTable?.blinds} · tap a seat for Smart HUD</span><span className="inline-flex items-center gap-1"><Timer className="h-3 w-3" />{yourTurn ? `00:${String(seconds).padStart(2, "0")}` : game?.handOver ? "Hand over" : "Playing"}</span></div><div className="poker-round-status mt-5 rounded-xl bg-black/35 p-3 text-center text-sm text-emerald-100" role="status">{status}</div>
             <div className="mt-2 flex flex-wrap justify-center gap-1.5">{feed.slice(0, 3).map((line, i) => <span key={`${line}-${i}`} className={`rounded-full px-2.5 py-1 text-[10px] ${i === 0 ? "bg-amber-300/15 text-amber-100" : "bg-white/5 text-white/40"}`}>{line}</span>)}</div>
             <div className="poker-social-controls mt-3 flex flex-wrap justify-center gap-2">{emotes.map((emote) => <button key={emote} onClick={() => { play("tableKnock"); note(`You to ${selectedSeat}: ${emote}`); }} className="rounded-full border border-white/15 bg-white/10 px-3 py-2 text-xs font-bold">{emote}</button>)}<button onClick={() => setGiftsOpen((v) => !v)} className="rounded-full border border-amber-200/35 bg-amber-300/10 px-3 py-2 text-xs font-black text-amber-100">Send gift</button></div>{giftsOpen && <div className="mt-3 grid grid-cols-3 gap-2 rounded-xl border border-amber-200/20 bg-black/40 p-2">{gifts.map((gift) => <button key={gift.name} onClick={() => sendGift(gift)} className="rounded-lg bg-white/10 p-2 text-center text-xs"><span className="block text-lg">{gift.icon}</span><b className="block">{gift.name}</b><small className="text-amber-100">{gift.cost} chips</small></button>)}</div>}
             {game && !game.handOver && yourTurn && <div className="poker-action-dock mt-5" role="group" aria-label="Poker actions">

@@ -1222,6 +1222,16 @@
   .poker-playing-page .poker-table-artwork > img { height:100%; }
 }
 
+/* Smart HUD overlay — works over the landscape fullscreen table too. */
+.poker-hud-overlay { position:fixed; inset:0; z-index:1500; display:grid; place-items:center; padding:1rem; background:rgba(3,2,1,.72); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
+.poker-hud-card { position:relative; width:min(22rem,92vw); max-height:86dvh; overflow-y:auto; border-radius:1.25rem; border:1px solid rgba(255,224,149,.4); background:linear-gradient(160deg,#171006,#0a0703 70%); padding:1.1rem 1.1rem 1rem; box-shadow:0 24px 70px #000d, 0 0 40px #e8bb4622; color:#fff; }
+@media (orientation:landscape) and (max-height:1200px) {
+  .poker-hud-overlay { padding:.5rem; }
+  .poker-hud-card { width:min(26rem,86vw); max-height:92dvh; padding:.8rem .9rem .7rem; }
+  .poker-hud-card .mt-4 { margin-top:.55rem; }
+  .poker-hud-card .space-y-3 > * + * { margin-top:.5rem; }
+}
+
 /* ── Lounge carousel card (featured table design) ── */
 /* Stacked 3D deck carousel (travel-card style) */
 .lounge-stack { max-width:34rem; margin:1.5rem auto 0; }
