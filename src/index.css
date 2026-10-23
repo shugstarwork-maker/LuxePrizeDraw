@@ -1416,3 +1416,146 @@
 .league-board__row { position: relative; box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 6px 14px -10px rgba(0,0,0,.9); transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
 .league-board__row:hover { transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 10px 22px -10px rgba(0,0,0,.95); }
 .league-board__row--you { box-shadow: inset 0 1px 0 rgba(255,235,180,.18), 0 0 22px rgba(246,201,69,.28), 0 8px 18px -10px rgba(0,0,0,.9); }
+
+/* ══════════════════════════════════════════════════════════════════
+   CINEMATIC SITE PASS — film grain, vignette, light beams, reveals
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Film grain overlay across the whole app (behind nav, above backgrounds) */
+body::after {
+  content: "";
+  position: fixed;
+  inset: -50%;
+  z-index: 4;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  opacity: .05;
+  animation: cine-grain 8s steps(10) infinite;
+}
+@keyframes cine-grain {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-3%, -4%); }
+  20% { transform: translate(3%, 2%); }
+  30% { transform: translate(-2%, 4%); }
+  40% { transform: translate(4%, -3%); }
+  50% { transform: translate(-4%, 1%); }
+  60% { transform: translate(2%, 4%); }
+  70% { transform: translate(-3%, -2%); }
+  80% { transform: translate(4%, 3%); }
+  90% { transform: translate(-1%, -4%); }
+}
+
+/* Cinematic page scaffold: vignette + top light beam + letterbox fade */
+.cine-page, .salon-selection { position: relative; isolation: isolate; }
+.cine-page::before, .salon-selection::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 120% 60% at 50% -10%, rgba(246, 201, 69, .10), transparent 60%),
+    radial-gradient(ellipse 140% 90% at 50% 115%, rgba(0, 0, 0, .55), transparent 55%),
+    radial-gradient(ellipse 90% 70% at 50% 50%, transparent 60%, rgba(0, 0, 0, .38) 100%);
+}
+.cine-page > *, .salon-selection > * { position: relative; z-index: 1; }
+
+/* Sweeping spotlight beam that drifts across hero zones */
+.cine-beam { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.cine-beam::before {
+  content: "";
+  position: absolute;
+  top: -30%;
+  left: 50%;
+  width: 60vmax;
+  height: 120vmax;
+  background: conic-gradient(from 170deg at 50% 0%, transparent 0deg, rgba(255, 224, 150, .09) 14deg, transparent 30deg);
+  transform-origin: top center;
+  animation: cine-beam-sway 14s ease-in-out infinite alternate;
+}
+@keyframes cine-beam-sway { from { transform: translateX(-50%) rotate(-9deg); } to { transform: translateX(-50%) rotate(9deg); } }
+
+/* Cinematic reveal-on-render for sections/cards */
+.cine-reveal { animation: cine-reveal .8s cubic-bezier(.16, 1, .3, 1) both; }
+.cine-reveal-1 { animation-delay: .08s; }
+.cine-reveal-2 { animation-delay: .16s; }
+.cine-reveal-3 { animation-delay: .24s; }
+.cine-reveal-4 { animation-delay: .32s; }
+.cine-reveal-5 { animation-delay: .4s; }
+@keyframes cine-reveal {
+  from { opacity: 0; transform: translateY(26px) scale(.985); filter: blur(6px); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+/* Cinematic titles: golden shimmer sweep */
+.cine-title {
+  background: linear-gradient(100deg, #fff 20%, #ffe9ac 38%, #d4af37 50%, #ffe9ac 62%, #fff 80%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: cine-shimmer 7s ease-in-out infinite;
+}
+@keyframes cine-shimmer { 0%, 100% { background-position: 120% 0; } 50% { background-position: -20% 0; } }
+
+/* Cinematic card: deep shadows, edge light, hover dolly */
+.cine-card {
+  position: relative;
+  box-shadow: inset 0 1px 0 rgba(255, 235, 180, .10), 0 24px 50px -24px rgba(0, 0, 0, .95), 0 0 0 1px rgba(212, 175, 55, .06);
+  transition: transform .35s cubic-bezier(.16, 1, .3, 1), box-shadow .35s ease, border-color .35s ease;
+}
+.cine-card:hover {
+  transform: translateY(-4px) scale(1.012);
+  box-shadow: inset 0 1px 0 rgba(255, 235, 180, .16), 0 34px 70px -26px rgba(0, 0, 0, 1), 0 0 34px rgba(212, 175, 55, .12);
+}
+
+/* Ken Burns drift for cinematic images */
+.cine-img { overflow: hidden; }
+.cine-img img { animation: cine-kenburns 22s ease-in-out infinite alternate; will-change: transform; }
+@keyframes cine-kenburns { from { transform: scale(1) translate(0, 0); } to { transform: scale(1.09) translate(-1.5%, -1.5%); } }
+
+/* Letterbox bars for full cinematic moments (opt-in wrapper) */
+.cine-letterbox { position: relative; }
+.cine-letterbox::before,
+.cine-letterbox::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: clamp(.45rem, 1.6vw, .9rem);
+  background: #000;
+  z-index: 2;
+  pointer-events: none;
+}
+.cine-letterbox::before { top: 0; box-shadow: 0 1px 0 rgba(212, 175, 55, .35); }
+.cine-letterbox::after { bottom: 0; box-shadow: 0 -1px 0 rgba(212, 175, 55, .35); }
+
+/* Ambient floating dust motes */
+.cine-dust { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.cine-dust span {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 9999px;
+  background: rgba(255, 230, 160, .55);
+  box-shadow: 0 0 8px rgba(255, 220, 130, .8);
+  animation: cine-mote 12s linear infinite;
+  opacity: 0;
+}
+.cine-dust span:nth-child(1) { left: 12%; animation-delay: 0s; }
+.cine-dust span:nth-child(2) { left: 28%; animation-delay: 2.5s; animation-duration: 15s; }
+.cine-dust span:nth-child(3) { left: 47%; animation-delay: 5s; animation-duration: 11s; }
+.cine-dust span:nth-child(4) { left: 63%; animation-delay: 1.5s; animation-duration: 17s; }
+.cine-dust span:nth-child(5) { left: 78%; animation-delay: 4s; animation-duration: 13s; }
+.cine-dust span:nth-child(6) { left: 90%; animation-delay: 7s; animation-duration: 16s; }
+@keyframes cine-mote {
+  0% { transform: translateY(105%); opacity: 0; }
+  12% { opacity: .8; }
+  85% { opacity: .5; }
+  100% { transform: translateY(-110vh) translateX(3vw); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::after, .cine-beam::before, .cine-reveal, .cine-title, .cine-img img, .cine-dust span { animation: none !important; }
+}

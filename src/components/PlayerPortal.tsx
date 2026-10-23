@@ -68,7 +68,7 @@ export function PlayerPortal() {
 
   return (
     <main className="min-h-screen bg-[#08090f] px-4 py-8 pb-28 text-white sm:px-6 sm:py-12">
-      <div className="mx-auto max-w-6xl space-y-6">
+      <div className="cine-reveal mx-auto max-w-6xl space-y-6">
 
         {/* ── Profile hero ── */}
         <header className="rounded-[2rem] border border-amber-200/25 bg-[radial-gradient(circle_at_top_right,rgba(251,191,36,.2),transparent_35%),linear-gradient(135deg,#17120a,#0c0d16_55%,#151025)] p-6 shadow-2xl sm:p-9">

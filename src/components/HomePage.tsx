@@ -56,9 +56,11 @@ export const HomePage: React.FC = () => (
 
     {/* ── A. Hero ── */}
     <section className="relative overflow-hidden px-5 pb-10 pt-12 text-center sm:pt-16">
+      <div className="cine-beam" />
+      <div className="cine-dust"><span /><span /><span /><span /><span /><span /></div>
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(212,175,55,.22),transparent_55%)]" />
       <p className="relative text-[10px] font-black uppercase tracking-[.32em] text-amber-200">Luxury · Opportunity · Community</p>
-      <h1 className="relative mx-auto mt-4 max-w-xl text-4xl font-black leading-tight sm:text-5xl">More than a prize draw.</h1>
+      <h1 className="cine-title relative mx-auto mt-4 max-w-xl text-4xl font-black leading-tight sm:text-5xl">More than a prize draw.</h1>
       <p className="relative mx-auto mt-4 max-w-md text-sm leading-relaxed text-white/65">
         Discover luxury prizes, exclusive partner offers and a new way to support community projects.
       </p>
@@ -71,11 +73,11 @@ export const HomePage: React.FC = () => (
       <p className="relative mx-auto mt-6 max-w-md text-[10px] leading-relaxed text-white/40">
         Clear competition rules · Transparent prize information · Community impact · Pre-launch preview — entries and payments open only after rules are legally approved.
       </p>
-      <img src="/prizes/hero-supercar.jpg" alt="Proposed headline prestige car prize" className="relative mx-auto mt-8 w-full max-w-2xl rounded-3xl border border-amber-200/25 bg-black/30 shadow-[0_30px_80px_rgba(212,175,55,.22)]" />
+      <div className="cine-letterbox cine-img cine-reveal cine-reveal-3 relative mx-auto mt-8 w-full max-w-2xl overflow-hidden rounded-3xl border border-amber-200/25 bg-black/30 shadow-[0_30px_80px_rgba(212,175,55,.22)]"><img src="/prizes/hero-supercar.jpg" alt="Proposed headline prestige car prize" className="w-full" /></div>
     </section>
 
     {/* ── C. Featured live prizes (proposed catalogue, pre-launch) ── */}
-    <section className="px-5 py-8">
+    <section className="cine-reveal cine-reveal-1 px-5 py-8">
       <div className="mx-auto max-w-4xl">
         <div className="flex items-end justify-between gap-3">
           <div>
@@ -87,8 +89,8 @@ export const HomePage: React.FC = () => (
         <p className="mt-2 text-xs text-white/50">Entries are not open yet — each draw below shows its confirmed prize detail. Entry price, closing date and entry limits publish with the approved rules before launch.</p>
         <div className="mt-5 grid gap-4 sm:grid-cols-3">
           {LIVE_PRIZES.map((p) => (
-            <button key={p.title} type="button" onClick={() => go("/draws")} className="group overflow-hidden rounded-2xl border border-amber-200/20 bg-gradient-to-b from-[#171106] to-[#0b0704] text-left shadow-lg transition hover:border-amber-200/50 active:scale-[.98]">
-              <div className="relative h-44 overflow-hidden bg-black/40">
+            <button key={p.title} type="button" onClick={() => go("/draws")} className="cine-card group overflow-hidden rounded-2xl border border-amber-200/20 bg-gradient-to-b from-[#171106] to-[#0b0704] text-left transition hover:border-amber-200/50 active:scale-[.98]">
+              <div className="cine-img relative h-44 overflow-hidden bg-black/40">
                 <img src={p.image} alt="" className="h-full w-full object-cover opacity-90 transition duration-500 group-hover:scale-105" />
                 <span className="absolute left-2 top-2 rounded-full bg-black/70 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-amber-200">{p.tag}</span>
                 <span className="absolute bottom-2 right-2 rounded-full bg-amber-300 px-2.5 py-1 text-[10px] font-black text-black">{p.value}</span>
@@ -105,8 +107,8 @@ export const HomePage: React.FC = () => (
     </section>
 
     {/* ── D. Luxe Deals ── */}
-    <section className="px-5 py-8">
-      <div className="mx-auto max-w-4xl rounded-[1.75rem] border border-amber-200/25 bg-[linear-gradient(145deg,#1c150b,#0d0904_70%)] p-6 sm:p-8">
+    <section className="cine-reveal cine-reveal-2 px-5 py-8">
+      <div className="cine-card mx-auto max-w-4xl rounded-[1.75rem] border border-amber-200/25 bg-[linear-gradient(145deg,#1c150b,#0d0904_70%)] p-6 sm:p-8">
         <p className="text-[10px] font-black uppercase tracking-[.25em] text-amber-200"><Handshake className="mr-1 inline h-4 w-4" />Luxe Deals</p>
         <h2 className="mt-2 text-2xl font-black">Partner offers worth visiting for alone</h2>
         <p className="mt-2 text-sm leading-relaxed text-white/60">
@@ -130,8 +132,8 @@ export const HomePage: React.FC = () => (
     </section>
 
     {/* ── E. Community Fund ── */}
-    <section className="px-5 py-8">
-      <div className="mx-auto max-w-4xl rounded-[1.75rem] border border-emerald-200/20 bg-[linear-gradient(145deg,#06240f,#0a1206_70%)] p-6 sm:p-8">
+    <section className="cine-reveal cine-reveal-3 px-5 py-8">
+      <div className="cine-card mx-auto max-w-4xl rounded-[1.75rem] border border-emerald-200/20 bg-[linear-gradient(145deg,#06240f,#0a1206_70%)] p-6 sm:p-8">
         <p className="text-[10px] font-black uppercase tracking-[.25em] text-emerald-200"><Heart className="mr-1 inline h-4 w-4" />Community Fund</p>
         <h2 className="mt-2 text-2xl font-black">Built to give back — transparently</h2>
         <p className="mt-2 text-sm leading-relaxed text-white/60">
@@ -162,7 +164,7 @@ export const HomePage: React.FC = () => (
     </section>
 
     {/* ── F. The Luxe Promise ── */}
-    <section className="px-5 py-8">
+    <section className="cine-reveal cine-reveal-4 px-5 py-8">
       <div className="mx-auto max-w-4xl">
         <p className="text-center text-[10px] font-black uppercase tracking-[.25em] text-amber-200"><ShieldCheck className="mr-1 inline h-4 w-4" />The Luxe Promise</p>
         <h2 className="mt-2 text-center text-2xl font-black">Trust you can check</h2>
@@ -179,7 +181,7 @@ export const HomePage: React.FC = () => (
     </section>
 
     {/* ── G. Games & leagues (secondary) ── */}
-    <section className="px-5 py-8">
+    <section className="cine-reveal cine-reveal-5 px-5 py-8">
       <div className="mx-auto max-w-4xl">
         <p className="text-[10px] font-black uppercase tracking-[.25em] text-amber-200"><Trophy className="mr-1 inline h-4 w-4" />Free to play</p>
         <h2 className="mt-2 text-2xl font-black">Games &amp; weekly leagues</h2>
