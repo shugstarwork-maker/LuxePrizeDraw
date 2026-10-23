@@ -29,6 +29,20 @@ const LIVE_PRIZES = [
     blurb: "A curated luxury experience landing every month for a year — getaways, hospitality and signature days out.",
     value: "£120,000",
   },
+  {
+    title: "1kg Fine Gold Bar",
+    tag: "Solid gold",
+    image: "/prizes/hero-goldbar.jpg",
+    blurb: "A full kilogram of 999.9 fine gold, sourced from an accredited refinery with certificate of authenticity and insured delivery.",
+    value: "£85,000+",
+  },
+  {
+    title: "Bitcoin Crown — Crypto Windfall",
+    tag: "Crypto prize",
+    image: "/prizes/hero-bitcoin.jpg",
+    blurb: "A headline Bitcoin prize transferred to your verified wallet, with the option to take the full sterling cash equivalent instead.",
+    value: "£100,000",
+  },
 ];
 
 const DEAL_CATEGORIES = [
