@@ -3,7 +3,7 @@
 // proposed catalogue ("entries opening soon"), deals launch with approved partners
 // only, community figures show £0 until real distributions exist. Nothing invented.
 import React from "react";
-import { ArrowRight, BadgeCheck, Coins, Crown, Gamepad2, Handshake, Heart, Palmtree, Scale, ShieldCheck, Sparkles, Trophy, Users } from "lucide-react";
+import { ArrowRight, BadgeCheck, CarFront, Coins, Cpu, Crown, Gamepad2, Handshake, Heart, Palmtree, Scale, ShieldCheck, Sparkles, Trophy, Users } from "lucide-react";
 
 const go = (path: string) => { window.history.pushState({}, "", path); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); };
 
@@ -46,9 +46,9 @@ const LIVE_PRIZES = [
 ];
 
 const DEAL_CATEGORIES = [
-  { icon: Sparkles, name: "Luxe Motoring", detail: "Approved dealer offers, featured stock and automotive experiences." },
+  { icon: CarFront, name: "Luxe Motoring · Moss Prestige Cars", detail: "Prestige vehicle offers and featured stock from our confirmed West Yorkshire dealership partner." },
   { icon: Crown, name: "Luxe Watches & Lifestyle", detail: "Watches, jewellery, gift cards and luxury retail offers." },
-  { icon: Gamepad2, name: "Luxe Tech", detail: "Phones, electronics and accessories with verified prices." },
+  { icon: Cpu, name: "Luxe Tech · Veno Scorp", detail: "Custom gaming PCs and bundles from our confirmed Manchester manufacturer partner." },
   { icon: Palmtree, name: "Luxe Experiences", detail: "Getaways, hospitality and dining where supplier offers are secured." },
 ];
 
