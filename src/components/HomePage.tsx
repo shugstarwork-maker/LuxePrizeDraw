@@ -43,6 +43,13 @@ const LIVE_PRIZES = [
     blurb: "A headline Bitcoin prize transferred to your verified wallet, with the option to take the full sterling cash equivalent instead.",
     value: "£100,000",
   },
+  {
+    title: "Bespoke Luxe Garden Summer House",
+    tag: "Built for you",
+    image: "/prizes/hero-summerhouse.jpg",
+    blurb: "A premium timber garden room designed and built to order by our joinery partner — your own luxury retreat, delivered and installed.",
+    value: "£15,000+",
+  },
 ];
 
 const DEAL_CATEGORIES = [
