@@ -11,21 +11,21 @@ const LIVE_PRIZES = [
   {
     title: "£100,000 Sterling Cash Grant",
     tag: "Headline prize",
-    image: "/prizes/cash-vault.svg",
+    image: "/prizes/hero-cash.jpg",
     blurb: "Direct seed capital in GBP — 0% personal tax, zero equity taken, wired to your new UK company account.",
     value: "£100,000",
   },
   {
     title: "2-Week VIP UK Holiday for Two",
     tag: "5-star experience",
-    image: "/prizes/island-villa.svg",
+    image: "/prizes/hero-holiday.jpg",
     blurb: "Business-class flights, 5-star suites, 24/7 private chauffeur and a £4,000 Michelin dining credit.",
     value: "£20,000",
   },
   {
     title: "12 Luxury Drops — A Year of Experiences",
     tag: "Monthly drops",
-    image: "/prizes/escape.svg",
+    image: "/prizes/hero-experiences.jpg",
     blurb: "A curated luxury experience landing every month for a year — getaways, hospitality and signature days out.",
     value: "£120,000",
   },
@@ -71,7 +71,7 @@ export const HomePage: React.FC = () => (
       <p className="relative mx-auto mt-6 max-w-md text-[10px] leading-relaxed text-white/40">
         Clear competition rules · Transparent prize information · Community impact · Pre-launch preview — entries and payments open only after rules are legally approved.
       </p>
-      <img src="/prizes/supercar.svg" alt="Proposed headline prestige car prize" className="relative mx-auto mt-8 w-full max-w-lg rounded-3xl border border-amber-200/25 bg-black/30 p-4 shadow-2xl" />
+      <img src="/prizes/hero-supercar.jpg" alt="Proposed headline prestige car prize" className="relative mx-auto mt-8 w-full max-w-2xl rounded-3xl border border-amber-200/25 bg-black/30 shadow-[0_30px_80px_rgba(212,175,55,.22)]" />
     </section>
 
     {/* ── C. Featured live prizes (proposed catalogue, pre-launch) ── */}
@@ -88,8 +88,8 @@ export const HomePage: React.FC = () => (
         <div className="mt-5 grid gap-4 sm:grid-cols-3">
           {LIVE_PRIZES.map((p) => (
             <button key={p.title} type="button" onClick={() => go("/draws")} className="group overflow-hidden rounded-2xl border border-amber-200/20 bg-gradient-to-b from-[#171106] to-[#0b0704] text-left shadow-lg transition hover:border-amber-200/50 active:scale-[.98]">
-              <div className="relative h-32 bg-black/40">
-                <img src={p.image} alt="" className="h-full w-full object-cover opacity-90" />
+              <div className="relative h-44 overflow-hidden bg-black/40">
+                <img src={p.image} alt="" className="h-full w-full object-cover opacity-90 transition duration-500 group-hover:scale-105" />
                 <span className="absolute left-2 top-2 rounded-full bg-black/70 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-amber-200">{p.tag}</span>
                 <span className="absolute bottom-2 right-2 rounded-full bg-amber-300 px-2.5 py-1 text-[10px] font-black text-black">{p.value}</span>
               </div>
