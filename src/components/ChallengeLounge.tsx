@@ -110,8 +110,8 @@ export const ChallengeLounge: React.FC = () => {
     </section>;
   }
 
-  return <section id="challenge-lounge" className="salon-selection min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] pb-28 text-white">
-    <div className="mx-auto max-w-5xl px-4 pt-6">
+  return <section id="challenge-lounge" className="salon-selection min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-4 py-6 pb-28 text-white">
+    <div className="mx-auto max-w-5xl">
       <header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-4 py-3">
         <span className="inline-flex items-center gap-2 font-black text-amber-100"><Crown className="h-5 w-5" />LUXE CHALLENGE LOUNGE</span>
         <span className="rounded-full border border-amber-200/35 bg-amber-300/10 px-3 py-1.5 font-mono text-sm font-black text-amber-100">{confirmedXP()} XP</span>
@@ -123,10 +123,9 @@ export const ChallengeLounge: React.FC = () => {
         <button type="button" onClick={() => nav("/poker")} className="rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-white/55 transition hover:border-amber-200/50 hover:text-amber-100">♠ Card Lounge</button>
         <button type="button" onClick={() => nav("/portal")} className="rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-white/55 transition hover:border-amber-200/50 hover:text-amber-100">Portal</button>
       </nav>
-    </div>
 
       
-      {tab === "play" && <><div className="mx-auto max-w-5xl px-4"><div className="mt-8 text-center">
+      {tab === "play" && <><div className="mt-8 text-center">
         <p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">Members’ games room · no cash value</p>
         <h2 className="mt-3 text-4xl font-black">Your Weekly League</h2>
         <p className="mt-3 text-sm text-white/60">Pick a board game and you're matched straight into your {leagueTier.name} League — no lobbies, no waiting. Win games to climb the divisions. Free-play only, pure competition.</p>
@@ -146,8 +145,8 @@ export const ChallengeLounge: React.FC = () => {
         </div>
       </button>
 
-      </div></>}
-      {tab === "league" && <><div className="min-h-[calc(100vh-9rem)] w-full bg-[linear-gradient(180deg,#171106,#0b0704_40%)] px-3 py-5 sm:px-6"><div className="mx-auto max-w-3xl"><div className="mt-8 rounded-[1.75rem] border p-5" style={{ borderColor: `${leagueTier.colour}55`, background: "linear-gradient(145deg,#1c150b,#0d0904 70%)", boxShadow: `0 0 34px ${leagueTier.glow}` }}>
+      </>}
+      {tab === "league" && <><div className="mt-8 rounded-[1.75rem] border p-5" style={{ borderColor: `${leagueTier.colour}55`, background: "linear-gradient(145deg,#1c150b,#0d0904 70%)", boxShadow: `0 0 34px ${leagueTier.glow}` }}>
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-[10px] font-black uppercase tracking-[.22em]" style={{ color: leagueTier.colour }}>{leagueTier.name} League · week table</p>
@@ -158,7 +157,7 @@ export const ChallengeLounge: React.FC = () => {
             <p className="text-[10px] font-black uppercase tracking-wider text-white/45">Confirmed{provisionalXP() > 0 ? ` · ${provisionalXP()} provisional` : ""}</p>
           </div>
         </div>
-        <div className="league-board mt-3 space-y-1 pr-1">
+        <div className="league-board mt-3 max-h-64 space-y-1 overflow-y-auto pr-1">
           {leagueBoard.slice(0, leagueOpen ? COHORT_SIZE : 10).map((row, i) => {
             const rank = i + 1;
             const zone = league.tierIndex < LEAGUE_TIERS.length - 1 && rank <= PROMOTE_COUNT ? "promote" : league.tierIndex > 0 && rank > leagueBoard.length - RELEGATE_COUNT ? "demote" : "";
@@ -176,8 +175,8 @@ export const ChallengeLounge: React.FC = () => {
         <p className="mt-3 text-[10px] text-white/35">Verified scoring: +{CHALLENGE_XP.win} XP per game won · +{CHALLENGE_XP.draw} per draw · +{LEAGUE_XP.dailyParticipation} daily participation bonus (capped). Top {PROMOTE_COUNT} ({cutoffs.promoteXP}+ XP) promote, bottom {RELEGATE_COUNT} relegate. Weekly leagues are free-play pride only — no prizes, no cash value.</p>
       </div>
 
-      </div></div></>}
-      {tab === "profile" && <><div className="mx-auto max-w-5xl px-4"><div className="mt-8 grid gap-3 sm:grid-cols-3">
+      </>}
+      {tab === "profile" && <><div className="mt-8 grid gap-3 sm:grid-cols-3">
         <div className="rounded-2xl border border-amber-200/30 bg-black/40 p-4 text-left">
           <Crown className="h-5 w-5 text-amber-200" /><b className="mt-3 block">{leagueTier.name} League</b><small className="text-white/55">Season {season.info.season} · week {season.info.weekInSeason}</small>
         </div>
@@ -190,16 +189,16 @@ export const ChallengeLounge: React.FC = () => {
       </div>
       <button type="button" onClick={() => nav("/portal")} className="mt-4 w-full rounded-2xl border border-amber-200/40 bg-gradient-to-b from-amber-300/15 to-amber-500/10 p-4 text-left transition hover:border-amber-200/70 active:scale-[.98]">
         <b className="block text-amber-100">Open full player portal →</b><small className="text-white/55">Quests, achievements, trophies and season history</small>
-      </button></div></>}
-      {tab === "rewards" && <><div className="mx-auto max-w-5xl px-4"><div className="mt-8 grid gap-3">
+      </button></>}
+      {tab === "rewards" && <><div className="mt-8 grid gap-3">
         <button onClick={dailyReward} disabled={!rewardReady} className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-5 text-left disabled:opacity-40">
           <Gift className="h-5 w-5 text-emerald-200" /><b className="mt-3 block text-base">{rewardReady ? `Daily sign-in: +${LEAGUE_XP.dailyParticipation} XP` : "Daily XP claimed"}</b><small className="text-white/55">Free participation XP every day — come back tomorrow</small>
         </button>
         <div className="rounded-2xl border border-amber-200/30 bg-amber-300/10 p-5">
           <Swords className="h-5 w-5 text-amber-200" /><b className="mt-3 block text-base">Game XP</b><small className="text-white/55">Finish a game: +{CHALLENGE_XP.win} XP per win · +{CHALLENGE_XP.draw} per draw · server-verified with a daily cap</small>
         </div>
-      </div></div></>}
-      <div className="mx-auto max-w-5xl px-4">{notice && <p className="mt-4 rounded-xl border border-emerald-300/30 bg-emerald-300/10 p-3 text-sm text-emerald-100">{notice}</p>}
+      </div></>}
+      {notice && <p className="mt-4 rounded-xl border border-emerald-300/30 bg-emerald-300/10 p-3 text-sm text-emerald-100">{notice}</p>}
 
       
       <p className="mt-6 rounded-xl border border-white/10 bg-black/30 p-3 text-[10px] leading-relaxed text-white/50"><ShieldCheck className="mr-1 inline h-3.5 w-3.5 text-emerald-300" />Free-to-play entertainment only. Challenge games share the same weekly league as the Luxe Poker Lounge — one division, one ladder, no stakes and nothing to withdraw.</p>
