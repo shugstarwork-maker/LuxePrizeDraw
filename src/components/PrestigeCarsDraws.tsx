@@ -1,6 +1,8 @@
-import { DeckCard, deckGo } from "./DeckCard";
+import { DeckCard } from "./DeckCard";
 import { CarFront, Gauge, ShieldCheck, Sparkles, Ticket } from "lucide-react";
+import { useState } from "react";
 import { RollingCardCarousel } from "./RollingCardCarousel";
+import { EntryTermsDialog, type EntryPrize } from "./EntryTermsDialog";
 
 // Moss Prestige Cars — confirmed West Yorkshire dealership partner.
 // Three cars planned for the first motoring draws. Entry is not open yet:
@@ -34,6 +36,7 @@ const vehicles = [
 ];
 
 export function PrestigeCarsDraws() {
+  const [entering, setEntering] = useState<EntryPrize | null>(null);
   return <section id="prestige-cars" className="border-y border-amber-200/15 bg-black/35 py-20 sm:py-28">
     <div className="mx-auto max-w-7xl px-4 sm:px-6">
       <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
@@ -43,8 +46,9 @@ export function PrestigeCarsDraws() {
       <RollingCardCarousel items={vehicles} getKey={item => item.name} label="Moss Prestige Cars prize draws" className="mt-9" compactControls renderItem={(vehicle) => <DeckCard image={vehicle.image} title={vehicle.name}
         facts={vehicle.specs.map((s) => [s, CarFront] as [string, typeof CarFront])}
         stats={[{ value: vehicle.value, label: "Car value" }, { value: vehicle.entry, label: "Entry" }, { value: "Pending", label: "Draw date" }]}
-        cta={vehicle.entry} onCta={() => deckGo("/draws")}
+        cta={vehicle.entry} onCta={() => setEntering({ name: vehicle.name, value: vehicle.value, entry: vehicle.entry, partner: "Moss Prestige Cars" })}
         note="Illustrative image · value and entry price proposed pending legal approval" />} />
+      {entering && <EntryTermsDialog prize={entering} onClose={() => setEntering(null)} />}
       <p className="mt-6 flex items-center justify-center gap-2 text-center text-[10px] text-white/40"><Gauge className="h-3.5 w-3.5" /> Every car is inspected, valeted and hand-over prepared by Moss Prestige Cars before the winner collects.</p>
       <p className="mt-2 flex items-center justify-center gap-2 text-center text-[10px] font-black uppercase tracking-wider text-amber-100/70"><Ticket className="h-3.5 w-3.5" /> Free postal entry route available for every draw</p>
     </div>

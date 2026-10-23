@@ -1232,6 +1232,10 @@
   .poker-hud-card .space-y-3 > * + * { margin-top:.5rem; }
 }
 
+/* Entry terms dialog — every entry-fee button opens terms first. */
+.entry-terms-overlay { position:fixed; inset:0; z-index:1500; display:grid; place-items:center; padding:1rem; background:rgba(3,2,1,.78); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
+.entry-terms-card { position:relative; width:min(24rem,94vw); max-height:88dvh; overflow-y:auto; border-radius:1.4rem; border:1px solid rgba(255,224,149,.4); background:linear-gradient(165deg,#191106,#0a0703 70%); padding:1.25rem; box-shadow:0 24px 70px #000d, 0 0 40px #e8bb4622; color:#fff; }
+
 /* ── Lounge carousel card (featured table design) ── */
 /* Stacked 3D deck carousel (travel-card style) */
 .lounge-stack { max-width:34rem; margin:1.5rem auto 0; }

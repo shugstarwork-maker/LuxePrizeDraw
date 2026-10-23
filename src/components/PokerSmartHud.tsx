@@ -1,4 +1,5 @@
 import { ShieldCheck, X } from "lucide-react";
+import { createPortal } from "react-dom";
 import { pfrPct, showdownWinPct, styleTag, vpipPct, type HudEntry } from "../lib/pokerHud";
 
 function Meter({ label, hint, pct, colour }: { label: string; hint: string; pct: number | null; colour: string }) {
@@ -32,7 +33,9 @@ export function PokerSmartHud({ name, initials, entry, live, onClose }: {
   const vpip = vpipPct(entry);
   const pfr = pfrPct(entry);
   const sd = showdownWinPct(entry);
-  return (
+  // Portal to body: page-enter animations leave a transform on ancestors, which
+  // would trap position:fixed inside the page container instead of the viewport.
+  return createPortal(
     <div className="poker-hud-overlay" role="dialog" aria-label={`Smart HUD for ${name}`} onClick={onClose}>
       <div className="poker-hud-card" onClick={(e) => e.stopPropagation()}>
         <button type="button" aria-label="Close Smart HUD" onClick={onClose} className="absolute right-2.5 top-2.5 rounded-lg p-1.5 text-white/50 hover:text-white"><X className="h-4 w-4" /></button>
@@ -57,6 +60,7 @@ export function PokerSmartHud({ name, initials, entry, live, onClose }: {
           <span>Smart HUD — the same read for everyone at the table. Third-party tracking software is banned at Luxe tables{live ? " · live opponent stats build as hands complete" : ""} · {entry.hands} hand{entry.hands === 1 ? "" : "s"} tracked.</span>
         </p>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
