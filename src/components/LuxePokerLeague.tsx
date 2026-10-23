@@ -67,7 +67,6 @@ export const LuxePokerLeague: React.FC = () => {
   };
   const joinMp = (tableId: string) => { mp.spectate(tableId); setScreen("mp"); };
   const [leaveOpen, setLeaveOpen] = useState(false);
-  const [gateDismissed, setGateDismissed] = useState(false);
 
   const [selectedSeat, setSelectedSeat] = useState("Amelia K.");
   const [giftsOpen, setGiftsOpen] = useState(false);
@@ -231,50 +230,10 @@ export const LuxePokerLeague: React.FC = () => {
 
   useEffect(() => { localStorage.setItem("luxe-poker-chips", String(chips)); }, [chips]);
 
-  // Landscape-only play: auto-cover the whole screen when rotated; portrait shows the rotate gate.
-  useEffect(() => {
-    if (screen !== "table" && screen !== "mp") return;
-    const page = document.getElementById("poker-league");
-    if (!page) return;
-    const mq = window.matchMedia("(orientation: landscape)");
-    // Cover the full screen regardless of iframe/viewport quirks: use the largest height the device reports.
-    const apply = () => {
-      page.classList.toggle("poker-fullscreen-sim", mq.matches);
-      if (mq.matches) {
-        // Break out of any preview wrapper: pin to the real screen size and clear any insets.
-        const dpr = window.devicePixelRatio || 1;
-        const h = Math.max(window.innerHeight, document.documentElement.clientHeight, window.screen.height, window.screen.availHeight, Math.round(window.screen.height * dpr / dpr), window.visualViewport?.height ?? 0);
-        const w = Math.max(window.innerWidth, document.documentElement.clientWidth, window.screen.width, window.screen.availWidth, window.visualViewport?.width ?? 0);
-        page.style.height = `${h}px`;
-        page.style.width = `${w}px`;
-        page.style.top = "0";
-        page.style.left = "0";
-        page.style.transform = "none";
-        // If the page sits inside a clipped/offset preview container, neutralise it.
-        let host = page.parentElement;
-        while (host && host !== document.body) {
-          const cs = window.getComputedStyle(host);
-          if (cs.transform !== "none" || cs.overflow === "hidden" || cs.position === "relative" || cs.contain !== "none") {
-            host.style.transform = "none";
-            host.style.overflow = "visible";
-            host.style.position = "static";
-            host.style.contain = "none";
-            host.style.padding = "0";
-            host.style.margin = "0";
-          }
-          host = host.parentElement;
-        }
-      } else {
-        page.style.height = "";
-        page.style.width = "";
-      }
-    };
-    apply();
-    mq.addEventListener("change", apply);
-    window.addEventListener("resize", apply);
-    window.visualViewport?.addEventListener("resize", apply);
-    return () => { mq.removeEventListener("change", apply); window.removeEventListener("resize", apply); window.visualViewport?.removeEventListener("resize", apply); page.classList.remove("poker-fullscreen-sim"); page.style.height = ""; page.style.width = ""; };
-  }, [screen]);
+  // Landscape-only play: pure CSS — portrait shows a blocking rotate gate,
+  // landscape pins the table to the viewport (position:fixed inset:0). No JS
+  // sizing: screen.height/innerHeight disagree on real phones and caused the
+  // oversized-canvas "black screen" on rotate.
 
   const note = (message: string) => { setStatus(message); setFeed((items) => [message, ...items].slice(0, 4)); };
   const awardXp = (amount: number) => {
@@ -651,8 +610,8 @@ export const LuxePokerLeague: React.FC = () => {
     const mpWinner: "player" | "host" | "split" | null = !g?.handOver || !g.winners.length ? null : g.winners.length > 1 ? "split" : g.winners[0].id === myId ? "player" : "host";
     const mpMood: "idle" | "win" | "lose" = mpWinner === "player" || mpWinner === "split" ? "win" : mpWinner === "host" ? "lose" : "idle";
     const mpSeated = Boolean(me && !me.sittingOut);
-    return <section id="poker-league" className={`poker-playing-page${gateDismissed ? " poker-gate-dismissed" : ""} min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-3 py-4 pb-28 text-white`}>
-      {!gateDismissed && <div className="poker-landscape-gate" role="status"><span aria-hidden="true">↻</span><h2>Turn your phone sideways for a bigger poker table</h2><p>You can still play in portrait — rotate whenever you're ready for the full table view.</p><button type="button" onClick={() => setGateDismissed(true)}>Continue in portrait</button><button type="button" onClick={() => { mp.leave(); setScreen("lobby"); }}>Back to Luxe Lounges</button></div>}
+    return <section id="poker-league" className="poker-playing-page min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-3 py-4 pb-28 text-white">
+      <div className="poker-landscape-gate" role="status"><span aria-hidden="true">↻</span><h2>Rotate your phone to play poker</h2><p>Luxe Poker tables are landscape-only — turn your phone sideways to take your seat and play.</p><button type="button" onClick={() => { mp.leave(); setScreen("lobby"); }}>Back to Luxe Lounges</button></div>
       <div className="poker-playing-wrap mx-auto max-w-5xl">
         <header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-3 py-2">
           <button onClick={() => { mp.leave(); setScreen("lobby"); }} className="inline-flex items-center gap-1 rounded-lg bg-white/10 px-3 py-2 text-xs font-black"><ChevronLeft className="h-4 w-4" />Lobby</button>
@@ -715,7 +674,7 @@ export const LuxePokerLeague: React.FC = () => {
 
   // ── Table screen ──
   const botSlots = game ? game.players.filter((p) => p.isBot) : [];
-  return <section id="poker-league" className={`poker-playing-page${gateDismissed ? " poker-gate-dismissed" : ""} min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-3 py-4 pb-28 text-white`}>{!gateDismissed && <div className="poker-landscape-gate" role="status"><span aria-hidden="true">↻</span><h2>Turn your phone sideways for a bigger poker table</h2><p>You can still play in portrait — rotate whenever you're ready for the full table view.</p><button type="button" onClick={() => setGateDismissed(true)}>Continue in portrait</button><button type="button" onClick={leaveTable}>Back to Luxe Lounges</button></div>}<div className="poker-playing-wrap mx-auto max-w-5xl"><header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-3 py-2"><button onClick={() => setLeaveOpen(true)} className="inline-flex items-center gap-1 rounded-lg bg-white/10 px-3 py-2 text-xs font-black"><ChevronLeft className="h-4 w-4" />Lobby</button><span className="font-mono text-sm font-black text-amber-100">{chips.toLocaleString()} wallet · {you?.chips.toLocaleString() ?? 0} at table · <span style={{ color: leagueTier.colour }}>{leagueTier.name} {league.xp}XP</span></span><button onClick={() => setEnabled(!enabled)} className="rounded-lg bg-white/10 p-2"><Volume2 className="h-4 w-4" /></button></header><article className="poker-game-article relative mt-4 overflow-hidden rounded-[2rem] border border-amber-200/50 bg-[radial-gradient(ellipse_at_center,#2a2318,#151009_55%,#090604)] p-4 shadow-[0_0_70px_rgba(212,175,55,.22),inset_0_0_140px_rgba(0,0,0,0.5)] sm:p-6"><div className={`poker-surface-frame relative rounded-[2rem] ${winFlash ? "poker-win-flash" : ""} ${tableTheme === "onyx" ? "ring-4 ring-amber-400/50" : tableTheme === "noir" ? "ring-4 ring-zinc-400/50" : ""}`}>
+  return <section id="poker-league" className="poker-playing-page min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-3 py-4 pb-28 text-white"><div className="poker-landscape-gate" role="status"><span aria-hidden="true">↻</span><h2>Rotate your phone to play poker</h2><p>Luxe Poker tables are landscape-only — turn your phone sideways to take your seat and play.</p><button type="button" onClick={leaveTable}>Back to Luxe Lounges</button></div><div className="poker-playing-wrap mx-auto max-w-5xl"><header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-3 py-2"><button onClick={() => setLeaveOpen(true)} className="inline-flex items-center gap-1 rounded-lg bg-white/10 px-3 py-2 text-xs font-black"><ChevronLeft className="h-4 w-4" />Lobby</button><span className="font-mono text-sm font-black text-amber-100">{chips.toLocaleString()} wallet · {you?.chips.toLocaleString() ?? 0} at table · <span style={{ color: leagueTier.colour }}>{leagueTier.name} {league.xp}XP</span></span><button onClick={() => setEnabled(!enabled)} className="rounded-lg bg-white/10 p-2"><Volume2 className="h-4 w-4" /></button></header><article className="poker-game-article relative mt-4 overflow-hidden rounded-[2rem] border border-amber-200/50 bg-[radial-gradient(ellipse_at_center,#2a2318,#151009_55%,#090604)] p-4 shadow-[0_0_70px_rgba(212,175,55,.22),inset_0_0_140px_rgba(0,0,0,0.5)] sm:p-6"><div className={`poker-surface-frame relative rounded-[2rem] ${winFlash ? "poker-win-flash" : ""} ${tableTheme === "onyx" ? "ring-4 ring-amber-400/50" : tableTheme === "noir" ? "ring-4 ring-zinc-400/50" : ""}`}>
               {winFlash && <div className="pointer-events-none absolute inset-0 z-20 flex items-start justify-center gap-2 pt-14">{[...Array(6)].map((_, i) => <span key={i} className="poker-chip-fly h-4 w-4 rounded-full border border-amber-200/70 bg-gradient-to-br from-amber-300 to-amber-600" style={{ animationDelay: `${i * 90}ms` }} />)}</div>}
               <PokerTableArtwork pot={game?.pot ?? 0} stage={dealerStage} winner={potWinner}><div className="poker-live-seats pointer-events-none absolute inset-0">{game && game.players.map((p) => {
                 const slotIndex = p.isBot ? botSlots.indexOf(p) : 5;

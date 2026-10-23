@@ -25,11 +25,12 @@ test('live seats and board are nested inside the artwork rather than below it', 
   for (const layer of ['poker-live-seats', 'poker-live-board', 'poker-live-hand']) assert.ok(surface.includes(layer));
 });
 
-test('poker table offers landscape guidance without blocking portrait play', () => {
+test('poker table is landscape-only: portrait shows a blocking rotate gate', () => {
   const source = readFileSync(new URL('../src/components/LuxePokerLeague.tsx', import.meta.url), 'utf8');
   const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
-  assert.match(source, /Turn your phone sideways for a bigger poker table/);
-  assert.match(source, /You can still play in portrait/);
+  assert.match(source, /Rotate your phone to play poker/);
+  assert.match(source, /landscape-only/);
+  assert.doesNotMatch(source, /Continue in portrait/);
   assert.match(css, /poker-playing-wrap \{ max-width:90rem/);
   assert.match(css, /orientation:portrait/);
 });
