@@ -52,7 +52,7 @@ export function AccountCard({ chips }: { chips: number }) {
         </div>
       )}
 
-      <p className="mt-3 text-[10px] text-white/35">Demo-grade security (salted hash, no email verification yet) — fine for free-play. Before any real-money features: bcrypt/argon2, verified email, device limits and full KYC.</p>
+      <p className="mt-3 text-[10px] text-white/35">Free-play account — your password is stored as a salted hash on this device. No deposits, no cash wagering, ever.</p>
     </div>
   );
 }
