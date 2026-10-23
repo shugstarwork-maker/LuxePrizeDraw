@@ -4,9 +4,9 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { readFileSync, existsSync } from 'node:fs';
 import { HomeBrandBanner } from '../src/components/HomeBrandBanner';
-test('original banner lives under the draws page; homepage is a placeholder', () => {
+test('homepage renders the brief-built HomePage; banner stays on the draws page', () => {
   const source = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8');
-  assert.ok(source.includes('path === "/" ? <HomeComingSoon />'));
+  assert.ok(source.includes('path === "/" ? <HomePage />'));
   assert.ok(source.includes('<HomeBrandBanner /><FeaturedDraws />'));
   const html = renderToStaticMarkup(createElement(HomeBrandBanner));
   assert.match(html, /home-luxe-banner.png/); assert.match(html, /Approval pending/);
