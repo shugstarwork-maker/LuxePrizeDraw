@@ -2,6 +2,7 @@
 // Duolingo-style weekly league experience as the poker lounge.
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Bot, ChevronLeft, Crown, Gift, ShieldCheck, Swords, Users, Volume2 } from "lucide-react";
+import { LoungeTabBar } from "./LoungeTabBar";
 import { useAudio } from "../audio/AudioProvider";
 import { ChallengeGamesCarousel, type ChallengeGameId } from "./ChallengeGamesCarousel";
 import { ChessBoard, ConnectFourBoard, DraughtsBoard } from "./GamesArena";
@@ -25,6 +26,7 @@ export const ChallengeLounge: React.FC = () => {
   const [notice, setNotice] = useState("");
   const [rewardReady, setRewardReady] = useState(() => localStorage.getItem("luxe-challenge-reward") !== new Date().toDateString());
   const [glide, setGlide] = useState<GlideEvent>(null);
+  const [tab, setTab] = useState<"play"|"league"|"profile"|"rewards">("play");
   const glideId = useRef(0);
   const leagueTier = tierByIndex(league.tierIndex);
   const leagueBoard = useMemo(() => weeklyBoard(league), [league]);
@@ -110,13 +112,12 @@ export const ChallengeLounge: React.FC = () => {
         <button type="button" onClick={() => nav("/portal")} className="rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-white/55 transition hover:border-amber-200/50 hover:text-amber-100">Portal</button>
       </nav>
 
-      <div className="mt-8 text-center">
+      
+      {tab === "play" && <><div className="mt-8 text-center">
         <p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">Members’ games room · no cash value</p>
         <h2 className="mt-3 text-4xl font-black">Your Weekly League</h2>
         <p className="mt-3 text-sm text-white/60">Pick a board game and you're matched straight into your {leagueTier.name} League — no lobbies, no waiting. Win games to climb the divisions. Free-play only, pure competition.</p>
-      </div>
-
-      <ChallengeGamesCarousel onPlay={sitDown} />
+      </div><ChallengeGamesCarousel onPlay={sitDown} />
 
       <button onClick={() => sitDown("chess")} className="group mt-7 block w-full overflow-hidden rounded-2xl border border-amber-200/40 bg-black/40 text-left transition hover:border-amber-200/80 active:scale-[.98]">
         <div className="relative h-32 bg-gradient-to-br from-amber-200 to-amber-600">
@@ -132,10 +133,8 @@ export const ChallengeLounge: React.FC = () => {
         </div>
       </button>
 
-      {notice && <p className="mt-4 rounded-xl border border-emerald-300/30 bg-emerald-300/10 p-3 text-sm text-emerald-100">{notice}</p>}
-
-      {/* Weekly league leaderboard — same engine and styling as the poker lounge */}
-      <div className="mt-8 rounded-[1.75rem] border p-5" style={{ borderColor: `${leagueTier.colour}55`, background: "linear-gradient(145deg,#1c150b,#0d0904 70%)", boxShadow: `0 0 34px ${leagueTier.glow}` }}>
+      </>}
+      {tab === "league" && <><div className="mt-8 rounded-[1.75rem] border p-5" style={{ borderColor: `${leagueTier.colour}55`, background: "linear-gradient(145deg,#1c150b,#0d0904 70%)", boxShadow: `0 0 34px ${leagueTier.glow}` }}>
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-[10px] font-black uppercase tracking-[.22em]" style={{ color: leagueTier.colour }}>{leagueTier.name} League · week table</p>
@@ -164,20 +163,36 @@ export const ChallengeLounge: React.FC = () => {
         <p className="mt-3 text-[10px] text-white/35">Verified scoring: +{CHALLENGE_XP.win} XP per game won · +{CHALLENGE_XP.draw} per draw · +{LEAGUE_XP.dailyParticipation} daily participation bonus (capped). Top {PROMOTE_COUNT} ({cutoffs.promoteXP}+ XP) promote, bottom {RELEGATE_COUNT} relegate. Weekly leagues are free-play pride only — no prizes, no cash value.</p>
       </div>
 
-      <div className="mt-7 grid gap-3 sm:grid-cols-3">
-        <button onClick={dailyReward} disabled={!rewardReady} className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-4 text-left disabled:opacity-40">
-          <Gift className="h-5 w-5 text-emerald-200" /><b className="mt-3 block">{rewardReady ? `Daily sign-in: +${LEAGUE_XP.dailyParticipation} XP` : "Daily XP claimed"}</b><small className="text-white/55">Free participation XP every day</small>
-        </button>
-        <div className="rounded-2xl border border-violet-300/30 bg-violet-300/10 p-4">
-          <Crown className="h-5 w-5 text-violet-200" /><b className="mt-3 block">Your position: #{yourRank || "—"}</b><small className="text-white/55">of {COHORT_SIZE} in {leagueTier.name} · {division.onTrack ? "on track for promotion" : "outside the promotion cut"}</small>
+      </>}
+      {tab === "profile" && <><div className="mt-8 grid gap-3 sm:grid-cols-3">
+        <div className="rounded-2xl border border-amber-200/30 bg-black/40 p-4 text-left">
+          <Crown className="h-5 w-5 text-amber-200" /><b className="mt-3 block">{leagueTier.name} League</b><small className="text-white/55">Season {season.info.season} · week {season.info.weekInSeason}</small>
         </div>
-        <div className="rounded-2xl border border-amber-200/30 bg-amber-300/10 p-4">
-          <Bot className="h-5 w-5 text-amber-200" /><b className="mt-3 block">Cinematic boards</b><small className="text-white/55">Chess, Connect Four and Draughts with full rules and local two-player matches</small>
+        <div className="rounded-2xl border border-amber-200/30 bg-black/40 p-4 text-left">
+          <Swords className="h-5 w-5 text-amber-200" /><b className="mt-3 block">{confirmedXP()} XP confirmed</b><small className="text-white/55">{provisionalXP()} provisional · {league.games ?? 0} games this week</small>
+        </div>
+        <div className="rounded-2xl border border-amber-200/30 bg-black/40 p-4 text-left">
+          <Bot className="h-5 w-5 text-amber-200" /><b className="mt-3 block">{division.onTrack ? "Promotion pace" : "Chasing the cut"}</b><small className="text-white/55">{division.onTrack ? "You're on track to promote" : "Outside the promotion zone — keep playing"}</small>
         </div>
       </div>
+      <button type="button" onClick={() => nav("/portal")} className="mt-4 w-full rounded-2xl border border-amber-200/40 bg-gradient-to-b from-amber-300/15 to-amber-500/10 p-4 text-left transition hover:border-amber-200/70 active:scale-[.98]">
+        <b className="block text-amber-100">Open full player portal →</b><small className="text-white/55">Quests, achievements, trophies and season history</small>
+      </button></>}
+      {tab === "rewards" && <><div className="mt-8 grid gap-3">
+        <button onClick={dailyReward} disabled={!rewardReady} className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-5 text-left disabled:opacity-40">
+          <Gift className="h-5 w-5 text-emerald-200" /><b className="mt-3 block text-base">{rewardReady ? `Daily sign-in: +${LEAGUE_XP.dailyParticipation} XP` : "Daily XP claimed"}</b><small className="text-white/55">Free participation XP every day — come back tomorrow</small>
+        </button>
+        <div className="rounded-2xl border border-amber-200/30 bg-amber-300/10 p-5">
+          <Swords className="h-5 w-5 text-amber-200" /><b className="mt-3 block text-base">Game XP</b><small className="text-white/55">Finish a game: +{CHALLENGE_XP.win} XP per win · +{CHALLENGE_XP.draw} per draw · server-verified with a daily cap</small>
+        </div>
+      </div></>}
+      {notice && <p className="mt-4 rounded-xl border border-emerald-300/30 bg-emerald-300/10 p-3 text-sm text-emerald-100">{notice}</p>}
 
+      
       <p className="mt-6 rounded-xl border border-white/10 bg-black/30 p-3 text-[10px] leading-relaxed text-white/50"><ShieldCheck className="mr-1 inline h-3.5 w-3.5 text-emerald-300" />Free-to-play entertainment only. Challenge games share the same weekly league as the Luxe Poker Lounge — one division, one ladder, no stakes and nothing to withdraw.</p>
+      
       {glide && <LeagueGlideOverlay event={glide} onDone={() => setGlide(null)} />}
+      <LoungeTabBar tab={tab} onTab={(t) => { play("button"); setTab(t); window.scrollTo({ top: 0, behavior: "smooth" }); }} accent="amber" />
     </div>
   </section>;
 };

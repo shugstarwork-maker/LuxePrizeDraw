@@ -19,6 +19,7 @@ import { useAccount } from "../lib/useAccount";
 import { LeagueCelebration, type Celebration } from "./LeagueCelebration";
 import { LeagueRacePop, type RacePop } from "./LeagueRacePop";
 import { LeagueGlideOverlay, type GlideEvent } from "./LeagueGlideOverlay";
+import { LoungeTabBar } from "./LoungeTabBar";
 
 const CardView = LuxePlayingCard;
 const key = (card: { rank: string; suit: string }) => `${card.rank}${card.suit}`;
@@ -134,6 +135,7 @@ export const LuxePokerLeague: React.FC = () => {
   const [racePop, setRacePop] = useState<RacePop>(null);
   const racePopId = useRef(0);
   const [leagueGlide, setLeagueGlide] = useState<GlideEvent>(null);
+  const [lobbyTab, setLobbyTab] = useState<"play" | "league" | "profile" | "rewards">("play");
   const glideId = useRef(0);
   const gainLeagueXp = (amount: number) => {
     pushXpFloat(amount);
@@ -480,8 +482,8 @@ export const LuxePokerLeague: React.FC = () => {
   const dealerMood: "idle" | "win" | "lose" = potWinner === "player" || potWinner === "split" ? "win" : potWinner === "host" ? "lose" : "idle";
   const busted = Boolean(game?.handOver && you && you.chips <= 0);
 
-  if (screen === "lobby") return <section id="poker-league" className="salon-selection min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-4 py-6 pb-28 text-white"><div className="mx-auto max-w-5xl"><header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-4 py-3"><span className="inline-flex items-center gap-2 font-black text-amber-100"><Crown className="h-5 w-5" />LUXE POKER LOUNGE</span><span className="rounded-full border border-amber-200/35 bg-amber-300/10 px-3 py-1.5 font-mono text-sm font-black text-amber-100">{chips.toLocaleString()} chips</span><button onClick={() => setEnabled(!enabled)} className="rounded-lg bg-white/10 p-2"><Volume2 className="h-4 w-4" /></button></header><nav className="mt-3 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[.18em]"><span className="rounded-full border border-amber-200/50 bg-amber-300/15 px-3.5 py-1.5 text-amber-100">♠ Card Lounge</span><button type="button" onClick={() => { window.history.pushState({}, "", "/challenge"); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-white/55 transition hover:border-amber-200/50 hover:text-amber-100">⚔ Challenge</button><button type="button" onClick={() => { window.history.pushState({}, "", "/portal"); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-white/55 transition hover:border-amber-200/50 hover:text-amber-100">Portal</button></nav><div className="mt-8 text-center"><p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">Members’ casino · no cash value</p><h2 className="mt-3 text-4xl font-black">Your Weekly League</h2><p className="mt-3 text-sm text-white/60">Pick a card game and you're seated straight at your {leagueTier.name} League table — no lobbies, no waiting. Win hands to climb the divisions. Free-play chips only, pure experience.</p></div><LoungeGamesCarousel /><button onClick={() => join(leagueTable)} className="group mt-7 block w-full overflow-hidden rounded-2xl border text-left transition active:scale-[.98] border-amber-200/40 hover:border-amber-200/80 bg-black/40"><div className={`relative h-32 bg-gradient-to-br ${leagueTable.tone}`}><img src={leagueTable.image} alt="" className="h-full w-full object-cover opacity-80 mix-blend-luminosity" /><span className="absolute right-2 top-2 rounded-full bg-black/70 px-2 py-1 text-[9px] font-black uppercase tracking-wider" style={{ color: leagueTier.colour }}>{leagueTier.name} League · your table</span></div><div className="flex items-center justify-between gap-3 p-4"><div><p className="font-black text-amber-100">{leagueTable.name}</p><p className="mt-1 flex items-center gap-1 text-[11px] text-white/55"><Users className="h-3 w-3" /> 6 seats · blinds {leagueTable.blinds} · buy-in {leagueTable.buyIn.toLocaleString()}</p></div><span className="rounded-full bg-gradient-to-b from-amber-300 to-amber-500 px-5 py-2.5 text-sm font-black text-black shadow-lg">Play now</span></div></button>{seatError && <p role="alert" className="poker-seat-error">{seatError}</p>}
-        <AccountCard chips={chips} />
+  if (screen === "lobby") return <section id="poker-league" className="salon-selection min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-4 py-6 pb-28 text-white"><div className="mx-auto max-w-5xl"><header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-4 py-3"><span className="inline-flex items-center gap-2 font-black text-amber-100"><Crown className="h-5 w-5" />LUXE POKER LOUNGE</span><span className="rounded-full border border-amber-200/35 bg-amber-300/10 px-3 py-1.5 font-mono text-sm font-black text-amber-100">{chips.toLocaleString()} chips</span><button onClick={() => setEnabled(!enabled)} className="rounded-lg bg-white/10 p-2"><Volume2 className="h-4 w-4" /></button></header><nav className="mt-3 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[.18em]"><span className="rounded-full border border-amber-200/50 bg-amber-300/15 px-3.5 py-1.5 text-amber-100">♠ Card Lounge</span><button type="button" onClick={() => { window.history.pushState({}, "", "/challenge"); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-white/55 transition hover:border-amber-200/50 hover:text-amber-100">⚔ Challenge</button><button type="button" onClick={() => { window.history.pushState({}, "", "/portal"); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-white/55 transition hover:border-amber-200/50 hover:text-amber-100">Portal</button></nav>
+        {lobbyTab === "play" && <><div className="mt-8 text-center"><p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">Members’ casino · no cash value</p><h2 className="mt-3 text-4xl font-black">Your Weekly League</h2><p className="mt-3 text-sm text-white/60">Pick a card game and you're seated straight at your {leagueTier.name} League table — no lobbies, no waiting. Win hands to climb the divisions. Free-play chips only, pure experience.</p></div><LoungeGamesCarousel /><button onClick={() => join(leagueTable)} className="group mt-7 block w-full overflow-hidden rounded-2xl border text-left transition active:scale-[.98] border-amber-200/40 hover:border-amber-200/80 bg-black/40"><div className={`relative h-32 bg-gradient-to-br ${leagueTable.tone}`}><img src={leagueTable.image} alt="" className="h-full w-full object-cover opacity-80 mix-blend-luminosity" /><span className="absolute right-2 top-2 rounded-full bg-black/70 px-2 py-1 text-[9px] font-black uppercase tracking-wider" style={{ color: leagueTier.colour }}>{leagueTier.name} League · your table</span></div><div className="flex items-center justify-between gap-3 p-4"><div><p className="font-black text-amber-100">{leagueTable.name}</p><p className="mt-1 flex items-center gap-1 text-[11px] text-white/55"><Users className="h-3 w-3" /> 6 seats · blinds {leagueTable.blinds} · buy-in {leagueTable.buyIn.toLocaleString()}</p></div><span className="rounded-full bg-gradient-to-b from-amber-300 to-amber-500 px-5 py-2.5 text-sm font-black text-black shadow-lg">Play now</span></div></button>{seatError && <p role="alert" className="poker-seat-error">{seatError}</p>}
         <div className="mt-8 rounded-[1.75rem] border border-emerald-200/25 bg-[linear-gradient(145deg,#06240f,#0a1206_70%)] p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -506,32 +508,8 @@ export const LuxePokerLeague: React.FC = () => {
           {mp.error && <p role="alert" className="mt-2 text-[11px] text-rose-200">{mp.error}</p>}
           <p className="mt-3 text-[10px] text-white/35">Same integrity stack as solo tables: provably fair committed shuffle, append-only records, review before any league credit.</p>
         </div>
-        <div className="mt-8 rounded-[1.75rem] border border-amber-200/25 bg-[linear-gradient(145deg,#241a08,#120d06_70%)] p-5">
-          <p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">VIP ladder &amp; chip store</p>
-          <div className="mt-4 flex items-center gap-3">
-            <div className="min-w-0 flex-1">
-              <p className={`text-sm font-black text-white ${levelFlash ? "poker-level-flash" : ""}`}>{vipTier.name} · Level {level}{avatarFrame === "gold" ? " 🟡" : avatarFrame === "platinum" ? " ⚪" : ""}</p>
-              <p className="mt-0.5 text-xs text-white/55">Rating {competitiveRating()} · {chips.toLocaleString()} chips{tickets > 0 ? ` · ${tickets} tournament ticket${tickets > 1 ? "s" : ""}` : ""}</p>
-              <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/10">
-                <div className="h-full rounded-full bg-gradient-to-r from-amber-300 to-amber-500 transition-all duration-500" style={{ width: `${Math.min(100, (xp % 200) / 2)}%` }} />
-              </div>
-            </div>
-            <span className="rounded-full border border-amber-200/35 bg-amber-300/10 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-amber-200">{vipTier.benefit}</span>
-          </div>
-          <div className="mt-4 grid gap-2 sm:grid-cols-3">
-            {STORE.map((item) => (
-              <button key={item.id} onClick={() => buyItem(item)} className={`rounded-xl border px-4 py-3 text-left transition active:scale-95 ${item.type === "theme" || item.type === "frame" ? (owned.includes(item.id) ? "border-emerald-400/50 bg-emerald-400/10" : "border-amber-200/25 bg-black/40 hover:border-amber-200/60") : "border-amber-200/25 bg-black/40 hover:border-amber-200/60"}`}>
-                <p className="font-mono text-lg font-black text-amber-100">{item.label}</p>
-                <p className="text-[10px] font-black uppercase tracking-wider text-white/50">{(item.type === "theme" || item.type === "frame") && owned.includes(item.id) ? "Owned — equipped" : item.badge}</p>
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="mt-7 flex flex-wrap items-center gap-3">
-          <button type="button" onClick={() => setMusicEnabled(!musicEnabled)} className="inline-flex items-center gap-2 rounded-xl border border-amber-200/25 bg-black/40 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-amber-100 transition hover:border-amber-200/60"><Volume2 className="h-4 w-4" />{musicEnabled ? "Lounge music on" : "Lounge music off"}</button>
-          <span className="text-[10px] text-white/35">Ambient Luxe Lounge loop — synthesized in-house, no licensing needed.</span>
-        </div>
-        <div ref={boardCardRef} className={`mt-4 border p-5 transition-all duration-700 ${glide ? "-mx-4 rounded-none border-x-0" : "rounded-[1.75rem]"}`} style={{ borderColor: `${leagueTier.colour}55`, background: `linear-gradient(145deg,#1c150b, #0d0904 70%)`, boxShadow: glide ? `0 0 70px ${leagueTier.glow}` : `0 0 34px ${leagueTier.glow}` }}>
+        </>}
+        {lobbyTab === "league" && <><div ref={boardCardRef} className={`mt-4 border p-5 transition-all duration-700 ${glide ? "-mx-4 rounded-none border-x-0" : "rounded-[1.75rem]"}`} style={{ borderColor: `${leagueTier.colour}55`, background: `linear-gradient(145deg,#1c150b, #0d0904 70%)`, boxShadow: glide ? `0 0 70px ${leagueTier.glow}` : `0 0 34px ${leagueTier.glow}` }}>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-[10px] font-black uppercase tracking-[.22em]" style={{ color: leagueTier.colour }}>Weekly league · ends in {weekEndsIn()}</p>
@@ -605,6 +583,8 @@ export const LuxePokerLeague: React.FC = () => {
         </div>
         <SeasonHub onPlayEvent={(label) => { note(`${label}: you're registered — your table run counts as your tournament result.`); join(leagueTable); }} />
         <LeagueCelebration celebration={celebration} onDone={() => setCelebration(null)} />
+        </>}
+        {lobbyTab === "profile" && <><AccountCard chips={chips} />
         <div className="mt-4 rounded-[1.75rem] border border-amber-200/25 bg-[linear-gradient(145deg,#241a08,#120d06_70%)] p-5">
           <p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">Luxe Lounge leaderboard</p>
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -617,7 +597,34 @@ export const LuxePokerLeague: React.FC = () => {
           </div>
           <p className="mt-3 text-[10px] text-white/35">Your private Luxe Lounge record — stored on this device. Realtime multiplayer tables are on the roadmap.</p>
         </div>
-        <div className="mt-7 grid gap-3 sm:grid-cols-3"><button onClick={dailyReward} disabled={!rewardReady} className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-4 text-left disabled:opacity-40"><Gift className="h-5 w-5 text-emerald-200" /><b className="mt-3 block">{rewardReady ? "Daily sign-in: 200 chips" : "Daily chips claimed"}</b><small className="text-white/55">200 free-play chips every day</small></button><button onClick={() => note("Demo leaderboard becomes available after completing a hand.")} className="rounded-2xl border border-violet-300/30 bg-violet-300/10 p-4 text-left"><Crown className="h-5 w-5 text-violet-200" /><b className="mt-3 block">League table</b><small className="text-white/55">Practice ranking</small></button><button onClick={() => note("Demo tournaments use virtual chips and cannot issue tickets.")} className="rounded-2xl border border-amber-200/30 bg-amber-300/10 p-4 text-left"><Sparkles className="h-5 w-5 text-amber-200" /><b className="mt-3 block">Tournament night</b><small className="text-white/55">Table race points: 1st 100 · 2nd 75 · 3rd 60 · 4th 50 · 5th 40 · 6th 30 — outlast the table to score for your weekly league</small></button></div>{status !== "Choose a table to sit down." && <p className="mt-5 rounded-xl border border-amber-200/20 bg-amber-300/10 p-3 text-sm text-amber-100">{status}</p>}<LeagueRacePop pop={racePop} />{leagueGlide && <LeagueGlideOverlay event={leagueGlide} onDone={() => setLeagueGlide(null)} />}</div></section>;
+        <div className="mt-7 flex flex-wrap items-center gap-3">
+          <button type="button" onClick={() => setMusicEnabled(!musicEnabled)} className="inline-flex items-center gap-2 rounded-xl border border-amber-200/25 bg-black/40 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-amber-100 transition hover:border-amber-200/60"><Volume2 className="h-4 w-4" />{musicEnabled ? "Lounge music on" : "Lounge music off"}</button>
+          <span className="text-[10px] text-white/35">Ambient Luxe Lounge loop — synthesized in-house, no licensing needed.</span>
+        </div>
+        </>}
+        {lobbyTab === "rewards" && <><div className="mt-7 grid gap-3 sm:grid-cols-3"><button onClick={dailyReward} disabled={!rewardReady} className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-4 text-left disabled:opacity-40"><Gift className="h-5 w-5 text-emerald-200" /><b className="mt-3 block">{rewardReady ? "Daily sign-in: 200 chips" : "Daily chips claimed"}</b><small className="text-white/55">200 free-play chips every day</small></button><button onClick={() => note("Demo leaderboard becomes available after completing a hand.")} className="rounded-2xl border border-violet-300/30 bg-violet-300/10 p-4 text-left"><Crown className="h-5 w-5 text-violet-200" /><b className="mt-3 block">League table</b><small className="text-white/55">Practice ranking</small></button><button onClick={() => note("Demo tournaments use virtual chips and cannot issue tickets.")} className="rounded-2xl border border-amber-200/30 bg-amber-300/10 p-4 text-left"><Sparkles className="h-5 w-5 text-amber-200" /><b className="mt-3 block">Tournament night</b><small className="text-white/55">Table race points: 1st 100 · 2nd 75 · 3rd 60 · 4th 50 · 5th 40 · 6th 30 — outlast the table to score for your weekly league</small></button></div><div className="mt-8 rounded-[1.75rem] border border-amber-200/25 bg-[linear-gradient(145deg,#241a08,#120d06_70%)] p-5">
+          <p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">VIP ladder &amp; chip store</p>
+          <div className="mt-4 flex items-center gap-3">
+            <div className="min-w-0 flex-1">
+              <p className={`text-sm font-black text-white ${levelFlash ? "poker-level-flash" : ""}`}>{vipTier.name} · Level {level}{avatarFrame === "gold" ? " 🟡" : avatarFrame === "platinum" ? " ⚪" : ""}</p>
+              <p className="mt-0.5 text-xs text-white/55">Rating {competitiveRating()} · {chips.toLocaleString()} chips{tickets > 0 ? ` · ${tickets} tournament ticket${tickets > 1 ? "s" : ""}` : ""}</p>
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/10">
+                <div className="h-full rounded-full bg-gradient-to-r from-amber-300 to-amber-500 transition-all duration-500" style={{ width: `${Math.min(100, (xp % 200) / 2)}%` }} />
+              </div>
+            </div>
+            <span className="rounded-full border border-amber-200/35 bg-amber-300/10 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-amber-200">{vipTier.benefit}</span>
+          </div>
+          <div className="mt-4 grid gap-2 sm:grid-cols-3">
+            {STORE.map((item) => (
+              <button key={item.id} onClick={() => buyItem(item)} className={`rounded-xl border px-4 py-3 text-left transition active:scale-95 ${item.type === "theme" || item.type === "frame" ? (owned.includes(item.id) ? "border-emerald-400/50 bg-emerald-400/10" : "border-amber-200/25 bg-black/40 hover:border-amber-200/60") : "border-amber-200/25 bg-black/40 hover:border-amber-200/60"}`}>
+                <p className="font-mono text-lg font-black text-amber-100">{item.label}</p>
+                <p className="text-[10px] font-black uppercase tracking-wider text-white/50">{(item.type === "theme" || item.type === "frame") && owned.includes(item.id) ? "Owned — equipped" : item.badge}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+        </>}
+        {status !== "Choose a table to sit down." && <p className="mt-5 rounded-xl border border-amber-200/20 bg-amber-300/10 p-3 text-sm text-amber-100">{status}</p>}<LeagueRacePop pop={racePop} />{leagueGlide && <LeagueGlideOverlay event={leagueGlide} onDone={() => setLeagueGlide(null)} />}<LoungeTabBar tab={lobbyTab} onTab={(t) => { play("button"); setLobbyTab(t); window.scrollTo({ top: 0, behavior: "smooth" }); }} accent="amber" /></div></section>;
 
   // ── Multiplayer table screen ──
   if (screen === "mp") {
