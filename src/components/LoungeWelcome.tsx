@@ -27,7 +27,7 @@ export const LoungeWelcome: React.FC<{
     {chipsLabel && <p className="mt-4 rounded-full border border-amber-200/35 bg-amber-300/10 px-4 py-1.5 font-mono text-sm font-black text-amber-100">{chipsLabel}</p>}
     <div className="cine-letterbox cine-img cine-reveal cine-reveal-2 mt-8 w-full max-w-md overflow-hidden rounded-3xl border border-amber-200/25 shadow-2xl"><img src={art} alt="" className="w-full object-cover" /></div>
     <button type="button" onClick={onEnter} className="gate-page__enter cine-reveal cine-reveal-3 mt-8 rounded-full bg-gradient-to-b from-amber-300 to-amber-500 px-14 py-4 text-base font-black uppercase tracking-[.2em] text-black shadow-[0_8px_40px_rgba(246,201,69,.45)] transition active:scale-95">Enter</button>
-    <p className="mt-6 flex items-center gap-1.5 text-[10px] text-white/40"><ShieldCheck className="h-3.5 w-3.5 text-emerald-300" />Free-play only · no deposits, no cash wagering, no cash-out</p>
+    <p className="mt-6 flex items-center gap-1.5 text-[10px] text-white/40"><ShieldCheck className="h-3.5 w-3.5 text-emerald-300" />Live now · free-play leagues · no deposits, no cash wagering</p>
     <LoungeTabBar tab={tab} onTab={onTab} />
   </section>
 );

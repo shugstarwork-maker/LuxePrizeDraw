@@ -72,7 +72,7 @@ export const LuxePokerLeague: React.FC = () => {
   const [selectedSeat, setSelectedSeat] = useState("Amelia K.");
   const [giftsOpen, setGiftsOpen] = useState(false);
   const [avatar, setAvatar] = useState(() => localStorage.getItem("luxe-poker-avatar") || "");
-  const [chips, setChips] = useState(() => Number(localStorage.getItem("luxe-demo-poker-chips")) || 1000);
+  const [chips, setChips] = useState(() => Number(localStorage.getItem("luxe-poker-chips") ?? localStorage.getItem("luxe-demo-poker-chips")) || 1000);
   useEffect(() => { if (acct.profile) acct.syncChips(chips); }, [chips, acct.profile]); // keep server copy of chips in step with this device
   const [xp, setXp] = useState(() => competitiveRating()); // competitive rating — separate from league XP and trust
   const level = Math.floor(competitiveRating() / 200);
@@ -229,7 +229,7 @@ export const LuxePokerLeague: React.FC = () => {
   const minRaiseTo = game && you ? Math.min(game.currentBet + game.minRaise, you.bet + you.chips) : 0;
   const maxRaiseTo = you ? you.bet + you.chips : 0;
 
-  useEffect(() => { localStorage.setItem("luxe-demo-poker-chips", String(chips)); }, [chips]);
+  useEffect(() => { localStorage.setItem("luxe-poker-chips", String(chips)); }, [chips]);
 
   // Landscape-only play: auto-cover the whole screen when rotated; portrait shows the rotate gate.
   useEffect(() => {
@@ -414,14 +414,14 @@ export const LuxePokerLeague: React.FC = () => {
   // Keep the raise slider inside legal bounds as the hand evolves.
   useEffect(() => { if (game && you) setRaiseTo((v) => Math.min(Math.max(v || minRaiseTo, minRaiseTo), maxRaiseTo)); }, [game?.currentBet, game?.stage, yourTurn]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const chooseAvatar = (file?: File) => { if (!file) return; const reader = new FileReader(); reader.onload = () => { const value = String(reader.result); localStorage.setItem("luxe-poker-avatar", value); setAvatar(value); note("Demo avatar updated on this device."); }; reader.readAsDataURL(file); };
+  const chooseAvatar = (file?: File) => { if (!file) return; const reader = new FileReader(); reader.onload = () => { const value = String(reader.result); localStorage.setItem("luxe-poker-avatar", value); setAvatar(value); note("Avatar updated on this device."); }; reader.readAsDataURL(file); };
   const buyItem = (item: StoreItem) => {
     if (item.type === "chips") { setChips((v) => v + (item.chips ?? 0)); }
     else if (item.type === "ticket") setTickets((v) => v + (item.count ?? 0));
     else if (item.type === "theme") { setOwned((o) => [...new Set([...o, item.id])]); setTableTheme(item.id === "theme-onyx" ? "onyx" : "noir"); }
     else { setOwned((o) => [...new Set([...o, item.id])]); setAvatarFrame(item.id === "frame-gold" ? "gold" : "platinum"); }
     play(item.type === "chips" ? "chipStack" : "ticketPurchase");
-    note(`${item.label} — acquired. Demo store, no cash value.`);
+    note(`${item.label} — acquired. Free-play style, no cash value.`);
   };
   const join = (table: TableDef) => {
     if (chips < table.buyIn) { const message = `${table.name} needs ${table.buyIn.toLocaleString()} free-play chips. You have ${chips.toLocaleString()} — collect free daily chips below.`; setSeatError(message); note(message); return; }
@@ -614,7 +614,7 @@ export const LuxePokerLeague: React.FC = () => {
           <span className="text-[10px] text-white/35">Ambient Luxe Lounge loop — synthesized in-house, no licensing needed.</span>
         </div>
         </>}
-        {lobbyTab === "rewards" && <><div className="mt-7 grid gap-3 sm:grid-cols-3"><button onClick={dailyReward} disabled={!rewardReady} className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-4 text-left disabled:opacity-40"><Gift className="h-5 w-5 text-emerald-200" /><b className="mt-3 block">{rewardReady ? "Daily sign-in: 200 chips" : "Daily chips claimed"}</b><small className="text-white/55">200 free-play chips every day</small></button><button onClick={() => note("Demo leaderboard becomes available after completing a hand.")} className="rounded-2xl border border-violet-300/30 bg-violet-300/10 p-4 text-left"><Crown className="h-5 w-5 text-violet-200" /><b className="mt-3 block">League table</b><small className="text-white/55">Practice ranking</small></button><button onClick={() => note("Demo tournaments use virtual chips and cannot issue tickets.")} className="rounded-2xl border border-amber-200/30 bg-amber-300/10 p-4 text-left"><Sparkles className="h-5 w-5 text-amber-200" /><b className="mt-3 block">Tournament night</b><small className="text-white/55">Table race points: 1st 100 · 2nd 75 · 3rd 60 · 4th 50 · 5th 40 · 6th 30 — outlast the table to score for your weekly league</small></button></div><div className="mt-8 rounded-[1.75rem] border border-amber-200/25 bg-[linear-gradient(145deg,#241a08,#120d06_70%)] p-5">
+        {lobbyTab === "rewards" && <><div className="mt-7 grid gap-3 sm:grid-cols-3"><button onClick={dailyReward} disabled={!rewardReady} className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-4 text-left disabled:opacity-40"><Gift className="h-5 w-5 text-emerald-200" /><b className="mt-3 block">{rewardReady ? "Daily sign-in: 200 chips" : "Daily chips claimed"}</b><small className="text-white/55">200 free-play chips every day</small></button><button onClick={() => note("Your league table unlocks after completing your first hand.")} className="rounded-2xl border border-violet-300/30 bg-violet-300/10 p-4 text-left"><Crown className="h-5 w-5 text-violet-200" /><b className="mt-3 block">League table</b><small className="text-white/55">Practice ranking</small></button><button onClick={() => note("Table race points: outlast the table to score for your weekly league. Free-play chips only.")} className="rounded-2xl border border-amber-200/30 bg-amber-300/10 p-4 text-left"><Sparkles className="h-5 w-5 text-amber-200" /><b className="mt-3 block">Tournament night</b><small className="text-white/55">Table race points: 1st 100 · 2nd 75 · 3rd 60 · 4th 50 · 5th 40 · 6th 30 — outlast the table to score for your weekly league</small></button></div><div className="mt-8 rounded-[1.75rem] border border-amber-200/25 bg-[linear-gradient(145deg,#241a08,#120d06_70%)] p-5">
           <p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">VIP ladder &amp; chip store</p>
           <div className="mt-4 flex items-center gap-3">
             <div className="min-w-0 flex-1">
@@ -725,7 +725,7 @@ export const LuxePokerLeague: React.FC = () => {
                 const isWinner = game.handOver && !p.sittingOut && game.winners.some((w) => w.id === p.id);
                 const showCards = !p.isBot || (game.stage === "showdown" && !p.folded && !p.sittingOut);
                 return <div key={p.id} onClick={() => p.isBot && setSelectedSeat(p.name)} className={`${isYou ? "poker-seat-you " : ""}pointer-events-auto absolute w-[4.9rem] rounded-2xl border px-1.5 py-1 text-center shadow-2xl backdrop-blur-md transition ${p.sittingOut ? "opacity-30" : p.folded ? "opacity-45" : ""} ${isWinner ? "border-emerald-300 bg-emerald-300/20" : isTurn ? "border-amber-200 bg-amber-300/20 poker-turn-ring" : !p.isBot ? "border-amber-200/70 bg-amber-300/10" : selectedSeat === p.name ? "border-fuchsia-300 bg-fuchsia-300/15" : "border-white/15 bg-black/55"}`} style={{ left: `${slot.px}%`, top: `${isYou ? slot.py + 8 : slot.py}%`, zIndex: 10 + Math.round(slot.py), transform: `translate(-50%,-50%) scale(${(isYou ? Math.min(slot.sc, 0.78) : slot.sc).toFixed(2)})` }}>
-                  {!p.isBot ? <label className="block cursor-pointer"><PlayerTurnRing active={isTurn} seconds={seconds} name={p.name}>{avatar ? <img src={avatar} alt="Your avatar" className="h-full w-full object-cover" /> : p.initials}</PlayerTurnRing><input aria-label="Upload demo avatar" type="file" accept="image/*" className="hidden" onChange={(e) => chooseAvatar(e.target.files?.[0])} /></label> : <PlayerTurnRing active={isTurn} seconds={20} name={p.name}>{p.initials}</PlayerTurnRing>}
+                  {!p.isBot ? <label className="block cursor-pointer"><PlayerTurnRing active={isTurn} seconds={seconds} name={p.name}>{avatar ? <img src={avatar} alt="Your avatar" className="h-full w-full object-cover" /> : p.initials}</PlayerTurnRing><input aria-label="Upload avatar" type="file" accept="image/*" className="hidden" onChange={(e) => chooseAvatar(e.target.files?.[0])} /></label> : <PlayerTurnRing active={isTurn} seconds={20} name={p.name}>{p.initials}</PlayerTurnRing>}
                   <b className="mt-1 block truncate text-[9px] text-amber-100">{p.name}{!p.sittingOut && game.players[game.dealerIndex]?.id === p.id ? " 🔘" : ""}</b>
                   <small className="text-[8px] text-white/55">{p.sittingOut ? (p.isBot ? "Away" : "Watching") : p.chips.toLocaleString()}{p.allIn ? " · ALL-IN" : ""}</small>
                   {p.bet > 0 && <span className="mt-0.5 inline-block rounded-full bg-amber-300/90 px-1.5 py-px font-mono text-[8px] font-black text-black">bet {p.bet.toLocaleString()}</span>}
