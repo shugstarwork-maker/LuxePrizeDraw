@@ -1,4 +1,4 @@
-import { CarFront, Cpu, HeartHandshake, ShieldCheck, ArrowRight } from "lucide-react";
+import { CarFront, Cpu, HeartHandshake, ShieldCheck, ArrowRight, TreePine } from "lucide-react";
 import { RollingCardCarousel } from "./RollingCardCarousel";
 import { DeckCard } from "./DeckCard";
 
@@ -8,6 +8,7 @@ const partners = [
   { name: "Veno Scorp", detail: "UK manufacturer of custom-built gaming PCs — designed, built and tested in-house in Manchester, from entry-level bundles to high-end RTX rigs.", status: "Confirmed tech partner", icon: Cpu, tone: "from-violet-400/20 to-fuchsia-400/5" },
   { name: "Moss Prestige Cars", detail: "Specialist prestige car dealership in West Yorkshire — quality hand-picked vehicles with first-class customer service.", status: "Confirmed motoring partner", icon: CarFront, tone: "from-rose-400/20 to-amber-300/5" },
   { name: "Serenity Soul CIC", detail: "Our community interest company partner — the charity at the heart of LuxePrizeDraw, supporting wellbeing and community care.", status: "Charity partner", icon: HeartHandshake, tone: "from-emerald-300/20 to-teal-400/5", path: "/serenity" },
+  { name: "Luxe Garden Summer Houses", detail: "A commercial joinery partnership building bespoke Luxe garden summer houses — premium timber garden rooms, crafted to order.", status: "Confirmed joinery partner", icon: TreePine, tone: "from-lime-300/20 to-emerald-400/5" },
 ];
 
 export function PartnerShowcase() {

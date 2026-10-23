@@ -3,7 +3,7 @@
 // proposed catalogue ("entries opening soon"), deals launch with approved partners
 // only, community figures show £0 until real distributions exist. Nothing invented.
 import React from "react";
-import { ArrowRight, BadgeCheck, CarFront, Coins, Cpu, Crown, Gamepad2, Handshake, Heart, Palmtree, Scale, ShieldCheck, Sparkles, Trophy, Users } from "lucide-react";
+import { ArrowRight, BadgeCheck, CarFront, Coins, Cpu, Crown, Gamepad2, Handshake, Heart, Palmtree, Scale, ShieldCheck, Sparkles, TreePine, Trophy, Users } from "lucide-react";
 
 const go = (path: string) => { window.history.pushState({}, "", path); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); };
 
@@ -50,6 +50,7 @@ const DEAL_CATEGORIES = [
   { icon: Crown, name: "Luxe Watches & Lifestyle", detail: "Watches, jewellery, gift cards and luxury retail offers." },
   { icon: Cpu, name: "Luxe Tech · Veno Scorp", detail: "Custom gaming PCs and bundles from our confirmed Manchester manufacturer partner." },
   { icon: Palmtree, name: "Luxe Experiences", detail: "Getaways, hospitality and dining where supplier offers are secured." },
+  { icon: TreePine, name: "Luxe Garden Summer Houses", detail: "Bespoke timber summer houses built to order through our confirmed joinery partner." },
 ];
 
 const PROMISES = [
