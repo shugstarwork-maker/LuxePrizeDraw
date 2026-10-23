@@ -936,6 +936,20 @@
   .poker-playing-page:fullscreen .poker-landscape-gate { display:flex; }
 }
 
+/* Fullscreen-sim (landscape auto-cover): seat every child layer or the table renders black. */
+.poker-playing-page.poker-fullscreen-sim .poker-game-article,
+.poker-playing-page.poker-fullscreen-sim .poker-surface-frame,
+.poker-playing-page.poker-fullscreen-sim .poker-table-scroll,
+.poker-playing-page.poker-fullscreen-sim .poker-table-artwork { position:absolute; inset:0; width:100%; height:100%; margin:0; padding:0; border:0; border-radius:0; overflow:hidden; box-shadow:none; }
+.poker-playing-page.poker-fullscreen-sim .poker-table-artwork > img { width:100%; height:100%; object-fit:cover; }
+.poker-playing-page.poker-fullscreen-sim .poker-table-artwork__live { inset:2.75rem 0 4.75rem; }
+.poker-playing-page.poker-fullscreen-sim .poker-playing-wrap > header { position:absolute; z-index:120; top:max(.2rem,env(safe-area-inset-top)); right:max(.3rem,env(safe-area-inset-right)); left:auto; transform:none; width:auto; max-width:45%; min-height:1.6rem; padding:.1rem .4rem; background:#08060399; border-radius:999px; gap:.3rem; border:0; }
+.poker-playing-page.poker-fullscreen-sim .poker-playing-wrap > header button { padding:.15rem .45rem; font-size:.55rem; min-height:1.4rem; background:transparent; }
+.poker-playing-page.poker-fullscreen-sim .poker-playing-wrap > header span { font-size:.55rem; white-space:nowrap; }
+.poker-playing-page.poker-fullscreen-sim .poker-below-table { position:static; }
+.poker-playing-page.poker-fullscreen-sim .poker-round-meta,.poker-playing-page.poker-fullscreen-sim .poker-social-controls { display:none; }
+.poker-playing-page.poker-fullscreen-sim .poker-action-dock,.poker-playing-page.poker-fullscreen-sim .poker-deal-dock { z-index:1100; bottom:max(.3rem,env(safe-area-inset-bottom)); width:min(34rem,75%); }
+
 /* In-app full-view fallback when native fullscreen is blocked (embeds, iOS). */
 .poker-playing-page.poker-fullscreen-sim { position:fixed; inset:0; z-index:1400; width:100%; height:100dvh; min-height:0; padding:0; overflow:hidden; background:#050403; }
 .poker-playing-page.poker-fullscreen-sim .poker-playing-wrap { width:100%; max-width:none; height:100%; padding:0; }

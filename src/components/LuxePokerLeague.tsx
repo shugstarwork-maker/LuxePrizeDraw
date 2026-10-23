@@ -233,7 +233,7 @@ export const LuxePokerLeague: React.FC = () => {
 
   // Landscape-only play: auto-cover the whole screen when rotated; portrait shows the rotate gate.
   useEffect(() => {
-    if (!game) return;
+    if (screen !== "table" && screen !== "mp") return;
     const page = document.getElementById("poker-league");
     if (!page) return;
     const mq = window.matchMedia("(orientation: landscape)");
@@ -274,7 +274,7 @@ export const LuxePokerLeague: React.FC = () => {
     window.addEventListener("resize", apply);
     window.visualViewport?.addEventListener("resize", apply);
     return () => { mq.removeEventListener("change", apply); window.removeEventListener("resize", apply); window.visualViewport?.removeEventListener("resize", apply); page.classList.remove("poker-fullscreen-sim"); page.style.height = ""; page.style.width = ""; };
-  }, [game]);
+  }, [screen]);
 
   const note = (message: string) => { setStatus(message); setFeed((items) => [message, ...items].slice(0, 4)); };
   const awardXp = (amount: number) => {
