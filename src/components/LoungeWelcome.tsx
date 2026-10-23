@@ -26,9 +26,6 @@ export const LoungeWelcome: React.FC<{
     <img src={art} alt="" className="mt-8 w-full max-w-md rounded-3xl border border-amber-200/25 object-cover shadow-2xl" />
     <button type="button" onClick={onEnter} className="gate-page__enter mt-8 rounded-full bg-gradient-to-b from-amber-300 to-amber-500 px-14 py-4 text-base font-black uppercase tracking-[.2em] text-black shadow-[0_8px_40px_rgba(246,201,69,.45)] transition active:scale-95">Enter</button>
     <p className="mt-6 flex items-center gap-1.5 text-[10px] text-white/40"><ShieldCheck className="h-3.5 w-3.5 text-emerald-300" />Free-play only · no deposits, no cash wagering, no cash-out</p>
-    <div className="mt-8 w-full max-w-md">
-      <p className="mb-2 text-[9px] font-black uppercase tracking-[.25em] text-white/35">Jump straight in</p>
-      <LoungeTabBar tab={tab} onTab={onTab} inline />
-    </div>
+    <LoungeTabBar tab={tab} onTab={onTab} />
   </section>
 );
