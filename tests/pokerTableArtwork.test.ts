@@ -22,7 +22,9 @@ test('game uses artwork without removing dealer or betting handlers', () => {
 test('live seats and board are nested inside the artwork rather than below it', () => {
   const source = readFileSync(new URL('../src/components/LuxePokerLeague.tsx', import.meta.url), 'utf8');
   const surface = source.split('<PokerTableArtwork')[1].split('</PokerTableArtwork>')[0];
-  for (const layer of ['poker-live-seats', 'poker-live-board', 'poker-live-hand']) assert.ok(surface.includes(layer));
+  for (const layer of ['poker-live-seats', 'poker-live-board']) assert.ok(surface.includes(layer));
+  // The player's hand lives on their seat badge, not as a centre-felt strip.
+  assert.ok(surface.includes('poker-seat-hand'));
 });
 
 test('poker table is landscape-only: portrait shows a blocking rotate gate', () => {

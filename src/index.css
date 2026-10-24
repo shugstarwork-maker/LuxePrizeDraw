@@ -936,8 +936,8 @@
   .poker-playing-page .poker-table-artwork > img { object-fit:contain; }
   .poker-playing-page .poker-table-artwork__live { inset:2rem 3.5rem 4.25rem; }
   .poker-playing-page .poker-table-artwork__live .poker-live-seats > div { max-width:14%; }
-  /* Ticker slides left so it never sits under the centre HUD panels. */
-  .poker-playing-page .poker-ticker { left:.5rem; right:auto; transform:none; max-width:52vw; overflow:hidden; }
+  /* Ticker tucks under the table-info HUD card instead of overlapping it. */
+  .poker-playing-page .poker-ticker { left:.5rem; right:auto; transform:none; max-width:52vw; overflow:hidden; top:4.5rem; }
   /* Bottom corners lift clear of the action dock. */
   .poker-playing-page .hud-zone--bl,.poker-playing-page .hud-zone--br { bottom:4.6rem; }
 }
@@ -976,16 +976,22 @@
   .poker-playing-page.poker-fullscreen-sim .poker-table-artwork__live { inset:2rem 3.5rem 4.25rem; }
 }
 
+/* Your cards sit on your seat badge, outside the felt like every other seat. */
+@media (orientation:landscape) and (max-height:1200px) {
+  .poker-playing-page .poker-live-seats .poker-seat-hand span { height:1.9rem; width:1.45rem; font-size:12px; }
+}
+/* Pot chips sit centre-felt, under the board, like a real table. */
+@media (orientation:landscape) and (max-height:1200px) {
+  .poker-playing-page .luxe-pot-chips { left:50%; top:56%; transform:translate(-50%,-50%); }
+}
 /* De-crowd the player's area in landscape: cards shift left, avatar badge drops to bottom-right, clear of chips and the board. */
 @media (orientation:landscape) and (max-height:1200px) {
   .poker-playing-page .poker-live-hand { top:60%; left:41%; scale:.88; }
-  .poker-playing-page .poker-live-seats .poker-seat-you { position:absolute; top:84% !important; left:63% !important; transform:translate(-50%,-50%) scale(.68) !important; }
+  /* seat-you position comes from the data-seat-index rules; badge transform stays inline */
 }
 
 /* Playability pass: isolate live cards from seat badges and preserve turn feedback. */
 @media (orientation:landscape) and (max-height:1200px) {
-  .poker-playing-page .poker-live-seats > [data-seat-index="5"] { left:78% !important; top:76% !important; }
-  .poker-playing-page .poker-live-hand { top:62%; left:50%; pointer-events:none; }
   .poker-playing-page .poker-live-host { top:16%; pointer-events:none; }
   .poker-playing-page .poker-live-board { top:39%; width:auto; pointer-events:none; }
   .poker-playing-page .poker-round-status { display:block; position:fixed; z-index:125; bottom:4.25rem; left:50%; transform:translateX(-50%); max-width:62%; margin:0; padding:.3rem .6rem; border-radius:.5rem; background:#080603eb; color:#ffe6a0; font-size:.7rem; line-height:1.3; pointer-events:none; }
@@ -1016,10 +1022,12 @@
 @media (orientation:landscape) and (max-height:1200px) { .poker-playing-page .player-turn-ring { width:2.3rem; height:2.3rem; } }
 @media(prefers-reduced-motion:reduce) { .player-turn-ring__clock { transition:none; } }
 
-/* Separate lower-right player seat from Theo, the hand and the action dock. */
+/* Separate lower-right player seat from Theo, the hand and the action dock.
+   Your seat sits on the right rim, fully clear of the dock, with your cards face-up. */
 @media (orientation:landscape) and (max-height:1200px) {
   .poker-playing-page .poker-live-seats > [data-seat-index="4"] { left:91% !important; top:43% !important; }
-  .poker-playing-page .poker-live-seats > [data-seat-index="5"] { left:83% !important; top:78% !important; width:4rem; max-width:4rem; padding:.25rem; transform:translate(-50%,-50%) !important; }
+  .poker-playing-page .poker-live-seats > [data-seat-index="5"],
+  .poker-playing-page .poker-live-seats .poker-seat-you { left:80% !important; top:62% !important; width:4.6rem; max-width:4.6rem; padding:.3rem; transform:translate(-50%,-50%) !important; }
   .poker-playing-page .poker-live-seats > [data-seat-index="5"] b { font-size:.6rem; }
   .poker-playing-page .poker-live-seats > [data-seat-index="5"] small { font-size:.55rem; }
 }
