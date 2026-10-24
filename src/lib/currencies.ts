@@ -104,6 +104,55 @@ export function coinPackById(id: string): CoinPack | undefined {
   return COIN_PACKS.find((p) => p.id === id);
 }
 
+// ── Credit card spending cap (UK Prize Draw Code of Good Practice) ─────────
+// Hard-coded: no account may spend more than £250/month by card on Gold Coin
+// bundles. Tracked here as a demo ledger; enforced server-side at launch.
+
+export const CARD_MONTHLY_CAP_PENCE = 25000; // £250.00
+
+const SPEND_KEY = "luxe-coin-spend-v1";
+type SpendLedger = { month: string; spentPence: number };
+
+function spendLedger(): SpendLedger {
+  const month = new Date().toISOString().slice(0, 7); // YYYY-MM
+  try {
+    const parsed = JSON.parse(localStorage.getItem(SPEND_KEY) ?? "null") as SpendLedger | null;
+    if (parsed && parsed.month === month) return parsed;
+  } catch { /* fall through */ }
+  return { month, spentPence: 0 };
+}
+
+export function cardSpendThisMonthPence(): number {
+  return spendLedger().spentPence;
+}
+
+export function cardCapRemainingPence(): number {
+  return Math.max(0, CARD_MONTHLY_CAP_PENCE - spendLedger().spentPence);
+}
+
+function priceToPence(priceGBP: string): number {
+  return Math.round(parseFloat(priceGBP.replace("£", "")) * 100);
+}
+
+/** Would this pack purchase stay inside the £250 monthly card cap? */
+export function purchaseWithinCap(packId: string): { allowed: boolean; reason?: string } {
+  const pack = coinPackById(packId);
+  if (!pack) return { allowed: false, reason: "Unknown pack." };
+  const price = priceToPence(pack.priceGBP);
+  if (price > cardCapRemainingPence()) {
+    return { allowed: false, reason: `UK prize-draw code: card purchases are capped at £${CARD_MONTHLY_CAP_PENCE / 100} per month. You have £${(cardCapRemainingPence() / 100).toFixed(2)} left this month.` };
+  }
+  return { allowed: true };
+}
+
+/** Record a completed purchase (called by the payment webhook at launch). */
+export function recordCardPurchase(packId: string): void {
+  const pack = coinPackById(packId);
+  if (!pack) return;
+  const l = spendLedger();
+  try { localStorage.setItem(SPEND_KEY, JSON.stringify({ month: l.month, spentPence: l.spentPence + priceToPence(pack.priceGBP) })); } catch { /* demo only */ }
+}
+
 // ── High-stakes prize tables (ticket-entry, locked pre-launch) ──────────────
 
 export type PrizeTable = {

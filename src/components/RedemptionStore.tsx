@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import { BadgePoundSterling, Gift, Lock, ShieldCheck, Store } from "lucide-react";
+import { BadgePoundSterling, Gift, Lock, MailCheck, ShieldCheck, Store } from "lucide-react";
 import { REDEMPTION_CATEGORIES, REDEMPTION_ITEMS, STORE_RULES, formatPence, type RedemptionCategory } from "../lib/redemption";
+import { AML_REVIEW_HOURS, AML_REVIEW_THRESHOLD_PENCE, POINTS_PER_POUND, VOUCHER_BRANDS, pointsCost, prizePoints } from "../lib/redemptionEngine";
 import { WITHDRAWAL_DAILY_CAP_PENCE, WITHDRAWAL_MIN_PENCE } from "../lib/verification";
 
 export function RedemptionStore() {
@@ -65,6 +66,29 @@ export function RedemptionStore() {
             </div>
           </article>
         ))}
+      </section>
+
+      {/* Instant digital voucher payouts (Tango Card / Giftbit) */}
+      <section className="mt-8 rounded-2xl border border-white/10 bg-white/[.04] p-5" data-testid="voucher-rail">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="inline-flex items-center gap-2 text-sm font-black text-amber-100"><MailCheck className="h-4 w-4" /> Instant digital vouchers</p>
+          <span className="rounded-full border border-emerald-300/35 bg-emerald-400/10 px-3 py-1 font-mono text-xs font-black text-emerald-100">★ {prizePoints().toLocaleString()} Prize Points</span>
+        </div>
+        <p className="mt-2 max-w-2xl text-[11px] leading-relaxed text-white/55">
+          At launch, redemptions call a B2B gift-card API (Tango Card / Giftbit) that buys the voucher and emails the code automatically —
+          no manual transfers, no physical shipping. Rate: {POINTS_PER_POUND.toLocaleString()} points = £1.
+          Anything over {formatPence(AML_REVIEW_THRESHOLD_PENCE)} holds {AML_REVIEW_HOURS}h for an anti-cheat review before release (AML ceiling).
+        </p>
+        <div className="mt-4 grid gap-2 sm:grid-cols-5">
+          {VOUCHER_BRANDS.map((v) => (
+            <div key={v.id} className="rounded-xl border border-white/10 bg-black/30 p-3 text-center" data-voucher={v.id}>
+              <p className="text-sm font-black">{v.brand}</p>
+              <p className="mt-0.5 text-lg font-black text-amber-200">{formatPence(v.valuePence)}</p>
+              <p className="text-[10px] text-white/45">★ {pointsCost(v.valuePence).toLocaleString()} pts</p>
+              <button type="button" disabled title="Locked until launch — Prize Points are only ever won in Sweep Ticket matches" className="mt-2 w-full cursor-not-allowed rounded-lg border border-white/15 bg-white/5 py-1.5 text-[9px] font-black uppercase tracking-widest text-white/40">Locked</button>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* How it works */}
