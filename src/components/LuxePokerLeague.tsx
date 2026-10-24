@@ -699,6 +699,7 @@ export const LuxePokerLeague: React.FC = () => {
             ))}
           </div>
           <p className="mt-3 text-[10px] text-white/40">You hold <b className="text-violet-200">{wallet.sweepTickets} Sweep Tickets</b> — claim {DAILY_FREE_TICKETS} free every day above.</p>
+          <p className="mt-2 text-[10px] text-white/40">Proximity gate active: players sharing an IP, a Wi-Fi network or a repeated prize-match history can't be seated together at these tables. <button type="button" onClick={() => go("/verify")} className="font-bold text-amber-200 underline underline-offset-2">See the checks</button></p>
         </div>
         <div className="mt-8 rounded-[1.75rem] border border-amber-200/25 bg-[linear-gradient(145deg,#241a08,#120d06_70%)] p-5" data-testid="coin-packs">
           <p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">Gold Coin packs · free bonus Sweep Tickets</p>
