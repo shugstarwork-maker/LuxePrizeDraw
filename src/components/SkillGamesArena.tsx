@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Clock3, Crown, FlaskConical, Gamepad2, Lock, ShieldCheck, Swords, Ticket, Users } from "lucide-react";
 import { useAudio } from "../audio/AudioProvider";
-import { ChessBoard, ConnectFourBoard, DraughtsBoard } from "./GamesArena";
+import { ChessBoard, ConnectFourBoard, DraughtsBoard, type BoardState } from "./GamesArena";
+import { GameHudShell, type HudPlayer } from "./GameHudShell";
 import { DisconnectWarning, HardwareLockNotice, IntegrityPause, MatchKillNotice, StallWarning, type IntegrityWarning } from "./IntegrityWarnings";
 import { MatchTelemetry, MOVE_TIME_LIMIT_SECONDS, STALL_WARNING_SECONDS, assessMatch, type MoveSample } from "../lib/antiCheat";
 import { loadWallet, type Wallet } from "../lib/currencies";
@@ -15,10 +16,41 @@ import {
 // Demo shows a shortened grace countdown so the overlay is reviewable.
 const FORFEIT_DEMO_SECONDS = Math.min(10, FORFEIT_GRACE_SECONDS);
 
+const SIDES: Record<SkillGameId, { a: HudPlayer; b: HudPlayer }> = {
+  chess: {
+    a: { name: "You", badge: "Ivory", piece: "♔", active: false },
+    b: { name: "Onyx O.", badge: "Onyx", piece: "♚", active: false },
+  },
+  draughts: {
+    a: { name: "You", badge: "Ivory", piece: "⚪", active: false },
+    b: { name: "Marcus B.", badge: "Onyx", piece: "⚫", active: false },
+  },
+  connect4: {
+    a: { name: "You", badge: "Ruby", piece: "🔴", active: false },
+    b: { name: "Ruby C.", badge: "Gold", piece: "🟡", active: false },
+  },
+};
+
+function hudPlayers(game: SkillGameId, s: BoardState | null): [HudPlayer, HudPlayer] {
+  const base = SIDES[game];
+  const clockA = s?.clockA != null ? `${Math.floor(s.clockA / 60)}:${String(s.clockA % 60).padStart(2, "0")}` : undefined;
+  const clockB = s?.clockB != null ? `${Math.floor(s.clockB / 60)}:${String(s.clockB % 60).padStart(2, "0")}` : undefined;
+  return [
+    { ...base.a, active: s?.turn === "a", stat: clockA },
+    { ...base.b, active: s?.turn === "b", stat: clockB },
+  ];
+}
+
+function stateLabelFor(game: SkillGameId, s: BoardState): string {
+  if (s.status !== "playing") return s.status === "draw" ? `Draw after move ${s.moveNumber - 1}` : `Decided on move ${s.moveNumber - 1}`;
+  const mover = s.turn === "a" ? SIDES[game].a.badge : SIDES[game].b.badge;
+  return `Move ${s.moveNumber} · ${mover} to move`;
+}
+
 type Phase = "pick" | "queue" | "playing";
 
 export function SkillGamesArena() {
-  const { play } = useAudio();
+  const { play, enabled, setEnabled } = useAudio();
   const [game, setGame] = useState<SkillGameId>("chess");
   const [format, setFormat] = useState<EntryFormat>("casual");
   const [phase, setPhase] = useState<Phase>("pick");
@@ -29,6 +61,7 @@ export function SkillGamesArena() {
   const [rating, setRating] = useState(() => skillRating("chess"));
   const [warning, setWarning] = useState<IntegrityWarning | null>(null);
   const [stallLeft, setStallLeft] = useState<number | null>(null);
+  const [boardState, setBoardState] = useState<BoardState | null>(null);
   const review = reviewModeEnabled();
   const timer = useRef<number | null>(null);
   const telemetry = useRef<MatchTelemetry>(new MatchTelemetry());
@@ -202,7 +235,16 @@ export function SkillGamesArena() {
             <button onClick={() => setPhase("pick")} className="rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-[11px] font-black text-white/70">Leave board</button>
           </div>
         </div>
-        <Board sound={(s) => { play(s); if (s !== "button") { telemetry.current.movePlayed(); turnStart.current = Date.now(); telemetry.current.turnStarted(); focusLost.current = false; } }} onResult={onResult} />
+        <GameHudShell
+          title={g.title}
+          balanceLabel={`${wallet.goldCoins.toLocaleString()} coins wallet · arena rating ${rating.toLocaleString()}`}
+          stateLabel={boardState ? stateLabelFor(game, boardState) : `${g.title} · ready`}
+          players={hudPlayers(game, boardState)}
+          muted={!enabled}
+          onToggleMute={() => setEnabled(!enabled)}
+          onExit={() => setPhase("pick")}>
+          <Board sound={(s) => { play(s); if (s !== "button") { telemetry.current.movePlayed(); turnStart.current = Date.now(); telemetry.current.turnStarted(); focusLost.current = false; } }} onResult={onResult} onState={setBoardState} />
+        </GameHudShell>
         {note && <p className="mt-3 rounded-xl border border-emerald-300/25 bg-emerald-400/10 p-3 text-[11px] text-emerald-100" data-testid="arena-note">{note}</p>}
       </div>}
 

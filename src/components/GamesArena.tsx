@@ -25,6 +25,7 @@ export function GamesArena() {
 }
 type BoardResult = "win" | "draw";
 type BoardSound = (s: "button" | "ticketSelect" | "success" | "error") => void;
+export type BoardState = { turn: "a" | "b"; moveNumber: number; clockA?: number; clockB?: number; status: string };
 // Fires exactly once per finished game (decisive result or draw) — used for league scoring.
 function useResultReport(status: string, onResult?: (result: BoardResult) => void) {
   const wasPlaying = useRef(false);
@@ -36,10 +37,11 @@ function useResultReport(status: string, onResult?: (result: BoardResult) => voi
   }, [status, onResult]);
 }
 
-export function ChessBoard({ sound, onResult }: { sound: BoardSound; onResult?: (result: BoardResult) => void }) {
+export function ChessBoard({ sound, onResult, onState }: { sound: BoardSound; onResult?: (result: BoardResult) => void; onState?: (s: BoardState) => void }) {
   const [match, setMatch] = useState<ChessMatch>(newChess); const [selected, setSelected] = useState<string | null>(null); const [clock, setClock] = useState({ w: 600, b: 600 });
   useResultReport(match.status, onResult);
   const chess = useMemo(() => new Chess(match.fen), [match.fen]); const turn = chess.turn(); const legal = selected ? chessLegalMoves(match, selected as never).map((move) => move.to) : [];
+  useEffect(() => { onState?.({ turn: turn === "w" ? "a" : "b", moveNumber: Math.floor(match.history.length / 2) + 1, clockA: clock.w, clockB: clock.b, status: match.status }); }, [turn, match.history.length, match.status, clock, onState]);
   useEffect(() => { if (match.status !== "playing") return; const id = window.setInterval(() => setClock((value) => ({ ...value, [turn]: Math.max(0, value[turn] - 1) })), 1000); return () => clearInterval(id); }, [turn, match.status]);
   useEffect(() => { if (clock.w === 0 || clock.b === 0) setMatch((value) => ({ ...value, status: clock.w === 0 ? "black_won" : "white_won" })); }, [clock]);
   const tap = (square: string) => { if (match.status !== "playing") return; const piece = chess.get(square as never); if (!selected) { if (piece?.color === turn) { setSelected(square); sound("ticketSelect"); } return; } if (selected === square) return setSelected(null); try { const next = playChess(match, selected as never, square as never); setMatch(next); setSelected(null); sound(next.status === "playing" ? piece ? "ticketSelect" : "button" : "success"); } catch { if (piece?.color === turn) { setSelected(square); sound("button"); } else sound("error"); } };
@@ -59,9 +61,10 @@ function winningLine(state: ConnectFourState): C4Cell[] {
   return [];
 }
 const PIECE_ART: Record<string, string> = { red: "radial-gradient(circle at 34% 28%, #fda4af, #e11d48 52%, #7f1d1d)", yellow: "radial-gradient(circle at 34% 28%, #fef3c7, #f59e0b 52%, #78350f)" };
-export function ConnectFourBoard({ sound, onResult }: { sound: BoardSound; onResult?: (result: BoardResult) => void }) {
+export function ConnectFourBoard({ sound, onResult, onState }: { sound: BoardSound; onResult?: (result: BoardResult) => void; onState?: (s: BoardState) => void }) {
   const [state, setState] = useState<ConnectFourState>(newConnectFour);
   useResultReport(state.status, onResult);
+  useEffect(() => { onState?.({ turn: state.turn === "red" ? "a" : "b", moveNumber: state.moves.length + 1, status: state.status }); }, [state.turn, state.moves.length, state.status, onState]);
   const lastCol = state.moves[state.moves.length - 1];
   const win = winningLine(state);
   const winSet = new Set(win.map((c) => `${c.row}-${c.col}`));
@@ -88,9 +91,10 @@ export function ConnectFourBoard({ sound, onResult }: { sound: BoardSound; onRes
     <OnlineConnectFour />
   </GameShell>;
 }
-export function DraughtsBoard({ sound, onResult }: { sound: BoardSound; onResult?: (result: BoardResult) => void }) {
+export function DraughtsBoard({ sound, onResult, onState }: { sound: BoardSound; onResult?: (result: BoardResult) => void; onState?: (s: BoardState) => void }) {
   const [state, setState] = useState<DraughtsState>(newDraughts);
   useResultReport(state.status, onResult);
+  useEffect(() => { onState?.({ turn: state.turn === "white" ? "a" : "b", moveNumber: Math.floor(state.halfMoves / 2) + 1, status: state.status }); }, [state.turn, state.status, state.halfMoves, onState]);
   const [selected, setSelected] = useState<[number, number] | null>(null);
   const [lastMove, setLastMove] = useState<{ from: [number, number]; to: [number, number] } | null>(null);
   const legal = selected ? draughtsMoves(state, selected) : draughtsMoves(state);
