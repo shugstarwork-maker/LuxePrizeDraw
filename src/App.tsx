@@ -43,6 +43,8 @@ const NeonGameLobby = lazy(() => import("./components/NeonGameLobby").then((m) =
 const DuelRoom = lazy(() => import("./components/DuelRoom").then((m) => ({ default: m.DuelRoom })));
 const AdminPanel = lazy(() => import("./components/AdminPanel").then((m) => ({ default: m.AdminPanel })));
 const StudioPanel = lazy(() => import("./components/StudioPanel").then((m) => ({ default: m.StudioPanel })));
+const VerificationCenter = lazy(() => import("./components/VerificationCenter").then((m) => ({ default: m.VerificationCenter })));
+const RedemptionStore = lazy(() => import("./components/RedemptionStore").then((m) => ({ default: m.RedemptionStore })));
 const CategoryDrawCarousel = lazy(() => import("./components/CategoryDrawCarousel").then((m) => ({ default: m.CategoryDrawCarousel })));
 const PartnershipCampaignPage = lazy(() => import("./components/PartnershipCampaignPage").then((m) => ({ default: m.PartnershipCampaignPage })));
 const WelcomePage = lazy(() => import("./components/WelcomePage").then((m) => ({ default: m.WelcomePage })));
@@ -75,6 +77,8 @@ export default function App() {
     : path === "/postal-intake" ? <PostalIntakePage />
     : path === "/admin" ? <AdminPanel />
     : path === "/studio" ? <StudioPanel />
+    : path === "/verify" ? <><VerificationCenter /><MobileDock /></>
+    : path === "/redeem" ? <><RedemptionStore /><MobileDock /></>
     : path === "/standards" ? <ParticipationStandardsPage />
     : path === "/duel" ? <><DuelRoom /><ScottishHost /><MobileDock /></>
     : path === "/lobby" ? <NeonGameLobby soundEnabled={audio.enabled} onToggleSound={() => audio.setEnabled(!audio.enabled)} />

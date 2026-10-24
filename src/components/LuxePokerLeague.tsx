@@ -3,7 +3,7 @@ import { PlayerTurnRing } from "./PlayerTurnRing";
 import { LuxePlayingCard } from "./LuxePlayingCard";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { LuxeDealer } from "./LuxeDealer";
-import { Bot, BadgePoundSterling, ChevronLeft, Crown, Gift, MessageCircle, Scale, ShieldCheck, Sparkles, Timer, Users, Volume2 } from "lucide-react";
+import { Bot, BadgePoundSterling, ChevronLeft, Crown, Gift, MessageCircle, Scale, ShieldCheck, Sparkles, Store, Timer, Users, Volume2 } from "lucide-react";
 import { PokerTableArtwork } from "./PokerTableArtwork";
 import { useAudio } from "../audio/AudioProvider";
 import { applyAction, botAction, createTable, dealHand, seatPlayer, type HoldemState } from "../games/holdem";
@@ -60,6 +60,7 @@ const SEAT_SLOTS = [180, 55, 125, 235, 305, 270].map((deg) => {
 
 export const LuxePokerLeague: React.FC = () => {
   const { enabled, setEnabled, play, musicEnabled, setMusicEnabled } = useAudio();
+  const go = (href: string) => { window.history.pushState({}, "", href); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo(0, 0); };
   const [screen, setScreen] = useState<"welcome" | "lobby" | "table" | "mp">(() =>
     typeof window !== "undefined" && window.location.search.includes("studio") ? "table" : "welcome");
   const mp = useMultiplayerPoker(playerId(), "You");
@@ -645,6 +646,18 @@ export const LuxePokerLeague: React.FC = () => {
             ))}
           </div>
           <p className="mt-3 text-[10px] text-white/35">Your private Luxe Lounge record — stored on this device. Realtime multiplayer tables are on the roadmap.</p>
+        </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <button type="button" onClick={() => go("/verify")} className="rounded-2xl border border-emerald-300/25 bg-emerald-400/10 p-4 text-left transition hover:border-emerald-300/50" data-testid="profile-verify-link">
+            <ShieldCheck className="h-5 w-5 text-emerald-200" />
+            <b className="mt-2 block text-sm">Verification &amp; security</b>
+            <small className="text-white/55">Device fingerprint, 18+ ID check and payout rules — see how your account will be protected.</small>
+          </button>
+          <button type="button" onClick={() => go("/redeem")} className="rounded-2xl border border-amber-200/25 bg-amber-300/10 p-4 text-left transition hover:border-amber-200/50" data-testid="profile-redeem-link">
+            <Store className="h-5 w-5 text-amber-200" />
+            <b className="mt-2 block text-sm">Prize Redemption Store</b>
+            <small className="text-white/55">Preview where verified winnings become prizes. Chips never convert — preview only.</small>
+          </button>
         </div>
         <div className="mt-7 flex flex-wrap items-center gap-3">
           <button type="button" onClick={() => setMusicEnabled(!musicEnabled)} className="inline-flex items-center gap-2 rounded-xl border border-amber-200/25 bg-black/40 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-amber-100 transition hover:border-amber-200/60"><Volume2 className="h-4 w-4" />{musicEnabled ? "Lounge music on" : "Lounge music off"}</button>
