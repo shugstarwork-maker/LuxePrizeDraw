@@ -12,6 +12,7 @@ import {
   ARENA_FORMATS, ARENA_RULES, FORFEIT_GRACE_SECONDS, MATCHMAKING_TIMEOUT_SECONDS, PRIZE_ENTRY_TICKETS, PRIZE_WIN_POINTS,
   SKILL_GAMES, applyResult, matchmakingBand, skillRating, type EntryFormat, type SkillGameId,
 } from "../lib/skillGames";
+import { LEADERBOARD_NOTE, ladderRank, ladderTier, leaderboard, matchHistory, recordResult, recordSummary } from "../lib/leaderboard";
 
 // Demo shows a shortened grace countdown so the overlay is reviewable.
 const FORFEIT_DEMO_SECONDS = Math.min(10, FORFEIT_GRACE_SECONDS);
@@ -62,6 +63,7 @@ export function SkillGamesArena() {
   const [warning, setWarning] = useState<IntegrityWarning | null>(null);
   const [stallLeft, setStallLeft] = useState<number | null>(null);
   const [boardState, setBoardState] = useState<BoardState | null>(null);
+  const [historyTick, setHistoryTick] = useState(0);
   const review = reviewModeEnabled();
   const timer = useRef<number | null>(null);
   const telemetry = useRef<MatchTelemetry>(new MatchTelemetry());
@@ -143,6 +145,8 @@ export function SkillGamesArena() {
   const onResult = (result: "win" | "draw") => {
     const { rating: next, delta } = applyResult(game, result === "win", 800);
     setRating(next);
+    setHistoryTick((n) => n + 1);
+    recordResult({ game, outcome: result, opponent: SIDES[game].b.name, ratingDelta: delta, format: "casual" });
     if (result === "win") play("success");
     setNote(result === "win"
       ? `Match won — arena rating ${delta >= 0 ? "+" : ""}${delta} → ${next.toLocaleString()}.`
@@ -265,9 +269,64 @@ export function SkillGamesArena() {
         ))}
       </section>
 
+      {/* Leaderboard + results feed */}
+      <LeaderboardPanel game={game} rating={rating} tick={historyTick} />
+
       <p className="mt-6 text-center text-[10px] text-white/40">
         Pre-launch simulation — local play only. Prize matches, Prize Points and payouts activate after legal approval and 18+ ID verification. <a href="/redeem" className="font-bold text-amber-200 underline underline-offset-4">Preview the Prize Store</a>
       </p>
     </div>
   </div>;
+}
+
+// ── Leaderboard panel ───────────────────────────────────────────────────────
+
+function LeaderboardPanel({ game, rating, tick }: { game: SkillGameId; rating: number; tick: number }) {
+  void tick; // re-read localStorage after each finished match
+  const ladder = leaderboard(game);
+  const rank = ladderRank(game);
+  const summary = recordSummary(game);
+  const recent = matchHistory(game, 5);
+  return <section className="mt-6 grid gap-4 lg:grid-cols-2" data-testid="arena-leaderboard">
+    <div className="rounded-2xl border border-amber-200/25 bg-white/[.04] p-5">
+      <div className="flex items-center justify-between gap-3">
+        <h3 className="flex items-center gap-2 text-sm font-black uppercase tracking-[.2em] text-amber-200"><Crown className="h-4 w-4" /> {game === "chess" ? "Luxe Chess" : game === "draughts" ? "Draughts" : "Connect Four"} ladder</h3>
+        <span className="rounded-full border border-amber-200/35 bg-amber-300/10 px-3 py-1 text-[10px] font-black text-amber-100" data-testid="arena-rank">#{rank} · {ladderTier(rating)}</span>
+      </div>
+      <ol className="mt-4 space-y-1.5">
+        {ladder.map((e, i) => (
+          <li key={e.name} data-testid={e.you ? "ladder-you" : undefined} className={`flex items-center justify-between rounded-xl border px-3 py-2 text-xs font-bold ${e.you ? "border-amber-300/50 bg-amber-400/10 text-amber-100" : "border-white/10 bg-black/25 text-white/65"}`}>
+            <span className="flex items-center gap-2"><span className="w-6 text-center font-mono text-[10px] text-white/40">{i + 1}</span>{e.name}{e.you && <span className="rounded-full bg-amber-300 px-1.5 py-0.5 text-[8px] font-black uppercase text-black">You</span>}</span>
+            <span className="font-mono">{e.rating.toLocaleString()}</span>
+          </li>
+        ))}
+      </ol>
+      <p className="mt-3 text-[10px] leading-relaxed text-white/40">{LEADERBOARD_NOTE}</p>
+    </div>
+
+    <div className="rounded-2xl border border-white/10 bg-white/[.04] p-5" data-testid="arena-history">
+      <h3 className="flex items-center gap-2 text-sm font-black uppercase tracking-[.2em] text-white/80"><Gamepad2 className="h-4 w-4 text-emerald-300" /> Your results</h3>
+      <div className="mt-4 grid grid-cols-3 gap-2 text-center" data-testid="arena-record">
+        {[["Wins", summary.wins, "text-emerald-300"], ["Draws", summary.draws, "text-white/70"], ["Losses", summary.losses, "text-rose-300"]].map(([label, n, cls]) => (
+          <div key={label as string} className="rounded-xl border border-white/10 bg-black/25 p-3">
+            <b className={`block font-mono text-xl ${cls}`}>{n}</b>
+            <small className="text-[9px] font-black uppercase tracking-widest text-white/40">{label}</small>
+          </div>
+        ))}
+      </div>
+      {recent.length === 0
+        ? <p className="mt-4 rounded-xl border border-dashed border-white/15 p-4 text-center text-[11px] text-white/45">Finish a local match to start your results feed.</p>
+        : <ul className="mt-4 space-y-1.5">
+            {recent.map((r) => (
+              <li key={r.id} className="flex items-center justify-between rounded-xl border border-white/10 bg-black/25 px-3 py-2 text-[11px]">
+                <span className={r.outcome === "win" ? "font-black text-emerald-300" : r.outcome === "loss" ? "font-black text-rose-300" : "font-black text-white/70"}>
+                  {r.outcome === "win" ? "Won" : r.outcome === "loss" ? "Lost" : "Drew"} vs {r.opponent}
+                </span>
+                <span className="font-mono text-white/50">{r.ratingDelta >= 0 ? "+" : ""}{r.ratingDelta}</span>
+              </li>
+            ))}
+          </ul>}
+      <p className="mt-3 text-[10px] text-white/40">Casual results only — prize matches settle server-side after launch.</p>
+    </div>
+  </section>;
 }
