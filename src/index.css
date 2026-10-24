@@ -1769,3 +1769,19 @@ body::after {
 @media (prefers-reduced-motion: reduce) {
   .league-marquee { animation: none; }
 }
+
+/* ── Studio broadcast (demo live-dealer pipeline) ────────────────────────── */
+.studio-scanlines {
+  background: repeating-linear-gradient(0deg, rgba(255, 255, 255, .028) 0 1px, transparent 1px 3px);
+  mix-blend-mode: overlay;
+}
+.studio-monitor {
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(255, 214, 120, .10), transparent 55%),
+    radial-gradient(ellipse at 50% 110%, rgba(212, 175, 55, .08), transparent 60%),
+    #050403;
+}
+.poker-studio-overlay { border-radius: inherit; overflow: hidden; }
+@media (prefers-reduced-motion: reduce) {
+  .poker-studio-overlay .animate-pulse { animation: none; }
+}

@@ -14,6 +14,7 @@ import { useMultiplayerPoker, type MpTableInfo } from "../lib/useMultiplayerPoke
 import { AccountCard } from "./AccountCard";
 import { SeasonHub } from "./SeasonHub";
 import { PokerFullscreen } from "./PokerFullscreen";
+import { StudioBroadcastOverlay } from "./StudioBroadcastOverlay";
 import { recordEventResult, weekFixtures } from "../lib/pokerSeason";
 import { getSeason } from "../lib/pokerSeason";
 import { checkTrophyUnlocks, awardBracelet } from "../lib/pokerTrophies";
@@ -56,7 +57,8 @@ const SEAT_SLOTS = [180, 55, 125, 235, 305, 270].map((deg) => {
 
 export const LuxePokerLeague: React.FC = () => {
   const { enabled, setEnabled, play, musicEnabled, setMusicEnabled } = useAudio();
-  const [screen, setScreen] = useState<"welcome" | "lobby" | "table" | "mp">("welcome");
+  const [screen, setScreen] = useState<"welcome" | "lobby" | "table" | "mp">(() =>
+    typeof window !== "undefined" && window.location.search.includes("studio") ? "table" : "welcome");
   const mp = useMultiplayerPoker(playerId(), "You");
   const acct = useAccount();
   const [mpTables, setMpTables] = useState<MpTableInfo[]>([]);
@@ -742,7 +744,7 @@ export const LuxePokerLeague: React.FC = () => {
     />
     <div className="poker-playing-wrap mx-auto max-w-5xl"><header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-3 py-2"><button onClick={() => setLeaveOpen(true)} className="inline-flex items-center gap-1 rounded-lg bg-white/10 px-3 py-2 text-xs font-black"><ChevronLeft className="h-4 w-4" />Lobby</button><span className="font-mono text-sm font-black text-amber-100">{chips.toLocaleString()} wallet · {you?.chips.toLocaleString() ?? 0} at table · <span style={{ color: leagueTier.colour }}>{leagueTier.name} {league.xp}XP</span></span><button onClick={() => setEnabled(!enabled)} className="rounded-lg bg-white/10 p-2"><Volume2 className="h-4 w-4" /></button></header><article className="poker-game-article relative mt-4 overflow-hidden rounded-[2rem] border border-amber-200/50 bg-[radial-gradient(ellipse_at_center,#2a2318,#151009_55%,#090604)] p-4 shadow-[0_0_70px_rgba(212,175,55,.22),inset_0_0_140px_rgba(0,0,0,0.5)] sm:p-6"><div className={`poker-surface-frame relative rounded-[2rem] ${winFlash ? "poker-win-flash" : ""} ${tableTheme === "onyx" ? "ring-4 ring-amber-400/50" : tableTheme === "noir" ? "ring-4 ring-zinc-400/50" : ""}`}>
               {winFlash && <div className="pointer-events-none absolute inset-0 z-20 flex items-start justify-center gap-2 pt-14">{[...Array(6)].map((_, i) => <span key={i} className="poker-chip-fly h-4 w-4 rounded-full border border-amber-200/70 bg-gradient-to-br from-amber-300 to-amber-600" style={{ animationDelay: `${i * 90}ms` }} />)}</div>}
-              <PokerTableArtwork pot={game?.pot ?? 0} stage={dealerStage} winner={potWinner}><div className="poker-live-seats pointer-events-none absolute inset-0">{game && game.players.map((p) => {
+              <PokerTableArtwork pot={game?.pot ?? 0} stage={dealerStage} winner={potWinner}><StudioBroadcastOverlay /><div className="poker-live-seats pointer-events-none absolute inset-0">{game && game.players.map((p) => {
                 const slotIndex = p.isBot ? botSlots.indexOf(p) : 5;
                 const slot = SEAT_SLOTS[slotIndex];
                 const isYou = !p.isBot;
