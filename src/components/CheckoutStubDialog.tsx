@@ -13,6 +13,7 @@ export type PricedItem = {
  * keys are connected. Nothing is charged, ever, in this build.
  */
 export function CheckoutStubDialog({ item, onClose }: { item: PricedItem; onClose: () => void }) {
+  const isCoinPack = item.id.startsWith("pack-");
   return (
     <div className="ad-break" role="dialog" aria-modal="true" aria-label="Checkout preview">
       <div className="ad-break__card">
@@ -32,9 +33,9 @@ export function CheckoutStubDialog({ item, onClose }: { item: PricedItem; onClos
         </div>
 
         <div className="mt-4 space-y-2 text-[11px] leading-relaxed text-white/55">
-          <p className="flex items-start gap-2"><ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-300" /> Cosmetic only — this item can never be converted back into cash, prizes, or draw entries.</p>
+          <p className="flex items-start gap-2"><ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-300" /> {isCoinPack ? "Gold Coins are for fun only — zero real-world value, never redeemable for cash or prizes." : "Cosmetic only — this item can never be converted back into cash, prizes, or draw entries."}</p>
           <p className="flex items-start gap-2"><ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-300" /> Non-refundable digital content, delivered instantly on this device.</p>
-          <p className="flex items-start gap-2"><ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-300" /> Store chips are for casual social tables only — they never affect the weekly league.</p>
+          <p className="flex items-start gap-2"><ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-300" /> {isCoinPack ? "Bonus Sweep Tickets are included free — tickets are never sold." : "Store chips are for casual social tables only — they never affect the weekly league."}</p>
         </div>
 
         <button disabled className="mt-5 w-full cursor-not-allowed rounded-xl bg-white/10 px-4 py-3.5 text-sm font-black uppercase tracking-wider text-white/40">

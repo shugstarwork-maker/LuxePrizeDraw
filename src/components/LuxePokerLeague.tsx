@@ -3,7 +3,7 @@ import { PlayerTurnRing } from "./PlayerTurnRing";
 import { LuxePlayingCard } from "./LuxePlayingCard";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { LuxeDealer } from "./LuxeDealer";
-import { Bot, BadgePoundSterling, ChevronLeft, Crown, Gift, MessageCircle, Scale, ShieldCheck, Sparkles, Store, Timer, Users, Volume2 } from "lucide-react";
+import { Bot, BadgePoundSterling, ChevronLeft, Crown, Gift, MessageCircle, Scale, ShieldCheck, Sparkles, Store, Ticket, Timer, Users, Volume2 } from "lucide-react";
 import { PokerTableArtwork } from "./PokerTableArtwork";
 import { useAudio } from "../audio/AudioProvider";
 import { applyAction, botAction, createTable, dealHand, seatPlayer, type HoldemState } from "../games/holdem";
@@ -31,6 +31,7 @@ import { LeagueImpactScreen, type LeagueImpact } from "./LeagueImpactScreen";
 import { AdBreakOverlay } from "./AdBreakOverlay";
 import { CheckoutStubDialog, type PricedItem } from "./CheckoutStubDialog";
 import { AD_REWARD_CHIPS, adsRemainingToday, adsWatchedToday, recordAdWatched, SOCIAL_TABLES, type SocialTable } from "../lib/pokerMonetization";
+import { COIN_PACKS, DAILY_FREE_TICKETS, PRIZE_TABLES, claimDailyTickets, dailyTicketsAvailable, loadWallet, type Wallet } from "../lib/currencies";
 
 const CardView = LuxePlayingCard;
 const key = (card: { rank: string; suit: string }) => `${card.rank}${card.suit}`;
@@ -87,6 +88,7 @@ export const LuxePokerLeague: React.FC = () => {
   const [giftsOpen, setGiftsOpen] = useState(false);
   const [avatar, setAvatar] = useState(() => localStorage.getItem("luxe-poker-avatar") || "");
   const [chips, setChips] = useState(() => Number(localStorage.getItem("luxe-poker-chips") ?? localStorage.getItem("luxe-demo-poker-chips")) || 1000);
+  const [wallet, setWallet] = useState<Wallet>(() => loadWallet());
   useEffect(() => { if (acct.profile) acct.syncChips(chips); }, [chips, acct.profile]); // keep server copy of chips in step with this device
   const [xp, setXp] = useState(() => competitiveRating()); // competitive rating — separate from league XP and trust
   const level = Math.floor(competitiveRating() / 200);
@@ -495,6 +497,13 @@ export const LuxePokerLeague: React.FC = () => {
     play("coinWin");
     note(`Thanks for watching — ${AD_REWARD_CHIPS.toLocaleString()} free-play chips added. Ads never cost money and chips never turn into cash.`);
   };
+  const claimTickets = () => {
+    const { wallet: next, granted } = claimDailyTickets(wallet);
+    if (granted === 0) { note("Today's free Sweep Tickets are already claimed — back tomorrow, or postal entry is always free."); return; }
+    setWallet(next);
+    play("coinWin");
+    note(`${granted} free Sweep Tickets added. Tickets are never sold — daily drops, pack bonuses or postal entry only.`);
+  };
   const joinSocial = (t: SocialTable) => {
     if (chips < t.buyIn) { const message = `${t.name} needs ${t.buyIn.toLocaleString()} free-play chips. You have ${chips.toLocaleString()} — daily sign-in and ad breaks top you up free.`; setSeatError(message); note(message); return; }
     setSeatError("");
@@ -532,7 +541,7 @@ export const LuxePokerLeague: React.FC = () => {
     onEnter={() => { play("ticketSelect"); setLobbyTab("play"); setScreen("lobby"); }}
   />;
 
-  if (screen === "lobby") return <section id="poker-league" className="salon-selection min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-4 py-6 pb-28 text-white"><div className="mx-auto max-w-5xl"><header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-4 py-3"><span className="inline-flex items-center gap-2 font-black text-amber-100"><Crown className="h-5 w-5" />LUXE POKER LOUNGE</span><span className="rounded-full border border-amber-200/35 bg-amber-300/10 px-3 py-1.5 font-mono text-sm font-black text-amber-100">{chips.toLocaleString()} chips</span><button onClick={() => setEnabled(!enabled)} className="rounded-lg bg-white/10 p-2"><Volume2 className="h-4 w-4" /></button></header><nav className="mt-3 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[.18em]"><span className="rounded-full border border-amber-200/50 bg-amber-300/15 px-3.5 py-1.5 text-amber-100">♠ Card Lounge</span><button type="button" onClick={() => { window.history.pushState({}, "", "/challenge"); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-white/55 transition hover:border-amber-200/50 hover:text-amber-100">⚔ Challenge</button><button type="button" onClick={() => { window.history.pushState({}, "", "/portal"); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-white/55 transition hover:border-amber-200/50 hover:text-amber-100">Portal</button></nav>
+  if (screen === "lobby") return <section id="poker-league" className="salon-selection min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-4 py-6 pb-28 text-white"><div className="mx-auto max-w-5xl"><header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-4 py-3"><span className="inline-flex items-center gap-2 font-black text-amber-100"><Crown className="h-5 w-5" />LUXE POKER LOUNGE</span><span className="rounded-full border border-amber-200/35 bg-amber-300/10 px-3 py-1.5 font-mono text-sm font-black text-amber-100">{chips.toLocaleString()} chips</span><span className="rounded-full border border-sky-300/35 bg-sky-400/10 px-3 py-1.5 font-mono text-sm font-black text-sky-100" data-testid="sweep-ticket-balance" title="Sweep Tickets — always free, never sold">🎟 {wallet.sweepTickets}</span><button onClick={() => setEnabled(!enabled)} className="rounded-lg bg-white/10 p-2"><Volume2 className="h-4 w-4" /></button></header><nav className="mt-3 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[.18em]"><span className="rounded-full border border-amber-200/50 bg-amber-300/15 px-3.5 py-1.5 text-amber-100">♠ Card Lounge</span><button type="button" onClick={() => { window.history.pushState({}, "", "/challenge"); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-white/55 transition hover:border-amber-200/50 hover:text-amber-100">⚔ Challenge</button><button type="button" onClick={() => { window.history.pushState({}, "", "/portal"); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-white/55 transition hover:border-amber-200/50 hover:text-amber-100">Portal</button></nav>
         {lobbyTab === "play" && <><div className="mt-8 text-center"><p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">Members’ casino · no cash value</p><h2 className="mt-3 text-4xl font-black">Your Weekly League</h2><p className="mt-3 text-sm text-white/60">Pick a card game, then tap your {leagueTier.name} League table below to take your seat. Win hands to climb the divisions. Free-play chips only, pure experience.</p></div><LoungeGamesCarousel onPlayGame={(id, href) => { if (id === "poker") { join(leagueTable); return; } window.history.pushState({}, "", href); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo(0, 0); }} /><button onClick={() => join(leagueTable)} className="group mt-7 block w-full overflow-hidden rounded-2xl border text-left transition active:scale-[.98] border-amber-200/40 hover:border-amber-200/80 bg-black/40"><div className={`relative h-32 bg-gradient-to-br ${leagueTable.tone}`}><img src={leagueTable.image} alt="" className="h-full w-full object-cover opacity-80 mix-blend-luminosity" /><span className="absolute right-2 top-2 rounded-full bg-black/70 px-2 py-1 text-[9px] font-black uppercase tracking-wider" style={{ color: leagueTier.colour }}>{leagueTier.name} League · your table</span></div><div className="flex items-center justify-between gap-3 p-4"><div><p className="font-black text-amber-100">{leagueTable.name}</p><p className="mt-1 flex items-center gap-1 text-[11px] text-white/55"><Users className="h-3 w-3" /> 6 seats · blinds {leagueTable.blinds} · buy-in {leagueTable.buyIn.toLocaleString()}</p></div><span className="rounded-full bg-gradient-to-b from-amber-300 to-amber-500 px-5 py-2.5 text-sm font-black text-black shadow-lg">Play now</span></div></button>{seatError && <p role="alert" className="poker-seat-error">{seatError}</p>}
         <div className="mt-8 rounded-[1.75rem] border border-emerald-200/25 bg-[linear-gradient(145deg,#06240f,#0a1206_70%)] p-5">
           <div className="flex items-center justify-between gap-3">
@@ -664,7 +673,36 @@ export const LuxePokerLeague: React.FC = () => {
           <span className="text-[10px] text-white/35">Ambient Luxe Lounge loop — synthesized in-house, no licensing needed.</span>
         </div>
         </>}
-        {lobbyTab === "rewards" && <><div className="mt-7 grid gap-3 sm:grid-cols-3"><button onClick={dailyReward} disabled={!rewardReady} className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-4 text-left disabled:opacity-40"><Gift className="h-5 w-5 text-emerald-200" /><b className="mt-3 block">{rewardReady ? "Daily sign-in: 200 chips" : "Daily chips claimed"}</b><small className="text-white/55">200 free-play chips every day</small></button><button onClick={() => { if (adsRemainingToday() <= 0) { note("That's all the sponsored breaks for today — back tomorrow for more."); return; } play("button"); setAdOpen(true); }} className="rounded-2xl border border-sky-300/30 bg-sky-300/10 p-4 text-left"><BadgePoundSterling className="h-5 w-5 text-sky-200" /><b className="mt-3 block">Sponsored break: {AD_REWARD_CHIPS.toLocaleString()} chips</b><small className="text-white/55">{adsRemainingToday() > 0 ? `Watch a short ad — ${adsRemainingToday()} of ${5} left today` : "All claimed for today"}</small></button><button onClick={() => note("Table race points: outlast the table to score for your weekly league. Free-play chips only.")} className="rounded-2xl border border-amber-200/30 bg-amber-300/10 p-4 text-left"><Sparkles className="h-5 w-5 text-amber-200" /><b className="mt-3 block">Tournament night</b><small className="text-white/55">Table race points: 1st 100 · 2nd 75 · 3rd 60 · 4th 50 · 5th 40 · 6th 30 — outlast the table to score for your weekly league</small></button></div><div className="mt-8 rounded-[1.75rem] border border-amber-200/25 bg-[linear-gradient(145deg,#241a08,#120d06_70%)] p-5">
+        {lobbyTab === "rewards" && <><div className="mt-7 grid gap-3 sm:grid-cols-3"><button onClick={dailyReward} disabled={!rewardReady} className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-4 text-left disabled:opacity-40"><Gift className="h-5 w-5 text-emerald-200" /><b className="mt-3 block">{rewardReady ? "Daily sign-in: 200 chips" : "Daily chips claimed"}</b><small className="text-white/55">200 free-play chips every day</small></button><button onClick={() => { if (adsRemainingToday() <= 0) { note("That's all the sponsored breaks for today — back tomorrow for more."); return; } play("button"); setAdOpen(true); }} className="rounded-2xl border border-sky-300/30 bg-sky-300/10 p-4 text-left"><BadgePoundSterling className="h-5 w-5 text-sky-200" /><b className="mt-3 block">Sponsored break: {AD_REWARD_CHIPS.toLocaleString()} chips</b><small className="text-white/55">{adsRemainingToday() > 0 ? `Watch a short ad — ${adsRemainingToday()} of ${5} left today` : "All claimed for today"}</small></button><button onClick={() => note("Table race points: outlast the table to score for your weekly league. Free-play chips only.")} className="rounded-2xl border border-amber-200/30 bg-amber-300/10 p-4 text-left"><Sparkles className="h-5 w-5 text-amber-200" /><b className="mt-3 block">Tournament night</b><small className="text-white/55">Table race points: 1st 100 · 2nd 75 · 3rd 60 · 4th 50 · 5th 40 · 6th 30 — outlast the table to score for your weekly league</small></button><button onClick={claimTickets} disabled={!dailyTicketsAvailable(wallet)} className="rounded-2xl border border-violet-300/30 bg-violet-400/10 p-4 text-left disabled:opacity-40" data-testid="daily-tickets-btn"><Ticket className="h-5 w-5 text-violet-200" /><b className="mt-3 block">{dailyTicketsAvailable(wallet) ? `Free daily: ${DAILY_FREE_TICKETS} Sweep Tickets` : "Today's tickets claimed"}</b><small className="text-white/55">Prize-table entry — always free, never sold. Postal entry also free.</small></button></div>
+        <div className="mt-8 rounded-[1.75rem] border border-violet-300/25 bg-[linear-gradient(145deg,#160b24,#0b0612_70%)] p-5" data-testid="prize-tables">
+          <p className="text-[10px] font-black uppercase tracking-[.22em] text-violet-200">High-stakes prize tables · Sweep Ticket entry</p>
+          <p className="mt-2 text-[11px] leading-relaxed text-white/55">Real prizes are won here after launch. Tickets are the only way in — and tickets are only ever free. Entry stays locked until legal sign-off and 18+ ID checks go live.</p>
+          <div className="mt-4 grid gap-2 sm:grid-cols-3">
+            {PRIZE_TABLES.map((t) => (
+              <div key={t.id} className="rounded-xl border border-violet-300/20 bg-black/40 p-4" data-prize-table={t.id}>
+                <span className="flex items-baseline justify-between gap-2"><p className="font-black text-violet-100">{t.name}</p><b className="text-sm font-black text-violet-200">🎟 {t.ticketCost}</b></span>
+                <p className="mt-1 text-[11px] font-bold text-amber-200">Prize: {t.prize}</p>
+                <p className="mt-1 text-[10px] text-white/45">{t.note}</p>
+                <button type="button" disabled title="Opens after launch, legal sign-off and 18+ ID verification" className="mt-3 w-full cursor-not-allowed rounded-lg border border-white/15 bg-white/5 py-2 text-[10px] font-black uppercase tracking-widest text-white/40" data-testid={`enter-${t.id}`}>Locked pre-launch</button>
+              </div>
+            ))}
+          </div>
+          <p className="mt-3 text-[10px] text-white/40">You hold <b className="text-violet-200">{wallet.sweepTickets} Sweep Tickets</b> — claim {DAILY_FREE_TICKETS} free every day above.</p>
+        </div>
+        <div className="mt-8 rounded-[1.75rem] border border-amber-200/25 bg-[linear-gradient(145deg,#241a08,#120d06_70%)] p-5" data-testid="coin-packs">
+          <p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">Gold Coin packs · free bonus Sweep Tickets</p>
+          <p className="mt-2 text-[11px] leading-relaxed text-white/55">Gold Coins are for fun, practice and social climbing — zero real-world value, never redeemable. Every pack includes free bonus Sweep Tickets. Checkout stays locked until payments are legally approved.</p>
+          <div className="mt-4 grid gap-2 sm:grid-cols-4">
+            {COIN_PACKS.map((p) => (
+              <button key={p.id} onClick={() => { play("button"); setCheckoutItem({ id: p.id, label: `${p.coins.toLocaleString()} Gold Coins`, badge: `+ ${p.bonusTickets} free Sweep Tickets`, priceGBP: p.priceGBP }); }} className="relative rounded-xl border border-amber-200/25 bg-black/40 px-4 py-3 text-left transition hover:border-amber-200/60 active:scale-95" data-testid={`pack-${p.id}`}>
+                {p.tag && <span className="absolute -top-2 right-2 rounded-full bg-gradient-to-b from-amber-300 to-amber-500 px-2 py-0.5 text-[8px] font-black uppercase tracking-wider text-black">{p.tag}</span>}
+                <p className="font-mono text-lg font-black text-amber-100">🪙 {p.coins.toLocaleString()}</p>
+                <p className="mt-0.5 text-[10px] font-black uppercase tracking-wider text-violet-300">+ {p.bonusTickets} free 🎟</p>
+                <b className="mt-1 block text-sm font-black text-emerald-200">{p.priceGBP}</b>
+              </button>
+            ))}
+          </div>
+        </div><div className="mt-8 rounded-[1.75rem] border border-amber-200/25 bg-[linear-gradient(145deg,#241a08,#120d06_70%)] p-5">
           <p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">VIP ladder &amp; chip store</p>
           <div className="mt-4 flex items-center gap-3">
             <div className="min-w-0 flex-1">
