@@ -49,3 +49,14 @@ test("avatars light up on the active player's turn and show chess clocks", () =>
   assert.match(arena, /stat: clockA/);
   assert.match(shell, /shadow-\[0_0_18px_rgba\(252,211,77,\.45\)\]/); // active ring glow
 });
+
+const poker = readFileSync(new URL("../src/components/LuxePokerLeague.tsx", import.meta.url), "utf8");
+
+test("poker tables carry the same dynamic Free-play disclaimer pattern", () => {
+  // both solo and multiplayer tables use the shared "<stage> · Free-play · No cash value" line
+  const lines = poker.match(/data-testid="poker-disclaimer"/g) ?? [];
+  assert.equal(lines.length, 2, "solo and multiplayer tables each render the dynamic disclaimer");
+  assert.match(poker, /\{dealerStage\} · Free-play · No cash value/);
+  assert.match(poker, /\{mpStage\} · Free-play · No cash value/);
+  assert.match(poker, /role="status"/);
+});

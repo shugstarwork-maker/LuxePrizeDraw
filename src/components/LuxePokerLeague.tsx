@@ -815,7 +815,7 @@ export const LuxePokerLeague: React.FC = () => {
               {!g.handOver && !mpSeated && <button onClick={() => mp.takeSeat()} className="poker-deal-dock mt-4 w-full rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-4 text-sm font-black text-black shadow-lg active:scale-95">Take your seat — in from the next hand</button>}
             </div>
           </article>
-          <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-[10px] text-white/35"><ShieldCheck className="h-3 w-3" /> Free-play multiplayer — virtual chips only, no cash value. Server deals and validates; every action is on the permanent record.</p>
+          <p className="mt-4 flex items-center gap-1.5 text-left text-[10px] font-bold uppercase tracking-wider text-white/40" role="status" data-testid="poker-disclaimer"><ShieldCheck className="h-3 w-3 shrink-0 text-emerald-300" /> {mpStage} · Free-play · No cash value — server deals and validates; every action is on the permanent record.</p>
         </>}
       </div>
     </section>;
@@ -879,7 +879,7 @@ export const LuxePokerLeague: React.FC = () => {
               {busted && <button onClick={rebuy} className="rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-4 text-xs font-black text-black shadow-lg active:scale-95">Rebuy {activeTable?.buyIn.toLocaleString()} to stay seated</button>}
               <button onClick={leaveTable} className="poker-leave-btn rounded-xl bg-zinc-800/90 py-3 text-xs font-black text-zinc-100 shadow-lg active:scale-95">Leave table</button>
             </div>}
-            <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-[10px] text-white/35"><ShieldCheck className="h-3 w-3" /> Free-play table — virtual chips have no cash value and cannot be exchanged.</p>
+            <p className="mt-4 flex items-center gap-1.5 text-left text-[10px] font-bold uppercase tracking-wider text-white/40" role="status" data-testid="poker-disclaimer"><ShieldCheck className="h-3 w-3 shrink-0 text-emerald-300" /> {dealerStage} · Free-play · No cash value — virtual chips cannot be exchanged.</p>
             </div></article>
       <LeagueRacePop pop={racePop} />
       {leagueGlide && <LeagueGlideOverlay event={leagueGlide} onDone={() => setLeagueGlide(null)} />}
