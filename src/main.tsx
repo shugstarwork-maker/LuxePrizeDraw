@@ -6,8 +6,10 @@ import { SpeedInsights } from '@vercel/speed-insights/react';
 import { Analytics } from '@vercel/analytics/react';
 import './index.css';
 
+const onVercel = typeof window !== "undefined" && window.location.hostname.endsWith("vercel.app");
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <AudioProvider><App /><SpeedInsights /><Analytics /></AudioProvider>
+    <AudioProvider><App />{onVercel && <><SpeedInsights /><Analytics /></>}</AudioProvider>
   </StrictMode>,
 );
