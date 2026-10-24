@@ -5,16 +5,19 @@ import { useEffect, useRef, useState } from "react";
 const LOUNGE_GAMES = [
   {
     id: "poker", title: "Texas Hold'em", image: "/games/holdem-card.png", href: "/poker",
+    theme: "Professional sporting lounge",
     rating: "9.8", match: "98%", chips: "1,000",
     facts: [["No-limit Hold'em", MapPin], ["6-seat tables", Users], ["Weekly league", Trophy], ["Free-play chips", Coins]],
   },
   {
     id: "blackjack", title: "Luxe Blackjack", image: "/games/blackjack-card.png", href: "/blackjack",
+    theme: "Classic casino felt",
     rating: "9.7", match: "96%", chips: "1,000",
     facts: [["Beat the dealer", MapPin], ["3:2 blackjack", Star], ["Weekly league", Trophy], ["Free-play chips", Coins]],
   },
   {
     id: "brag", title: "3 Card Brag", image: "/games/brag-card.png", href: "/brag",
+    theme: "Pub classic · underground",
     rating: "9.6", match: "95%", chips: "1,000",
     facts: [["The British classic", MapPin], ["Ante & play", Sparkles], ["Weekly league", Trophy], ["Free-play chips", Coins]],
   },
@@ -49,10 +52,11 @@ export function LoungeGamesCarousel() {
       {order.map((idx) => {
         const g = LOUNGE_GAMES[idx];
         const pos = idx === active ? "c" : idx === prev ? "l" : "r";
-        return <article key={g.id} className={`lounge-stack__card lounge-stack__card--${pos}`} onClick={() => { if (pos === "l") setActive(prev); if (pos === "r") setActive(next); }}>
+        return <article key={g.id} className={`lounge-stack__card lounge-stack__card--${pos} lounge-stack__card--${g.id}`} onClick={() => { if (pos === "l") setActive(prev); if (pos === "r") setActive(next); }}>
           <img className="lounge-stack__bg" src={g.image} alt={`${g.title} table artwork`} loading="lazy" />
           <div className="lounge-stack__shade" aria-hidden="true" />
           <span className="lounge-stack__vertical" aria-hidden="true">{g.title}</span>
+          <span className="lounge-stack__theme">{g.theme}</span>
           <div className="lounge-stack__panel">
             {g.facts.map(([label, Icon]) => <p key={label as string}><Icon className="h-3.5 w-3.5" aria-hidden="true" /><span>{label as string}</span></p>)}
           </div>

@@ -21,6 +21,9 @@ import { LeagueRacePop, type RacePop } from "./LeagueRacePop";
 import { LeagueGlideOverlay, type GlideEvent } from "./LeagueGlideOverlay";
 import { LoungeTabBar } from "./LoungeTabBar";
 import { LoungeWelcome } from "./LoungeWelcome";
+import { PokerTournamentTicker } from "./PokerTournamentTicker";
+import { PokerHudFrame } from "./PokerHudFrame";
+import { LeagueImpactScreen, type LeagueImpact } from "./LeagueImpactScreen";
 
 const CardView = LuxePlayingCard;
 const key = (card: { rank: string; suit: string }) => `${card.rank}${card.suit}`;
@@ -67,6 +70,9 @@ export const LuxePokerLeague: React.FC = () => {
   };
   const joinMp = (tableId: string) => { mp.spectate(tableId); setScreen("mp"); };
   const [leaveOpen, setLeaveOpen] = useState(false);
+  const [impact, setImpact] = useState<LeagueImpact | null>(null); // post-game League Impact screen
+  const [tableChatOpen, setTableChatOpen] = useState(false); // Zone B bottom-left social/chat panel
+  const sessionRef = useRef<{ hands: number; won: number; chipsIn: number; xpStart: number } | null>(null);
 
   const [selectedSeat, setSelectedSeat] = useState("Amelia K.");
   const [giftsOpen, setGiftsOpen] = useState(false);
@@ -275,6 +281,7 @@ export const LuxePokerLeague: React.FC = () => {
     const mine = game.winners.find((w) => w.id === "you");
     const youPlayed = Boolean(game.players.find((p) => p.id === "you" && !p.sittingOut));
     if (youPlayed) {
+      if (sessionRef.current) { sessionRef.current.hands += 1; if (mine) sessionRef.current.won += 1; }
       const showdown = game.board.length === 5; // went to the river = verified showdown result
       // Competitive rating updates on the result itself — separate from league XP and trust
       recordCompetitiveResult(Boolean(mine));
@@ -386,6 +393,9 @@ export const LuxePokerLeague: React.FC = () => {
     if (chips < table.buyIn) { const message = `${table.name} needs ${table.buyIn.toLocaleString()} free-play chips. You have ${chips.toLocaleString()} — collect free daily chips below.`; setSeatError(message); note(message); return; }
     setSeatError("");
     rankAtJoin.current = weeklyBoard(league).findIndex((r) => r.you) + 1; // for the exit glide
+    sessionRef.current = { hands: 0, won: 0, chipsIn: table.buyIn, xpStart: league.xp };
+    setTableChatOpen(false);
+    setImpact(null);
     setScreen("table");
     setActiveTable(table);
     setChips((v) => v - table.buyIn);
@@ -410,11 +420,20 @@ export const LuxePokerLeague: React.FC = () => {
   }, [game?.handOver, game?.handNumber]); // eslint-disable-line react-hooks/exhaustive-deps
   const takeSeat = () => { play("chipStack"); setGame((g) => (g ? seatPlayer(g, "you") : g)); note("Seat taken. You're in from the next hand."); };
   const leaveTable = () => {
-    if (game) { const stack = game.players.find((p) => p.id === "you")?.chips ?? 0; setChips((v) => v + stack); }
+    const stack = game ? game.players.find((p) => p.id === "you")?.chips ?? 0 : 0;
+    if (game) setChips((v) => v + stack);
     // Exit glide: if the session moved you up the weekly board, glide the row up on return.
     const before = rankAtJoin.current;
     rankAtJoin.current = null;
-    const after = weeklyBoard(ensureWeek()).findIndex((r) => r.you) + 1;
+    const week = ensureWeek();
+    const board = weeklyBoard(week);
+    const after = board.findIndex((r) => r.you) + 1;
+    // Post-game League Impact screen instead of dropping straight to the menu.
+    const s = sessionRef.current;
+    sessionRef.current = null;
+    if (s && s.hands > 0) {
+      setImpact({ handsPlayed: s.hands, handsWon: s.won, chipsDelta: stack - s.chipsIn, xpEarned: Math.max(0, week.xp - s.xpStart), tierName: leagueTier.name, tierColour: leagueTier.colour, rankBefore: before, rankAfter: after, boardSize: board.length });
+    }
     setGame(null); setActiveTable(null); setLeaveOpen(false); setScreen("lobby");
     if (before && after && after < before) setGlide({ from: before, to: after });
     note("You left the table. Your remaining stack returned to your wallet.");
@@ -597,7 +616,7 @@ export const LuxePokerLeague: React.FC = () => {
           </div>
         </div>
         </>}
-        {status !== "Choose a table to sit down." && <p className="mt-5 rounded-xl border border-amber-200/20 bg-amber-300/10 p-3 text-sm text-amber-100">{status}</p>}<LeagueRacePop pop={racePop} />{leagueGlide && <LeagueGlideOverlay event={leagueGlide} onDone={() => setLeagueGlide(null)} />}<LoungeTabBar tab={lobbyTab} onTab={(t) => { play("button"); setLobbyTab(t); window.scrollTo({ top: 0, behavior: "smooth" }); }} accent="amber" /></div></section>;
+        {status !== "Choose a table to sit down." && <p className="mt-5 rounded-xl border border-amber-200/20 bg-amber-300/10 p-3 text-sm text-amber-100">{status}</p>}<LeagueRacePop pop={racePop} />{leagueGlide && <LeagueGlideOverlay event={leagueGlide} onDone={() => setLeagueGlide(null)} />}{impact && <LeagueImpactScreen impact={impact} onSpectate={() => { play("button"); setImpact(null); const live = mpTables.find((t) => t.playing) ?? mpTables[0]; if (live) joinMp(live.id); else { setLobbyTab("play"); void refreshMpTables().then(() => note("Loading live tables — tap one to spectate.")); } }} onRejoin={() => { play("button"); setImpact(null); setLobbyTab("play"); }} />}<LoungeTabBar tab={lobbyTab} onTab={(t) => { play("button"); setLobbyTab(t); window.scrollTo({ top: 0, behavior: "smooth" }); }} accent="amber" /></div></section>;
 
   // ── Multiplayer table screen ──
   if (screen === "mp") {
@@ -676,7 +695,25 @@ export const LuxePokerLeague: React.FC = () => {
 
   // ── Table screen ──
   const botSlots = game ? game.players.filter((p) => p.isBot) : [];
-  return <section id="poker-league" className="poker-playing-page min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-3 py-4 pb-28 text-white"><div className="poker-landscape-gate" role="status"><span aria-hidden="true">↻</span><h2>Rotate your phone to play poker</h2><p>Luxe Poker tables are landscape-only — turn your phone sideways to take your seat and play.</p><button type="button" onClick={leaveTable}>Back to Luxe Lounges</button></div><div className="poker-playing-wrap mx-auto max-w-5xl"><header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-3 py-2"><button onClick={() => setLeaveOpen(true)} className="inline-flex items-center gap-1 rounded-lg bg-white/10 px-3 py-2 text-xs font-black"><ChevronLeft className="h-4 w-4" />Lobby</button><span className="font-mono text-sm font-black text-amber-100">{chips.toLocaleString()} wallet · {you?.chips.toLocaleString() ?? 0} at table · <span style={{ color: leagueTier.colour }}>{leagueTier.name} {league.xp}XP</span></span><button onClick={() => setEnabled(!enabled)} className="rounded-lg bg-white/10 p-2"><Volume2 className="h-4 w-4" /></button></header><article className="poker-game-article relative mt-4 overflow-hidden rounded-[2rem] border border-amber-200/50 bg-[radial-gradient(ellipse_at_center,#2a2318,#151009_55%,#090604)] p-4 shadow-[0_0_70px_rgba(212,175,55,.22),inset_0_0_140px_rgba(0,0,0,0.5)] sm:p-6"><div className={`poker-surface-frame relative rounded-[2rem] ${winFlash ? "poker-win-flash" : ""} ${tableTheme === "onyx" ? "ring-4 ring-amber-400/50" : tableTheme === "noir" ? "ring-4 ring-zinc-400/50" : ""}`}>
+  const alivePlayers = game ? game.players.filter((p) => p.chips > 0).length : 0;
+  const nextTable = LEAGUE_TABLES[Math.min(league.tierIndex + 1, LEAGUE_TABLES.length - 1)];
+  return <section id="poker-league" className="poker-playing-page min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-3 py-4 pb-28 text-white"><div className="poker-landscape-gate" role="status"><span aria-hidden="true">↻</span><h2>Rotate your phone to play poker</h2><p>Luxe Poker tables are landscape-only — turn your phone sideways to take your seat and play.</p><button type="button" onClick={leaveTable}>Back to Luxe Lounges</button></div>
+    <PokerTournamentTicker playersRemaining={alivePlayers} totalSeats={game?.players.length ?? 6} yourPosition={null} currentBlinds={activeTable?.blinds ?? "—"} nextBlinds={nextTable.blinds} />
+    <PokerHudFrame
+      tableName={activeTable?.name ?? "League table"} blinds={activeTable?.blinds ?? "—"} handNumber={game?.handNumber ?? 0}
+      tierName={leagueTier.name} tierColour={leagueTier.colour} leagueXp={league.xp}
+      wallet={chips} atTable={you?.chips ?? 0} activeBet={you?.bet ?? 0}
+      audioOn={enabled} onAudio={() => setEnabled(!enabled)}
+      onLobby={() => setLeaveOpen(true)}
+      onLeaderboard={() => { play("button"); setLobbyTab("league"); setScreen("lobby"); }}
+      onChat={() => { play("button"); setTableChatOpen((v) => !v); }}
+      chatOpen={tableChatOpen}
+      chatPanel={<div className="hud-chat-pop" role="log" aria-label="Table chat">
+        {feed.slice(0, 3).map((line, i) => <p key={`${line}-${i}`}>{line}</p>)}
+        <div className="hud-chat-emotes">{emotes.map((emote) => <button key={emote} type="button" onClick={() => { play("tableKnock"); note(`You to ${selectedSeat}: ${emote}`); }}>{emote}</button>)}</div>
+      </div>}
+    />
+    <div className="poker-playing-wrap mx-auto max-w-5xl"><header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-3 py-2"><button onClick={() => setLeaveOpen(true)} className="inline-flex items-center gap-1 rounded-lg bg-white/10 px-3 py-2 text-xs font-black"><ChevronLeft className="h-4 w-4" />Lobby</button><span className="font-mono text-sm font-black text-amber-100">{chips.toLocaleString()} wallet · {you?.chips.toLocaleString() ?? 0} at table · <span style={{ color: leagueTier.colour }}>{leagueTier.name} {league.xp}XP</span></span><button onClick={() => setEnabled(!enabled)} className="rounded-lg bg-white/10 p-2"><Volume2 className="h-4 w-4" /></button></header><article className="poker-game-article relative mt-4 overflow-hidden rounded-[2rem] border border-amber-200/50 bg-[radial-gradient(ellipse_at_center,#2a2318,#151009_55%,#090604)] p-4 shadow-[0_0_70px_rgba(212,175,55,.22),inset_0_0_140px_rgba(0,0,0,0.5)] sm:p-6"><div className={`poker-surface-frame relative rounded-[2rem] ${winFlash ? "poker-win-flash" : ""} ${tableTheme === "onyx" ? "ring-4 ring-amber-400/50" : tableTheme === "noir" ? "ring-4 ring-zinc-400/50" : ""}`}>
               {winFlash && <div className="pointer-events-none absolute inset-0 z-20 flex items-start justify-center gap-2 pt-14">{[...Array(6)].map((_, i) => <span key={i} className="poker-chip-fly h-4 w-4 rounded-full border border-amber-200/70 bg-gradient-to-br from-amber-300 to-amber-600" style={{ animationDelay: `${i * 90}ms` }} />)}</div>}
               <PokerTableArtwork pot={game?.pot ?? 0} stage={dealerStage} winner={potWinner}><div className="poker-live-seats pointer-events-none absolute inset-0">{game && game.players.map((p) => {
                 const slotIndex = p.isBot ? botSlots.indexOf(p) : 5;

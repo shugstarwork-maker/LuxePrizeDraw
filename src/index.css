@@ -1576,3 +1576,121 @@ body::after {
 @media (prefers-reduced-motion: reduce) {
   body::after, .cine-beam::before, .cine-reveal, .cine-title, .cine-img img, .cine-dust span { animation: none !important; }
 }
+
+/* ── Three-zone table HUD frame ─────────────────────────────────────────────
+   Zone B persistent frame: corner panels pinned over the table (landscape
+   only). Same four corners for every card game so players build muscle memory.
+   TL = table info & league standings · TR = menu/settings · BL = chat/social
+   BR = player profile mini-card. Zone C action dock already sits bottom-centre. */
+.hud-zone { position: fixed; z-index: 1150; display: none; }
+@media (orientation: landscape) and (max-height: 1200px) {
+  .poker-playing-page .hud-zone { display: block; }
+}
+.hud-zone--tl { top: max(.4rem, env(safe-area-inset-top)); left: max(.5rem, env(safe-area-inset-left)); }
+.hud-zone--tr { top: max(.4rem, env(safe-area-inset-top)); right: max(.5rem, env(safe-area-inset-right)); display: none; }
+.hud-zone--bl { bottom: max(.4rem, env(safe-area-inset-bottom)); left: max(.5rem, env(safe-area-inset-left)); display: none; flex-direction: column; align-items: flex-start; gap: .35rem; }
+@media (orientation: landscape) and (max-height: 1200px) {
+  .poker-playing-page .hud-zone--bl { display: flex; }
+}
+.hud-chat-pop {
+  width: 12.5rem;
+  border: 1px solid rgba(217, 183, 100, .45);
+  border-radius: .75rem;
+  background: rgba(9, 7, 3, .92);
+  backdrop-filter: blur(6px);
+  padding: .5rem .6rem;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, .55);
+}
+.hud-chat-pop p { font-size: 9px; font-weight: 700; color: rgba(255, 240, 200, .75); line-height: 1.35; }
+.hud-chat-pop p + p { margin-top: .2rem; color: rgba(255, 255, 255, .4); }
+.hud-chat-pop .hud-chat-emotes { display: flex; flex-wrap: wrap; gap: .25rem; margin-top: .4rem; }
+.hud-chat-pop .hud-chat-emotes button {
+  border: 1px solid rgba(255, 255, 255, .15); background: rgba(255, 255, 255, .08);
+  border-radius: 9999px; padding: .15rem .5rem; font-size: 9px; font-weight: 800; color: rgba(255, 240, 200, .9);
+}
+.hud-zone--br { bottom: max(.4rem, env(safe-area-inset-bottom)); right: max(.5rem, env(safe-area-inset-right)); }
+@media (orientation: landscape) and (max-height: 1200px) {
+  .poker-playing-page .hud-zone--tr { display: flex; gap: .35rem; }
+}
+.hud-panel {
+  border: 1px solid rgba(217, 183, 100, .45);
+  border-radius: .75rem;
+  background: rgba(9, 7, 3, .88);
+  backdrop-filter: blur(6px);
+  padding: .35rem .6rem;
+  font-size: 10px;
+  font-weight: 800;
+  color: rgba(255, 240, 200, .9);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, .55);
+  max-width: 13rem;
+}
+.hud-panel b { color: #ffe095; }
+.hud-panel__row { display: flex; align-items: center; gap: .3rem; white-space: nowrap; }
+.hud-panel__row + .hud-panel__row { margin-top: .15rem; }
+.hud-icon-btn {
+  display: grid; place-items: center;
+  width: 2rem; height: 2rem;
+  border-radius: .6rem;
+  border: 1px solid rgba(217, 183, 100, .45);
+  background: rgba(9, 7, 3, .88);
+  color: #ffe095;
+}
+.hud-icon-btn:active { transform: scale(.94); }
+
+/* Tournament ticker — slim banner across the very top of the table HUD. */
+.poker-ticker {
+  position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+  z-index: 1140; display: none;
+  align-items: center; gap: .45rem;
+  padding: .18rem .8rem;
+  border: 1px solid rgba(217, 183, 100, .35); border-top: none;
+  border-radius: 0 0 .7rem .7rem;
+  background: rgba(9, 7, 3, .82);
+  backdrop-filter: blur(6px);
+  font-size: 9px; font-weight: 800; letter-spacing: .04em;
+  color: rgba(255, 240, 200, .75);
+  white-space: nowrap;
+}
+.poker-ticker b { color: #ffe095; }
+.poker-ticker__sep { color: rgba(255, 224, 149, .35); }
+@media (orientation: landscape) and (max-height: 1200px) {
+  .poker-playing-page .poker-ticker { display: flex; }
+}
+
+/* League Impact post-game screen — portal-mounted, centres over everything. */
+.league-impact {
+  position: fixed; inset: 0; z-index: 1600;
+  display: grid; place-items: center;
+  padding: 1rem;
+  background: rgba(3, 2, 1, .82);
+  backdrop-filter: blur(10px);
+}
+.league-impact__card {
+  width: min(26rem, 94vw);
+  max-height: 90dvh; overflow-y: auto;
+  border-radius: 1.4rem;
+  border: 1px solid rgba(255, 224, 149, .4);
+  background: linear-gradient(165deg, #191106, #0a0703 70%);
+  padding: 1.4rem;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .7), 0 0 60px rgba(212, 175, 55, .12);
+}
+
+/* ── Lounge themes — distinct visual identity per game lounge ───────────────
+   Texas Hold'em: professional/sporting gold · Luxe Blackjack: classic casino
+   felt green · 3 Card Brag: pub/underground warm amber. */
+.lounge-theme { border-radius: .5rem; padding: .1rem .5rem; font-weight: 900; }
+.lounge-stack__card--poker .lounge-stack__shade { background: linear-gradient(180deg, rgba(20, 14, 2, .1), rgba(8, 6, 1, .88) 70%), linear-gradient(120deg, rgba(212, 175, 55, .22), transparent 55%); }
+.lounge-stack__card--blackjack .lounge-stack__shade { background: linear-gradient(180deg, rgba(2, 22, 10, .12), rgba(2, 12, 5, .9) 70%), linear-gradient(120deg, rgba(24, 98, 52, .38), transparent 55%); }
+.lounge-stack__card--brag .lounge-stack__shade { background: linear-gradient(180deg, rgba(30, 12, 2, .12), rgba(16, 6, 1, .9) 70%), linear-gradient(120deg, rgba(146, 64, 14, .4), transparent 55%); }
+.lounge-stack__card--poker .lounge-stack__play { background: linear-gradient(180deg, #ffd97a, #d9a52e); color: #140e02; }
+.lounge-stack__card--blackjack .lounge-stack__play { background: linear-gradient(180deg, #4ade80, #15803d); color: #021208; }
+.lounge-stack__card--brag .lounge-stack__play { background: linear-gradient(180deg, #fbbf24, #b45309); color: #1c0d02; }
+.lounge-stack__theme {
+  position: absolute; top: .7rem; left: .7rem; z-index: 3;
+  border-radius: 9999px; padding: .2rem .6rem;
+  background: rgba(0, 0, 0, .65); backdrop-filter: blur(4px);
+  font-size: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: .14em;
+}
+.lounge-stack__card--poker .lounge-stack__theme { color: #ffd97a; border: 1px solid rgba(255, 217, 122, .4); }
+.lounge-stack__card--blackjack .lounge-stack__theme { color: #6ee7a0; border: 1px solid rgba(110, 231, 160, .4); }
+.lounge-stack__card--brag .lounge-stack__theme { color: #fbbf24; border: 1px solid rgba(251, 191, 36, .4); }
