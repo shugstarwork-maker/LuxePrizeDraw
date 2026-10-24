@@ -1793,3 +1793,27 @@ body::after {
 @media (prefers-reduced-motion: reduce) {
   .poker-studio-overlay .animate-pulse { animation: none; }
 }
+
+/* ── Monetization demo overlays (ad break, checkout stub) ────────────────── */
+.ad-break {
+  position: fixed; inset: 0; z-index: 1600;
+  display: grid; place-items: center;
+  background: rgba(4, 3, 1, .86); backdrop-filter: blur(6px);
+  padding: 1rem;
+}
+.ad-break__card {
+  width: min(26rem, 100%);
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 224, 149, .3);
+  background: linear-gradient(165deg, #171006, #080503 70%);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .7), inset 0 1px 0 rgba(255, 230, 160, .12);
+  padding: 1.25rem;
+}
+.ad-break__screen {
+  display: grid; place-items: center; text-align: center;
+  min-height: 10rem;
+  border-radius: 1rem;
+  border: 1px dashed rgba(255, 224, 149, .25);
+  background: radial-gradient(ellipse at center, rgba(255, 214, 120, .07), rgba(0, 0, 0, .5));
+  padding: 1.25rem;
+}

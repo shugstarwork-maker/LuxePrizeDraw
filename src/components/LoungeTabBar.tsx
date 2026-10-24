@@ -1,13 +1,14 @@
 // Lounge dock — looks exactly like the main MobileDock and takes its place while
-// you're inside a lounge: Play / League / Profile / Rewards instead of Home / Draws / Games / Portal.
+// you're inside a lounge: Play / League / Social / Profile / Rewards instead of Home / Draws / Games / Portal.
 import React from "react";
-import { ChevronLeft, CirclePlay, Gift, Trophy, UserRound } from "lucide-react";
+import { ChevronLeft, CirclePlay, Coffee, Gift, Trophy, UserRound } from "lucide-react";
 
-export type LoungeTab = "play" | "league" | "profile" | "rewards";
+export type LoungeTab = "play" | "league" | "social" | "profile" | "rewards";
 
 const TABS: { id: LoungeTab; label: string; icon: typeof Trophy }[] = [
   { id: "play", label: "Play", icon: CirclePlay },
   { id: "league", label: "League", icon: Trophy },
+  { id: "social", label: "Social", icon: Coffee },
   { id: "profile", label: "Profile", icon: UserRound },
   { id: "rewards", label: "Rewards", icon: Gift },
 ];

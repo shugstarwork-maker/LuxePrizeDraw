@@ -3,7 +3,7 @@ import { PlayerTurnRing } from "./PlayerTurnRing";
 import { LuxePlayingCard } from "./LuxePlayingCard";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { LuxeDealer } from "./LuxeDealer";
-import { Bot, ChevronLeft, Crown, Gift, MessageCircle, Scale, ShieldCheck, Sparkles, Timer, Users, Volume2 } from "lucide-react";
+import { Bot, BadgePoundSterling, ChevronLeft, Crown, Gift, MessageCircle, Scale, ShieldCheck, Sparkles, Timer, Users, Volume2 } from "lucide-react";
 import { PokerTableArtwork } from "./PokerTableArtwork";
 import { useAudio } from "../audio/AudioProvider";
 import { applyAction, botAction, createTable, dealHand, seatPlayer, type HoldemState } from "../games/holdem";
@@ -28,6 +28,9 @@ import { LoungeWelcome } from "./LoungeWelcome";
 import { PokerTournamentTicker } from "./PokerTournamentTicker";
 import { PokerHudFrame } from "./PokerHudFrame";
 import { LeagueImpactScreen, type LeagueImpact } from "./LeagueImpactScreen";
+import { AdBreakOverlay } from "./AdBreakOverlay";
+import { CheckoutStubDialog, type PricedItem } from "./CheckoutStubDialog";
+import { AD_REWARD_CHIPS, adsRemainingToday, adsWatchedToday, recordAdWatched, SOCIAL_TABLES, type SocialTable } from "../lib/pokerMonetization";
 
 const CardView = LuxePlayingCard;
 const key = (card: { rank: string; suit: string }) => `${card.rank}${card.suit}`;
@@ -87,16 +90,16 @@ export const LuxePokerLeague: React.FC = () => {
   const [xp, setXp] = useState(() => competitiveRating()); // competitive rating — separate from league XP and trust
   const level = Math.floor(competitiveRating() / 200);
 
-  type StoreItem = { id: string; type: "chips" | "ticket" | "theme" | "frame"; label: string; badge: string; chips?: number; count?: number };
+  type StoreItem = { id: string; type: "chips" | "ticket" | "theme" | "frame"; label: string; badge: string; chips?: number; count?: number; price: string };
   const STORE: StoreItem[] = [
-    { id: "chips-5k", type: "chips", label: "5,000 chips", badge: "Bronze stack", chips: 5_000 },
-    { id: "chips-25k", type: "chips", label: "25,000 chips", badge: "Silver stack", chips: 25_000 },
-    { id: "chips-100k", type: "chips", label: "100,000 chips", badge: "Gold stack", chips: 100_000 },
-    { id: "ticket-3", type: "ticket", label: "Tournament ticket x3", badge: "2x XP hands", count: 3 },
-    { id: "theme-onyx", type: "theme", label: "Onyx Noir felt", badge: "Table theme" },
-    { id: "theme-noir", type: "theme", label: "Noir Rose felt", badge: "Table theme" },
-    { id: "frame-gold", type: "frame", label: "Gold Halo frame", badge: "Avatar cosmetic" },
-    { id: "frame-platinum", type: "frame", label: "Platinum Ring frame", badge: "Avatar cosmetic" },
+    { id: "chips-5k", type: "chips", label: "5,000 chips", badge: "Social-room stack", chips: 5_000, price: "£0.99" },
+    { id: "chips-25k", type: "chips", label: "25,000 chips", badge: "Social-room stack", chips: 25_000, price: "£2.99" },
+    { id: "chips-100k", type: "chips", label: "100,000 chips", badge: "Social-room stack", chips: 100_000, price: "£6.99" },
+    { id: "ticket-3", type: "ticket", label: "Tournament ticket x3", badge: "2x XP hands", count: 3, price: "£1.99" },
+    { id: "theme-onyx", type: "theme", label: "Onyx Noir felt", badge: "Table theme", price: "£1.49" },
+    { id: "theme-noir", type: "theme", label: "Noir Rose felt", badge: "Table theme", price: "£1.49" },
+    { id: "frame-gold", type: "frame", label: "Gold Halo frame", badge: "Avatar cosmetic", price: "£0.99" },
+    { id: "frame-platinum", type: "frame", label: "Platinum Ring frame", badge: "Avatar cosmetic", price: "£1.99" },
   ];
   const [owned, setOwned] = useState<string[]>([]);
   const [tableTheme, setTableTheme] = useState<"classic" | "onyx" | "noir">("classic");
@@ -146,7 +149,10 @@ export const LuxePokerLeague: React.FC = () => {
   const [racePop, setRacePop] = useState<RacePop>(null);
   const racePopId = useRef(0);
   const [leagueGlide, setLeagueGlide] = useState<GlideEvent>(null);
-  const [lobbyTab, setLobbyTab] = useState<"play" | "league" | "profile" | "rewards">("play");
+  const [lobbyTab, setLobbyTab] = useState<"play" | "league" | "profile" | "rewards" | "social">("play");
+  const [adOpen, setAdOpen] = useState(false);
+  const [adCount, setAdCount] = useState(() => adsWatchedToday());
+  const [checkoutItem, setCheckoutItem] = useState<PricedItem | null>(null);
   const glideId = useRef(0);
   const gainLeagueXp = (amount: number) => {
     pushXpFloat(amount);
@@ -294,7 +300,8 @@ export const LuxePokerLeague: React.FC = () => {
     settledHand.current = game.handNumber;
     const mine = game.winners.find((w) => w.id === "you");
     const youPlayed = Boolean(game.players.find((p) => p.id === "you" && !p.sittingOut));
-    if (youPlayed) {
+    const socialRoom = !sessionRef.current; // social tables set no league session — chips only, no XP, no highlights
+    if (youPlayed && !socialRoom) {
       if (sessionRef.current) { sessionRef.current.hands += 1; if (mine) sessionRef.current.won += 1; }
       const showdown = game.board.length === 5; // went to the river = verified showdown result
       // Competitive rating updates on the result itself — separate from league XP and trust
@@ -326,9 +333,9 @@ export const LuxePokerLeague: React.FC = () => {
       });
     }
     play("winnerReveal");
-    // Bad Beat Timeline: auto-clip notable hands for the highlights feed.
+    // Bad Beat Timeline: auto-clip notable hands for the highlights feed (league tables only — social rooms stay private).
     const showdownClip = game.board.length === 5 && youPlayed;
-    const clip = youPlayed ? classifyHand({ won: Boolean(mine), pot: mine?.amount ?? game.pot, wentToShowdown: showdownClip, handLabel: mine?.label }) : null;
+    const clip = youPlayed && !socialRoom ? classifyHand({ won: Boolean(mine), pot: mine?.amount ?? game.pot, wentToShowdown: showdownClip, handLabel: mine?.label }) : null;
     if (clip) {
       const { season } = getSeason().info;
       recordHighlight({
@@ -411,12 +418,9 @@ export const LuxePokerLeague: React.FC = () => {
 
   const chooseAvatar = (file?: File) => { if (!file) return; const reader = new FileReader(); reader.onload = () => { const value = String(reader.result); localStorage.setItem("luxe-poker-avatar", value); setAvatar(value); note("Avatar updated on this device."); }; reader.readAsDataURL(file); };
   const buyItem = (item: StoreItem) => {
-    if (item.type === "chips") { setChips((v) => v + (item.chips ?? 0)); }
-    else if (item.type === "ticket") setTickets((v) => v + (item.count ?? 0));
-    else if (item.type === "theme") { setOwned((o) => [...new Set([...o, item.id])]); setTableTheme(item.id === "theme-onyx" ? "onyx" : "noir"); }
-    else { setOwned((o) => [...new Set([...o, item.id])]); setAvatarFrame(item.id === "frame-gold" ? "gold" : "platinum"); }
-    play(item.type === "chips" ? "chipStack" : "ticketPurchase");
-    note(`${item.label} — acquired. Free-play style, no cash value.`);
+    // Stripe-ready stub: every purchase routes through the checkout dialog,
+    // which stays disabled until live keys are connected and legal sign-off lands.
+    setCheckoutItem({ id: item.id, label: item.label, badge: item.badge, priceGBP: item.price });
   };
   const join = (table: TableDef) => {
     if (chips < table.buyIn) { const message = `${table.name} needs ${table.buyIn.toLocaleString()} free-play chips. You have ${chips.toLocaleString()} — collect free daily chips below.`; setSeatError(message); note(message); return; }
@@ -483,6 +487,30 @@ export const LuxePokerLeague: React.FC = () => {
   };
   const sendGift = (gift: typeof gifts[number]) => { if (chips < gift.cost) return note(`You need ${gift.cost} virtual chips to send ${gift.name}.`); setChips((v) => v - gift.cost); play("success"); setGiftsOpen(false); note(`You sent ${gift.icon} ${gift.name} to ${selectedSeat}. Virtual gift only.`); };
   const dailyReward = () => { if (!rewardReady) return; setChips((v) => v + 200); play("chipStack"); setRewardReady(false); localStorage.setItem("luxe-poker-reward", new Date().toDateString()); note("Daily sign-in collected: 200 free-play chips."); };
+  const finishAd = () => {
+    setAdOpen(false);
+    setAdCount(recordAdWatched());
+    setChips((v) => v + AD_REWARD_CHIPS);
+    play("coinWin");
+    note(`Thanks for watching — ${AD_REWARD_CHIPS.toLocaleString()} free-play chips added. Ads never cost money and chips never turn into cash.`);
+  };
+  const joinSocial = (t: SocialTable) => {
+    if (chips < t.buyIn) { const message = `${t.name} needs ${t.buyIn.toLocaleString()} free-play chips. You have ${chips.toLocaleString()} — daily sign-in and ad breaks top you up free.`; setSeatError(message); note(message); return; }
+    setSeatError("");
+    sessionRef.current = null; // social rooms never touch the league session record
+    setTableChatOpen(false);
+    setImpact(null);
+    setScreen("table");
+    setActiveTable({ name: t.name, image: "/games/luxe-poker-table.png", blinds: `${t.smallBlind} / ${t.bigBlind}`, smallBlind: t.smallBlind, bigBlind: t.bigBlind, buyIn: t.buyIn, bots: t.bots, tone: "from-zinc-300 to-zinc-500" });
+    setChips((v) => v - t.buyIn);
+    const table0 = createTable({ playerName: "You", playerChips: t.buyIn, botCount: t.bots, botChips: t.buyIn * 5, smallBlind: t.smallBlind, bigBlind: t.bigBlind });
+    settledHand.current = 0;
+    aliveRef.current = [];
+    finishedRef.current = false;
+    handStartAt.current = Date.now();
+    setGame(table0);
+    note(`Welcome to ${t.name} — casual social room. No league XP, no prizes, pure fun.`);
+  };
   const leagueTable = LEAGUE_TABLES[Math.min(league.tierIndex, LEAGUE_TABLES.length - 1)];
 
   // Lobby-to-lounge flow: /poker opens on the welcome screen, ENTER takes you
@@ -623,7 +651,7 @@ export const LuxePokerLeague: React.FC = () => {
           <span className="text-[10px] text-white/35">Ambient Luxe Lounge loop — synthesized in-house, no licensing needed.</span>
         </div>
         </>}
-        {lobbyTab === "rewards" && <><div className="mt-7 grid gap-3 sm:grid-cols-3"><button onClick={dailyReward} disabled={!rewardReady} className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-4 text-left disabled:opacity-40"><Gift className="h-5 w-5 text-emerald-200" /><b className="mt-3 block">{rewardReady ? "Daily sign-in: 200 chips" : "Daily chips claimed"}</b><small className="text-white/55">200 free-play chips every day</small></button><button onClick={() => note("Your league table unlocks after completing your first hand.")} className="rounded-2xl border border-violet-300/30 bg-violet-300/10 p-4 text-left"><Crown className="h-5 w-5 text-violet-200" /><b className="mt-3 block">League table</b><small className="text-white/55">Practice ranking</small></button><button onClick={() => note("Table race points: outlast the table to score for your weekly league. Free-play chips only.")} className="rounded-2xl border border-amber-200/30 bg-amber-300/10 p-4 text-left"><Sparkles className="h-5 w-5 text-amber-200" /><b className="mt-3 block">Tournament night</b><small className="text-white/55">Table race points: 1st 100 · 2nd 75 · 3rd 60 · 4th 50 · 5th 40 · 6th 30 — outlast the table to score for your weekly league</small></button></div><div className="mt-8 rounded-[1.75rem] border border-amber-200/25 bg-[linear-gradient(145deg,#241a08,#120d06_70%)] p-5">
+        {lobbyTab === "rewards" && <><div className="mt-7 grid gap-3 sm:grid-cols-3"><button onClick={dailyReward} disabled={!rewardReady} className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-4 text-left disabled:opacity-40"><Gift className="h-5 w-5 text-emerald-200" /><b className="mt-3 block">{rewardReady ? "Daily sign-in: 200 chips" : "Daily chips claimed"}</b><small className="text-white/55">200 free-play chips every day</small></button><button onClick={() => { if (adsRemainingToday() <= 0) { note("That's all the sponsored breaks for today — back tomorrow for more."); return; } play("button"); setAdOpen(true); }} className="rounded-2xl border border-sky-300/30 bg-sky-300/10 p-4 text-left"><BadgePoundSterling className="h-5 w-5 text-sky-200" /><b className="mt-3 block">Sponsored break: {AD_REWARD_CHIPS.toLocaleString()} chips</b><small className="text-white/55">{adsRemainingToday() > 0 ? `Watch a short ad — ${adsRemainingToday()} of ${5} left today` : "All claimed for today"}</small></button><button onClick={() => note("Table race points: outlast the table to score for your weekly league. Free-play chips only.")} className="rounded-2xl border border-amber-200/30 bg-amber-300/10 p-4 text-left"><Sparkles className="h-5 w-5 text-amber-200" /><b className="mt-3 block">Tournament night</b><small className="text-white/55">Table race points: 1st 100 · 2nd 75 · 3rd 60 · 4th 50 · 5th 40 · 6th 30 — outlast the table to score for your weekly league</small></button></div><div className="mt-8 rounded-[1.75rem] border border-amber-200/25 bg-[linear-gradient(145deg,#241a08,#120d06_70%)] p-5">
           <p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">VIP ladder &amp; chip store</p>
           <div className="mt-4 flex items-center gap-3">
             <div className="min-w-0 flex-1">
@@ -638,14 +666,15 @@ export const LuxePokerLeague: React.FC = () => {
           <div className="mt-4 grid gap-2 sm:grid-cols-3">
             {STORE.map((item) => (
               <button key={item.id} onClick={() => buyItem(item)} className={`rounded-xl border px-4 py-3 text-left transition active:scale-95 ${item.type === "theme" || item.type === "frame" ? (owned.includes(item.id) ? "border-emerald-400/50 bg-emerald-400/10" : "border-amber-200/25 bg-black/40 hover:border-amber-200/60") : "border-amber-200/25 bg-black/40 hover:border-amber-200/60"}`}>
-                <p className="font-mono text-lg font-black text-amber-100">{item.label}</p>
+                <span className="flex items-baseline justify-between gap-2"><p className="font-mono text-lg font-black text-amber-100">{item.label}</p><b className="text-sm font-black text-emerald-200">{item.price}</b></span>
                 <p className="text-[10px] font-black uppercase tracking-wider text-white/50">{(item.type === "theme" || item.type === "frame") && owned.includes(item.id) ? "Owned — equipped" : item.badge}</p>
               </button>
             ))}
           </div>
         </div>
         </>}
-        {status !== "Choose a table to sit down." && <p className="mt-5 rounded-xl border border-amber-200/20 bg-amber-300/10 p-3 text-sm text-amber-100">{status}</p>}<LeagueRacePop pop={racePop} />{leagueGlide && <LeagueGlideOverlay event={leagueGlide} onDone={() => setLeagueGlide(null)} />}{impact && <LeagueImpactScreen impact={impact} onSpectate={() => { play("button"); setImpact(null); const live = mpTables.find((t) => t.playing) ?? mpTables[0]; if (live) joinMp(live.id); else { setLobbyTab("play"); void refreshMpTables().then(() => note("Loading live tables — tap one to spectate.")); } }} onRejoin={() => { play("button"); setImpact(null); setLobbyTab("play"); }} />}<LoungeTabBar tab={lobbyTab} onTab={(t) => { play("button"); setLobbyTab(t); window.scrollTo({ top: 0, behavior: "smooth" }); }} accent="amber" /></div></section>;
+        {lobbyTab === "social" && <><div className="mt-8 text-center"><p className="text-[10px] font-black uppercase tracking-[.22em] text-zinc-300">Casual rooms · chips only</p><h2 className="mt-3 text-4xl font-black">Social Tables</h2><p className="mt-3 text-sm text-white/60">Splash your chips around with zero pressure — social rooms never award league XP, never clip highlights and never touch your division race. Store chips live here.</p></div><div className="mt-6 grid gap-3">{SOCIAL_TABLES.map((t) => <button key={t.id} onClick={() => joinSocial(t)} className="rounded-2xl border border-zinc-300/25 bg-black/40 p-4 text-left transition hover:border-amber-200/50 active:scale-[.99]"><span className="flex items-center justify-between gap-3"><span><b className="block text-lg text-amber-50">{t.name}</b><small className="text-[11px] text-white/55">{t.vibe} · blinds {t.smallBlind}/{t.bigBlind} · buy-in {t.buyIn.toLocaleString()}</small></span><span className="rounded-full bg-gradient-to-b from-zinc-200 to-zinc-400 px-4 py-2 text-xs font-black text-black">Sit down</span></span><small className="mt-2 block text-[10px] text-white/40">{t.note}</small></button>)}</div>{seatError && <p role="alert" className="poker-seat-error">{seatError}</p>}<p className="mt-4 text-center text-[10px] text-white/40">Social rooms are casual-only: no league XP, no prizes, no cash value — ever.</p></>}
+        {status !== "Choose a table to sit down." && <p className="mt-5 rounded-xl border border-amber-200/20 bg-amber-300/10 p-3 text-sm text-amber-100">{status}</p>}<LeagueRacePop pop={racePop} />{leagueGlide && <LeagueGlideOverlay event={leagueGlide} onDone={() => setLeagueGlide(null)} />}{impact && <LeagueImpactScreen impact={impact} onSpectate={() => { play("button"); setImpact(null); const live = mpTables.find((t) => t.playing) ?? mpTables[0]; if (live) joinMp(live.id); else { setLobbyTab("play"); void refreshMpTables().then(() => note("Loading live tables — tap one to spectate.")); } }} onRejoin={() => { play("button"); setImpact(null); setLobbyTab("play"); }} />}{adOpen && <AdBreakOverlay onDone={finishAd} onCancel={() => { setAdOpen(false); note("Break closed early — no chips this time."); }} />}{checkoutItem && <CheckoutStubDialog item={checkoutItem} onClose={() => setCheckoutItem(null)} />}<LoungeTabBar tab={lobbyTab} onTab={(t) => { play("button"); setLobbyTab(t); window.scrollTo({ top: 0, behavior: "smooth" }); }} accent="amber" /></div></section>;
 
   // ── Multiplayer table screen ──
   if (screen === "mp") {
