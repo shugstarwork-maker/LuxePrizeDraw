@@ -110,3 +110,14 @@ export function recordSummary(game?: SkillGameId): { wins: number; draws: number
 
 export const LEADERBOARD_NOTE =
   "Pre-launch demo ladder — your rating is real (earned on local boards); rival positions are illustrative. Live rankings settle from server-verified matches after launch. Ratings have no cash value." as const;
+
+// ── Weekly league bridge ────────────────────────────────────────────────────
+// The homepage promises poker and the skill arena feed "the same weekly
+// league" — arena results pay provisional league XP through the same ledger
+// as poker hands, so one weekly table covers every Luxe lounge.
+
+export const ARENA_XP = { win: 10, draw: 4, loss: 1 } as const;
+
+export function arenaXPFor(outcome: "win" | "draw" | "loss"): number {
+  return ARENA_XP[outcome];
+}

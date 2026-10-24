@@ -12,7 +12,8 @@ import {
   ARENA_FORMATS, ARENA_RULES, FORFEIT_GRACE_SECONDS, MATCHMAKING_TIMEOUT_SECONDS, PRIZE_ENTRY_TICKETS, PRIZE_WIN_POINTS,
   SKILL_GAMES, applyResult, matchmakingBand, skillRating, type EntryFormat, type SkillGameId,
 } from "../lib/skillGames";
-import { LEADERBOARD_NOTE, ladderRank, ladderTier, leaderboard, matchHistory, recordResult, recordSummary } from "../lib/leaderboard";
+import { ARENA_XP, LEADERBOARD_NOTE, ladderRank, ladderTier, leaderboard, matchHistory, recordResult, recordSummary } from "../lib/leaderboard";
+import { addProvisionalPoints, confirmedXP, provisionalXP } from "../lib/pokerLeague";
 
 // Demo shows a shortened grace countdown so the overlay is reviewable.
 const FORFEIT_DEMO_SECONDS = Math.min(10, FORFEIT_GRACE_SECONDS);
@@ -147,10 +148,11 @@ export function SkillGamesArena() {
     setRating(next);
     setHistoryTick((n) => n + 1);
     recordResult({ game, outcome: result, opponent: SIDES[game].b.name, ratingDelta: delta, format: "casual" });
+    addProvisionalPoints(ARENA_XP[result], `arena-${game}-${result}`); // shared weekly league ledger
     if (result === "win") play("success");
     setNote(result === "win"
-      ? `Match won — arena rating ${delta >= 0 ? "+" : ""}${delta} → ${next.toLocaleString()}.`
-      : `Honours even — arena rating ${delta >= 0 ? "+" : ""}${delta} → ${next.toLocaleString()}.`);
+      ? `Match won — arena rating ${delta >= 0 ? "+" : ""}${delta} → ${next.toLocaleString()} · +${ARENA_XP.win} league XP.`
+      : `Honours even — arena rating ${delta >= 0 ? "+" : ""}${delta} → ${next.toLocaleString()} · +${ARENA_XP.draw} league XP.`);
   };
 
   const Board = game === "chess" ? ChessBoard : game === "connect4" ? ConnectFourBoard : DraughtsBoard;
@@ -287,12 +289,14 @@ function LeaderboardPanel({ game, rating, tick }: { game: SkillGameId; rating: n
   const rank = ladderRank(game);
   const summary = recordSummary(game);
   const recent = matchHistory(game, 5);
+  const weekXP = confirmedXP() + provisionalXP();
   return <section className="mt-6 grid gap-4 lg:grid-cols-2" data-testid="arena-leaderboard">
     <div className="rounded-2xl border border-amber-200/25 bg-white/[.04] p-5">
       <div className="flex items-center justify-between gap-3">
         <h3 className="flex items-center gap-2 text-sm font-black uppercase tracking-[.2em] text-amber-200"><Crown className="h-4 w-4" /> {game === "chess" ? "Luxe Chess" : game === "draughts" ? "Draughts" : "Connect Four"} ladder</h3>
         <span className="rounded-full border border-amber-200/35 bg-amber-300/10 px-3 py-1 text-[10px] font-black text-amber-100" data-testid="arena-rank">#{rank} · {ladderTier(rating)}</span>
       </div>
+      <p className="mt-2 text-[10px] font-bold text-white/50" data-testid="arena-week-xp">Weekly league XP (all Luxe lounges): <span className="font-mono text-amber-100">{weekXP.toLocaleString()}</span> — arena wins pay +{ARENA_XP.win}, draws +{ARENA_XP.draw}</p>
       <ol className="mt-4 space-y-1.5">
         {ladder.map((e, i) => (
           <li key={e.name} data-testid={e.you ? "ladder-you" : undefined} className={`flex items-center justify-between rounded-xl border px-3 py-2 text-xs font-bold ${e.you ? "border-amber-300/50 bg-amber-400/10 text-amber-100" : "border-white/10 bg-black/25 text-white/65"}`}>

@@ -67,3 +67,20 @@ test("arena UI renders the ladder, rank badge, record strip and results feed", (
   // honesty line stays with the ladder
   assert.match(arena, /\{LEADERBOARD_NOTE\}/);
 });
+
+test("arena results pay into the shared weekly league XP ledger", async () => {
+  assert.equal(lb.ARENA_XP.win, 10);
+  assert.equal(lb.ARENA_XP.draw, 4);
+  assert.equal(lb.ARENA_XP.loss, 1);
+  assert.equal(lb.arenaXPFor("win"), 10);
+  // the arena component pushes results into the poker league ledger
+  assert.match(arena, /addProvisionalPoints\(ARENA_XP\[result\], `arena-\$\{game\}-\$\{result\}`\)/);
+  // and surfaces the weekly XP total on the ladder panel
+  assert.match(arena, /data-testid="arena-week-xp"/);
+  assert.match(arena, /confirmedXP\(\) \+ provisionalXP\(\)/);
+  // ledger integration is real
+  const pl = await import("../src/lib/pokerLeague.ts");
+  store.clear();
+  pl.addProvisionalPoints(lb.ARENA_XP.win, "arena-chess-win");
+  assert.equal(pl.provisionalXP(), 10);
+});
