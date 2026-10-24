@@ -25,7 +25,7 @@ const LOUNGE_GAMES = [
 
 const go = (href: string) => { window.history.pushState({}, "", href); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo(0, 0); };
 
-export function LoungeGamesCarousel() {
+export function LoungeGamesCarousel({ onPlayGame }: { onPlayGame?: (id: string, href: string) => void }) {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const startX = useRef<number | null>(null);
@@ -66,7 +66,7 @@ export function LoungeGamesCarousel() {
               <span><b>{g.match}</b><small>Player match</small></span>
               <span><b>{g.chips}</b><small>Free chips</small></span>
             </div>
-            <button className="lounge-stack__play" onClick={(e) => { e.stopPropagation(); go(g.href); }}>Play now <ChevronRight className="h-4 w-4" aria-hidden="true" /></button>
+            <button className="lounge-stack__play" onClick={(e) => { e.stopPropagation(); onPlayGame ? onPlayGame(g.id, g.href) : go(g.href); }}>Play now <ChevronRight className="h-4 w-4" aria-hidden="true" /></button>
           </div>
         </article>;
       })}
