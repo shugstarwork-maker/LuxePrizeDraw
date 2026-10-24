@@ -156,6 +156,69 @@ create table enforcement_actions (
   created_at timestamptz not null default now()
 );
 
+-- ── Anti-cheat engine (board games: chess, draughts, Connect Four) ─────────
+-- Perfect-information games are vulnerable to solver assistance, so every
+-- move in a prize match streams telemetry into these tables and the risk
+-- engine scores the match (shadow flag ≥60, match kill ≥75).
+
+create table arena_matches (
+  id           uuid primary key default gen_random_uuid(),
+  game         text not null check (game in ('chess','draughts','connect4')),
+  format       text not null check (format in ('casual','prize')),
+  user_id_a    uuid not null references users(id) on delete cascade,
+  user_id_b    uuid not null references users(id) on delete cascade,
+  entry_tickets integer not null default 0,           -- prize matches only; never Gold Coins
+  status       text not null default 'active'
+               check (status in ('active','completed','killed','forfeit')),
+  winner_id    uuid references users(id),
+  started_at   timestamptz not null default now(),
+  ended_at     timestamptz
+);
+
+create table move_telemetry (
+  id                uuid primary key default gen_random_uuid(),
+  match_id          uuid not null references arena_matches(id) on delete cascade,
+  user_id           uuid not null references users(id) on delete cascade,
+  move_number       smallint not null,
+  think_ms          integer not null,                 -- Module B: timing rhythm (σ < 400ms = robotic)
+  engine_match      boolean not null default false,   -- Module A: matched engine #1 choice
+  centipawn_loss    smallint,                         -- Module A: engine evaluation delta
+  focus_lost_before boolean not null default false,   -- Module C: alt-tab before the move
+  client_ping_ms    smallint,                         -- latency audit (eu-west-2 target)
+  recorded_at       timestamptz not null default now(),
+  unique (match_id, user_id, move_number)
+);
+create index move_telemetry_match_idx on move_telemetry (match_id);
+
+-- One risk report per player per match; drives the 3-strike pipeline.
+create table integrity_flags (
+  id          uuid primary key default gen_random_uuid(),
+  match_id    uuid not null references arena_matches(id) on delete cascade,
+  user_id     uuid not null references users(id) on delete cascade,
+  risk_score  smallint not null check (risk_score between 0 and 100),
+  tier        text not null check (tier in ('clean','shadow_flag','match_kill','hardware_ban')),
+  module_quality smallint not null default 0,
+  module_timing  smallint not null default 0,
+  module_focus   smallint not null default 0,
+  reasons     jsonb not null default '[]',
+  reviewed_by uuid,                                   -- human review required before hardware_ban
+  created_at  timestamptz not null default now()
+);
+create index integrity_flags_user_idx on integrity_flags (user_id, tier);
+
+-- Hardware bans blacklist device + payout identity so banned players cannot
+-- simply register a fresh account.
+create table hardware_bans (
+  id              uuid primary key default gen_random_uuid(),
+  user_id         uuid not null references users(id) on delete cascade,
+  fingerprint_hash text not null,                     -- device_fingerprints.fingerprint_hash
+  payout_hash     text,                               -- payout_methods.account_hash
+  ip_range        cidr,
+  flag_id         uuid not null references integrity_flags(id),
+  created_at      timestamptz not null default now()
+);
+create index hardware_bans_fingerprint_idx on hardware_bans (fingerprint_hash);
+
 -- ── Prize redemption (front-end preview gates on these) ─────────────────────
 -- Chips NEVER convert to cash or prizes. Redemption spends verified winnings
 -- credit only, and every order requires an approved KYC row.

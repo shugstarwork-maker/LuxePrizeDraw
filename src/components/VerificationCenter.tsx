@@ -23,6 +23,7 @@ const MODULE_LABEL: Record<string, string> = {
   C: "Module C · collusion analytics",
   payout: "Payout rails",
   redemption: "Prize redemption",
+  anticheat: "Anti-cheat engine",
 };
 
 export function VerificationCenter() {

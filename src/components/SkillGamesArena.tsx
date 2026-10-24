@@ -1,14 +1,19 @@
 import { useEffect, useRef, useState } from "react";
-import { Clock3, Crown, Gamepad2, Lock, ShieldCheck, Swords, Ticket, Users } from "lucide-react";
+import { Clock3, Crown, FlaskConical, Gamepad2, Lock, ShieldCheck, Swords, Ticket, Users } from "lucide-react";
 import { useAudio } from "../audio/AudioProvider";
 import { ChessBoard, ConnectFourBoard, DraughtsBoard } from "./GamesArena";
+import { DisconnectWarning, HardwareLockNotice, IntegrityPause, MatchKillNotice, StallWarning, type IntegrityWarning } from "./IntegrityWarnings";
+import { MatchTelemetry, MOVE_TIME_LIMIT_SECONDS, STALL_WARNING_SECONDS, assessMatch, type MoveSample } from "../lib/antiCheat";
 import { loadWallet, type Wallet } from "../lib/currencies";
 import { prizePoints } from "../lib/redemptionEngine";
 import { reviewModeEnabled } from "../lib/reviewMode";
 import {
-  ARENA_FORMATS, ARENA_RULES, MATCHMAKING_TIMEOUT_SECONDS, PRIZE_ENTRY_TICKETS, PRIZE_WIN_POINTS,
+  ARENA_FORMATS, ARENA_RULES, FORFEIT_GRACE_SECONDS, MATCHMAKING_TIMEOUT_SECONDS, PRIZE_ENTRY_TICKETS, PRIZE_WIN_POINTS,
   SKILL_GAMES, applyResult, matchmakingBand, skillRating, type EntryFormat, type SkillGameId,
 } from "../lib/skillGames";
+
+// Demo shows a shortened grace countdown so the overlay is reviewable.
+const FORFEIT_DEMO_SECONDS = Math.min(10, FORFEIT_GRACE_SECONDS);
 
 type Phase = "pick" | "queue" | "playing";
 
@@ -22,11 +27,54 @@ export function SkillGamesArena() {
   const [queueLeft, setQueueLeft] = useState(MATCHMAKING_TIMEOUT_SECONDS);
   const [note, setNote] = useState("");
   const [rating, setRating] = useState(() => skillRating("chess"));
+  const [warning, setWarning] = useState<IntegrityWarning | null>(null);
+  const [stallLeft, setStallLeft] = useState<number | null>(null);
   const review = reviewModeEnabled();
   const timer = useRef<number | null>(null);
+  const telemetry = useRef<MatchTelemetry>(new MatchTelemetry());
+  const turnStart = useRef<number>(0);
+  const focusLost = useRef(false);
 
   useEffect(() => setRating(skillRating(game)), [game]);
   useEffect(() => () => { if (timer.current) window.clearInterval(timer.current); }, []);
+
+  // Disconnect countdown: runs the grace window down; expiry = forfeit (demo
+  // returns to the picker — live servers award the win to the opponent).
+  useEffect(() => {
+    if (warning?.kind !== "disconnect") return;
+    if (warning.secondsLeft <= 0) {
+      setWarning(null);
+      setPhase("pick");
+      setNote("Grace window expired — match forfeited (demo). At launch the opponent would be awarded the win and entries.");
+      play("error");
+      return;
+    }
+    const id = window.setTimeout(() => {
+      setWarning((w) => (w?.kind === "disconnect" ? { kind: "disconnect", secondsLeft: w.secondsLeft - 1 } : w));
+    }, 1000);
+    return () => window.clearTimeout(id);
+  }, [warning, play]);
+  useEffect(() => {
+    if (phase !== "playing") return;
+    const onVis = () => {
+      if (document.hidden) { focusLost.current = true; telemetry.current.focusLost(); }
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, [phase]);
+
+  // Stall watch (per-move ceiling): warn after STALL_WARNING_SECONDS idle.
+  useEffect(() => {
+    if (phase !== "playing") { setStallLeft(null); return; }
+    turnStart.current = Date.now();
+    telemetry.current.turnStarted();
+    const id = window.setInterval(() => {
+      const idle = Math.floor((Date.now() - turnStart.current) / 1000);
+      const left = MOVE_TIME_LIMIT_SECONDS - idle;
+      setStallLeft(idle >= STALL_WARNING_SECONDS ? Math.max(0, left) : null);
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [phase, note, game]);
 
   const g = SKILL_GAMES.find((x) => x.id === game)!;
   const band = matchmakingBand(game);
@@ -52,6 +100,9 @@ export function SkillGamesArena() {
 
   const startLocal = () => {
     play("button");
+    telemetry.current = new MatchTelemetry();
+    focusLost.current = false;
+    setWarning(null);
     setPhase("playing");
     setNote("");
   };
@@ -143,13 +194,24 @@ export function SkillGamesArena() {
       </div>}
 
       {phase === "playing" && <div className="mt-5 rounded-[2rem] border border-white/15 bg-[#090b16] p-4 shadow-2xl sm:p-7" data-testid="arena-board">
-        <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <span className="inline-flex items-center gap-2 rounded-full border border-amber-200/30 bg-amber-300/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-amber-200"><Crown className="h-3.5 w-3.5" /> Casual · rating {rating.toLocaleString()}</span>
-          <button onClick={() => setPhase("pick")} className="rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-[11px] font-black text-white/70">Leave board</button>
+          <div className="flex items-center gap-2">
+            <button onClick={() => { setWarning({ kind: "disconnect", secondsLeft: FORFEIT_DEMO_SECONDS }); play("notification"); }} className="inline-flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-[10px] font-black uppercase tracking-wider text-white/60 transition hover:border-amber-200/40" data-testid="simulate-warning"><FlaskConical className="h-3.5 w-3.5" /> Demo warnings</button>
+            <button onClick={() => { setWarning({ kind: "integrity_pause", reasons: ["Demo: mechanical move pacing detected (σ=212ms across 14 moves)", "Demo: 9-move engine streak under review"] }); play("notification"); }} className="inline-flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-[10px] font-black uppercase tracking-wider text-white/60 transition hover:border-sky-300/40" data-testid="simulate-integrity"><FlaskConical className="h-3.5 w-3.5" /> Demo integrity</button>
+            <button onClick={() => setPhase("pick")} className="rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-[11px] font-black text-white/70">Leave board</button>
+          </div>
         </div>
-        <Board sound={(s) => play(s)} onResult={onResult} />
+        <Board sound={(s) => { play(s); if (s !== "button") { telemetry.current.movePlayed(); turnStart.current = Date.now(); telemetry.current.turnStarted(); focusLost.current = false; } }} onResult={onResult} />
         {note && <p className="mt-3 rounded-xl border border-emerald-300/25 bg-emerald-400/10 p-3 text-[11px] text-emerald-100" data-testid="arena-note">{note}</p>}
       </div>}
+
+      {/* Integrity warning layer */}
+      {stallLeft !== null && phase === "playing" && !warning && <StallWarning secondsLeft={stallLeft} />}
+      {warning?.kind === "disconnect" && <DisconnectWarning secondsLeft={warning.secondsLeft} onReconnected={() => { setWarning(null); play("button"); }} />}
+      {warning?.kind === "integrity_pause" && <IntegrityPause reasons={warning.reasons} onContinue={() => { setWarning(null); play("button"); }} />}
+      {warning?.kind === "match_kill" && <MatchKillNotice reasons={warning.reasons} onExit={() => { setWarning(null); setPhase("pick"); play("button"); }} />}
+      {warning?.kind === "hardware_lock" && <HardwareLockNotice />}
 
       {/* Rules */}
       <section className="mt-8 grid gap-3 sm:grid-cols-2" data-testid="arena-rules">

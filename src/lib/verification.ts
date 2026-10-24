@@ -16,7 +16,7 @@ export type KycStatus = "pending" | "approved" | "rejected" | "expired";
 
 export type SchemaTable = {
   name: string;
-  module: "A" | "B" | "C" | "payout" | "redemption" | "core";
+  module: "A" | "B" | "C" | "payout" | "redemption" | "core" | "anticheat";
   purpose: string;
   keyColumns: string[];
   links: { to: string; via: string }[];
@@ -100,6 +100,43 @@ export const SCHEMA_MAP: SchemaTable[] = [
     links: [
       { to: "users", via: "user_id" },
       { to: "redemption_items", via: "item_id" },
+    ],
+  },
+  {
+    name: "arena_matches",
+    module: "anticheat",
+    purpose: "Every board-game match (casual or prize). Server-authoritative: clients send coordinates, the server validates legality.",
+    keyColumns: ["game", "format", "user_id_a/b → users", "entry_tickets (never Gold Coins)", "status"],
+    links: [{ to: "users", via: "user_id_a / user_id_b" }],
+  },
+  {
+    name: "move_telemetry",
+    module: "anticheat",
+    purpose: "Per-move stream: think time, engine-match flag, centipawn loss, focus loss, ping. Feeds the risk engine.",
+    keyColumns: ["match_id → arena_matches", "think_ms", "engine_match", "focus_lost_before"],
+    links: [
+      { to: "arena_matches", via: "match_id" },
+      { to: "users", via: "user_id" },
+    ],
+  },
+  {
+    name: "integrity_flags",
+    module: "anticheat",
+    purpose: "Risk report per player per match. Tier drives the 3-strike pipeline: shadow flag → match kill → hardware ban (human-reviewed).",
+    keyColumns: ["risk_score 0–100", "tier", "module_quality/timing/focus", "reviewed_by"],
+    links: [
+      { to: "arena_matches", via: "match_id" },
+      { to: "users", via: "user_id" },
+    ],
+  },
+  {
+    name: "hardware_bans",
+    module: "anticheat",
+    purpose: "Confirmed cheaters blacklisted by device fingerprint, payout hash and IP range so they cannot re-register.",
+    keyColumns: ["fingerprint_hash ↔ device_fingerprints", "payout_hash ↔ payout_methods", "ip_range"],
+    links: [
+      { to: "users", via: "user_id" },
+      { to: "integrity_flags", via: "flag_id" },
     ],
   },
 ];
