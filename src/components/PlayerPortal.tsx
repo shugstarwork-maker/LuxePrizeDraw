@@ -4,6 +4,8 @@ import {
   Gamepad2, Gift, Lock, Medal, ShieldCheck, Sparkles, Star, Swords, Target, Trophy, UserRound, Zap,
 } from "lucide-react";
 import { EntrantLookup } from "./EntrantLookup";
+import { TrophyRoom } from "./TrophyRoom";
+import { HighlightsFeed } from "./HighlightsFeed";
 import {
   confirmedXP, currentLeague, loadLedger, playerFlag, provisionalXP, setPlayerFlag, tierByIndex, weeklyBoard, weeklyCutoffs,
   PROMOTE_COUNT, RELEGATE_COUNT,
@@ -180,6 +182,16 @@ export function PlayerPortal() {
                   </div>
                 ))}
               </div>
+            </article>
+
+            {/* ── Trophy room: 3D display case of league honours ── */}
+            <article className="rounded-3xl border border-white/10 bg-white/[.035] p-5 sm:p-6">
+              <TrophyRoom />
+            </article>
+
+            {/* ── Bad beat timeline: auto-clipped highlights ── */}
+            <article className="rounded-3xl border border-white/10 bg-white/[.035] p-5 sm:p-6">
+              <HighlightsFeed />
             </article>
           </div>
 

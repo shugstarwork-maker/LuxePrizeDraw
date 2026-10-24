@@ -1694,3 +1694,53 @@ body::after {
 .lounge-stack__card--poker .lounge-stack__theme { color: #ffd97a; border: 1px solid rgba(255, 217, 122, .4); }
 .lounge-stack__card--blackjack .lounge-stack__theme { color: #6ee7a0; border: 1px solid rgba(110, 231, 160, .4); }
 .lounge-stack__card--brag .lounge-stack__theme { color: #fbbf24; border: 1px solid rgba(251, 191, 36, .4); }
+
+/* ── Trophy Room — 3D career display case ────────────────────────────────── */
+.trophy-room { margin-top: 1.5rem; }
+.trophy-case {
+  position: relative; margin-top: .75rem;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 224, 149, .3);
+  background: linear-gradient(165deg, #171006, #080503 70%);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, .6), inset 0 1px 0 rgba(255, 230, 160, .12);
+  padding: 1rem;
+  transition: transform .25s ease-out;
+  transform-style: preserve-3d;
+  overflow: hidden;
+}
+.trophy-case__glass {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(115deg, rgba(255, 255, 255, .09) 0%, transparent 28%, transparent 68%, rgba(255, 255, 255, .05) 100%);
+}
+.trophy-shelf + .trophy-shelf { margin-top: 1rem; }
+.trophy-shelf__label { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: .18em; color: rgba(255, 224, 149, .55); margin-bottom: .5rem; }
+.trophy-shelf__row {
+  display: flex; gap: .5rem; overflow-x: auto; padding-bottom: .35rem;
+  scrollbar-width: none;
+}
+.trophy-shelf__row::-webkit-scrollbar { display: none; }
+.trophy-slot {
+  flex: 0 0 auto; width: 6.4rem;
+  border-radius: .9rem;
+  border: 1px solid rgba(255, 255, 255, .08);
+  background: rgba(0, 0, 0, .4);
+  padding: .6rem .5rem;
+  text-align: center;
+  color: rgba(255, 255, 255, .3);
+  transform: translateZ(18px);
+}
+.trophy-slot--earned {
+  border-color: var(--trophy-glow, #ffe095);
+  background: linear-gradient(180deg, rgba(255, 224, 149, .12), rgba(0, 0, 0, .5));
+  color: #ffe9b8;
+  box-shadow: 0 0 22px color-mix(in srgb, var(--trophy-glow, #ffe095) 30%, transparent), inset 0 0 14px rgba(255, 224, 149, .08);
+}
+.trophy-slot__icon { display: grid; place-items: center; height: 2rem; color: inherit; }
+.trophy-slot--earned .trophy-slot__icon { filter: drop-shadow(0 0 8px var(--trophy-glow, #ffe095)); }
+.trophy-slot__title { margin-top: .3rem; font-size: 9px; font-weight: 900; line-height: 1.25; }
+.trophy-slot__detail { margin-top: .2rem; font-size: 8px; line-height: 1.3; opacity: .75; }
+
+/* ── Bad Beat Timeline — highlights feed ─────────────────────────────────── */
+.highlights-feed { margin-top: 1.5rem; }
+.highlight-clip { transition: border-color .2s ease; }
+.highlight-clip:hover { border-color: rgba(255, 224, 149, .35); }

@@ -15,6 +15,9 @@ import { AccountCard } from "./AccountCard";
 import { SeasonHub } from "./SeasonHub";
 import { PokerFullscreen } from "./PokerFullscreen";
 import { recordEventResult, weekFixtures } from "../lib/pokerSeason";
+import { getSeason } from "../lib/pokerSeason";
+import { checkTrophyUnlocks, awardBracelet } from "../lib/pokerTrophies";
+import { classifyHand, recordHighlight, buildCardStrings } from "../lib/pokerHighlights";
 import { useAccount } from "../lib/useAccount";
 import { LeagueCelebration, type Celebration } from "./LeagueCelebration";
 import { LeagueRacePop, type RacePop } from "./LeagueRacePop";
@@ -170,6 +173,15 @@ export const LuxePokerLeague: React.FC = () => {
     const fromTier = tierByIndex(mv.tierIndex + (mv.moved === "promote" ? -1 : 1));
     setCelebration({ type: mv.moved, fromTier: fromTier.name, toTier: toTier.name, fromColour: fromTier.colour, toColour: toTier.colour });
     play(mv.moved === "promote" ? "levelUp" : "tableKnock");
+    // Trophy room: record the new tier (and bracelet for promotion finishes).
+    const { season } = getSeason().info;
+    if (mv.moved === "promote") {
+      const fresh = checkTrophyUnlocks(mv.tierIndex, season);
+      awardBracelet(mv.tierIndex, season);
+      if (fresh.length) note(`Trophy room updated: ${fresh.length} new honour${fresh.length === 1 ? "" : "s"} unlocked.`);
+    } else {
+      checkTrophyUnlocks(mv.tierIndex, season);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   // Board rows slide to their new position when XP changes the order (Duolingo-style FLIP race)
@@ -312,6 +324,21 @@ export const LuxePokerLeague: React.FC = () => {
       });
     }
     play("winnerReveal");
+    // Bad Beat Timeline: auto-clip notable hands for the highlights feed.
+    const showdownClip = game.board.length === 5 && youPlayed;
+    const clip = youPlayed ? classifyHand({ won: Boolean(mine), pot: mine?.amount ?? game.pot, wentToShowdown: showdownClip, handLabel: mine?.label }) : null;
+    if (clip) {
+      const { season } = getSeason().info;
+      recordHighlight({
+        type: clip.type, note: clip.note,
+        handNumber: game.handNumber,
+        table: activeTable?.name ?? "League table",
+        pot: mine?.amount ?? game.pot,
+        board: buildCardStrings(game.board),
+        yourCards: buildCardStrings(game.players.find((p) => p.id === "you")?.cards ?? []),
+        season, week: ensureWeek().week,
+      });
+    }
     if (mine) {
       play("coinWin");
       setWinFlash(true);
