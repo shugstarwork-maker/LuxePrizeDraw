@@ -33,6 +33,7 @@ import { StormBackdrop } from "./components/StormBackdrop";
 // Route-level code splitting: heavy lounges, games and info pages load on first visit,
 // keeping the initial bundle lean for the home/draws flow.
 const LuxePokerLeague = lazy(() => import("./components/LuxePokerLeague").then((m) => ({ default: m.LuxePokerLeague })));
+const PokerLeagueLanding = lazy(() => import("./components/PokerLeagueLanding").then((m) => ({ default: m.PokerLeagueLanding })));
 const ChallengeLounge = lazy(() => import("./components/ChallengeLounge").then((m) => ({ default: m.ChallengeLounge })));
 const PlayerPortal = lazy(() => import("./components/PlayerPortal").then((m) => ({ default: m.PlayerPortal })));
 const LuxeChessPage = lazy(() => import("./components/LuxeChessPage").then((m) => ({ default: m.LuxeChessPage })));
@@ -76,6 +77,7 @@ export default function App() {
     : path === "/duel" ? <><DuelRoom /><ScottishHost /><MobileDock /></>
     : path === "/lobby" ? <NeonGameLobby soundEnabled={audio.enabled} onToggleSound={() => audio.setEnabled(!audio.enabled)} />
     : path === "/poker" ? <><LuxePokerLeague /><ScottishHost /></>
+    : path === "/league" ? <><PokerLeagueLanding /><ScottishHost /><MobileDock /></>
     : path === "/chess" ? <LuxeChessPage />
     : path === "/blackjack" ? <><CardLounge game="blackjack" /><div className="poker-external-chrome"><ScottishHost /><MobileDock /></div></>
     : path === "/brag" ? <><CardLounge game="brag" /><div className="poker-external-chrome"><ScottishHost /><MobileDock /></div></>

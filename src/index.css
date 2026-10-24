@@ -1744,3 +1744,14 @@ body::after {
 .highlights-feed { margin-top: 1.5rem; }
 .highlight-clip { transition: border-color .2s ease; }
 .highlight-clip:hover { border-color: rgba(255, 224, 149, .35); }
+
+/* ── League landing marquee ticker ───────────────────────────────────────── */
+@keyframes league-marquee-scroll {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+.league-marquee { animation: league-marquee-scroll 28s linear infinite; }
+.league-marquee:hover { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .league-marquee { animation: none; }
+}
