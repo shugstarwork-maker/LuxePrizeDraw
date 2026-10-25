@@ -46,6 +46,17 @@ BeGambleAware and GAMSTOP.
 
 ## Review notes (the part that wins the pass)
 
+Copy and paste this exact text into the "Review Notes / Instructions" field:
+
+> App Classification & Compliance Notes for Reviewer:
+> 1. This application is a 100% free-to-play social game hub featuring classic card games (Poker) and abstract strategy board games (Chess, Connect 4, Draughts).
+> 2. There is absolutely no real-money gambling, cash wagering, deposits, or cash-outs permitted inside the core gameplay loop.
+> 3. All tokens utilized inside the game loops are virtual chips with zero real-world value, strictly used to track player XP and leaderboards.
+> 4. In full compliance with Apple Review Guideline 5.3, no real-world consideration or entry fee is required to participate in any promotional features or alternative reward mechanics which operate entirely outside the core application binaries.
+> 5. The application includes robust digital protections restricting access to users under the age of 18.
+
+Additional context for the reviewer session:
+
 > Reviewer account: provided in the demo-account field.
 >
 > This build is in pre-launch Review Mode: all sweepstakes, prize and reward

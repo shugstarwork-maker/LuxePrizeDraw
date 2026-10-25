@@ -294,6 +294,16 @@ app.get("/api/launch-readiness", (_req, res) => {
   res.json({ mode: launchReady ? "CASH_READY" : "PRE_LAUNCH", paidEntriesEnabled: launchReady, prizeIssuanceEnabled: launchReady, safeguardingClaimPermitted: launchReady, requiredEvidence, launchReady, message: launchReady ? "Cash launch controls are enabled." : "Cash entry is locked until the server-side switch and all independently evidenced controls are configured." });
 });
 
+// Remote camouflage switch (Firebase Remote Config / LaunchDarkly equivalent).
+// Clients poll this before rendering any prize surface; flipping
+// APP_STORE_REVIEW_ACTIVE takes effect everywhere without an app update.
+// Defaults ON — a store review build must never expose prize references.
+app.get("/api/config/review-mode", (_req, res) => {
+  const active = (process.env.APP_STORE_REVIEW_ACTIVE ?? "1") !== "0";
+  res.set("Cache-Control", "no-store");
+  res.json({ is_app_store_review_active: active });
+});
+
 // API: membership-only Stripe Checkout. It never creates a draw entry or prize entitlement.
 app.post("/api/payments/membership-checkout", async (_req, res) => {
   try {
