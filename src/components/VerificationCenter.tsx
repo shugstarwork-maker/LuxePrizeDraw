@@ -205,7 +205,7 @@ function SmsOtpDemo() {
       Try the one-phone-one-account flow. No SMS is actually sent — this demonstrates the Twilio / Firebase path that switches on at launch.
     </p>
     {stage === "enter" && <div className="mt-4 flex flex-wrap items-center gap-2">
-      <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="07123 456789" inputMode="tel"
+      <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="07123 456789" aria-label="Mobile phone number" type="tel" autoComplete="tel" inputMode="tel"
         className="w-56 rounded-xl border border-white/15 bg-black/40 px-4 py-2.5 text-sm text-white placeholder:text-white/30" data-testid="sms-phone-input" />
       <button onClick={send} className="rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-black" data-testid="sms-send">Send code</button>
     </div>}
