@@ -837,7 +837,10 @@ app.post("/api/accounts/signup", async (req, res) => {
 app.post("/api/accounts/login", async (req, res) => {
   try {
     const out = await accounts.login(String(req.body?.email ?? ""), String(req.body?.password ?? ""));
-    if (!out.ok) return res.status(401).json({ error: (out as { ok: false; error: string }).error });
+    if (!out.ok) {
+      const error = (out as { ok: false; error: string }).error;
+      return res.status(error === "too_many_attempts" ? 429 : 401).json({ error });
+    }
     return res.json(out);
   } catch { return res.status(503).json({ error: "account_storage_unavailable" }); }
 });
@@ -851,6 +854,13 @@ app.get("/api/accounts/me", async (req, res) => {
 app.post("/api/accounts/logout", async (req, res) => {
   await accounts.logout(String(req.header("authorization") ?? "").replace(/^Bearer\s+/i, ""));
   res.json({ ok: true });
+});
+app.post("/api/accounts/logout-everywhere", async (req, res) => {
+  try {
+    const ok = await accounts.logoutEverywhere(String(req.header("authorization") ?? "").replace(/^Bearer\s+/i, ""));
+    if (!ok) return res.status(401).json({ error: "not_signed_in" });
+    return res.json({ ok: true });
+  } catch { return res.status(503).json({ error: "account_storage_unavailable" }); }
 });
 app.post("/api/accounts/chips", async (req, res) => {
   try {
