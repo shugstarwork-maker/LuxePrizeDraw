@@ -27,6 +27,9 @@ export function PokerHudFrame({
   onChat,
   chatOpen,
   chatPanel,
+  ticker,
+  handStrip,
+  dock,
 }: {
   tableName: string;
   blinds: string;
@@ -44,10 +47,17 @@ export function PokerHudFrame({
   onChat: () => void;
   chatOpen: boolean;
   chatPanel: ReactNode;
+  /** Console slots (wide landscape control-room): tournament ticker, your
+   *  face-up cards on the black pad, and the action/deal dock. On narrower
+   *  layouts these render in their classic positions instead. */
+  ticker?: ReactNode;
+  handStrip?: ReactNode;
+  dock?: ReactNode;
 }) {
   return (
     <>
-      <div className="hud-zone hud-zone--tl">
+      <div className="poker-console" data-testid="poker-console">
+        <div className="hud-zone hud-zone--tl">
         <div className="hud-panel" aria-label="Table information">
           <p className="hud-panel__row"><b>{tableName}</b></p>
           <p className="hud-panel__row">Blinds {blinds} · Hand #{handNumber}</p>
@@ -68,6 +78,10 @@ export function PokerHudFrame({
           <p className="hud-panel__row">You · <b>{atTable.toLocaleString()}</b> at table</p>
           <p className="hud-panel__row">Wallet {wallet.toLocaleString()}{activeBet > 0 ? <> · active bet <b>{activeBet.toLocaleString()}</b></> : ""}</p>
         </div>
+      </div>
+        {ticker}
+        {handStrip && <div className="poker-console-hand" data-testid="poker-console-hand">{handStrip}</div>}
+        {dock}
       </div>
     </>
   );

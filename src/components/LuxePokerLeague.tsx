@@ -887,21 +887,6 @@ export const LuxePokerLeague: React.FC = () => {
   const alivePlayers = game ? game.players.filter((p) => p.chips > 0).length : 0;
   const nextTable = LEAGUE_TABLES[Math.min(league.tierIndex + 1, LEAGUE_TABLES.length - 1)];
   return <section id="poker-league" className="poker-playing-page min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-3 py-4 pb-28 text-white"><RotateGate onBack={leaveTable} />
-    <PokerTournamentTicker playersRemaining={alivePlayers} totalSeats={game?.players.length ?? 6} yourPosition={null} currentBlinds={activeTable?.blinds ?? "—"} nextBlinds={nextTable.blinds} />
-    <PokerHudFrame
-      tableName={activeTable?.name ?? "League table"} blinds={activeTable?.blinds ?? "—"} handNumber={game?.handNumber ?? 0}
-      tierName={leagueTier.name} tierColour={leagueTier.colour} leagueXp={league.xp}
-      wallet={chips} atTable={you?.chips ?? 0} activeBet={you?.bet ?? 0}
-      audioOn={enabled} onAudio={() => setEnabled(!enabled)}
-      onLobby={() => setLeaveOpen(true)}
-      onLeaderboard={() => { play("button"); setLobbyTab("league"); setScreen("lobby"); }}
-      onChat={() => { play("button"); setTableChatOpen((v) => !v); }}
-      chatOpen={tableChatOpen}
-      chatPanel={<div className="hud-chat-pop" role="log" aria-label="Table chat">
-        {feed.slice(0, 3).map((line, i) => <p key={`${line}-${i}`}>{line}</p>)}
-        <div className="hud-chat-emotes">{emotes.map((emote) => <button key={emote} type="button" onClick={() => { play("tableKnock"); note(`You to ${selectedSeat}: ${emote}`); }}>{emote}</button>)}</div>
-      </div>}
-    />
     <div className="poker-playing-wrap mx-auto max-w-5xl"><header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-3 py-2"><button onClick={() => setLeaveOpen(true)} className="inline-flex items-center gap-1 rounded-lg bg-white/10 px-3 py-2 text-xs font-black"><ChevronLeft className="h-4 w-4" />Lobby</button><span className="font-mono text-sm font-black text-amber-100">{chips.toLocaleString()} wallet · {you?.chips.toLocaleString() ?? 0} at table · <span style={{ color: leagueTier.colour }}>{leagueTier.name} {league.xp}XP</span></span><button onClick={() => setEnabled(!enabled)} className="rounded-lg bg-white/10 p-2"><Volume2 className="h-4 w-4" /></button></header><article className="poker-game-article relative mt-4 overflow-hidden rounded-[2rem] border border-amber-200/50 bg-[radial-gradient(ellipse_at_center,#2a2318,#151009_55%,#090604)] p-4 shadow-[0_0_70px_rgba(212,175,55,.22),inset_0_0_140px_rgba(0,0,0,0.5)] sm:p-6"><div className={`poker-surface-frame relative rounded-[2rem] ${winFlash ? "poker-win-flash" : ""} ${tableTheme === "onyx" ? "ring-4 ring-amber-400/50" : tableTheme === "noir" ? "ring-4 ring-zinc-400/50" : ""}`}>
               {winFlash && <div className="pointer-events-none absolute inset-0 z-20 flex items-start justify-center gap-2 pt-14">{[...Array(6)].map((_, i) => <span key={i} className="poker-chip-fly h-4 w-4 rounded-full border border-amber-200/70 bg-gradient-to-br from-amber-300 to-amber-600" style={{ animationDelay: `${i * 90}ms` }} />)}</div>}
               <PokerTableArtwork pot={game?.pot ?? 0} stage={dealerStage} winner={potWinner}><StudioBroadcastOverlay /><div className="poker-live-seats pointer-events-none absolute inset-0">{game && game.players.map((p) => {
@@ -927,16 +912,7 @@ export const LuxePokerLeague: React.FC = () => {
             </div><div className="poker-below-table relative"><div className="mb-3 flex justify-center"><PokerFullscreen /></div><div className="poker-round-meta flex justify-between text-[10px] font-black uppercase tracking-wider text-white/60"><span>{activeTable?.name} · Hand #{game?.handNumber ?? 0} · Blinds {activeTable?.blinds}</span><span className="inline-flex items-center gap-1"><Timer className="h-3 w-3" />{yourTurn ? `00:${String(seconds).padStart(2, "0")}` : game?.handOver ? "Hand over" : "Playing"}</span></div><div className="poker-round-status mt-5 rounded-xl bg-black/35 p-3 text-center text-sm text-emerald-100" role="status">{status}</div>
             <div className="mt-2 flex flex-wrap justify-center gap-1.5">{feed.slice(0, 3).map((line, i) => <span key={`${line}-${i}`} className={`rounded-full px-2.5 py-1 text-[10px] ${i === 0 ? "bg-amber-300/15 text-amber-100" : "bg-white/5 text-white/40"}`}>{line}</span>)}</div>
             <div className="poker-social-controls mt-3 flex flex-wrap justify-center gap-2">{emotes.map((emote) => <button key={emote} onClick={() => { play("tableKnock"); note(`You to ${selectedSeat}: ${emote}`); }} className="rounded-full border border-white/15 bg-white/10 px-3 py-2 text-xs font-bold">{emote}</button>)}<button onClick={() => setGiftsOpen((v) => !v)} className="rounded-full border border-amber-200/35 bg-amber-300/10 px-3 py-2 text-xs font-black text-amber-100">Send gift</button></div>{giftsOpen && <div className="mt-3 grid grid-cols-3 gap-2 rounded-xl border border-amber-200/20 bg-black/40 p-2">{gifts.map((gift) => <button key={gift.name} onClick={() => sendGift(gift)} className="rounded-lg bg-white/10 p-2 text-center text-xs"><span className="block text-lg">{gift.icon}</span><b className="block">{gift.name}</b><small className="text-amber-100">{gift.cost} chips</small></button>)}</div>}
-            {game && !game.handOver && yourTurn && <div className="poker-action-dock mt-5" role="group" aria-label="Poker actions">
-              <div className="flex items-center gap-3"><input aria-label="Raise amount" type="range" min={minRaiseTo} max={maxRaiseTo} step={activeTable?.bigBlind ?? 50} value={Math.min(Math.max(raiseTo, minRaiseTo), maxRaiseTo)} onChange={(e) => setRaiseTo(Number(e.target.value))} className="w-full accent-amber-300" disabled={maxRaiseTo <= toCall} /><span className="w-24 text-right font-mono text-xs font-black text-amber-100">{Math.min(Math.max(raiseTo, minRaiseTo), maxRaiseTo).toLocaleString()}</span></div>
-              <div className="mt-3 grid grid-cols-3 gap-2">
-                <button onClick={() => act("fold")} className="rounded-xl bg-zinc-800/90 py-4 text-xs font-black text-zinc-100 shadow-lg shadow-black/60 transition hover:bg-zinc-700 active:scale-95">Fold</button>
-                {toCall > 0 ? <button onClick={() => act("call")} className="rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-4 text-xs font-black text-black shadow-lg shadow-black/50 transition hover:brightness-110 active:scale-95">Call {Math.min(toCall, you?.chips ?? 0).toLocaleString()}</button> : <button onClick={() => act("check")} className="rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-4 text-xs font-black text-black shadow-lg shadow-black/50 transition hover:brightness-110 active:scale-95">Check</button>}
-                <button onClick={() => act("raise")} disabled={maxRaiseTo <= toCall} className="rounded-xl bg-gradient-to-b from-rose-400 to-rose-600 py-4 text-xs font-black text-white shadow-lg shadow-black/50 transition hover:brightness-110 active:scale-95 disabled:opacity-40">{raiseTo >= maxRaiseTo ? "All-in" : "Raise to"} {Math.min(Math.max(raiseTo, minRaiseTo), maxRaiseTo).toLocaleString()}</button>
-              </div>
-            </div>}
             {game && !game.handOver && !yourTurn && <p className="poker-thinking-note mt-5 flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-black/30 py-3 text-xs text-white/55"><Bot className="h-4 w-4 text-amber-200" />{game.players[game.turnIndex]?.name ?? "Table"} is thinking…</p>}
-            {game && !game.handOver && !youSeated && <button onClick={takeSeat} className="poker-deal-dock mt-4 w-full rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-4 text-sm font-black text-black shadow-lg active:scale-95">Take your seat — in from the next hand</button>}
             {game?.handOver && <div className="mt-5 grid gap-2">
               {game.winners.length > 0 && <p className={`poker-winner-banner rounded-xl border p-3 text-center text-sm font-black ${potWinner === "player" ? "border-emerald-300/40 bg-emerald-300/15 text-emerald-100" : "border-white/15 bg-white/5 text-white/75"}`}>{potWinner === "player" ? "🏆 " : ""}{game.lastAction}</p>}
               {!youSeated && <button onClick={takeSeat} disabled={Boolean(you && you.chips <= 0)} className="poker-deal-dock rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-4 text-sm font-black text-black shadow-lg active:scale-95 disabled:opacity-40">Take your seat</button>}
@@ -949,5 +925,37 @@ export const LuxePokerLeague: React.FC = () => {
       <LeagueRacePop pop={racePop} />
       {leagueGlide && <LeagueGlideOverlay event={leagueGlide} onDone={() => setLeagueGlide(null)} />}
       {leaveOpen && <div className="fixed inset-0 z-[1300] flex items-center justify-center bg-black/70 p-6" role="dialog" aria-modal="true"><div className="w-full max-w-sm rounded-2xl border border-amber-200/30 bg-zinc-950 p-5 text-center"><MessageCircle className="mx-auto h-6 w-6 text-amber-200" /><h3 className="mt-3 font-black text-amber-100">Leave {activeTable?.name}?</h3><p className="mt-2 text-xs text-white/60">Your remaining stack of {you?.chips.toLocaleString() ?? 0} chips returns to your wallet.</p><div className="mt-4 grid grid-cols-2 gap-2"><button onClick={() => setLeaveOpen(false)} className="rounded-xl bg-white/10 py-3 text-xs font-black">Stay</button><button onClick={leaveTable} className="rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-3 text-xs font-black text-black">Leave</button></div></div></div>}
-    </div></section>;
+    </div>
+    {/* Control-room console: on wide landscape this becomes the black right-hand
+        column holding nav, stats, ticker, chat, your cards and the action dock.
+        Everywhere else the wrapper is display:contents and each child keeps its
+        classic position (dock under the table, ticker bottom-left, corners). */}
+    <PokerHudFrame
+      tableName={activeTable?.name ?? "League table"} blinds={activeTable?.blinds ?? "—"} handNumber={game?.handNumber ?? 0}
+      tierName={leagueTier.name} tierColour={leagueTier.colour} leagueXp={league.xp}
+      wallet={chips} atTable={you?.chips ?? 0} activeBet={you?.bet ?? 0}
+      audioOn={enabled} onAudio={() => setEnabled(!enabled)}
+      onLobby={() => setLeaveOpen(true)}
+      onLeaderboard={() => { play("button"); setLobbyTab("league"); setScreen("lobby"); }}
+      onChat={() => { play("button"); setTableChatOpen((v) => !v); }}
+      chatOpen={tableChatOpen}
+      chatPanel={<div className="hud-chat-pop" role="log" aria-label="Table chat">
+        {feed.slice(0, 3).map((line, i) => <p key={`${line}-${i}`}>{line}</p>)}
+        <div className="hud-chat-emotes">{emotes.map((emote) => <button key={emote} type="button" onClick={() => { play("tableKnock"); note(`You to ${selectedSeat}: ${emote}`); }}>{emote}</button>)}</div>
+      </div>}
+      ticker={<PokerTournamentTicker playersRemaining={alivePlayers} totalSeats={game?.players.length ?? 6} yourPosition={null} currentBlinds={activeTable?.blinds ?? "—"} nextBlinds={nextTable.blinds} />}
+      handStrip={you && you.cards.length > 0 && !you.sittingOut ? you.cards.map((c) => <CardView key={key(c)} card={c} />) : null}
+      dock={<>
+        {game && !game.handOver && yourTurn && <div className="poker-action-dock mt-5" role="group" aria-label="Poker actions">
+          <div className="flex items-center gap-3"><input aria-label="Raise amount" type="range" min={minRaiseTo} max={maxRaiseTo} step={activeTable?.bigBlind ?? 50} value={Math.min(Math.max(raiseTo, minRaiseTo), maxRaiseTo)} onChange={(e) => setRaiseTo(Number(e.target.value))} className="w-full accent-amber-300" disabled={maxRaiseTo <= toCall} /><span className="w-24 text-right font-mono text-xs font-black text-amber-100">{Math.min(Math.max(raiseTo, minRaiseTo), maxRaiseTo).toLocaleString()}</span></div>
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            <button onClick={() => act("fold")} className="rounded-xl bg-zinc-800/90 py-4 text-xs font-black text-zinc-100 shadow-lg shadow-black/60 transition hover:bg-zinc-700 active:scale-95">Fold</button>
+            {toCall > 0 ? <button onClick={() => act("call")} className="rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-4 text-xs font-black text-black shadow-lg shadow-black/50 transition hover:brightness-110 active:scale-95">Call {Math.min(toCall, you?.chips ?? 0).toLocaleString()}</button> : <button onClick={() => act("check")} className="rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-4 text-xs font-black text-black shadow-lg shadow-black/50 transition hover:brightness-110 active:scale-95">Check</button>}
+            <button onClick={() => act("raise")} disabled={maxRaiseTo <= toCall} className="rounded-xl bg-gradient-to-b from-rose-400 to-rose-600 py-4 text-xs font-black text-white shadow-lg shadow-black/50 transition hover:brightness-110 active:scale-95 disabled:opacity-40">{raiseTo >= maxRaiseTo ? "All-in" : "Raise to"} {Math.min(Math.max(raiseTo, minRaiseTo), maxRaiseTo).toLocaleString()}</button>
+          </div>
+        </div>}
+        {game && !game.handOver && !youSeated && <button onClick={takeSeat} className="poker-deal-dock mt-4 w-full rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-4 text-sm font-black text-black shadow-lg active:scale-95">Take your seat — in from the next hand</button>}
+      </>}
+    />
+    </section>;
 };

@@ -945,29 +945,9 @@
   .poker-playing-page .poker-ticker { left:.5rem; right:auto; transform:none; max-width:52vw; overflow:hidden; bottom:4.6rem; }
   /* Bottom corners lift clear of the action dock. */
   .poker-playing-page .hud-zone--bl,.poker-playing-page .hud-zone--br { bottom:4.6rem; }
+  /* Wide screens hand all of this to the control-room console instead. */
 }
 
-/* Wide landscape (phone sideways): the black side columns become the UI rails.
-   The felt shrinks to the centre channel; the action dock, ticker, seat panel
-   and chat live in the rails — nothing floats over the cards or the pot. */
-@media (orientation:landscape) and (max-height:1200px) and (min-aspect-ratio:2/1) {
-  .poker-playing-page .poker-playing-wrap,
-  .poker-playing-page .poker-game-article,
-  .poker-playing-page .poker-surface-frame,
-  .poker-playing-page .poker-table-scroll,
-  .poker-playing-page .poker-table-artwork { left:9%; width:82%; }
-  .poker-playing-page .poker-table-artwork__live { inset:1.5rem 0 1.5rem; }
-  .poker-playing-page .poker-table-artwork__live .poker-live-seats > div { max-width:13%; }
-  /* LEFT RAIL: table info card, tournament ticker, status and chat stacked down it. */
-  .poker-playing-page .poker-ticker { left:1%; bottom:auto; top:22%; max-width:9%; white-space:normal; border-radius:.7rem; border-top:1px solid rgba(217,183,100,.35); flex-wrap:wrap; gap:.2rem .4rem; }
-  .poker-playing-page .poker-table-artwork__state { left:9.5%; }
-  /* RIGHT RAIL: your seat panel above the vertical action dock. */
-  .poker-playing-page .poker-action-dock { position:fixed; right:1%; left:auto; bottom:max(.4rem,env(safe-area-inset-bottom)); width:9%; display:flex; flex-direction:column; gap:.35rem; padding:.4rem; border:1px solid rgba(217,183,100,.3); border-radius:.9rem; background:rgba(9,7,3,.92); }
-  .poker-playing-page .poker-action-dock > .flex:first-child { order:2; }
-  .poker-playing-page .poker-action-dock > .grid { display:flex; flex-direction:column; gap:.35rem; }
-  .poker-playing-page .poker-deal-dock { position:fixed; right:1%; left:auto; bottom:max(.4rem,env(safe-area-inset-bottom)); width:9%; }
-  .poker-playing-page .hud-zone--br { right:1%; bottom:auto; top:16%; }
-}
 
 @media (orientation:landscape) and (max-height:1200px) {
   .poker-playing-page .poker-deal-dock { background:linear-gradient(#fff0b0,#ffbd22); color:#140c00; font-size:1rem; font-weight:900; min-height:2.75rem; text-shadow:none; }
@@ -1840,3 +1820,50 @@ body::after {
 .poker-bet-chips__stack i { position:absolute; left:0; width:2.1rem; height:2.1rem; border:2px dashed #ffe09a; border-radius:50%; background:linear-gradient(135deg,#e4bc58,#53370c 35%,#f8dc89 65%,#a97c24); box-shadow:0 2px #5b3c12,0 3px 4px #0009; transform:rotateX(25deg); }
 .poker-bet-chips b { padding:.1rem .35rem; border:1px solid #c4a050; border-radius:.35rem; background:#080603e8; font-size:.6rem; color:#ffe6a0; }
 .poker-bet-chips em { font-size:.5rem; font-style:normal; color:#ffd97a; }
+
+/* ══ Control-room console (wide landscape) ════════════════════════════════
+   The felt runs edge-to-edge down the left; a slim black console column on
+   the right holds every control like a control room: nav buttons, table
+   stats, the tournament ticker, your seat panel, table chat, your cards
+   face-up on a black pad, and the action dock at its foot. Nothing floats
+   over the board or the pot. Outside this mode the console wrapper is
+   transparent (display:contents) and every child keeps its classic position. */
+.poker-console { display: contents; }
+.poker-console-hand { display: none; }
+@media (orientation:landscape) and (max-height:1200px) and (min-aspect-ratio:2/1) {
+  /* The felt yields its right 17% to the console and fills the rest edge-to-edge.
+     Narrow the wrap only — the inner layers are inset:0 and follow it. */
+  .poker-playing-page:has(.poker-console) .poker-playing-wrap { position:absolute; left:0; top:0; bottom:0; right:auto; width:83%; }
+  .poker-playing-page:has(.poker-console) .poker-table-artwork > img { object-fit:cover; }
+  .poker-playing-page:has(.poker-console) .poker-table-artwork__live { inset:2.2rem 0 1.2rem; }
+  .poker-playing-page:has(.poker-console) .poker-table-artwork__live .poker-live-seats > div { max-width:11%; }
+  .poker-playing-page:has(.poker-console) .poker-table-artwork__state { left:.5rem; bottom:.5rem; }
+  .poker-playing-page:has(.poker-console) .poker-playing-wrap > header { display:none; }
+  .poker-playing-page:has(.poker-console) .poker-round-status { left:41.5%; }
+
+  /* The console column itself. */
+  .poker-playing-page .poker-console { position:fixed; top:0; right:0; bottom:0; left:auto; width:17%; z-index:1180; display:flex; flex-direction:column; gap:.4rem; padding:max(.45rem,env(safe-area-inset-top)) .5rem max(.45rem,env(safe-area-inset-bottom)); background:linear-gradient(180deg,#0b0906,#050403); border-left:1px solid rgba(217,183,100,.35); box-shadow:-18px 0 40px rgba(0,0,0,.65); overflow-y:auto; }
+  .poker-console .hud-zone { position:static; }
+  .poker-console .hud-panel { width:100%; max-width:none; }
+
+  /* Control-room order: nav, table info, ticker, your seat, chat, cards, dock. */
+  .poker-console .hud-zone--tr { order:1; display:flex; gap:.3rem; justify-content:space-between; }
+  .poker-console .hud-zone--tr .hud-icon-btn { flex:1; }
+  .poker-console .hud-zone--tl { order:2; display:block; }
+  .poker-console .poker-ticker { order:3; position:static; display:flex; flex-direction:column; align-items:flex-start; gap:.2rem; transform:none; max-width:none; white-space:normal; border-radius:.6rem; border:1px solid rgba(217,183,100,.35); border-bottom-width:1px; padding:.4rem .5rem; }
+  .poker-console .hud-zone--br { order:4; display:block; }
+  .poker-console .hud-zone--bl { order:5; display:flex; flex-direction:column; align-items:stretch; gap:.3rem; }
+  .poker-console .hud-zone--bl .hud-chat-pop { position:static; width:100%; max-height:22dvh; overflow-y:auto; }
+  .poker-console .hud-zone--bl .hud-icon-btn { align-self:flex-start; }
+
+  /* Your cards face-up on the black pad — they pop against the console. */
+  .poker-console .poker-console-hand { order:6; display:flex; justify-content:center; gap:.35rem; padding:.55rem .4rem; border:1px solid rgba(217,183,100,.45); border-radius:.7rem; background:#000; }
+  .poker-console .poker-console-hand .luxe-playing-card { transform:none; width:clamp(2.2rem,3.4vw,3.4rem); height:clamp(3.1rem,4.8vw,4.9rem); }
+
+  /* Action dock at the foot, one thumb-wide column. */
+  .poker-console .poker-action-dock { order:7; position:static; width:100%; display:flex; flex-direction:column; align-items:stretch; gap:.35rem; padding:0; margin:0; margin-top:auto; transform:none; border:0; background:transparent; box-shadow:none; }
+  .poker-console .poker-action-dock > div { margin:0; }
+  .poker-console .poker-action-dock > .grid { display:flex; flex-direction:column; gap:.35rem; }
+  .poker-console .poker-action-dock button { min-height:2.6rem; }
+  .poker-console .poker-deal-dock { order:7; position:static; width:100%; margin:0; margin-top:auto; transform:none; }
+}

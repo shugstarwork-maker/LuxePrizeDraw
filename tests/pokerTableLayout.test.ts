@@ -52,11 +52,34 @@ test("tournament ticker docks to the bottom of the table HUD, clear of the actio
   assert.doesNotMatch(css, /\.poker-ticker \{[^}]*top: 0/);       // no longer pinned to the top
 });
 
-test("wide landscape hands the black side columns to the UI rails", () => {
-  assert.match(css, /min-aspect-ratio:2\/1/);                       // wide-screen rail mode exists
-  assert.match(css, /\.poker-table-artwork \{ left:9%; width:82%/); // felt shrinks to the centre channel
-  assert.match(css, /\.poker-action-dock \{ position:fixed; right:1%/); // actions live in the right rail
-  assert.match(css, /\.poker-ticker \{ left:1%; bottom:auto; top:22%/); // ticker lives in the left rail
+test("wide landscape becomes a control room: felt edge-to-edge left, black console column right", () => {
+  assert.match(css, /min-aspect-ratio:2\/1/);                                            // wide-screen console mode exists
+  assert.match(css, /\.poker-playing-page:has\(\.poker-console\) \.poker-playing-wrap \{ position:absolute; left:0; top:0; bottom:0; right:auto; width:83%/); // felt fills the left channel
+  assert.match(css, /\.poker-playing-page:has\(\.poker-console\) \.poker-table-artwork > img \{ object-fit:cover/);        // edge-to-edge felt
+  assert.match(css, /\.poker-playing-page \.poker-console \{ position:fixed; top:0; right:0; bottom:0; left:auto; width:17%/); // console owns the right column
+});
+
+test("console column stacks stats, chat, your cards on a black pad and the dock at its foot", () => {
+  assert.match(css, /\.poker-console \.poker-ticker \{ order:3; position:static/);        // ticker in the stack
+  assert.match(css, /\.poker-console \.hud-zone--bl \.hud-chat-pop \{ position:static/);  // chat inline, never over the felt
+  assert.match(css, /\.poker-console \.poker-console-hand \{ order:6;[^}]*background:#000/); // cards pop on black
+  assert.match(css, /\.poker-console \.poker-action-dock \{ order:7; position:static/);   // dock at the foot
+});
+
+test("console wrapper is transparent outside wide landscape — classic layout untouched", () => {
+  assert.match(css, /\.poker-console \{ display: contents; \}/);
+  assert.match(css, /\.poker-console-hand \{ display: none; \}/);
+});
+
+test("HUD frame exposes the console slots and the league table wires them", () => {
+  const hud = readFileSync(new URL("../src/components/PokerHudFrame.tsx", import.meta.url), "utf8");
+  assert.match(hud, /data-testid="poker-console"/);
+  assert.match(hud, /ticker\?: ReactNode/);
+  assert.match(hud, /handStrip\?: ReactNode/);
+  assert.match(hud, /dock\?: ReactNode/);
+  assert.match(src, /ticker=\{<PokerTournamentTicker playersRemaining=\{alivePlayers\}/);
+  assert.match(src, /handStrip=\{you && you\.cards\.length > 0/);
+  assert.match(src, /dock=\{<>/);
 });
 
 test("your seat badge never drifts off its slot onto the board", () => {
