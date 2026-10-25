@@ -46,6 +46,31 @@ test("repeated failed sign-ins are refused until the window expires", async () =
   assert.deepEqual(await accounts.login("locked@luxeprize.test", "long-password-3"), { ok: false, error: "too_many_attempts" });
 });
 
+test("the lockout expires with its window, even after many failures", async () => {
+  await accounts.createAccount("expiry@luxeprize.test", "long-password-5", "X");
+  for (let i = 0; i < 10; i++) await accounts.login("expiry@luxeprize.test", "wrong-password");
+  const all = JSON.parse(fs.readFileSync(storeFile, "utf8"));
+  const entry = all["fail:expiry@luxeprize.test"];
+  assert.ok(entry.expiresAt, "every failure keeps an expiry on the counter");
+  assert.ok(entry.expiresAt <= Date.now() + 15 * 60 * 1000 + 1000);
+  entry.expiresAt = Date.now() - 1;
+  entry.value = `10:${Date.now() - 1}`;
+  fs.writeFileSync(storeFile, JSON.stringify(all));
+  assert.ok((await accounts.login("expiry@luxeprize.test", "long-password-5")).ok);
+});
+
+test("a sign-in finishing after sign out everywhere does not undo the revocation", async () => {
+  const created = await accounts.createAccount("race@luxeprize.test", "long-password-6", "Q");
+  const other = await accounts.login("race@luxeprize.test", "long-password-6");
+  assert.ok(created.ok && other.ok);
+  const pending = accounts.login("race@luxeprize.test", "long-password-6");
+  // Revoke while the sign-in is busy hashing (after it has read the account record).
+  await new Promise((r) => setTimeout(r, 15));
+  assert.equal(await accounts.logoutEverywhere(created.token), true);
+  await pending;
+  assert.equal(await accounts.profileForToken(other.token), null);
+});
+
 test("a successful sign-in clears earlier failures", async () => {
   await accounts.createAccount("reset@luxeprize.test", "long-password-4", "R");
   for (let i = 0; i < 9; i++) await accounts.login("reset@luxeprize.test", "wrong-password");

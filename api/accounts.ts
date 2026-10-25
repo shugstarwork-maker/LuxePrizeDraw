@@ -115,7 +115,7 @@ export type AccountProfile = {
   lastSeenAt: number;
 };
 
-type AccountRecord = AccountProfile & { salt: string; passHash: string; sessionsValidAfter?: number };
+type AccountRecord = AccountProfile & { salt: string; passHash: string };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const SESSION_TTL_S = 30 * 24 * 3600;
@@ -134,7 +134,7 @@ async function issueSession(s: Store, accountId: string): Promise<string> {
 function normalizeEmail(email: string) { return email.trim().toLowerCase(); }
 
 function toProfile(rec: AccountRecord): AccountProfile {
-  const { salt: _s, passHash: _p, sessionsValidAfter: _v, ...profile } = rec;
+  const { salt: _s, passHash: _p, ...profile } = rec;
   return profile;
 }
 
@@ -167,14 +167,19 @@ export async function createAccount(email: string, password: string, name: strin
 export async function login(email: string, password: string): Promise<{ ok: true; profile: AccountProfile; token: string } | { ok: false; error: string }> {
   const e = normalizeEmail(email);
   const s = await store();
+  // Stored as "<count>:<windowEndMs>"; every write re-applies the remaining TTL.
   const failKey = `fail:${e}`;
-  const failures = Number(await s.get(failKey)) || 0;
+  const [count, end] = (await s.get(failKey) ?? "").split(":").map(Number);
+  const now = Date.now();
+  const inWindow = Number.isFinite(end) && end > now;
+  const failures = inWindow ? count || 0 : 0;
   if (failures >= MAX_FAILED_LOGINS) return { ok: false, error: "too_many_attempts" };
   const id = await s.get(`acc:email:${e}`);
   const rec = id ? await readRecord(s, id) : null;
   if (!rec || !(await verifyPassword(password, rec.salt, rec.passHash))) {
     // The window starts at the first failure and is not extended by later ones.
-    await s.set(failKey, String(failures + 1), failures === 0 ? FAILED_LOGIN_WINDOW_S : undefined);
+    const windowEnd = inWindow ? end : now + FAILED_LOGIN_WINDOW_S * 1000;
+    await s.set(failKey, `${failures + 1}:${windowEnd}`, Math.max(1, Math.ceil((windowEnd - now) / 1000)));
     return { ok: false, error: "bad_credentials" };
   }
   if (failures) await s.del(failKey);
@@ -193,7 +198,8 @@ async function recordForToken(s: Store, token: string): Promise<AccountRecord | 
   const issuedAt = Number(issued);
   if (!id || !Number.isFinite(issuedAt)) return null;
   const rec = await readRecord(s, id);
-  if (!rec || issuedAt < (rec.sessionsValidAfter ?? 0)) return null;
+  // Kept under its own key so profile writes (sign-in, chip saves) can't overwrite a revocation.
+  if (!rec || issuedAt < (Number(await s.get(`acc:revoked:${id}`)) || 0)) return null;
   return rec;
 }
 
@@ -207,8 +213,7 @@ export async function logoutEverywhere(token: string): Promise<boolean> {
   const s = await store();
   const rec = await recordForToken(s, token);
   if (!rec) return false;
-  rec.sessionsValidAfter = Date.now() + 1;
-  await s.set(`acc:id:${rec.id}`, JSON.stringify(rec));
+  await s.set(`acc:revoked:${rec.id}`, String(Date.now() + 1));
   await s.del(`sess:${token}`);
   return true;
 }
