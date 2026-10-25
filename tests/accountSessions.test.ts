@@ -48,15 +48,22 @@ test("repeated failed sign-ins are refused until the window expires", async () =
 
 test("the lockout expires with its window, even after many failures", async () => {
   await accounts.createAccount("expiry@luxeprize.test", "long-password-5", "X");
-  for (let i = 0; i < 10; i++) await accounts.login("expiry@luxeprize.test", "wrong-password");
+  for (let i = 0; i < 12; i++) await accounts.login("expiry@luxeprize.test", "wrong-password");
   const all = JSON.parse(fs.readFileSync(storeFile, "utf8"));
-  const entry = all["fail:expiry@luxeprize.test"];
-  assert.ok(entry.expiresAt, "every failure keeps an expiry on the counter");
+  const entry = all["attempts:expiry@luxeprize.test"];
+  assert.ok(entry.expiresAt, "the counter always has an expiry");
   assert.ok(entry.expiresAt <= Date.now() + 15 * 60 * 1000 + 1000);
   entry.expiresAt = Date.now() - 1;
-  entry.value = `10:${Date.now() - 1}`;
   fs.writeFileSync(storeFile, JSON.stringify(all));
   assert.ok((await accounts.login("expiry@luxeprize.test", "long-password-5")).ok);
+});
+
+test("parallel wrong guesses can't get past the attempt limit", async () => {
+  await accounts.createAccount("parallel@luxeprize.test", "long-password-7", "P");
+  const results = await Promise.all(Array.from({ length: 30 }, () => accounts.login("parallel@luxeprize.test", "wrong-password")));
+  const checked = results.filter((r) => !r.ok && (r as { error: string }).error === "bad_credentials").length;
+  assert.equal(checked, 10, "only 10 guesses are actually checked");
+  assert.deepEqual(await accounts.login("parallel@luxeprize.test", "long-password-7"), { ok: false, error: "too_many_attempts" });
 });
 
 test("a sign-in finishing after sign out everywhere does not undo the revocation", async () => {

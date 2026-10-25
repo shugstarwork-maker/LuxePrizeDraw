@@ -18,6 +18,8 @@ type Entry = { value: string; expiresAt?: number };
 interface Store {
   get(key: string): Promise<string | null>;
   set(key: string, value: string, ttlSeconds?: number): Promise<void>;
+  /** Atomically add 1 and return the new count; the TTL is set when the key is created. */
+  incr(key: string, ttlSeconds: number): Promise<number>;
   del(key: string): Promise<void>;
 }
 
@@ -29,6 +31,12 @@ function redisStore(): Store {
     async get(key) { const v = await r.get<string>(key); return v == null ? null : typeof v === "string" ? v : JSON.stringify(v); },
     async set(key, value, ttl) { if (ttl) await r.set(key, value, { ex: ttl }); else await r.set(key, value); },
     async del(key) { await r.del(key); },
+    async incr(key, ttl) {
+      const n = await r.incr(key);
+      // Also repair a key left without a TTL (e.g. if a previous EXPIRE call failed).
+      if (n === 1 || (await r.ttl(key)) === -1) await r.expire(key, ttl);
+      return n;
+    },
   };
 }
 
@@ -52,6 +60,14 @@ function fileStore(): Store {
     async get(key) { return read()[key]?.value ?? null; },
     async set(key, value, ttl) { const all = read(); all[key] = { value, expiresAt: ttl ? Date.now() + ttl * 1000 : undefined }; write(all); },
     async del(key) { const all = read(); delete all[key]; write(all); },
+    // Synchronous read-modify-write, so atomic within this single-process demo store.
+    async incr(key, ttl) {
+      const all = read();
+      const n = (Number(all[key]?.value) || 0) + 1;
+      all[key] = { value: String(n), expiresAt: all[key]?.expiresAt ?? Date.now() + ttl * 1000 };
+      write(all);
+      return n;
+    },
   };
 }
 
@@ -119,7 +135,7 @@ type AccountRecord = AccountProfile & { salt: string; passHash: string };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const SESSION_TTL_S = 30 * 24 * 3600;
-// Failed sign-ins per email: after MAX_FAILED_LOGINS within the window, refuse until it expires.
+// Sign-in attempts per email: after MAX_FAILED_LOGINS within the window, refuse until it expires.
 const MAX_FAILED_LOGINS = 10;
 const FAILED_LOGIN_WINDOW_S = 15 * 60;
 
@@ -167,22 +183,18 @@ export async function createAccount(email: string, password: string, name: strin
 export async function login(email: string, password: string): Promise<{ ok: true; profile: AccountProfile; token: string } | { ok: false; error: string }> {
   const e = normalizeEmail(email);
   const s = await store();
-  // Stored as "<count>:<windowEndMs>"; every write re-applies the remaining TTL.
-  const failKey = `fail:${e}`;
-  const [count, end] = (await s.get(failKey) ?? "").split(":").map(Number);
-  const now = Date.now();
-  const inWindow = Number.isFinite(end) && end > now;
-  const failures = inWindow ? count || 0 : 0;
-  if (failures >= MAX_FAILED_LOGINS) return { ok: false, error: "too_many_attempts" };
+  // Every attempt is counted atomically *before* the password is checked, so parallel
+  // guesses can't share a stale count. A successful sign-in clears the counter. The
+  // window starts at the first attempt and is not extended by later ones.
+  const attemptKey = `attempts:${e}`;
+  const attempts = await s.incr(attemptKey, FAILED_LOGIN_WINDOW_S);
+  if (attempts > MAX_FAILED_LOGINS) return { ok: false, error: "too_many_attempts" };
   const id = await s.get(`acc:email:${e}`);
   const rec = id ? await readRecord(s, id) : null;
   if (!rec || !(await verifyPassword(password, rec.salt, rec.passHash))) {
-    // The window starts at the first failure and is not extended by later ones.
-    const windowEnd = inWindow ? end : now + FAILED_LOGIN_WINDOW_S * 1000;
-    await s.set(failKey, `${failures + 1}:${windowEnd}`, Math.max(1, Math.ceil((windowEnd - now) / 1000)));
     return { ok: false, error: "bad_credentials" };
   }
-  if (failures) await s.del(failKey);
+  await s.del(attemptKey);
   if (needsRehash(rec.passHash)) rec.passHash = await hashPassword(password, rec.salt);
   rec.lastSeenAt = Date.now();
   await s.set(`acc:id:${rec.id}`, JSON.stringify(rec));
