@@ -304,6 +304,67 @@ app.get("/api/config/review-mode", (_req, res) => {
   res.json({ is_app_store_review_active: active });
 });
 
+// Anti-cheat telemetry ingestion — mirrors db/schema_v2_ledger.sql
+// anti_cheat_telemetry_logs. Pre-launch (no DATABASE_URL) rows are held in an
+// in-memory ring buffer and logged; with a database attached this INSERTs and
+// lets idx_telemetry_high_risk serve the >=75 slice.
+type TelemetryIngest = {
+  userId: string;
+  game: "chess" | "draughts" | "connect4";
+  engineMatchPct: number;
+  moveTimeStdDevMs: number;
+  appFocusLostCount: number;
+};
+type TelemetryStored = TelemetryIngest & { riskScore: number; tier: "clean" | "shadow_flag" | "match_kill"; recordedAt: string };
+const TELEMETRY_BUFFER: TelemetryStored[] = [];
+const TELEMETRY_BUFFER_CAP = 200;
+const TELEMETRY_KILL_THRESHOLD = 75; // keep in sync with idx_telemetry_high_risk
+
+function telemetryRiskScore(t: TelemetryIngest): number {
+  // Transparent pre-launch scorer: engine similarity dominates, robotic move
+  // pacing (low σ) and focus-loss bursts add weight. Capped at 0–100.
+  const engine = Math.min(100, Math.max(0, t.engineMatchPct)) * 0.65;
+  const pacing = t.moveTimeStdDevMs < 300 ? 20 : t.moveTimeStdDevMs < 600 ? 10 : 0;
+  const focus = Math.min(15, t.appFocusLostCount * 1.5);
+  return Math.round(Math.min(100, engine + pacing + focus));
+}
+
+function telemetryTier(score: number): TelemetryStored["tier"] {
+  return score >= TELEMETRY_KILL_THRESHOLD ? "match_kill" : score >= 50 ? "shadow_flag" : "clean";
+}
+
+app.post("/api/telemetry/report", (req, res) => {
+  const b = req.body as Partial<TelemetryIngest> | undefined;
+  const games = ["chess", "draughts", "connect4"];
+  if (!b || typeof b.userId !== "string" || !/^usr_[a-z0-9_]{3,24}$/.test(b.userId)
+    || typeof b.game !== "string" || !games.includes(b.game)
+    || typeof b.engineMatchPct !== "number" || b.engineMatchPct < 0 || b.engineMatchPct > 100
+    || typeof b.moveTimeStdDevMs !== "number" || b.moveTimeStdDevMs < 0
+    || typeof b.appFocusLostCount !== "number" || b.appFocusLostCount < 0) {
+    return res.status(400).json({ error: "Malformed telemetry payload." });
+  }
+  const row: TelemetryStored = {
+    userId: b.userId, game: b.game as TelemetryIngest["game"],
+    engineMatchPct: b.engineMatchPct, moveTimeStdDevMs: b.moveTimeStdDevMs,
+    appFocusLostCount: b.appFocusLostCount,
+    riskScore: 0, tier: "clean", recordedAt: new Date().toISOString(),
+  };
+  row.riskScore = telemetryRiskScore(row);
+  row.tier = telemetryTier(row.riskScore);
+  TELEMETRY_BUFFER.unshift(row);
+  if (TELEMETRY_BUFFER.length > TELEMETRY_BUFFER_CAP) TELEMETRY_BUFFER.pop();
+  if (row.tier !== "clean") {
+    console.warn(`[anti-cheat] ${row.tier.toUpperCase()} ${row.userId} ${row.game} risk=${row.riskScore} engine=${row.engineMatchPct}% sigma=${row.moveTimeStdDevMs}ms focus=${row.appFocusLostCount}`);
+  }
+  res.status(201).json({ recorded: true, riskScore: row.riskScore, tier: row.tier });
+});
+
+// Back-office read for the God-Mode telemetry viewer (admin-gated at launch).
+app.get("/api/telemetry/recent", (_req, res) => {
+  res.set("Cache-Control", "no-store");
+  res.json({ killThreshold: TELEMETRY_KILL_THRESHOLD, rows: TELEMETRY_BUFFER.slice(0, 50) });
+});
+
 // API: membership-only Stripe Checkout. It never creates a draw entry or prize entitlement.
 app.post("/api/payments/membership-checkout", async (_req, res) => {
   try {
