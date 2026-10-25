@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Crown, Trophy, Volume2, VolumeX, MessageCircle, Users, HelpCircle, PanelRightClose, PanelRightOpen, Settings, Info, LogOut, Wallet, Coins } from "lucide-react";
+import { ChevronLeft, ChevronRight, Crown, Trophy, Volume2, VolumeX, MessageCircle, Users, HelpCircle, PanelRightClose, PanelRightOpen, Settings, Info, LogOut, Wallet } from "lucide-react";
 import { useState, type MouseEvent, type ReactNode } from "react";
 
 /**
@@ -93,29 +93,23 @@ export function PokerHudFrame({
         <button type="button" className="console-nav-btn" aria-label={audioOn ? "Mute audio" : "Unmute audio"} onClick={onAudio}>{audioOn ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}<span>Sound</span></button>
       </div>
 
-      {/* Table card — tier coin beside the title, like the pro lobby cards. */}
+      {/* Table card. */}
       <div className="hud-zone hud-zone--tl">
         <div className="hud-panel console-table-card" aria-label="Table information">
-          <span className="console-table-card__coin" aria-hidden="true"><Crown className="h-5 w-5" /></span>
-          <div className="console-table-card__body">
-            <p className="hud-panel__row console-table-card__title"><b>{tableName}</b></p>
-            <p className="hud-panel__row">Blinds {blinds} · Hand #{handNumber}</p>
-            <p className="hud-panel__row"><span style={{ color: tierColour }}>{tierName} League</span> · {leagueXp} XP</p>
-          </div>
+          <p className="hud-panel__row console-table-card__title"><Crown className="h-3.5 w-3.5" /><b>{tableName}</b></p>
+          <p className="hud-panel__row">Blinds {blinds} · Hand #{handNumber}</p>
+          <p className="hud-panel__row"><span style={{ color: tierColour }}>{tierName} League</span> · {leagueXp} XP</p>
         </div>
       </div>
 
       {ticker}
 
-      {/* Seat & stacks — chips icon header, wallet icon beside the numbers. */}
+      {/* Seat & stacks. */}
       <div className="hud-zone hud-zone--br">
-        <p className="console-section"><Coins className="h-3.5 w-3.5" />Seat &amp; Stacks</p>
-        <div className="hud-panel console-seat-panel" aria-label="Your seat">
-          <span className="console-seat-panel__icon" aria-hidden="true"><Wallet className="h-5 w-5" /></span>
-          <div>
-            <p className="hud-panel__row">You · <b>{atTable.toLocaleString()}</b> at table</p>
-            <p className="hud-panel__row">Wallet {wallet.toLocaleString()}{activeBet > 0 ? <> · active bet <b>{activeBet.toLocaleString()}</b></> : ""}</p>
-          </div>
+        <p className="console-section"><Wallet className="h-3 w-3" />Seat &amp; Stacks</p>
+        <div className="hud-panel" aria-label="Your seat">
+          <p className="hud-panel__row">You · <b>{atTable.toLocaleString()}</b> at table</p>
+          <p className="hud-panel__row">Wallet {wallet.toLocaleString()}{activeBet > 0 ? <> · active bet <b>{activeBet.toLocaleString()}</b></> : ""}</p>
         </div>
       </div>
 
