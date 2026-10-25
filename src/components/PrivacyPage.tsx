@@ -16,6 +16,7 @@ const sections: { title: string; body: string[] }[] = [
     body: [
       "Free-play account: if you create an account we store your email address, display name, a scrypt hash of your password (never the password itself), your free-play chip balance, and when the account was created and last used. Free-play chips have no cash value.",
       "Sign-in sessions: each sign-in creates a random session token that expires after 30 days. You can end every session at once with “Sign out on all devices”.",
+      "Password resets: if you ask to reset your password we email a one-time link to your address. It expires after 30 minutes.",
       "Security records: sign-in attempts are counted against the email address for up to 15 minutes to stop password guessing. The count is cleared when you sign in successfully and otherwise deleted automatically.",
       "Messages to our assistants: if you use an AI assistant feature, the text you type is sent to our AI provider through Vercel AI Gateway to generate a reply. Please don't include personal details you don't want processed.",
       "Usage and performance: we use Vercel Web Analytics and Speed Insights to count page views and measure loading speed. These are aggregated and do not use cookies or build a profile of you.",
@@ -39,19 +40,19 @@ const sections: { title: string; body: string[] }[] = [
   {
     title: "Who we share it with",
     body: [
-      "Our service providers process data on our behalf only: hosting (Vercel), account and game storage (Upstash), database hosting (Neon), and AI replies (Vercel AI Gateway and the model provider it routes to). Some providers may process data outside the UK. Where they do, we rely on UK adequacy regulations or approved contractual safeguards.",
+      "Our service providers process data on our behalf only: hosting (Render and Vercel), account and game storage (Upstash), database hosting (Neon), account emails (Resend), and AI replies (Vercel AI Gateway and the model provider it routes to). Some providers may process data outside the UK. Where they do, we rely on UK adequacy regulations or approved contractual safeguards.",
     ],
   },
   {
     title: "How long we keep it",
     body: [
-      "Account details are kept until you ask us to delete the account. Sessions expire after 30 days and sign-in attempt counters after 15 minutes. Analytics are aggregated and kept according to our provider’s retention period.",
+      "Account details are kept until you delete the account (account card → “Delete account”) or ask us to. Sessions expire after 30 days and sign-in attempt counters after 15 minutes. Analytics are aggregated and kept according to our provider’s retention period.",
     ],
   },
   {
     title: "Your rights",
     body: [
-      "Under UK GDPR you can ask for a copy of your data, ask us to correct or delete it, object to or restrict how we use it, and ask for it in a portable format. Email director@luxeprizedraw.com from the address on your account. We will respond within one month.",
+      "Under UK GDPR you can ask for a copy of your data, ask us to correct or delete it, object to or restrict how we use it, and ask for it in a portable format. You can download your account data and delete your account yourself from the account card. For anything else, email director@luxeprizedraw.com from the address on your account and we will respond within one month.",
       "If you are unhappy with how we handle your data you can complain to the Information Commissioner’s Office (ico.org.uk, 0303 123 1113). We would appreciate the chance to resolve it first.",
     ],
   },
