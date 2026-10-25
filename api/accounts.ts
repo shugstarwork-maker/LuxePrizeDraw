@@ -1,5 +1,6 @@
 // Player accounts — email + password sign-up, session tokens, persistent profiles.
-// Passwords are salted + SHA-256 hashed (demo-grade; swap for bcrypt/argon2 in production).
+// Passwords are hashed with scrypt (salted, memory-hard). Older accounts hashed with
+// salted SHA-256 still sign in and are re-hashed with scrypt on their next login.
 // Sessions are random 256-bit tokens stored with a 30-day TTL.
 // Storage: Upstash Redis when reachable (production), otherwise a local JSON file
 // (demo/offline sandbox). Accounts stay free-play: no payments, no cash value —
@@ -66,8 +67,38 @@ async function store(): Promise<Store> {
   return cached;
 }
 
-const hashPassword = (password: string, salt: string) =>
-  crypto.createHash("sha256").update(`${salt}:${password}`).digest("hex");
+// scrypt cost parameters are stored in the hash ("scrypt$N$r$p$hex") so they can be
+// raised later without breaking existing accounts. N=2^15, r=8 uses ~32 MiB per hash.
+const SCRYPT = { N: 1 << 15, r: 8, p: 1, keylen: 32 };
+const scryptAsync = (password: string, salt: string, N: number, r: number, p: number, keylen: number) =>
+  new Promise<Buffer>((resolve, reject) =>
+    crypto.scrypt(password, salt, keylen, { N, r, p, maxmem: 256 * N * r }, (err, key) => (err ? reject(err) : resolve(key))));
+
+export async function hashPassword(password: string, salt: string): Promise<string> {
+  const { N, r, p, keylen } = SCRYPT;
+  const key = await scryptAsync(password, salt, N, r, p, keylen);
+  return `scrypt$${N}$${r}$${p}$${key.toString("hex")}`;
+}
+
+/** Legacy hashes are bare SHA-256 hex; anything not using the current scrypt params needs re-hashing. */
+export function needsRehash(passHash: string): boolean {
+  const { N, r, p } = SCRYPT;
+  return !passHash.startsWith(`scrypt$${N}$${r}$${p}$`);
+}
+
+export async function verifyPassword(password: string, salt: string, passHash: string): Promise<boolean> {
+  let attempt: Buffer, expected: Buffer;
+  if (passHash.startsWith("scrypt$")) {
+    const [, n, r, p, hex] = passHash.split("$");
+    expected = Buffer.from(hex ?? "", "hex");
+    if (!expected.length) return false;
+    attempt = await scryptAsync(password, salt, Number(n), Number(r), Number(p), expected.length);
+  } else {
+    expected = Buffer.from(passHash, "hex");
+    attempt = crypto.createHash("sha256").update(`${salt}:${password}`).digest();
+  }
+  return attempt.length === expected.length && crypto.timingSafeEqual(attempt, expected);
+}
 
 export type AccountProfile = {
   id: string;            // ACC-XXXXXXXX
@@ -107,7 +138,7 @@ export async function createAccount(email: string, password: string, name: strin
   const rec: AccountRecord = {
     id: `ACC-${crypto.randomBytes(4).toString("hex").toUpperCase()}`,
     email: e, name: name.trim().slice(0, 24) || "Player",
-    salt, passHash: hashPassword(password, salt),
+    salt, passHash: await hashPassword(password, salt),
     chips: 1000, createdAt: Date.now(), lastSeenAt: Date.now(),
   };
   await s.set(`acc:id:${rec.id}`, JSON.stringify(rec));
@@ -124,10 +155,10 @@ export async function login(email: string, password: string): Promise<{ ok: true
   if (!id) return { ok: false, error: "bad_credentials" };
   const rec = await readRecord(s, id);
   if (!rec) return { ok: false, error: "bad_credentials" };
-  const attempt = hashPassword(password, rec.salt);
-  if (attempt.length !== rec.passHash.length || !crypto.timingSafeEqual(Buffer.from(attempt), Buffer.from(rec.passHash))) {
+  if (!(await verifyPassword(password, rec.salt, rec.passHash))) {
     return { ok: false, error: "bad_credentials" };
   }
+  if (needsRehash(rec.passHash)) rec.passHash = await hashPassword(password, rec.salt);
   rec.lastSeenAt = Date.now();
   await s.set(`acc:id:${rec.id}`, JSON.stringify(rec));
   const token = crypto.randomBytes(32).toString("hex");
