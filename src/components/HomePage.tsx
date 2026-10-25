@@ -222,15 +222,16 @@ export const HomePage: React.FC = () => (
 
     {/* ── H. Footer links ── */}
     <section className="border-t border-white/10 px-5 py-8">
-      <div className="mx-auto grid max-w-4xl grid-cols-2 gap-x-6 gap-y-2.5 text-xs font-bold text-white/60 sm:grid-cols-4">
-        <button type="button" onClick={() => go("/launch-build")} className="text-left hover:text-amber-200">How it works</button>
-        <button type="button" onClick={() => go("/draws")} className="text-left hover:text-amber-200">Prize draws</button>
-        <button type="button" onClick={() => go("/serenity")} className="text-left hover:text-amber-200">Community Fund</button>
-        <button type="button" onClick={() => go("/credentials")} className="text-left hover:text-amber-200">Partner with us</button>
-        <button type="button" onClick={() => go("/responsible-play")} className="text-left hover:text-amber-200">Responsible play</button>
-        <button type="button" onClick={() => go("/terms")} className="text-left hover:text-amber-200">Terms &amp; rules</button>
-        <button type="button" onClick={() => go("/community")} className="text-left hover:text-amber-200">Community</button>
-        <button type="button" onClick={() => go("/economics")} className="text-left hover:text-amber-200">Draw economics</button>
+      <div className="mx-auto grid max-w-4xl grid-cols-2 gap-x-6 gap-y-0.5 text-xs font-bold text-white/60 sm:grid-cols-4">
+        <button type="button" onClick={() => go("/launch-build")} className="min-h-6 py-1 text-left hover:text-amber-200">How it works</button>
+        <button type="button" onClick={() => go("/draws")} className="min-h-6 py-1 text-left hover:text-amber-200">Prize draws</button>
+        <button type="button" onClick={() => go("/serenity")} className="min-h-6 py-1 text-left hover:text-amber-200">Community Fund</button>
+        <button type="button" onClick={() => go("/credentials")} className="min-h-6 py-1 text-left hover:text-amber-200">Partner with us</button>
+        <button type="button" onClick={() => go("/responsible-play")} className="min-h-6 py-1 text-left hover:text-amber-200">Responsible play</button>
+        <button type="button" onClick={() => go("/terms")} className="min-h-6 py-1 text-left hover:text-amber-200">Terms &amp; rules</button>
+        <button type="button" onClick={() => go("/privacy")} className="min-h-6 py-1 text-left hover:text-amber-200">Privacy &amp; cookies</button>
+        <button type="button" onClick={() => go("/community")} className="min-h-6 py-1 text-left hover:text-amber-200">Community</button>
+        <button type="button" onClick={() => go("/economics")} className="min-h-6 py-1 text-left hover:text-amber-200">Draw economics</button>
       </div>
       <p className="mx-auto mt-6 flex max-w-4xl items-center gap-1.5 text-[10px] text-white/35"><Coins className="h-3.5 w-3.5 text-amber-200/60" />LuxePrizeDraw Ltd · pre-launch preview · draft rules require UK legal approval before entries open.</p>
     </section>

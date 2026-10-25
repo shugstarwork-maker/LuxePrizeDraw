@@ -51,6 +51,7 @@ const PartnershipCampaignPage = lazy(() => import("./components/PartnershipCampa
 const WelcomePage = lazy(() => import("./components/WelcomePage").then((m) => ({ default: m.WelcomePage })));
 const SerenityCharityPage = lazy(() => import("./components/SerenityCharityPage").then((m) => ({ default: m.SerenityCharityPage })));
 const CashGiveawaysPage = lazy(() => import("./components/CashGiveawaysPage").then((m) => ({ default: m.CashGiveawaysPage })));
+const PrivacyPage = lazy(() => import("./components/PrivacyPage").then((m) => ({ default: m.PrivacyPage })));
 const TermsPage = lazy(() => import("./components/TermsPage").then((m) => ({ default: m.TermsPage })));
 const CredentialsPartnershipsPage = lazy(() => import("./components/CredentialsPartnershipsPage").then((m) => ({ default: m.CredentialsPartnershipsPage })));
 const EconomicsPage = lazy(() => import("./components/EconomicsPage").then((m) => ({ default: m.EconomicsPage })));
@@ -74,6 +75,7 @@ export default function App() {
     : path === "/serenity" ? <SerenityCharityPage />
     : path === "/cash-giveaways" ? <CashGiveawaysPage />
     : path === "/terms" ? <TermsPage />
+    : path === "/privacy" ? <PrivacyPage />
     : path === "/credentials" ? <CredentialsPartnershipsPage />
     : path === "/economics" ? <EconomicsPage />
     : path === "/launch-build" ? <LaunchBuildPage />
@@ -103,7 +105,7 @@ export default function App() {
 
   const category = path === "/category" ? new URLSearchParams(window.location.search).get("name") : path === "/sports-cars" ? "Cars" : "";
   const backdropTheme = path === "/" ? "money" : category === "Cars" ? "cars" : category === "Cash" || category === "Bitcoin" ? "money" : undefined;
-  return <div className="storm-page luxe-brand-theme"><div className="storm-page__content"><OwnershipNotice />{page}<footer className="border-t border-white/10 bg-black/60 px-4 py-6 pb-28 text-center text-xs text-white/65 sm:pb-6"><a href="/terms" onClick={(e) => { e.preventDefault(); go("/terms"); }} className="font-bold text-amber-200 underline underline-offset-4">General terms for all draws</a><p className="mt-2">Pre-launch · Draft rules require legal approval before entries open.</p></footer><IntellectualPropertyNotice /></div><StormBackdrop theme={backdropTheme} />{path !== "/lobby" && <AudioControls />}<InstallAppPrompt /><RealityCheck /></div>;
+  return <div className="storm-page luxe-brand-theme"><div className="storm-page__content"><OwnershipNotice />{page}<footer className="border-t border-white/10 bg-black/60 px-4 py-6 pb-28 text-center text-xs text-white/65 sm:pb-6"><a href="/terms" onClick={(e) => { e.preventDefault(); go("/terms"); }} className="font-bold text-amber-200 underline underline-offset-4">General terms for all draws</a><span className="mx-2 text-white/30">·</span><a href="/privacy" onClick={(e) => { e.preventDefault(); go("/privacy"); }} className="font-bold text-amber-200 underline underline-offset-4">Privacy &amp; cookies</a><p className="mt-2">Pre-launch · Draft rules require legal approval before entries open.</p></footer><IntellectualPropertyNotice /></div><StormBackdrop theme={backdropTheme} />{path !== "/lobby" && <AudioControls />}<InstallAppPrompt /><RealityCheck /></div>;
 }
 
 function SiteContent({ path }: { path: string }) {

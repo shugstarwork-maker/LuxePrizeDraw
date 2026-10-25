@@ -104,7 +104,7 @@ export function PlayerPortal() {
           </div>
         </header>
 
-        <div className="grid gap-5 lg:grid-cols-[1.15fr_.85fr]">
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.15fr_.85fr]">
           <div className="space-y-5">
 
             {/* ── League positioning ── */}

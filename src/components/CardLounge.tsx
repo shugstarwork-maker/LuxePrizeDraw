@@ -162,7 +162,7 @@ export function CardLounge({ game }: { game: LoungeGame }) {
         <header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-3 py-2">
           <span className="inline-flex items-center gap-2 text-sm font-black text-amber-100"><Spade className="h-4 w-4 text-amber-300" />{meta.title}</span>
           <span className="font-mono text-sm font-black text-amber-100">{chips.toLocaleString()} chips · <span style={{ color: leagueTier.colour }}>{leagueTier.name}</span></span>
-          <button onClick={() => setMuted(!muted)} className="rounded-lg bg-white/10 p-2">{muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}</button>
+          <button onClick={() => setMuted(!muted)} aria-label={muted ? "Turn sound on" : "Turn sound off"} aria-pressed={muted} className="rounded-lg bg-white/10 p-2">{muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}</button>
         </header>
 
         <div className="lounge-carousel-card mt-5">
@@ -219,7 +219,7 @@ export function CardLounge({ game }: { game: LoungeGame }) {
       <header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-3 py-2">
         <button onClick={leave} className="inline-flex items-center gap-1 rounded-lg bg-white/10 px-3 py-2 text-xs font-black"><ChevronLeft className="h-4 w-4" />Lobby</button>
         <span className="font-mono text-sm font-black text-amber-100">{chips.toLocaleString()} wallet · <span style={{ color: leagueTier.colour }}>{leagueTier.name} {league.xp}XP</span></span>
-        <button onClick={() => setMuted(!muted)} className="rounded-lg bg-white/10 p-2">{muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}</button>
+        <button onClick={() => setMuted(!muted)} aria-label={muted ? "Turn sound on" : "Turn sound off"} aria-pressed={muted} className="rounded-lg bg-white/10 p-2">{muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}</button>
       </header>
       <article className="poker-game-article relative mt-4 overflow-hidden rounded-[2rem] border border-amber-200/50 p-4 sm:p-6">
         <div className="poker-surface-frame relative rounded-[2rem]">
