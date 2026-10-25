@@ -95,3 +95,27 @@ test("responsible play page offers custom caps and permanent exclusion", () => {
   const rp = readFileSync(new URL("../src/lib/responsiblePlay.ts", import.meta.url), "utf8");
   assert.match(rp, /permanent: \{ label: "Permanent exclusion"/);
 });
+
+test("telemetry feed mirrors anti_cheat_telemetry_logs and kill threshold slice", () => {
+  const feed = ops.telemetryFeed();
+  assert.ok(feed.length >= 5);
+  for (const row of feed) {
+    assert.ok(row.riskScore >= 0 && row.riskScore <= 100);
+    assert.ok(row.engineMatchPct >= 0 && row.engineMatchPct <= 100);
+    assert.ok(row.moveTimeStdDevMs > 0);
+    assert.ok(row.appFocusLostCount >= 0);
+  }
+  const high = ops.highRiskTelemetry(feed);
+  assert.ok(high.every((r) => r.riskScore >= ops.TELEMETRY_KILL_THRESHOLD));
+  assert.equal(ops.TELEMETRY_KILL_THRESHOLD, 75); // matches idx_telemetry_high_risk
+});
+
+test("admin UI renders the live telemetry panel with threshold highlighting", () => {
+  const src = readFileSync(new URL("../src/components/AdminOpsCenter.tsx", import.meta.url), "utf8");
+  assert.match(src, /data-testid="ops-telemetry"/);
+  assert.match(src, /data-testid=\{`telemetry-\$\{r\.id\}`\}/);
+  assert.match(src, /telemetry-high-risk-count/);
+  assert.match(src, /anti_cheat_telemetry_logs/);
+  assert.match(src, /idx_telemetry_high_risk/);
+  assert.match(src, /telemetryFeed\(\)/);
+});

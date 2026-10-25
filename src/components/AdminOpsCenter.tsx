@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { BadgePoundSterling, ClipboardCheck, Coins, FileCheck2, Gauge, MailCheck, ScrollText, ShieldAlert, ShieldCheck } from "lucide-react";
 import {
-  AMOE_RULES, adminAuditTrail, clearFlag, creditPostalEntry, economyInvariants, flagQueue, issueHardwareBan,
-  payoutQueue, approvePayout, rejectPayout, tokenLedger,
+  AMOE_RULES, adminAuditTrail, clearFlag, creditPostalEntry, economyInvariants, flagQueue, highRiskTelemetry, issueHardwareBan,
+  payoutQueue, approvePayout, rejectPayout, telemetryFeed, tokenLedger,
 } from "../lib/adminOps";
 import { VOUCHER_BRANDS } from "../lib/redemptionEngine";
 import { formatPence } from "../lib/redemption";
@@ -20,6 +20,8 @@ export function AdminOpsCenter() {
   void tick;
 
   const flags = flagQueue();
+  const telemetry = telemetryFeed();
+  const highRisk = highRiskTelemetry(telemetry);
   const payouts = payoutQueue();
   const ledger = tokenLedger();
   const invariants = economyInvariants();
@@ -49,6 +51,28 @@ export function AdminOpsCenter() {
               </div>
             )}
             {f.reviewedBy && <p className="mt-2 text-[10px] text-white/40">Reviewed by {f.reviewedBy}</p>}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* 1b. Live anti-cheat telemetry stream */}
+    <div className="mt-6 rounded-2xl border border-white/10 bg-white/[.03] p-5" data-testid="ops-telemetry">
+      <h3 className="flex items-center gap-2 text-sm font-black uppercase tracking-wider text-white/85"><Gauge className="h-4 w-4 text-sky-300" /> Live telemetry logs <span className="ml-auto text-[9px] font-bold normal-case text-white/35">anti_cheat_telemetry_logs</span></h3>
+      <p className="mt-2 text-[11px] text-white/50">Raw engine-match stream behind the flag queue. Rows scoring ≥75 are served by the partial index <span className="font-mono">idx_telemetry_high_risk</span> and highlighted.</p>
+      <p className="mt-3 text-[10px] font-black uppercase tracking-wider text-white/40" data-testid="telemetry-high-risk-count">{highRisk.length} session{highRisk.length === 1 ? "" : "s"} at or above the kill threshold (75)</p>
+      <div className="mt-3 space-y-2">
+        {telemetry.map((r) => (
+          <div key={r.id} className={`rounded-xl border p-3 ${r.riskScore >= 75 ? "border-rose-300/35 bg-rose-400/5" : "border-white/10 bg-black/25"}`} data-testid={`telemetry-${r.id}`}>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-xs font-black text-white">{r.userId} <span className="font-normal text-white/45">· {r.game}</span></p>
+              <span className={`rounded-full px-2 py-0.5 text-[9px] font-black ${r.riskScore >= 75 ? "bg-rose-400/20 text-rose-200" : "bg-emerald-400/10 text-emerald-300"}`} data-testid={`telemetry-risk-${r.id}`}>risk {r.riskScore}/100</span>
+            </div>
+            <div className="mt-2 grid grid-cols-3 gap-2 text-[10px]">
+              <span className="rounded-lg bg-black/30 px-2 py-1.5 text-white/60">Engine match: <b className="text-white">{r.engineMatchPct.toFixed(1)}%</b></span>
+              <span className="rounded-lg bg-black/30 px-2 py-1.5 text-white/60">Move σ: <b className="text-white">{r.moveTimeStdDevMs}ms</b></span>
+              <span className="rounded-lg bg-black/30 px-2 py-1.5 text-white/60">Focus lost: <b className="text-white">{r.appFocusLostCount}×</b></span>
+            </div>
           </div>
         ))}
       </div>

@@ -272,3 +272,38 @@ export const AMOE_RULES = [
   "Every grant writes an immutable audit row linking the physical letter reference to the account.",
   "Postal entries carry identical odds and rights to any other free entry route.",
 ] as const;
+
+// ── Live anti-cheat telemetry feed ──────────────────────────────────────────
+// Mirrors db/schema_v2_ledger.sql → anti_cheat_telemetry_logs. Pre-launch this
+// is a seeded demo stream; at launch it is a SELECT ordered by recorded_at.
+
+export type TelemetryRow = {
+  id: string;
+  userId: string;
+  game: "chess" | "draughts" | "connect4";
+  engineMatchPct: number;        // engine_match_percentage NUMERIC(5,2)
+  moveTimeStdDevMs: number;      // move_time_standard_deviation NUMERIC(6,3)
+  appFocusLostCount: number;     // app_focus_lost_count
+  riskScore: number;             // calculated_risk_score 0–100
+  recordedAt: number;
+};
+
+export const TELEMETRY_KILL_THRESHOLD = 75; // idx_telemetry_high_risk cutoff
+
+export function telemetryFeed(): TelemetryRow[] {
+  const now = Date.now();
+  const rows: TelemetryRow[] = [
+    { id: "tl_01", userId: "usr_marcus_b", game: "chess", engineMatchPct: 94.1, moveTimeStdDevMs: 212, appFocusLostCount: 3, riskScore: 88, recordedAt: now - 6 * 60_000 },
+    { id: "tl_02", userId: "usr_onyx_o", game: "draughts", engineMatchPct: 81.7, moveTimeStdDevMs: 388, appFocusLostCount: 9, riskScore: 76, recordedAt: now - 31 * 60_000 },
+    { id: "tl_03", userId: "usr_ruby_c", game: "connect4", engineMatchPct: 62.4, moveTimeStdDevMs: 340, appFocusLostCount: 1, riskScore: 63, recordedAt: now - 58 * 60_000 },
+    { id: "tl_04", userId: "usr_dex_p", game: "chess", engineMatchPct: 41.2, moveTimeStdDevMs: 1180, appFocusLostCount: 0, riskScore: 22, recordedAt: now - 74 * 60_000 },
+    { id: "tl_05", userId: "usr_wren_k", game: "connect4", engineMatchPct: 35.9, moveTimeStdDevMs: 1420, appFocusLostCount: 0, riskScore: 14, recordedAt: now - 95 * 60_000 },
+  ];
+  return rows.sort((a, b) => b.recordedAt - a.recordedAt);
+}
+
+/** Rows at or above the kill threshold — the partial index
+ *  idx_telemetry_high_risk serves exactly this slice in production. */
+export function highRiskTelemetry(rows: TelemetryRow[] = telemetryFeed()): TelemetryRow[] {
+  return rows.filter((r) => r.riskScore >= TELEMETRY_KILL_THRESHOLD);
+}
