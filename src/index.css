@@ -1851,6 +1851,10 @@ body::after {
   /* The console column itself — a see-through glass panel: the felt artwork
      stays visible through it, nothing opaque sits on the screen. */
   .poker-playing-page .poker-console { position:fixed; top:0; right:0; bottom:0; left:auto; width:17%; z-index:1180; display:flex; flex-direction:column; gap:.3rem; padding:max(.45rem,env(safe-area-inset-top)) .5rem max(.45rem,env(safe-area-inset-bottom)); background:rgba(9,7,3,.5) linear-gradient(180deg,rgba(217,183,100,.07),transparent 30%); backdrop-filter:blur(10px) saturate(1.15); -webkit-backdrop-filter:blur(10px) saturate(1.15); border-left:1px solid rgba(217,183,100,.4); box-shadow:-18px 0 40px rgba(0,0,0,.35); overflow-y:hidden; }
+  /* Crown watermark behind the console cards — the felt's emblem carried
+     through the glass like the reference console. */
+  .poker-playing-page .poker-console::before { content:""; position:absolute; inset:0; pointer-events:none; background:url(/games/luxe-poker-table.png) center 30% / cover no-repeat; opacity:.22; mix-blend-mode:screen; }
+  .poker-playing-page .poker-console > * { position:relative; }
   .poker-console .hud-zone { position:static; }
   .poker-console .hud-panel { width:100%; max-width:none; }
 
@@ -1861,13 +1865,22 @@ body::after {
   .poker-console .poker-console__collapse:active { transform:scale(.97); }
   .poker-console .hud-zone--tr { order:1; display:flex; gap:.3rem; }
   .poker-console .hud-zone--tr .hud-icon-btn { flex:0 0 auto; }
-  .poker-console .console-nav-btn { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.15rem; width:auto; height:auto; min-height:2.6rem; padding:.3rem .2rem; }
-  .poker-console .console-nav-btn span { display:block; font-size:.5rem; font-weight:800; letter-spacing:.05em; text-transform:uppercase; }
+  .poker-console .console-nav-btn { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.3rem; width:auto; height:auto; min-height:3.6rem; padding:.45rem .3rem; border-radius:.9rem; background:rgba(5,4,2,.45); }
+  .poker-console .console-nav-btn > svg { width:1.5rem; height:1.5rem; }
+  .poker-console .console-nav-btn span { display:block; font-size:.62rem; font-weight:800; letter-spacing:.04em; text-transform:none; }
+  .poker-console .hud-zone--tr .hud-icon-btn { flex:0 0 auto; width:2.6rem; height:3.6rem; border-radius:.9rem; }
   .poker-console .hud-zone--tl { order:2; display:block; }
-  .poker-console .console-table-card__title { font-size:.65rem; letter-spacing:.06em; text-transform:uppercase; color:#ffe095; }
-  .poker-console .poker-ticker { order:3; position:static; display:flex; flex-direction:column; align-items:flex-start; gap:.2rem; transform:none; max-width:none; white-space:normal; border-radius:.6rem; border:1px solid rgba(217,183,100,.35); border-bottom-width:1px; padding:.4rem .5rem; }
+  .poker-console .console-table-card { display:flex; align-items:center; gap:.7rem; padding:.7rem .8rem; }
+  .poker-console .console-table-card__coin { flex:0 0 auto; display:grid; place-items:center; width:2.9rem; height:2.9rem; border-radius:50%; background:radial-gradient(circle at 35% 30%,#f6d47c,#b7892c 60%,#6e4f14); border:2px solid rgba(255,224,149,.75); color:#1c1405; box-shadow:0 2px 10px rgba(0,0,0,.5), inset 0 1px 2px rgba(255,244,200,.6); }
+  .poker-console .console-table-card__title { font-size:.7rem; letter-spacing:.06em; text-transform:uppercase; color:#ffe095; }
+  .poker-console .poker-ticker { order:3; position:static; display:flex; flex-direction:column; align-items:flex-start; gap:.2rem; transform:none; max-width:none; white-space:normal; border-radius:.6rem; border:1px solid rgba(217,183,100,.35); border-bottom-width:1px; padding:.4rem .5rem; background:rgba(5,4,2,.38); font-size:.62rem; line-height:1.5; }
+  .poker-console .poker-ticker .poker-ticker__sep { display:none; }
+  .poker-console .poker-ticker .poker-ticker__blurb { font-size:.58rem; color:rgba(255,240,200,.55); }
   .poker-console .hud-zone--br { order:4; display:block; }
-  .poker-console .console-section { display:flex; align-items:center; gap:.3rem; margin:0 0 .2rem; font-size:.55rem; font-weight:900; letter-spacing:.14em; text-transform:uppercase; color:#d9b764; }
+  .poker-console .console-section { display:flex; align-items:center; gap:.4rem; margin:0 0 .25rem; font-size:.62rem; font-weight:900; letter-spacing:.16em; text-transform:uppercase; color:#ffe095; }
+  .poker-console .console-section > svg { color:#ffe095; }
+  .poker-console .console-seat-panel { display:flex; align-items:center; gap:.7rem; padding:.65rem .8rem; }
+  .poker-console .console-seat-panel__icon { flex:0 0 auto; display:grid; place-items:center; width:2.6rem; height:2.6rem; border-radius:.7rem; border:1px solid rgba(217,183,100,.55); background:rgba(217,183,100,.08); color:#ffe095; }
   .poker-console .hud-zone--bl { order:5; display:flex; flex-direction:column; align-items:stretch; gap:.3rem; }
   .poker-console .hud-zone--bl .hud-chat-pop { position:static; width:100%; max-height:22dvh; overflow-y:auto; }
   .poker-console .hud-zone--bl .hud-icon-btn { align-self:flex-start; }
@@ -1875,11 +1888,11 @@ body::after {
   .poker-console .poker-console-quick .poker-console-pop { width:100%; position:static; max-height:22dvh; overflow-y:auto; }
 
   /* TABLE OPTIONS — chevron rows. */
-  .poker-console .poker-console-options { order:7; display:flex; flex-direction:column; gap:.25rem; }
-  .poker-console .console-option-row { display:flex; align-items:center; gap:.4rem; width:100%; padding:.32rem .5rem; border:1px solid rgba(217,183,100,.28); border-radius:.55rem; background:rgba(5,4,2,.38); color:rgba(255,240,200,.92); font-size:.6rem; font-weight:800; letter-spacing:.04em; text-align:left; }
-  .poker-console .console-option-row > svg:first-child { color:#d9b764; flex-shrink:0; }
+  .poker-console .poker-console-options { order:7; display:flex; flex-direction:column; gap:.35rem; padding:.6rem .55rem; border:1px solid rgba(217,183,100,.28); border-radius:.9rem; background:rgba(5,4,2,.38); }
+  .poker-console .console-option-row { display:flex; align-items:center; gap:.55rem; width:100%; padding:.4rem .55rem; border:1px solid rgba(217,183,100,.28); border-radius:.65rem; background:rgba(9,7,3,.45); color:rgba(255,240,200,.92); font-size:.68rem; font-weight:800; letter-spacing:.04em; text-align:left; }
+  .poker-console .console-option-row > svg:first-child { width:1.05rem; height:1.05rem; color:#ffe095; flex-shrink:0; }
   .poker-console .console-option-row > span { flex:1; }
-  .poker-console .console-option-row > svg:last-child { color:rgba(255,224,149,.4); flex-shrink:0; }
+  .poker-console .console-option-row > svg:last-child { color:rgba(255,224,149,.55); flex-shrink:0; }
   .poker-console .console-option-row:active { transform:scale(.98); }
   .poker-console .poker-console-options .poker-console-pop { position:static; width:100%; max-height:22dvh; overflow-y:auto; }
 
@@ -1913,4 +1926,96 @@ body::after {
   .poker-console-min .poker-console .poker-action-dock > .grid { display:contents; }
   .poker-console-min .poker-console .poker-action-dock > .grid > * { grid-row:1; }
   .poker-console-min .poker-console .poker-deal-dock { position:fixed; left:50%; right:auto; bottom:max(.4rem,env(safe-area-inset-bottom)); transform:translateX(-50%); width:min(38rem,calc(100vw - 5.5rem)); margin:0; z-index:1190; }
+}
+
+/* ── Portrait console: on tall screens the felt stays as the backdrop
+     (object-fit:cover crops it to the frame) and the glass console overlays
+     the bottom — nav row, table card, ticker, seat & stacks, quick row,
+     TABLE OPTIONS, your cards, dock. One screen, no page scrolling. ── */
+@media (orientation:portrait) {
+  .poker-playing-page:has(.poker-console) { height:100dvh; overflow:hidden; }
+  .poker-playing-page:has(.poker-console) .poker-playing-wrap { position:absolute; inset:0; max-width:none; margin:0; }
+  .poker-playing-page:has(.poker-console) .poker-game-article { position:absolute; inset:0; margin:0; border-radius:0; border:0; padding:0; }
+  .poker-playing-page:has(.poker-console) .poker-surface-frame { position:absolute; inset:0; border-radius:0; }
+  .poker-playing-page:has(.poker-console) .poker-table-artwork,
+  .poker-playing-page:has(.poker-console) .poker-table-artwork__live { position:absolute; inset:0; }
+  .poker-playing-page:has(.poker-console) .poker-table-artwork > img { object-fit:cover; height:100%; width:100%; }
+  .poker-playing-page:has(.poker-console) .poker-playing-wrap > header { display:none; }
+  .poker-playing-page:has(.poker-console) .poker-below-table { display:none; }
+  .poker-playing-page:has(.poker-console) .poker-live-board { top:12%; }
+  .poker-playing-page:has(.poker-console) .poker-live-board > * { scale:1.5; }
+  .poker-playing-page:has(.poker-console) .poker-round-status { position:fixed; top:calc(58dvh - 2.4rem); left:50%; transform:translateX(-50%); z-index:1195; max-width:86vw; margin:0; }
+  .poker-playing-page:has(.poker-console) .poker-live-dealer { display:none; }
+  /* Portrait: the felt is a cover-cropped backdrop — seat badges shrink and
+     the live layer stays under the glass sheet's top edge. */
+  .poker-playing-page:has(.poker-console) .poker-live-seats .poker-seat { scale:.5; }
+  .poker-playing-page:has(.poker-console) .poker-live-seats .poker-bet-chips { scale:.7; }
+  .poker-playing-page:has(.poker-console) .poker-live-seats > div { max-width:14%; }
+  .poker-playing-page:has(.poker-console) .poker-table-artwork__live { max-height:56dvh; }
+  .poker-playing-page:has(.poker-console) .poker-table-artwork__live .poker-live-board,
+  .poker-playing-page:has(.poker-console) .poker-table-artwork__live .poker-live-seats { overflow:hidden; }
+
+  /* The console owns the bottom sheet; the felt fills what remains above. */
+  .poker-playing-page .poker-console { position:fixed; left:0; right:0; bottom:0; top:auto; width:auto; max-height:52dvh; z-index:1180; display:flex; flex-direction:column; gap:.45rem; padding:max(.55rem,env(safe-area-inset-top)) .8rem max(.55rem,env(safe-area-inset-bottom)); background:rgba(9,7,3,.5) linear-gradient(180deg,rgba(217,183,100,.07),transparent 30%); backdrop-filter:blur(12px) saturate(1.15); -webkit-backdrop-filter:blur(12px) saturate(1.15); border-top:1px solid rgba(217,183,100,.4); border-left:0; box-shadow:0 -18px 40px rgba(0,0,0,.35); overflow-y:auto; }
+  /* Crown watermark behind the sheet's cards — the felt's emblem carried
+     through the glass like the reference console. */
+  .poker-playing-page .poker-console::before { content:""; position:absolute; inset:0; pointer-events:none; background:url(/games/luxe-poker-table.png) center 38% / cover no-repeat; opacity:.28; mix-blend-mode:screen; }
+  .poker-playing-page .poker-console > * { position:relative; }
+  .poker-console .hud-zone { position:static; }
+  .poker-console .hud-panel { width:100%; max-width:none; }
+  .poker-console .poker-console__collapse { order:0; display:flex; align-items:center; justify-content:center; gap:.3rem; width:100%; height:1.5rem; border:1px solid rgba(217,183,100,.3); border-radius:.5rem; background:rgba(255,224,149,.06); color:#ffe095; font-size:.55rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
+  .poker-console .hud-zone--tr { order:1; display:flex; gap:.4rem; }
+  .poker-console .console-nav-btn { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.3rem; width:auto; height:auto; min-height:3.8rem; padding:.45rem .3rem; border-radius:.9rem; background:rgba(5,4,2,.45); }
+  .poker-console .console-nav-btn > svg { width:1.5rem; height:1.5rem; }
+  .poker-console .console-nav-btn span { display:block; font-size:.62rem; font-weight:800; letter-spacing:.04em; text-transform:none; }
+  .poker-console .hud-zone--tr .hud-icon-btn { flex:0 0 auto; width:2.7rem; height:3.8rem; border-radius:.9rem; }
+  .poker-console .hud-zone--tl { order:2; display:block; }
+  .poker-console .console-table-card { display:flex; align-items:center; gap:.7rem; padding:.7rem .8rem; }
+  .poker-console .console-table-card__coin { flex:0 0 auto; display:grid; place-items:center; width:2.9rem; height:2.9rem; border-radius:50%; background:radial-gradient(circle at 35% 30%,#f6d47c,#b7892c 60%,#6e4f14); border:2px solid rgba(255,224,149,.75); color:#1c1405; box-shadow:0 2px 10px rgba(0,0,0,.5), inset 0 1px 2px rgba(255,244,200,.6); }
+  .poker-console .console-table-card__title { font-size:.7rem; letter-spacing:.06em; text-transform:uppercase; color:#ffe095; }
+  .poker-console .poker-ticker { order:3; position:static; display:flex; flex-direction:column; align-items:flex-start; gap:.25rem; transform:none; max-width:none; white-space:normal; border-radius:.6rem; border:1px solid rgba(217,183,100,.35); padding:.45rem .6rem; background:rgba(5,4,2,.38); bottom:auto; left:auto; right:auto; font-size:.68rem; line-height:1.5; }
+  .poker-console .poker-ticker .poker-ticker__sep { display:none; }
+  .poker-console .poker-ticker .poker-ticker__blurb { font-size:.58rem; color:rgba(255,240,200,.55); }
+  .poker-console .hud-zone--br { order:4; display:block; }
+  .poker-console .console-section { display:flex; align-items:center; gap:.4rem; margin:0 0 .25rem; font-size:.62rem; font-weight:900; letter-spacing:.16em; text-transform:uppercase; color:#ffe095; }
+  .poker-console .console-section > svg { color:#ffe095; }
+  .poker-console .console-seat-panel { display:flex; align-items:center; gap:.7rem; padding:.65rem .8rem; }
+  .poker-console .console-seat-panel__icon { flex:0 0 auto; display:grid; place-items:center; width:2.6rem; height:2.6rem; border-radius:.7rem; border:1px solid rgba(217,183,100,.55); background:rgba(217,183,100,.08); color:#ffe095; }
+  .poker-console .hud-zone--bl { order:5; display:flex; flex-direction:column; align-items:stretch; gap:.3rem; bottom:auto; left:auto; }
+  .poker-console .hud-zone--bl .hud-chat-pop { position:static; width:100%; max-height:20dvh; overflow-y:auto; }
+  .poker-console .hud-zone--bl > .hud-icon-btn { display:none; }
+  .poker-console .poker-console-quick { order:6; display:flex; flex-wrap:nowrap; gap:.4rem; padding:.55rem .4rem; border:1px solid rgba(217,183,100,.28); border-radius:.9rem; background:rgba(5,4,2,.38); }
+  .poker-console .poker-console-quick .console-nav-btn { border:0; background:transparent; min-height:0; }
+  .poker-console .poker-console-quick .console-nav-btn > svg { width:1.6rem; height:1.6rem; }
+  .poker-console .poker-console-quick .poker-console-pop { width:100%; position:static; max-height:20dvh; overflow-y:auto; }
+  .poker-console .poker-console-options { order:7; display:flex; flex-direction:column; gap:.45rem; padding:.7rem .6rem; border:1px solid rgba(217,183,100,.28); border-radius:.9rem; background:rgba(5,4,2,.38); }
+  .poker-console .console-option-row { display:flex; align-items:center; gap:.55rem; width:100%; padding:.55rem .65rem; border:1px solid rgba(217,183,100,.28); border-radius:.65rem; background:rgba(9,7,3,.45); color:rgba(255,240,200,.92); font-size:.76rem; font-weight:800; letter-spacing:.04em; text-align:left; }
+  .poker-console .console-option-row > svg:first-child { width:1.05rem; height:1.05rem; color:#ffe095; flex-shrink:0; }
+  .poker-console .console-option-row > span { flex:1; }
+  .poker-console .console-option-row > svg:last-child { color:rgba(255,224,149,.55); flex-shrink:0; }
+  .poker-console .console-option-row:active { transform:scale(.98); }
+  .poker-console .poker-console-options .poker-console-pop { position:static; width:100%; max-height:20dvh; overflow-y:auto; }
+  .poker-console .poker-console-hand { order:8; display:flex; justify-content:center; gap:.35rem; padding:.45rem .4rem; border:1px solid rgba(217,183,100,.45); border-radius:.7rem; background:rgba(5,4,2,.3); }
+  .poker-console .poker-console-hand .luxe-playing-card { transform:none; width:clamp(2.2rem,10vw,3.2rem); height:clamp(3.1rem,14vw,4.6rem); }
+  .poker-console .poker-action-dock { order:9; position:static; width:100%; display:flex; flex-direction:column; align-items:stretch; gap:.35rem; padding:0; margin:0; margin-top:auto; transform:none; border:0; background:transparent; box-shadow:none; }
+  .poker-console .poker-action-dock > div { margin:0; }
+  .poker-console .poker-action-dock > .grid { display:flex; flex-direction:column; gap:.35rem; }
+  .poker-console .poker-action-dock button { min-height:2.8rem; }
+  .poker-console .poker-deal-dock { order:9; position:static; width:100%; margin:0; margin-top:auto; transform:none; }
+
+  /* Minimised portrait: the sheet tucks to a bottom tab strip. */
+  .poker-playing-page.poker-console-min .poker-console { width:auto; max-height:none; padding:max(.35rem,env(safe-area-inset-top)) .5rem max(.35rem,env(safe-area-inset-bottom)); gap:.3rem; overflow:visible; }
+  .poker-console-min .poker-console .hud-zone,
+  .poker-console-min .poker-console .poker-ticker,
+  .poker-console-min .poker-console .poker-console-hand,
+  .poker-console-min .poker-console .poker-console-quick,
+  .poker-console-min .poker-console .poker-console-options,
+  .poker-console-min .poker-console .poker-console__collapse { display:none; }
+  .poker-console-min .poker-console .poker-console-tabs { display:flex; flex-direction:row; gap:.4rem; justify-content:space-between; }
+  .poker-console-min .poker-console .poker-console-tabs .hud-icon-btn { flex:1; height:2.6rem; }
+  .poker-console-min .poker-console .poker-action-dock { position:fixed; left:50%; right:auto; bottom:calc(3.4rem + max(.35rem,env(safe-area-inset-bottom))); transform:translateX(-50%); width:min(38rem,calc(100vw - 1.5rem)); margin:0; z-index:1190; display:grid; grid-template-columns:8rem repeat(3,minmax(0,1fr)); align-items:center; gap:.5rem; padding:.4rem .6rem; border:1px solid #d9b764; border-radius:1rem; background:rgba(9,7,3,.85); backdrop-filter:blur(10px); box-shadow:0 0 25px rgba(0,0,0,.65); }
+  .poker-console-min .poker-console .poker-action-dock > .flex:first-child { grid-column:1; }
+  .poker-console-min .poker-console .poker-action-dock > .grid { display:contents; }
+  .poker-console-min .poker-console .poker-action-dock > .grid > * { grid-row:1; }
+  .poker-console-min .poker-console .poker-deal-dock { position:fixed; left:50%; right:auto; bottom:calc(3.4rem + max(.35rem,env(safe-area-inset-bottom))); transform:translateX(-50%); width:min(38rem,calc(100vw - 1.5rem)); margin:0; z-index:1190; }
 }

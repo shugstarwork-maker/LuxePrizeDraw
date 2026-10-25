@@ -40,6 +40,8 @@ export function PokerTournamentTicker({
       <span>Blinds {currentBlinds} → <b>{nextBlinds}</b> in <b>{mm}:{ss}</b></span>
       <span aria-hidden="true" className="poker-ticker__sep">·</span>
       <span>{yourPosition ? <>You: <b>#{yourPosition}</b> · bubble at <b>#{bubble}</b></> : <>Bubble position: <b>#{bubble}</b></>}</span>
+      <span aria-hidden="true" className="poker-ticker__sep">·</span>
+      <span className="poker-ticker__blurb">Free-play · no cash value — virtual chips cannot be exchanged.</span>
     </div>
   );
 }
