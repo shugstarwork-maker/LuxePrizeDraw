@@ -778,6 +778,9 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
+    // public/ is the source of truth for game artwork and other static assets —
+    // serve it as a fallback so deploys never depend on the publicDir copy step.
+    app.use(express.static(path.join(process.cwd(), "public")));
     app.get("*", (req, res) => {
       const index = path.join(distPath, "index.html");
       if (req.path !== "/prizes/northern-supercar-hire") return res.sendFile(index);
