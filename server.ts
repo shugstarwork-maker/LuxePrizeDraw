@@ -114,6 +114,13 @@ const targetBlockHeight = Number(process.env.ENTROPY_BTC_BLOCK_HEIGHT || "0");
 const publicClientSeed = process.env.ENTROPY_CLIENT_SEED || "LPD-2026-GRAND-DRAW-COMMITTED";
 const databaseUrl = process.env.ENTROPY_AUDIT_DATABASE_URL;
 
+// Production hardening: the database handshake must be encrypted. Neon
+// enforces TLS server-side; here we refuse to boot a production process
+// pointed at a non-SSL connection string at all.
+if (process.env.NODE_ENV === "production" && databaseUrl && !/[?&]sslmode=(require|verify-ca|verify-full)/.test(databaseUrl) && !databaseUrl.includes(".neon.tech")) {
+  throw new Error("Production database URL must enforce SSL (sslmode=require or managed TLS endpoint).");
+}
+
 function getAuditDatabase() {
   if (!databaseUrl) throw new Error("ENTROPY_AUDIT_DATABASE_URL is not configured.");
   return neon(databaseUrl);

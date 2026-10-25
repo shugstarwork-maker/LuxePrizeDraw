@@ -50,5 +50,8 @@
   "overrides": {
     "qs": "^6.16.0"
   },
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20 <23"
+  }
 }
