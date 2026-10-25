@@ -4,7 +4,8 @@ import { readFileSync } from 'node:fs';
 test('landscape keeps turn/error messages visible and separates player badge from hand', () => {
   const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
   assert.match(css, /poker-round-status \{ display:block; position:fixed/);
-  assert.match(css, /data-seat-index="5"[\s\S]{0,120}left:80% !important/);
+  // Seat positions come from inline SEAT_SLOTS geometry; no CSS override may pin a badge.
+  assert.doesNotMatch(css, /poker-seat-you[^}]*left:[0-9]+% !important/);
   // Your cards ride on your seat badge, not a centre-felt strip.
   assert.match(css, /poker-seat-hand span \{ height:1\.9rem/);
 });
@@ -26,8 +27,12 @@ test('dealer portrait has no visible two-card hand while opponent evaluation is 
 });
 
 
-test('player seat sits on the right rim, clear of Theo and the action dock', () => {
+test('player seat is spaced from neighbours by the inline seat geometry, not CSS pins', () => {
+  const src = readFileSync(new URL('../src/components/LuxePokerLeague.tsx', import.meta.url), 'utf8');
   const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
-  assert.match(css, /data-seat-index="4"\] \{ left:91% !important; top:43%/);
-  assert.match(css, /data-seat-index="5"[\s\S]{0,120}left:80% !important; top:62%/);
+  // SEAT_SLOTS insets every badge inside the felt (horizontal radius 38, not 42+).
+  assert.match(src, /50 \+ 38 \* Math\.cos\(th\)/);
+  // No leftover !important seat pins that can drag badges on top of each other.
+  assert.doesNotMatch(css, /data-seat-index="4"[^}]*left:[0-9]+% !important/);
+  assert.doesNotMatch(css, /poker-seat-you[^}]*left:[0-9]+% !important/);
 });

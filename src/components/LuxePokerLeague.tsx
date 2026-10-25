@@ -55,10 +55,31 @@ const emotes = ["Nice hand", "Good luck", "Well played", "Thinking..."];
 const gifts = [{ name: "Lucky chip", cost: 25, icon: "🪙" }, { name: "Gold crown", cost: 75, icon: "👑" }, { name: "Luxe sparkle", cost: 150, icon: "✨" }];
 
 // Seat slots around the oval artwork (percent coordinates). Slot 5 = bottom centre = you.
+// Every slot is inset ≥12% horizontally and ≥18% vertically so badges never
+// clip the felt edge or collide with the centre-felt board/pot zone.
 const SEAT_SLOTS = [180, 55, 125, 235, 305, 270].map((deg) => {
   const th = (deg * Math.PI) / 180;
-  return { px: 50 + 42 * Math.cos(th), py: 44 - 27 * Math.sin(th), sc: 1.06 - 0.34 * ((Math.sin(th) + 1) / 2) };
+  return { px: 50 + 38 * Math.cos(th), py: 46 - 28 * Math.sin(th), sc: 1.06 - 0.34 * ((Math.sin(th) + 1) / 2) };
 });
+
+
+/** Chips a player has pushed in front of their seat this street — rendered as a
+ *  small stack on the felt between the seat and the pot, clear of the board. */
+function BetChips({ amount, slot, isYou }: { amount: number; slot: { px: number; py: number }; isYou?: boolean; key?: string }) {
+  const chips = Math.min(4, Math.max(1, Math.round(amount / 25)));
+  // Nudge the stack toward the table centre so it reads "in front of" the seat.
+  const cx = slot.px + (50 - slot.px) * 0.3;
+  const cy = slot.py + (46 - slot.py) * 0.3;
+  return (
+    <div className="poker-bet-chips" data-testid="bet-chips" style={{ left: `${cx}%`, top: `${cy}%` }} aria-label={`${amount.toLocaleString()} virtual chips bet`}>
+      <span className="poker-bet-chips__stack" aria-hidden="true">
+        {Array.from({ length: chips }, (_, i) => <i key={i} style={{ bottom: `${i * 3}px` }} />)}
+      </span>
+      <b>{amount.toLocaleString()}</b>
+      {isYou && <em>your bet</em>}
+    </div>
+  );
+}
 
 export const LuxePokerLeague: React.FC = () => {
   const { enabled, setEnabled, play, musicEnabled, setMusicEnabled } = useAudio();
@@ -784,9 +805,13 @@ export const LuxePokerLeague: React.FC = () => {
                     <PlayerTurnRing active={isTurn} seconds={isTurn ? 20 : 20} name={p.name}>{isMe && avatar ? <img src={avatar} alt="Your avatar" className="h-full w-full object-cover" /> : p.initials}</PlayerTurnRing>
                     <b className="mt-1 block truncate text-[9px] text-amber-100">{p.name}{isMe ? " — you" : ""}{g.players[g.dealerIndex]?.id === p.id ? " 🔘" : ""}{!seat?.connected && <span className="text-rose-300"> · offline</span>}</b>
                     <small className="block text-[8px] text-white/55">{p.sittingOut ? "Watching" : p.chips.toLocaleString()}{p.allIn ? " · ALL-IN" : ""}{p.folded ? " · folded" : ""}</small>
-                    {p.bet > 0 && <span className="mt-0.5 inline-block rounded-full bg-amber-300/90 px-1.5 py-px font-mono text-[8px] font-black text-black">bet {p.bet.toLocaleString()}</span>}
+  
                     {p.cards.length === 2 && !p.sittingOut && <span className={`mt-1 flex justify-center gap-0.5 ${isMe ? "poker-seat-hand" : ""}`}>{p.cards.map((c, ci) => (isMe ? Boolean(c) : showCards) && c ? <span key={`${p.id}-${ci}`} className={`flex items-center justify-center rounded-sm border border-black/20 bg-white font-mono font-black ${isMe ? "h-7 w-[1.3rem] text-[10px]" : "h-6 w-[1.1rem] text-[9px]"} ${c.suit === "♥" || c.suit === "♦" ? "text-red-600" : "text-zinc-900"}`}>{c.rank}{c.suit}</span> : <span key={`${p.id}-${ci}`} className="flex h-6 w-[1.1rem] items-center justify-center rounded-sm border border-amber-200/40 bg-gradient-to-br from-amber-900 to-black text-[7px] text-amber-200/70">♛</span>)}</span>}
                   </div>;
+                })}{g.players.map((p, i) => {
+                  if (p.bet <= 0 || p.sittingOut) return null;
+                  const slot = SEAT_SLOTS[Math.min(i, SEAT_SLOTS.length - 1)];
+                  return <BetChips key={`bet-${p.id}`} amount={p.bet} slot={slot} isYou={p.id === myId} />;
                 })}</div>
                 <div className="poker-live-board flex justify-center gap-1">{[0, 1, 2, 3, 4].map((i) => g.board[i] ? <CardView key={key(g.board[i])} card={g.board[i]} /> : <div key={i} className="h-16 w-11 rounded-lg border border-dashed border-amber-100/30 bg-black/40 sm:h-20 sm:w-14" />)}</div>
                 {/* Your cards ride on your seat badge like every other player — no centre-felt hand strip. */}
@@ -850,13 +875,17 @@ export const LuxePokerLeague: React.FC = () => {
                 const isTurn = !game.handOver && game.players[game.turnIndex]?.id === p.id;
                 const isWinner = game.handOver && !p.sittingOut && game.winners.some((w) => w.id === p.id);
                 const showCards = !p.isBot || (game.stage === "showdown" && !p.folded && !p.sittingOut);
-                return <div key={p.id} onClick={() => p.isBot && setSelectedSeat(p.name)} className={`${isYou ? "poker-seat-you " : ""}pointer-events-auto absolute w-[4.9rem] rounded-2xl border px-1.5 py-1 text-center shadow-2xl backdrop-blur-md transition ${p.sittingOut ? "opacity-30" : p.folded ? "opacity-45" : ""} ${isWinner ? "border-emerald-300 bg-emerald-300/20" : isTurn ? "border-amber-200 bg-amber-300/20 poker-turn-ring" : !p.isBot ? "border-amber-200/70 bg-amber-300/10" : selectedSeat === p.name ? "border-fuchsia-300 bg-fuchsia-300/15" : "border-white/15 bg-black/55"}`} style={{ left: `${slot.px}%`, top: `${isYou ? slot.py + 8 : slot.py}%`, zIndex: 10 + Math.round(slot.py), transform: `translate(-50%,-50%) scale(${slot.sc.toFixed(2)})` }}>
+                return <div key={p.id} onClick={() => p.isBot && setSelectedSeat(p.name)} data-seat={p.id} className={`${isYou ? "poker-seat-you " : ""}pointer-events-auto absolute w-[4.9rem] rounded-2xl border px-1.5 py-1 text-center shadow-2xl backdrop-blur-md transition ${p.sittingOut ? "opacity-30" : p.folded ? "opacity-45" : ""} ${isWinner ? "border-emerald-300 bg-emerald-300/20" : isTurn ? "border-amber-200 bg-amber-300/20 poker-turn-ring" : !p.isBot ? "border-amber-200/70 bg-amber-300/10" : selectedSeat === p.name ? "border-fuchsia-300 bg-fuchsia-300/15" : "border-white/15 bg-black/55"}`} style={{ left: `${slot.px}%`, top: `${isYou ? slot.py + 8 : slot.py}%`, zIndex: 10 + Math.round(slot.py), transform: `translate(-50%,-50%) scale(${slot.sc.toFixed(2)})` }}>
                   {!p.isBot ? <label className="block cursor-pointer"><PlayerTurnRing active={isTurn} seconds={seconds} name={p.name}>{avatar ? <img src={avatar} alt="Your avatar" className="h-full w-full object-cover" /> : p.initials}</PlayerTurnRing><input aria-label="Upload avatar" type="file" accept="image/*" className="hidden" onChange={(e) => chooseAvatar(e.target.files?.[0])} /></label> : <PlayerTurnRing active={isTurn} seconds={20} name={p.name}>{p.initials}</PlayerTurnRing>}
                   <b className="mt-1 block truncate text-[9px] text-amber-100">{p.name}{!p.sittingOut && game.players[game.dealerIndex]?.id === p.id ? " 🔘" : ""}</b>
                   <small className="text-[8px] text-white/55">{p.sittingOut ? (p.isBot ? "Away" : "Watching") : p.chips.toLocaleString()}{p.allIn ? " · ALL-IN" : ""}</small>
-                  {p.bet > 0 && <span className="mt-0.5 inline-block rounded-full bg-amber-300/90 px-1.5 py-px font-mono text-[8px] font-black text-black">bet {p.bet.toLocaleString()}</span>}
+
                   {p.cards.length === 2 && !p.sittingOut && <span className={`mt-1 flex justify-center gap-0.5 ${isYou ? "poker-seat-hand" : ""}`}>{p.cards.map((c) => (isYou || showCards) ? <span key={key(c)} className={`flex items-center justify-center rounded-sm border border-black/20 bg-white font-mono font-black ${isYou ? "h-7 w-[1.3rem] text-[10px]" : "h-6 w-[1.1rem] text-[9px]"} ${c.suit === "♥" || c.suit === "♦" ? "text-red-600" : "text-zinc-900"}`}>{c.rank}{c.suit}</span> : <span key={key(c)} className="flex h-6 w-[1.1rem] items-center justify-center rounded-sm border border-amber-200/40 bg-gradient-to-br from-amber-900 to-black text-[7px] text-amber-200/70">♛</span>)}</span>}
                 </div>;
+              })}{game && game.players.map((p) => {
+                if (p.bet <= 0 || p.sittingOut) return null;
+                const slotIndex = p.isBot ? botSlots.indexOf(p) : 5;
+                return <BetChips key={`bet-${p.id}`} amount={p.bet} slot={SEAT_SLOTS[slotIndex]} isYou={!p.isBot} />;
               })}</div><div className="poker-live-board flex justify-center gap-1">{[0, 1, 2, 3, 4].map((i) => game?.board[i] ? <CardView key={key(game.board[i])} card={game.board[i]} /> : <div key={i} className="h-16 w-11 rounded-lg border border-dashed border-amber-100/30 bg-black/40 sm:h-20 sm:w-14" />)}</div>{/* Your cards ride on your seat badge like every other player. */}</PokerTableArtwork>
               <LuxeDealer stage={dealerStage} active={yourTurn} mood={dealerMood} />
             </div><div className="poker-below-table relative"><div className="mb-3 flex justify-center"><PokerFullscreen /></div><div className="poker-round-meta flex justify-between text-[10px] font-black uppercase tracking-wider text-white/60"><span>{activeTable?.name} · Hand #{game?.handNumber ?? 0} · Blinds {activeTable?.blinds}</span><span className="inline-flex items-center gap-1"><Timer className="h-3 w-3" />{yourTurn ? `00:${String(seconds).padStart(2, "0")}` : game?.handOver ? "Hand over" : "Playing"}</span></div><div className="poker-round-status mt-5 rounded-xl bg-black/35 p-3 text-center text-sm text-emerald-100" role="status">{status}</div>

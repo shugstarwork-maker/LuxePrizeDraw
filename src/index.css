@@ -1022,12 +1022,9 @@
 @media (orientation:landscape) and (max-height:1200px) { .poker-playing-page .player-turn-ring { width:2.3rem; height:2.3rem; } }
 @media(prefers-reduced-motion:reduce) { .player-turn-ring__clock { transition:none; } }
 
-/* Separate lower-right player seat from Theo, the hand and the action dock.
-   Your seat sits on the right rim, fully clear of the dock, with your cards face-up. */
+/* Landscape seats: inline SEAT_SLOTS geometry already insets every badge from
+   the felt edge and spaces them around the oval — no forced overrides. */
 @media (orientation:landscape) and (max-height:1200px) {
-  .poker-playing-page .poker-live-seats > [data-seat-index="4"] { left:91% !important; top:43% !important; }
-  .poker-playing-page .poker-live-seats > [data-seat-index="5"],
-  .poker-playing-page .poker-live-seats .poker-seat-you { left:80% !important; top:62% !important; width:4.6rem; max-width:4.6rem; padding:.3rem; transform:translate(-50%,-50%) !important; }
   .poker-playing-page .poker-live-seats > [data-seat-index="5"] b { font-size:.6rem; }
   .poker-playing-page .poker-live-seats > [data-seat-index="5"] small { font-size:.55rem; }
 }
@@ -1817,3 +1814,10 @@ body::after {
   background: radial-gradient(ellipse at center, rgba(255, 214, 120, .07), rgba(0, 0, 0, .5));
   padding: 1.25rem;
 }
+
+/* Per-seat bet chips on the felt — between the seat and the pot, never over the board. */
+.poker-bet-chips { position:absolute; z-index:4; display:grid; justify-items:center; gap:.1rem; transform:translate(-50%,-50%); pointer-events:none; }
+.poker-bet-chips__stack { position:relative; width:2.1rem; height:2.3rem; }
+.poker-bet-chips__stack i { position:absolute; left:0; width:2.1rem; height:2.1rem; border:2px dashed #ffe09a; border-radius:50%; background:linear-gradient(135deg,#e4bc58,#53370c 35%,#f8dc89 65%,#a97c24); box-shadow:0 2px #5b3c12,0 3px 4px #0009; transform:rotateX(25deg); }
+.poker-bet-chips b { padding:.1rem .35rem; border:1px solid #c4a050; border-radius:.35rem; background:#080603e8; font-size:.6rem; color:#ffe6a0; }
+.poker-bet-chips em { font-size:.5rem; font-style:normal; color:#ffd97a; }
