@@ -896,12 +896,17 @@
 .luxe-playing-card__suit { font-size:1.8rem; }.luxe-playing-card__brand { position:absolute; bottom:.2rem; right:.3rem; font-size:.45rem; color:#715017; }
 .poker-live-hand { top:57%; left:50%; z-index:100; padding:.25rem; border-radius:.7rem; background:#090703bb; }
 .poker-live-host { z-index:100; }
-.poker-landscape-gate { display:none; }
-@media (orientation:portrait) and (max-width:900px) {
-  .poker-landscape-gate { display:none; min-height:65dvh; flex-direction:column; align-items:center; justify-content:center; gap:1rem; padding:1.5rem; text-align:center; color:#ffe095; }
-  .poker-landscape-gate > span { font-size:4rem; }.poker-landscape-gate h2 { font:700 2rem Georgia,serif; }
-  .poker-landscape-gate button { padding:.8rem 1.25rem; border:1px solid #ffe095; border-radius:.8rem; background:#ffe095; color:#171109; font-weight:900; }
-}
+.poker-landscape-gate { display:none; position:fixed; inset:0; z-index:85; min-height:100dvh; box-sizing:border-box; padding:max(1.5rem,env(safe-area-inset-top)) 1.5rem max(1.5rem,env(safe-area-inset-bottom)); background:radial-gradient(ellipse at center,#302207,#050403 70%); color:#ffe095; text-align:center; }
+/* Gate visibility is driven by live JS orientation truth (width vs height),
+   never by CSS orientation media queries alone — Android WebViews misreport
+   those mid-rotation and trapped players on this screen with table audio
+   playing underneath. */
+.luxury-portrait .poker-playing-page .poker-landscape-gate { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem; }
+.poker-gate-dismissed .poker-landscape-gate { display:none !important; }
+.poker-gate-dismissed .poker-playing-wrap { visibility:visible !important; }
+.poker-landscape-gate > span { font-size:4rem; }.poker-landscape-gate h2 { font:700 2rem Georgia,serif; }
+.poker-landscape-gate button { padding:.8rem 1.25rem; border:1px solid #ffe095; border-radius:.8rem; background:#ffe095; color:#171109; font-weight:900; }
+.poker-landscape-gate .poker-gate-back { background:transparent; color:#ffe095; }
 
 /* Immersive landscape: table fills viewport; controls overlay rather than add height. */
 @media (orientation:landscape) and (max-height:1200px) {
@@ -947,10 +952,7 @@
   .poker-playing-page .poker-deal-dock:focus-visible,.poker-playing-page .poker-action-dock button:focus-visible { outline:3px solid #fff; outline-offset:2px; }
 }
 /* Full-screen on a portrait phone keeps the rotate gate instead of a squeezed table. */
-@media (orientation:portrait) and (max-width:900px) {
-  .poker-playing-page:fullscreen .poker-playing-wrap { display:none; }
-  .poker-playing-page:fullscreen .poker-landscape-gate { display:flex; }
-}
+.luxury-portrait .poker-playing-page:fullscreen:not(.poker-gate-dismissed) .poker-playing-wrap { display:none; }
 
 /* Fullscreen-sim (landscape auto-cover): seat every child layer or the table renders black. */
 .poker-playing-page.poker-fullscreen-sim .poker-game-article,
@@ -1073,10 +1075,7 @@
 .salon-table-preview__image,.salon-table-preview__shade { pointer-events:none; }
 .salon-table-preview { touch-action:manipulation; }
 
-/* Centre the rotate guidance in the phone viewport rather than the page flow. */
-@media (orientation:portrait) and (max-width:900px) {
-  .poker-playing-page .poker-landscape-gate { position:fixed; inset:0; z-index:1200; min-height:100dvh; box-sizing:border-box; padding: max(1.5rem,env(safe-area-inset-top)) 1.5rem max(1.5rem,env(safe-area-inset-bottom)); background:radial-gradient(ellipse at center,#302207,#050403 70%); }
-}
+
 
 /* Live pot chips are distinct from static stacks in the table artwork. */
 .luxe-pot-chips { position:absolute; left:69%; top:36%; z-index:3; display:grid; justify-items:center; gap:.15rem; pointer-events:none; color:#ffe6a0; }
@@ -1229,12 +1228,9 @@
   .compact-coverflow__card > .coverflow-draw { max-height:80vh; overflow-y:auto; }
 }
 
-/* Landscape-only poker: portrait always shows the rotate gate; the table never renders in portrait. */
-@media (orientation: portrait) {
-  .poker-playing-page .poker-landscape-gate { position:fixed; inset:0; z-index:85; min-height:100dvh; box-sizing:border-box; padding:max(1.5rem,env(safe-area-inset-top)) 1.5rem max(1.5rem,env(safe-area-inset-bottom)); background:radial-gradient(ellipse at center,#302207,#050403 70%); }
-  .poker-playing-page .poker-landscape-gate { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem; text-align:center; color:#ffe095; }
-  .poker-playing-page .poker-playing-wrap { visibility:hidden; }
-}
+/* Portrait hides the table wrap behind the gate — but only while the JS
+   portrait class is set and the player hasn't chosen to keep playing. */
+.luxury-portrait .poker-playing-page:not(.poker-gate-dismissed) .poker-playing-wrap { visibility:hidden; }
 
 /* Height-independent landscape cover: fill even when the visual viewport is taller than the window. */
 @media (orientation:landscape) {

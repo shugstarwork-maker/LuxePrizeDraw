@@ -63,6 +63,24 @@ const SEAT_SLOTS = [180, 55, 125, 235, 305, 270].map((deg) => {
 });
 
 
+
+/** Rotate gate. Renders inert (display:none) whenever the window is landscape —
+ *  driven by a live `luxury-portrait` class on <html>, never by CSS orientation
+ *  media queries alone (Android WebViews misreport those mid-rotation, which
+ *  used to trap players on this screen with table audio playing underneath).
+ *  The gate is also dismissible — no player is ever locked out of a live hand. */
+function RotateGate({ onBack }: { onBack: () => void }) {
+  return <div className="poker-landscape-gate" role="status" data-testid="rotate-gate">
+    <span aria-hidden="true">↻</span>
+    <h2>Rotate your phone to play poker</h2>
+    <p>Luxe Poker tables are built for landscape — turn your phone sideways for the full table view.</p>
+    <button type="button" className="poker-gate-play" data-testid="rotate-gate-dismiss" onClick={(e) => { e.currentTarget.closest(".poker-playing-page")?.classList.add("poker-gate-dismissed"); }}>
+      Keep playing in portrait
+    </button>
+    <button type="button" className="poker-gate-back" onClick={onBack}>Back to Luxe Lounges</button>
+  </div>;
+}
+
 /** Chips a player has pushed in front of their seat this street — rendered as a
  *  small stack on the felt between the seat and the pot, clear of the board. */
 function BetChips({ amount, slot, isYou }: { amount: number; slot: { px: number; py: number }; isYou?: boolean; key?: string }) {
@@ -83,6 +101,24 @@ function BetChips({ amount, slot, isYou }: { amount: number; slot: { px: number;
 
 export const LuxePokerLeague: React.FC = () => {
   const { enabled, setEnabled, play, musicEnabled, setMusicEnabled } = useAudio();
+  // Live orientation truth for the rotate gate: width vs height (never the CSS
+  // orientation query), re-evaluated on every resize/rotate. Dismissal clears
+  // the moment the device actually turns landscape.
+  useEffect(() => {
+    const apply = () => {
+      const portrait = window.innerHeight > window.innerWidth;
+      document.documentElement.classList.toggle("luxury-portrait", portrait);
+      if (!portrait) document.querySelectorAll(".poker-gate-dismissed").forEach((el) => el.classList.remove("poker-gate-dismissed"));
+    };
+    apply();
+    window.addEventListener("resize", apply);
+    window.addEventListener("orientationchange", apply);
+    return () => {
+      window.removeEventListener("resize", apply);
+      window.removeEventListener("orientationchange", apply);
+      document.documentElement.classList.remove("luxury-portrait");
+    };
+  }, []);
   const go = (href: string) => { window.history.pushState({}, "", href); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo(0, 0); };
   const [screen, setScreen] = useState<"welcome" | "lobby" | "table" | "mp">(() =>
     typeof window !== "undefined" && window.location.search.includes("studio") ? "table" : "welcome");
@@ -781,7 +817,7 @@ export const LuxePokerLeague: React.FC = () => {
     const mpMood: "idle" | "win" | "lose" = mpWinner === "player" || mpWinner === "split" ? "win" : mpWinner === "host" ? "lose" : "idle";
     const mpSeated = Boolean(me && !me.sittingOut);
     return <section id="poker-league" className="poker-playing-page min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-3 py-4 pb-28 text-white">
-      <div className="poker-landscape-gate" role="status"><span aria-hidden="true">↻</span><h2>Rotate your phone to play poker</h2><p>Luxe Poker tables are landscape-only — turn your phone sideways to take your seat and play.</p><button type="button" onClick={() => { mp.leave(); setScreen("lobby"); }}>Back to Luxe Lounges</button></div>
+      <RotateGate onBack={() => { mp.leave(); setScreen("lobby"); }} />
       <div className="poker-playing-wrap mx-auto max-w-5xl">
         <header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-3 py-2">
           <button onClick={() => { mp.leave(); setScreen("lobby"); }} className="inline-flex items-center gap-1 rounded-lg bg-white/10 px-3 py-2 text-xs font-black"><ChevronLeft className="h-4 w-4" />Lobby</button>
@@ -850,7 +886,7 @@ export const LuxePokerLeague: React.FC = () => {
   const botSlots = game ? game.players.filter((p) => p.isBot) : [];
   const alivePlayers = game ? game.players.filter((p) => p.chips > 0).length : 0;
   const nextTable = LEAGUE_TABLES[Math.min(league.tierIndex + 1, LEAGUE_TABLES.length - 1)];
-  return <section id="poker-league" className="poker-playing-page min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-3 py-4 pb-28 text-white"><div className="poker-landscape-gate" role="status"><span aria-hidden="true">↻</span><h2>Rotate your phone to play poker</h2><p>Luxe Poker tables are landscape-only — turn your phone sideways to take your seat and play.</p><button type="button" onClick={leaveTable}>Back to Luxe Lounges</button></div>
+  return <section id="poker-league" className="poker-playing-page min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-3 py-4 pb-28 text-white"><RotateGate onBack={leaveTable} />
     <PokerTournamentTicker playersRemaining={alivePlayers} totalSeats={game?.players.length ?? 6} yourPosition={null} currentBlinds={activeTable?.blinds ?? "—"} nextBlinds={nextTable.blinds} />
     <PokerHudFrame
       tableName={activeTable?.name ?? "League table"} blinds={activeTable?.blinds ?? "—"} handNumber={game?.handNumber ?? 0}

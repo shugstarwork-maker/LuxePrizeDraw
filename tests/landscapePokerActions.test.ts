@@ -26,6 +26,6 @@ test('landscape table fills viewport with overlay controls and no page scrolling
 test('deal control contrasts against scenery and portrait fullscreen keeps rotate gate', () => {
   const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
   assert.match(css, /poker-deal-dock \{ background:linear-gradient\(#fff0b0,#ffbd22\); color:#140c00/);
-  assert.match(css, /poker-playing-page:fullscreen \.poker-playing-wrap \{ display:none/);
-  assert.match(css, /poker-playing-page:fullscreen \.poker-landscape-gate \{ display:flex/);
+  assert.match(css, /luxury-portrait \.poker-playing-page:fullscreen:not\(\.poker-gate-dismissed\) \.poker-playing-wrap \{ display:none/);
+  assert.match(css, /luxury-portrait \.poker-playing-page \.poker-landscape-gate \{ display:flex/);
 });

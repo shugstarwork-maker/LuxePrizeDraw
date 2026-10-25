@@ -27,14 +27,18 @@ test('live seats and board are nested inside the artwork rather than below it', 
   assert.ok(surface.includes('poker-seat-hand'));
 });
 
-test('poker table is landscape-only: portrait shows a blocking rotate gate', () => {
+test('poker table is landscape-first: portrait shows a rotate gate driven by live JS orientation', () => {
   const source = readFileSync(new URL('../src/components/LuxePokerLeague.tsx', import.meta.url), 'utf8');
   const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
   assert.match(source, /Rotate your phone to play poker/);
-  assert.match(source, /landscape-only/);
-  assert.doesNotMatch(source, /Continue in portrait/);
+  // Gate visibility keys off the JS truth class, never CSS orientation alone —
+  // Android WebViews misreport orientation mid-rotation (black screen + audio bug).
+  assert.match(source, /classList\.toggle\("luxury-portrait", portrait\)/);
+  assert.match(css, /luxury-portrait \.poker-playing-page \.poker-landscape-gate \{ display:flex/);
+  // The gate is dismissible: no player is ever locked out of a live hand.
+  assert.match(source, /Keep playing in portrait/);
+  assert.match(css, /poker-gate-dismissed \.poker-landscape-gate \{ display:none !important/);
   assert.match(css, /poker-playing-wrap \{ max-width:90rem/);
-  assert.match(css, /orientation:portrait/);
 });
 
 test('portrait table fits inside its accessible region without forced horizontal scrolling', () => {
