@@ -1816,10 +1816,11 @@ body::after {
 
 /* Per-seat bet chips on the felt — between the seat and the pot, never over the board. */
 .poker-bet-chips { position:absolute; z-index:4; display:grid; justify-items:center; gap:.1rem; transform:translate(-50%,-50%); pointer-events:none; }
-.poker-bet-chips__stack { position:relative; width:2.1rem; height:2.3rem; }
-/* Luxe rail chips: black lacquer, gold edge spots, gold spade face. */
-.poker-bet-chips__stack i { position:absolute; left:0; width:2.1rem; height:2.1rem; border-radius:50%; background:radial-gradient(circle at 35% 30%, #4a4a4a, #17130a 55%, #050403); border:2.5px solid #0d0906; outline:2px dashed rgba(240,200,110,.9); outline-offset:-5px; box-shadow:0 2px 0 #d9b764, 0 3px 6px #000c; transform:rotateX(25deg); }
-.poker-bet-chips__face { position:absolute; inset:0; display:grid; place-items:center; color:#f0c86e; font-size:.85rem; text-shadow:0 1px 2px #000; }
+.poker-bet-chips__stack { position:relative; width:2.5rem; height:2.7rem; }
+/* Luxe rail chips: black lacquer face, gold edge segments, gold spade —
+   the exact chip that sits on the table rail artwork. */
+.poker-bet-chips__stack i { position:absolute; left:0; width:2.5rem; height:2.5rem; border-radius:50%; background:radial-gradient(circle, #0d0a04 46%, transparent 47%), repeating-conic-gradient(#f0c86e 0deg 30deg, #14100a 30deg 60deg); border:2px solid #d9b764; box-shadow:0 2px 0 #8a6a1c, 0 3px 6px #000c; transform:rotateX(25deg); }
+.poker-bet-chips__face { position:absolute; inset:0; display:grid; place-items:center; color:#f0c86e; font-size:1rem; text-shadow:0 1px 2px #000; }
 .poker-bet-chips b { padding:.1rem .35rem; border:1px solid #c4a050; border-radius:.35rem; background:#080603e8; font-size:.6rem; color:#ffe6a0; }
 .poker-bet-chips em { font-size:.5rem; font-style:normal; color:#ffd97a; }
 
@@ -1850,7 +1851,7 @@ body::after {
   /* Cinematic framing: the felt artwork is cropped around the table so the
      rail's Luxe chip stacks and the hole-cards fan are big and always in shot. */
   .poker-playing-page:has(.poker-console) .poker-playing-wrap { position:absolute; left:0; top:0; bottom:0; right:auto; width:83%; }
-  .poker-playing-page:has(.poker-console) .poker-table-artwork > img { object-fit:cover; object-position:46% 50%; transform:scale(1.18); }
+  .poker-playing-page:has(.poker-console) .poker-table-artwork > img { object-fit:cover; object-position:46% 50%; transform:scale(1.12); }
   .poker-playing-page:has(.poker-console) .poker-table-artwork__live { inset:3.1rem 2% 1.6rem; }
   .poker-playing-page:has(.poker-console) .poker-table-artwork__live .poker-live-seats > div { max-width:11%; }
   /* Community cards shrink slightly so they clear the rail badges; your badge

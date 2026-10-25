@@ -88,16 +88,16 @@ function RotateGate({ onBack }: { onBack: () => void }) {
 /** Chips a player has pushed in front of their seat this street — rendered as a
  *  small stack on the felt between the seat and the pot, clear of the board. */
 function BetChips({ amount, slot, isYou }: { amount: number; slot: { px: number; py: number }; isYou?: boolean; key?: string }) {
-  // Black-and-gold Luxe chip stack (up to 5 chips) with a spade face — the
-  // same chips that sit on the rail artwork.
-  const chips = Math.min(5, Math.max(2, Math.round(amount / 25)));
+  // Same Luxe chip as the rail artwork: black lacquer, thick gold rim, gold
+  // spade face — stacked taller for bigger bets.
+  const chips = Math.min(6, Math.max(2, Math.round(amount / 25)));
   // Nudge the stack toward the table centre so it reads "in front of" the seat.
   const cx = slot.px + (50 - slot.px) * 0.3;
   const cy = slot.py + (46 - slot.py) * 0.3;
   return (
     <div className="poker-bet-chips" data-testid="bet-chips" style={{ left: `${cx}%`, top: `${cy}%` }} aria-label={`${amount.toLocaleString()} virtual chips bet`}>
       <span className="poker-bet-chips__stack" aria-hidden="true">
-        {Array.from({ length: chips }, (_, i) => <i key={i} style={{ bottom: `${i * 3}px` }}>{i === chips - 1 ? <span className="poker-bet-chips__face">♠</span> : null}</i>)}
+        {Array.from({ length: chips }, (_, i) => <i key={i} style={{ bottom: `${i * 3}px`, zIndex: i }}>{i === chips - 1 ? <span className="poker-bet-chips__face">♠</span> : null}</i>)}
       </span>
       <b>{amount.toLocaleString()}</b>
       {isYou && <em>your bet</em>}

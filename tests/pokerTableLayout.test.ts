@@ -144,8 +144,9 @@ test("your seat badge never drifts off its slot onto the board", () => {
 
 test("in-play chips are black-and-gold Luxe stacks with a spade face, like the rail artwork", () => {
   assert.match(src, /poker-bet-chips__face/);                                   // spade face on the top chip
-  assert.match(css, /\.poker-bet-chips__stack i \{[^}]*#17130a/);               // black lacquer chip body
-  assert.match(css, /\.poker-bet-chips__stack i \{[^}]*outline:2px dashed rgba\(240,200,110/); // gold edge spots
+  assert.match(css, /\.poker-bet-chips__stack i \{[^}]*repeating-conic-gradient\(#f0c86e/); // gold rim segments
+  assert.match(css, /\.poker-bet-chips__stack i \{[^}]*#0d0a04/);               // black lacquer chip face
+  assert.match(css, /\.poker-bet-chips__stack i \{[^}]*border:2px solid #d9b764/); // gold rim
   assert.match(css, /\.poker-bet-chips__face \{[^}]*color:#f0c86e/);            // gold spade
 });
 
