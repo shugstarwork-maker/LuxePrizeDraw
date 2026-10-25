@@ -1816,10 +1816,16 @@ body::after {
 
 /* Per-seat bet chips on the felt — between the seat and the pot, never over the board. */
 .poker-bet-chips { position:absolute; z-index:4; display:grid; justify-items:center; gap:.1rem; transform:translate(-50%,-50%); pointer-events:none; }
-.poker-bet-chips__stack { position:relative; width:2.1rem; height:2.3rem; }
-.poker-bet-chips__stack i { position:absolute; left:0; width:2.1rem; height:2.1rem; border:2px dashed #ffe09a; border-radius:50%; background:linear-gradient(135deg,#e4bc58,#53370c 35%,#f8dc89 65%,#a97c24); box-shadow:0 2px #5b3c12,0 3px 4px #0009; transform:rotateX(25deg); }
-.poker-bet-chips b { padding:.1rem .35rem; border:1px solid #c4a050; border-radius:.35rem; background:#080603e8; font-size:.6rem; color:#ffe6a0; }
-.poker-bet-chips em { font-size:.5rem; font-style:normal; color:#ffd97a; }
+.poker-bet-chips__stack { position:relative; width:3rem; height:3.2rem; }
+.poker-bet-chips__stack i { position:absolute; left:0; width:3rem; height:3rem; border:2px dashed #ffe09a; border-radius:50%; background:linear-gradient(135deg,#e4bc58,#53370c 35%,#f8dc89 65%,#a97c24); box-shadow:0 2px #5b3c12,0 4px 6px #000c; transform:rotateX(25deg); }
+.poker-bet-chips b { padding:.12rem .45rem; border:1px solid #c4a050; border-radius:.4rem; background:#080603f2; font-size:.8rem; font-weight:900; color:#ffe6a0; }
+.poker-bet-chips em { display:none; }
+
+/* Clean seat furniture — gold-ringed circular avatar with a floating name
+   plate, like the pro apps. No card box, no duplicated mini cards or chips. */
+.poker-live-seats .poker-seat .player-turn-ring { width:3rem; height:3rem; }
+.poker-seat-plate { display:block; margin-top:.15rem; padding:.12rem .45rem; border-radius:999px; border:1px solid rgba(217,183,100,.35); background:rgba(5,4,3,.72); backdrop-filter:blur(3px); box-shadow:0 2px 8px rgba(0,0,0,.5); white-space:nowrap; overflow:hidden; }
+.poker-dealer-btn { display:inline-grid; place-items:center; width:.85rem; height:.85rem; border-radius:50%; background:linear-gradient(#fff0b0,#d4a017); color:#171109; font-size:.5rem; font-weight:900; font-style:normal; }
 
 /* ══ Control-room console (wide landscape) ════════════════════════════════
    The felt runs edge-to-edge down the left; a slim black console column on
@@ -1842,6 +1848,9 @@ body::after {
   .poker-playing-page:has(.poker-console) .poker-playing-wrap { position:absolute; left:0; top:0; bottom:0; right:auto; width:83%; }
   .poker-playing-page:has(.poker-console) .poker-table-artwork > img { object-fit:cover; }
   .poker-playing-page:has(.poker-console) .poker-table-artwork__live { inset:2.2rem 0 1.2rem; }
+  .poker-playing-page:has(.poker-console) .poker-live-board { top:36%; }
+  .poker-playing-page:has(.poker-console) .poker-live-board > * { scale:2; }
+  .poker-playing-page:has(.poker-console) .poker-live-seats .poker-seat .player-turn-ring { width:4.2rem; height:4.2rem; }
   .poker-playing-page:has(.poker-console) .poker-table-artwork__live .poker-live-seats > div { max-width:11%; }
   .poker-playing-page:has(.poker-console) .poker-table-artwork__state { left:.5rem; bottom:.5rem; }
   .poker-playing-page:has(.poker-console) .poker-playing-wrap > header { display:none; }
@@ -1868,7 +1877,7 @@ body::after {
   .poker-console .console-section { display:flex; align-items:center; gap:.3rem; margin:0 0 .2rem; font-size:.55rem; font-weight:900; letter-spacing:.14em; text-transform:uppercase; color:#d9b764; }
   .poker-console .hud-zone--bl { order:5; display:flex; flex-direction:column; align-items:stretch; gap:.3rem; }
   .poker-console .hud-zone--bl .hud-chat-pop { position:static; width:100%; max-height:22dvh; overflow-y:auto; }
-  .poker-console .hud-zone--bl .hud-icon-btn { align-self:flex-start; }
+  .poker-console .hud-zone--bl > .hud-icon-btn { display:none; }
   .poker-console .poker-console-quick { order:6; display:flex; flex-wrap:wrap; gap:.3rem; }
   .poker-console .poker-console-quick .poker-console-pop { width:100%; position:static; max-height:22dvh; overflow-y:auto; }
 

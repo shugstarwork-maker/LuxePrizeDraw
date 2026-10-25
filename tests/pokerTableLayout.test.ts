@@ -5,17 +5,18 @@ import { readFileSync } from "node:fs";
 const src = readFileSync(new URL("../src/components/LuxePokerLeague.tsx", import.meta.url), "utf8");
 const css = readFileSync(new URL("../src/index.css", import.meta.url), "utf8");
 
-test("seat slots are inset from the felt edge — no badge clipping", () => {
-  assert.match(src, /50 \+ 38 \* Math\.cos\(th\)/);      // horizontal radius pulled in from 42
-  assert.match(src, /46 - 28 \* Math\.sin\(th\)/);       // vertical radius centred at 46%
+test("seat slots sit on the gold racetrack of the clean oval felt", () => {
+  assert.match(src, /50 \+ 43 \* Math\.cos\(th\)/);      // horizontal radius on the racetrack
+  assert.match(src, /Math\.min\(86, 50 - 44 \* Math\.sin\(th\)\)/); // vertical radius, bottom seat clamped clear of the rail
 });
 
 test("bet amounts render as chip stacks on the felt, not as pills on the seat badges", () => {
   assert.match(src, /function BetChips\(/);
   assert.match(src, /data-testid="bet-chips"/);
   assert.match(src, /poker-bet-chips__stack/);
-  // inline bet pills removed from both seat renders
+  // seats are avatar + name plate only — no inline bet pills, no mini cards
   assert.ok(!src.includes('>bet {p.bet.toLocaleString()}<'), "inline bet pill still present on a seat badge");
+  assert.ok(!src.includes("poker-seat-hand"), "mini cards still duplicated on a seat badge");
 });
 
 test("bet chips sit between the seat and the pot, clear of the board", () => {
