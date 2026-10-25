@@ -28,13 +28,17 @@ export function AccountCard({ chips }: { chips: number }) {
         <UserRound className="h-5 w-5 shrink-0 text-sky-200/70" />
       </div>
 
+      {acct.profile && acct.error && <p role="alert" className="mt-2 text-[11px] text-rose-200">{acct.error}</p>}
       {acct.profile ? (
         <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-sky-200/20 bg-black/30 p-3.5">
           <div className="min-w-0">
             <p className="truncate text-sm font-black text-white/90">{acct.profile.name || acct.profile.email}</p>
             <p className="mt-0.5 font-mono text-[10px] text-sky-200/70">{acct.profile.id} · {acct.profile.chips.toLocaleString()} chips saved · {chips.toLocaleString()} on this device</p>
           </div>
-          <button onClick={() => acct.logout()} className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-[11px] font-black text-white/70 active:scale-[.97]"><LogOut className="h-3.5 w-3.5" />Sign out</button>
+          <div className="flex shrink-0 flex-col items-end gap-1.5">
+            <button onClick={() => acct.logout()} className="inline-flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-[11px] font-black text-white/70 active:scale-[.97]"><LogOut className="h-3.5 w-3.5" />Sign out</button>
+            <button onClick={() => void acct.logoutEverywhere()} className="text-[10px] font-bold text-white/45 underline underline-offset-2">Sign out on all devices</button>
+          </div>
         </div>
       ) : (
         <div className="mt-4">
@@ -52,7 +56,7 @@ export function AccountCard({ chips }: { chips: number }) {
         </div>
       )}
 
-      <p className="mt-3 text-[10px] text-white/35">Free-play account — your password is stored as a salted hash on this device. No deposits, no cash wagering, ever.</p>
+      <p className="mt-3 text-[10px] text-white/35">Free-play account — your password is stored only as a scrypt hash on our server. No deposits, no cash wagering, ever.</p>
     </div>
   );
 }

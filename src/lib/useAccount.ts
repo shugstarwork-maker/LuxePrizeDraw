@@ -33,6 +33,7 @@ export function useAccount() {
       if (!r.ok || !data.profile || !data.token) {
         setError(data.error === "email_taken" ? "That email already has an account — sign in instead."
           : data.error === "bad_credentials" ? "Email or password not recognised."
+          : data.error === "too_many_attempts" ? "Too many sign-in attempts — please wait 15 minutes and try again."
           : data.error === "password_too_short" ? "Password needs at least 8 characters."
           : data.error === "invalid_email" ? "That email doesn't look right."
           : "Account service is offline right now — you can keep playing free-play without signing in.");
@@ -52,10 +53,22 @@ export function useAccount() {
     setProfile(null);
   }, []);
 
+  // Revokes every session for this account (all devices), then signs out here.
+  const logoutEverywhere = useCallback(async (): Promise<boolean> => {
+    setError("");
+    try {
+      const r = await fetch("/api/accounts/logout-everywhere", { method: "POST", headers: { authorization: `Bearer ${accountToken()}` } });
+      if (!r.ok && r.status !== 401) { setError("Couldn't reach the account service — try again in a moment."); return false; }
+    } catch { setError("Couldn't reach the account service — try again in a moment."); return false; }
+    localStorage.removeItem(TOKEN_KEY);
+    setProfile(null);
+    return true;
+  }, []);
+
   const syncChips = useCallback((chips: number) => {
     if (!accountToken()) return;
     fetch("/api/accounts/chips", { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${accountToken()}` }, body: JSON.stringify({ chips }) }).catch(() => {});
   }, []);
 
-  return { profile, loading, error, signup, login, logout, syncChips };
+  return { profile, loading, error, signup, login, logout, logoutEverywhere, syncChips };
 }
