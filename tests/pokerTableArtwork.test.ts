@@ -6,11 +6,11 @@ import { existsSync, readFileSync } from 'node:fs';
 import { PokerTableArtwork } from '../src/components/PokerTableArtwork';
 test('original table imagery keeps pot and game stage live, not embedded in the image', () => {
   const html = renderToStaticMarkup(createElement(PokerTableArtwork, { pot: 1250, stage: 'flop' }));
-  assert.match(html, /luxe-poker-table-clean.png/);
+  assert.match(html, /luxe-poker-table.png/);
   assert.match(html, /1,250 virtual chips/);
   assert.match(html, /flop/);
   assert.match(html, /No cash value/);
-  assert.ok(existsSync(new URL('../public/games/luxe-poker-table-clean.png', import.meta.url)));
+  assert.ok(existsSync(new URL('../public/games/luxe-poker-table.png', import.meta.url)));
 });
 test('game uses artwork without removing dealer or betting handlers', () => {
   const source = readFileSync(new URL('../src/components/LuxePokerLeague.tsx', import.meta.url), 'utf8');
@@ -23,9 +23,8 @@ test('live seats and board are nested inside the artwork rather than below it', 
   const source = readFileSync(new URL('../src/components/LuxePokerLeague.tsx', import.meta.url), 'utf8');
   const surface = source.split('<PokerTableArtwork')[1].split('</PokerTableArtwork>')[0];
   for (const layer of ['poker-live-seats', 'poker-live-board']) assert.ok(surface.includes(layer));
-  // Seats are clean avatar plates — cards live on the console's black pad,
-  // never duplicated on the seat badge.
-  assert.ok(!surface.includes('poker-seat-hand'), 'seat badges must not carry mini cards');
+  // The player's hand lives on their seat badge, not as a centre-felt strip.
+  assert.ok(surface.includes('poker-seat-hand'));
 });
 
 test('poker table is landscape-first: portrait shows a rotate gate driven by live JS orientation', () => {

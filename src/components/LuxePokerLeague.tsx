@@ -40,26 +40,26 @@ const key = (card: { rank: string; suit: string }) => `${card.rank}${card.suit}`
 type TableDef = { name: string; image: string; blinds: string; smallBlind: number; bigBlind: number; buyIn: number; bots: number; tone: string };
 // Duolingo-style: no lounge picking — your weekly league auto-assigns your table.
 const LEAGUE_TABLES: TableDef[] = [
-  { name: "Bronze League Table", image: "/games/luxe-poker-table-clean.png", blinds: "10 / 20", smallBlind: 10, bigBlind: 20, buyIn: 200, bots: 5, tone: "from-amber-200 to-amber-500" },
-  { name: "Silver League Table", image: "/games/luxe-poker-table-clean.png", blinds: "25 / 50", smallBlind: 25, bigBlind: 50, buyIn: 500, bots: 5, tone: "from-amber-200 to-amber-500" },
-  { name: "Gold League Table", image: "/games/luxe-poker-table-clean.png", blinds: "50 / 100", smallBlind: 50, bigBlind: 100, buyIn: 1000, bots: 5, tone: "from-yellow-200 to-amber-600" },
-  { name: "Platinum League Table", image: "/games/luxe-poker-table-clean.png", blinds: "75 / 150", smallBlind: 75, bigBlind: 150, buyIn: 1500, bots: 5, tone: "from-teal-200 to-emerald-400" },
-  { name: "Sapphire League Table", image: "/games/luxe-poker-table-clean.png", blinds: "100 / 200", smallBlind: 100, bigBlind: 200, buyIn: 2000, bots: 5, tone: "from-yellow-200 to-amber-600" },
-  { name: "Ruby League Table", image: "/games/luxe-poker-table-clean.png", blinds: "150 / 300", smallBlind: 150, bigBlind: 300, buyIn: 3000, bots: 5, tone: "from-amber-300 to-orange-500" },
-  { name: "Emerald League Table", image: "/games/luxe-poker-table-clean.png", blinds: "200 / 400", smallBlind: 200, bigBlind: 400, buyIn: 4000, bots: 5, tone: "from-emerald-300 to-green-600" },
-  { name: "Amethyst League Table", image: "/games/luxe-poker-table-clean.png", blinds: "300 / 600", smallBlind: 300, bigBlind: 600, buyIn: 6000, bots: 5, tone: "from-purple-300 to-fuchsia-500" },
-  { name: "Diamond League Table", image: "/games/luxe-poker-table-clean.png", blinds: "400 / 800", smallBlind: 400, bigBlind: 800, buyIn: 8000, bots: 5, tone: "from-amber-300 to-orange-500" },
-  { name: "Luxe Elite Table", image: "/games/luxe-poker-table-clean.png", blinds: "800 / 1,600", smallBlind: 800, bigBlind: 1600, buyIn: 16000, bots: 5, tone: "from-amber-100 to-yellow-500" },
+  { name: "Bronze League Table", image: "/games/luxe-poker-table.png", blinds: "10 / 20", smallBlind: 10, bigBlind: 20, buyIn: 200, bots: 5, tone: "from-amber-200 to-amber-500" },
+  { name: "Silver League Table", image: "/games/luxe-poker-table.png", blinds: "25 / 50", smallBlind: 25, bigBlind: 50, buyIn: 500, bots: 5, tone: "from-amber-200 to-amber-500" },
+  { name: "Gold League Table", image: "/games/luxe-poker-table.png", blinds: "50 / 100", smallBlind: 50, bigBlind: 100, buyIn: 1000, bots: 5, tone: "from-yellow-200 to-amber-600" },
+  { name: "Platinum League Table", image: "/games/luxe-poker-table.png", blinds: "75 / 150", smallBlind: 75, bigBlind: 150, buyIn: 1500, bots: 5, tone: "from-teal-200 to-emerald-400" },
+  { name: "Sapphire League Table", image: "/games/luxe-poker-table.png", blinds: "100 / 200", smallBlind: 100, bigBlind: 200, buyIn: 2000, bots: 5, tone: "from-yellow-200 to-amber-600" },
+  { name: "Ruby League Table", image: "/games/luxe-poker-table.png", blinds: "150 / 300", smallBlind: 150, bigBlind: 300, buyIn: 3000, bots: 5, tone: "from-amber-300 to-orange-500" },
+  { name: "Emerald League Table", image: "/games/luxe-poker-table.png", blinds: "200 / 400", smallBlind: 200, bigBlind: 400, buyIn: 4000, bots: 5, tone: "from-emerald-300 to-green-600" },
+  { name: "Amethyst League Table", image: "/games/luxe-poker-table.png", blinds: "300 / 600", smallBlind: 300, bigBlind: 600, buyIn: 6000, bots: 5, tone: "from-purple-300 to-fuchsia-500" },
+  { name: "Diamond League Table", image: "/games/luxe-poker-table.png", blinds: "400 / 800", smallBlind: 400, bigBlind: 800, buyIn: 8000, bots: 5, tone: "from-amber-300 to-orange-500" },
+  { name: "Luxe Elite Table", image: "/games/luxe-poker-table.png", blinds: "800 / 1,600", smallBlind: 800, bigBlind: 1600, buyIn: 16000, bots: 5, tone: "from-amber-100 to-yellow-500" },
 ];
 const emotes = ["Nice hand", "Good luck", "Well played", "Thinking..."];
 const gifts = [{ name: "Lucky chip", cost: 25, icon: "🪙" }, { name: "Gold crown", cost: 75, icon: "👑" }, { name: "Luxe sparkle", cost: 150, icon: "✨" }];
 
 // Seat slots around the oval artwork (percent coordinates). Slot 5 = bottom centre = you.
-// Every slot rides the gold racetrack at the felt edge (43%/44% radii), with
-// the bottom-centre seat clamped to 86% so your avatar clears the near rail.
+// Every slot is inset ≥12% horizontally and ≥18% vertically so badges never
+// clip the felt edge or collide with the centre-felt board/pot zone.
 const SEAT_SLOTS = [180, 55, 125, 235, 305, 270].map((deg) => {
   const th = (deg * Math.PI) / 180;
-  return { px: 50 + 43 * Math.cos(th), py: Math.min(86, 50 - 44 * Math.sin(th)), sc: 1.06 - 0.34 * ((Math.sin(th) + 1) / 2) };
+  return { px: 50 + 38 * Math.cos(th), py: 46 - 28 * Math.sin(th), sc: 1.06 - 0.34 * ((Math.sin(th) + 1) / 2) };
 });
 
 
@@ -570,7 +570,7 @@ export const LuxePokerLeague: React.FC = () => {
     setTableChatOpen(false);
     setImpact(null);
     setScreen("table");
-    setActiveTable({ name: t.name, image: "/games/luxe-poker-table-clean.png", blinds: `${t.smallBlind} / ${t.bigBlind}`, smallBlind: t.smallBlind, bigBlind: t.bigBlind, buyIn: t.buyIn, bots: t.bots, tone: "from-zinc-300 to-zinc-500" });
+    setActiveTable({ name: t.name, image: "/games/luxe-poker-table.png", blinds: `${t.smallBlind} / ${t.bigBlind}`, smallBlind: t.smallBlind, bigBlind: t.bigBlind, buyIn: t.buyIn, bots: t.bots, tone: "from-zinc-300 to-zinc-500" });
     setChips((v) => v - t.buyIn);
     const table0 = createTable({ playerName: "You", playerChips: t.buyIn, botCount: t.bots, botChips: t.buyIn * 5, smallBlind: t.smallBlind, bigBlind: t.bigBlind });
     settledHand.current = 0;
@@ -592,7 +592,7 @@ export const LuxePokerLeague: React.FC = () => {
   if (screen === "welcome") return <LoungeWelcome
     brand="Luxe Poker League"
     tagline="Members' free-play casino — pick a card game, sit at your league table and climb the weekly divisions. Virtual chips only, no cash value."
-    art="/games/luxe-poker-table-clean.png"
+    art="/games/luxe-poker-table.png"
     icon="♠"
     chipsLabel={`${chips.toLocaleString()} chips`}
     tab={lobbyTab}
@@ -834,13 +834,15 @@ export const LuxePokerLeague: React.FC = () => {
                   const slot = SEAT_SLOTS[Math.min(i, SEAT_SLOTS.length - 1)];
                   const isMe = p.id === myId;
                   const isTurn = !g.handOver && g.players[g.turnIndex]?.id === p.id;
-                                    const seat = v.seats.find((x) => x.id === p.id);
-                  return <div key={p.id} className={`poker-seat pointer-events-auto absolute w-[4.9rem] px-1 py-1 text-center transition ${p.sittingOut ? "opacity-30" : p.folded ? "opacity-45" : ""}`} style={{ left: `${slot.px}%`, top: `${slot.py}%`, zIndex: 10 + Math.round(slot.py), transform: `translate(-50%,-50%) scale(${slot.sc})` }}>
-                    <PlayerTurnRing active={isTurn} seconds={20} name={p.name}>{isMe && avatar ? <img src={avatar} alt="Your avatar" className="h-full w-full object-cover" /> : p.initials}</PlayerTurnRing>
-                    <span className="poker-seat-plate">
-                      <b className="flex items-center justify-center gap-1 text-[9px] text-amber-100">{p.name}{isMe ? " — you" : ""}{g.players[g.dealerIndex]?.id === p.id ? <i className="poker-dealer-btn">D</i> : ""}{!seat?.connected && <span className="text-rose-300"> · offline</span>}</b>
-                      <small className="block text-[8px] text-white/55">{p.sittingOut ? "Watching" : p.chips.toLocaleString()}{p.allIn ? " · ALL-IN" : ""}{p.folded ? " · folded" : ""}</small>
-                    </span>
+                  const isWinner = g.handOver && !p.sittingOut && g.winners.some((w) => w.id === p.id);
+                  const seat = v.seats.find((x) => x.id === p.id);
+                  const showCards = Boolean(p.cards[0]) && (isMe || (g.stage === "showdown" && !p.folded && !p.sittingOut));
+                  return <div key={p.id} className={`pointer-events-auto absolute w-[4.9rem] rounded-2xl border px-1.5 py-1 text-center shadow-2xl backdrop-blur-md transition ${p.sittingOut ? "opacity-30" : p.folded ? "opacity-45" : ""} ${isWinner ? "border-emerald-300 bg-emerald-300/20" : isTurn ? "border-amber-200 bg-amber-300/20 poker-turn-ring" : isMe ? "poker-seat-you border-amber-200/70 bg-amber-300/10" : "border-white/15 bg-black/55"}`} style={{ left: `${slot.px}%`, top: `${slot.py}%`, zIndex: 10 + Math.round(slot.py), transform: `translate(-50%,-50%) scale(${slot.sc})` }}>
+                    <PlayerTurnRing active={isTurn} seconds={isTurn ? 20 : 20} name={p.name}>{isMe && avatar ? <img src={avatar} alt="Your avatar" className="h-full w-full object-cover" /> : p.initials}</PlayerTurnRing>
+                    <b className="mt-1 block truncate text-[9px] text-amber-100">{p.name}{isMe ? " — you" : ""}{g.players[g.dealerIndex]?.id === p.id ? " 🔘" : ""}{!seat?.connected && <span className="text-rose-300"> · offline</span>}</b>
+                    <small className="block text-[8px] text-white/55">{p.sittingOut ? "Watching" : p.chips.toLocaleString()}{p.allIn ? " · ALL-IN" : ""}{p.folded ? " · folded" : ""}</small>
+  
+                    {p.cards.length === 2 && !p.sittingOut && <span className={`mt-1 flex justify-center gap-0.5 ${isMe ? "poker-seat-hand" : ""}`}>{p.cards.map((c, ci) => (isMe ? Boolean(c) : showCards) && c ? <span key={`${p.id}-${ci}`} className={`flex items-center justify-center rounded-sm border border-black/20 bg-white font-mono font-black ${isMe ? "h-7 w-[1.3rem] text-[10px]" : "h-6 w-[1.1rem] text-[9px]"} ${c.suit === "♥" || c.suit === "♦" ? "text-red-600" : "text-zinc-900"}`}>{c.rank}{c.suit}</span> : <span key={`${p.id}-${ci}`} className="flex h-6 w-[1.1rem] items-center justify-center rounded-sm border border-amber-200/40 bg-gradient-to-br from-amber-900 to-black text-[7px] text-amber-200/70">♛</span>)}</span>}
                   </div>;
                 })}{g.players.map((p, i) => {
                   if (p.bet <= 0 || p.sittingOut) return null;
@@ -892,12 +894,14 @@ export const LuxePokerLeague: React.FC = () => {
                 const slot = SEAT_SLOTS[slotIndex];
                 const isYou = !p.isBot;
                 const isTurn = !game.handOver && game.players[game.turnIndex]?.id === p.id;
-                                return <div key={p.id} onClick={() => p.isBot && setSelectedSeat(p.name)} data-seat={p.id} className={`poker-seat pointer-events-auto absolute w-[4.9rem] px-1 py-1 text-center transition ${p.sittingOut ? "opacity-30" : p.folded ? "opacity-45" : ""}`} style={{ left: `${slot.px}%`, top: `${slot.py}%`, zIndex: 10 + Math.round(slot.py), transform: `translate(-50%,-50%) scale(${slot.sc.toFixed(2)})` }}>
+                const isWinner = game.handOver && !p.sittingOut && game.winners.some((w) => w.id === p.id);
+                const showCards = !p.isBot || (game.stage === "showdown" && !p.folded && !p.sittingOut);
+                return <div key={p.id} onClick={() => p.isBot && setSelectedSeat(p.name)} data-seat={p.id} className={`${isYou ? "poker-seat-you " : ""}pointer-events-auto absolute w-[4.9rem] rounded-2xl border px-1.5 py-1 text-center shadow-2xl backdrop-blur-md transition ${p.sittingOut ? "opacity-30" : p.folded ? "opacity-45" : ""} ${isWinner ? "border-emerald-300 bg-emerald-300/20" : isTurn ? "border-amber-200 bg-amber-300/20 poker-turn-ring" : !p.isBot ? "border-amber-200/70 bg-amber-300/10" : selectedSeat === p.name ? "border-fuchsia-300 bg-fuchsia-300/15" : "border-white/15 bg-black/55"}`} style={{ left: `${slot.px}%`, top: `${slot.py}%`, zIndex: 10 + Math.round(slot.py), transform: `translate(-50%,-50%) scale(${slot.sc.toFixed(2)})` }}>
                   {!p.isBot ? <label className="block cursor-pointer"><PlayerTurnRing active={isTurn} seconds={seconds} name={p.name}>{avatar ? <img src={avatar} alt="Your avatar" className="h-full w-full object-cover" /> : p.initials}</PlayerTurnRing><input aria-label="Upload avatar" type="file" accept="image/*" className="hidden" onChange={(e) => chooseAvatar(e.target.files?.[0])} /></label> : <PlayerTurnRing active={isTurn} seconds={20} name={p.name}>{p.initials}</PlayerTurnRing>}
-                  <span className="poker-seat-plate">
-                    <b className="flex items-center justify-center gap-1 text-[9px] text-amber-100">{p.name}{!p.sittingOut && game.players[game.dealerIndex]?.id === p.id ? <i className="poker-dealer-btn">D</i> : ""}</b>
-                    <small className="block text-[8px] text-white/55">{p.sittingOut ? (p.isBot ? "Away" : "Watching") : p.chips.toLocaleString()}{p.allIn ? " · ALL-IN" : ""}</small>
-                  </span>
+                  <b className="mt-1 block truncate text-[9px] text-amber-100">{p.name}{!p.sittingOut && game.players[game.dealerIndex]?.id === p.id ? " 🔘" : ""}</b>
+                  <small className="text-[8px] text-white/55">{p.sittingOut ? (p.isBot ? "Away" : "Watching") : p.chips.toLocaleString()}{p.allIn ? " · ALL-IN" : ""}</small>
+
+                  {p.cards.length === 2 && !p.sittingOut && <span className={`mt-1 flex justify-center gap-0.5 ${isYou ? "poker-seat-hand" : ""}`}>{p.cards.map((c) => (isYou || showCards) ? <span key={key(c)} className={`flex items-center justify-center rounded-sm border border-black/20 bg-white font-mono font-black ${isYou ? "h-7 w-[1.3rem] text-[10px]" : "h-6 w-[1.1rem] text-[9px]"} ${c.suit === "♥" || c.suit === "♦" ? "text-red-600" : "text-zinc-900"}`}>{c.rank}{c.suit}</span> : <span key={key(c)} className="flex h-6 w-[1.1rem] items-center justify-center rounded-sm border border-amber-200/40 bg-gradient-to-br from-amber-900 to-black text-[7px] text-amber-200/70">♛</span>)}</span>}
                 </div>;
               })}{game && game.players.map((p) => {
                 if (p.bet <= 0 || p.sittingOut) return null;
