@@ -74,8 +74,8 @@ test("console keeps only the option panels — cards and actions live on the fel
   assert.match(css, /\.poker-console \.hud-zone--bl \.hud-chat-pop \{ position:static/);   // chat inline, never over the felt
   assert.match(css, /\.poker-console \.hud-zone--bl \.hud-icon-btn \{ display:none/);      // no duplicate chat button
   assert.match(css, /\.poker-console \.poker-console-hand \{ display:none/);               // hero cards ride the seat badge
-  assert.match(css, /\.poker-console \.poker-action-dock \{ position:fixed; left:41\.5%/); // action bar across the felt bottom
-  assert.match(css, /\.poker-console \.poker-deal-dock \{ position:fixed; left:41\.5%/);   // deal bar across the felt bottom
+  assert.match(css, /\.poker-console \.poker-action-dock \{ position:fixed; left:auto; right:calc\(17%/); // action bar along the felt bottom, right of your avatar
+  assert.match(css, /\.poker-console \.poker-deal-dock \{ position:fixed; left:auto; right:calc\(17%/);   // deal bar rides the same slot
 });
 
 test("console minimises into a tab strip, one tab per option, and the felt takes the space back", () => {

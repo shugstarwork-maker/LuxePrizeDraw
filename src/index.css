@@ -1845,10 +1845,16 @@ body::after {
   /* The felt yields its right 17% to the glass console — nothing hides beneath
      the overlay, so the rail's Luxe chip stacks and the hole-cards artwork are
      never covered. The console blurs the felt edge behind it. */
+  /* Cinematic framing: the felt artwork is cropped around the table so the
+     rail's Luxe chip stacks and the hole-cards fan are big and always in shot. */
   .poker-playing-page:has(.poker-console) .poker-playing-wrap { position:absolute; left:0; top:0; bottom:0; right:auto; width:83%; }
-  .poker-playing-page:has(.poker-console) .poker-table-artwork > img { object-fit:cover; }
-  .poker-playing-page:has(.poker-console) .poker-table-artwork__live { inset:2.2rem 0 1.2rem; }
+  .poker-playing-page:has(.poker-console) .poker-table-artwork > img { object-fit:cover; object-position:46% 50%; transform:scale(1.18); }
+  .poker-playing-page:has(.poker-console) .poker-table-artwork__live { inset:3.1rem 2% 1.6rem; }
   .poker-playing-page:has(.poker-console) .poker-table-artwork__live .poker-live-seats > div { max-width:11%; }
+  /* Community cards shrink slightly so they clear the rail badges; your badge
+     scales down so the action bar sits right of it without an overlap. */
+  .poker-playing-page:has(.poker-console) .poker-live-board { scale:.85; }
+  .poker-playing-page:has(.poker-console) .poker-live-seats .poker-seat-you { transform:translate(-50%,-50%) scale(.78) !important; }
   .poker-playing-page:has(.poker-console) .poker-table-artwork__state { left:.5rem; bottom:.5rem; }
   .poker-playing-page:has(.poker-console) .poker-playing-wrap > header { display:none; }
   .poker-playing-page:has(.poker-console) .poker-round-status { left:41.5%; } /* felt's visual centre — the console covers the rightmost stretch */
@@ -1902,22 +1908,25 @@ body::after {
   /* Your cards ride your seat badge on the felt — no duplicate pad in the console. */
   .poker-console .poker-console-hand { display:none; }
 
-  /* The action dock leaves the console: one thumb row bar across the BOTTOM of
-     the felt — [raise slider] [Fold] [Check/Call] [Raise]. */
-  .poker-console .poker-action-dock { position:fixed; left:41.5%; right:auto; bottom:max(.35rem,env(safe-area-inset-bottom)); transform:translateX(-50%); width:min(36rem,76vw); margin:0; z-index:1190; display:grid; grid-template-columns:8rem repeat(3,minmax(0,1fr)); align-items:center; gap:.45rem; padding:.35rem .55rem; border:1px solid #d9b764; border-radius:.9rem; background:rgba(9,7,3,.94); box-shadow:0 6px 25px rgba(0,0,0,.6); }
+  /* The action dock leaves the console: a compact one-thumb-row bar along the
+     bottom of the felt, right of your avatar — [slider] [Fold] [Call] [Raise]. */
+  .poker-console .poker-action-dock { position:fixed; left:auto; right:calc(17% + .4rem); bottom:max(.35rem,env(safe-area-inset-bottom)); transform:none; width:min(30rem,56vw); margin:0; z-index:1190; display:grid; grid-template-columns:7rem repeat(3,minmax(0,1fr)); align-items:center; gap:.45rem; padding:.35rem .55rem; border:1px solid #d9b764; border-radius:.9rem; background:rgba(9,7,3,.94); box-shadow:0 6px 25px rgba(0,0,0,.6); }
   .poker-console .poker-action-dock > div { margin:0; min-width:0; }
   .poker-console .poker-action-dock > .flex:first-child { grid-column:1; grid-row:1; }
   .poker-console .poker-action-dock > .grid { display:contents; }
   .poker-console .poker-action-dock > .grid > * { grid-row:1; }
   .poker-console .poker-action-dock button { min-height:2.4rem; width:100%; padding-block:.45rem; }
-  .poker-console .poker-deal-dock { position:fixed; left:41.5%; right:auto; bottom:max(.35rem,env(safe-area-inset-bottom)); transform:translateX(-50%); width:min(24rem,60vw); margin:0; z-index:1190; }
+  .poker-console .poker-deal-dock { position:fixed; left:auto; right:calc(17% + .4rem); bottom:max(.35rem,env(safe-area-inset-bottom)); transform:none; width:min(20rem,44vw); margin:0; z-index:1190; }
   /* The multiplayer below-table docks ride the same felt bar position. */
-  .poker-playing-page:has(.poker-console) .poker-below-table .poker-action-dock,
-  .poker-playing-page:has(.poker-console) .poker-below-table .poker-deal-dock { left:41.5%; width:min(36rem,76vw); }
+  .poker-playing-page:has(.poker-console) .poker-below-table .poker-action-dock { left:auto; right:calc(17% + .4rem); transform:none; width:min(30rem,56vw); }
+  .poker-playing-page:has(.poker-console) .poker-below-table .poker-deal-dock { left:auto; right:calc(17% + .4rem); transform:none; width:min(20rem,44vw); }
 
   /* ── Minimised: the console collapses to a slim tab strip and the felt
         takes the space back. Ticker and action bars stay on the felt. ── */
   .poker-playing-page.poker-console-min .poker-playing-wrap { width:calc(100% - 3.6rem); }
+  .poker-playing-page.poker-console-min .poker-table-artwork > img { transform:none; } /* full cinematic canvas when the console is tucked away */
+  .poker-playing-page.poker-console-min .poker-live-board { scale:1; }
+  .poker-playing-page.poker-console-min .poker-live-seats .poker-seat-you { transform:translate(-50%,-50%) scale(1) !important; }
   .poker-playing-page.poker-console-min .poker-round-status { left:calc(50% - 1.8rem); }
   .poker-console-min .poker-console { width:3.4rem; padding:max(.45rem,env(safe-area-inset-top)) .3rem max(.45rem,env(safe-area-inset-bottom)); gap:.3rem; overflow:visible; }
   .poker-console-min .poker-console .hud-zone,
@@ -1928,10 +1937,10 @@ body::after {
   .poker-console-min .poker-console .poker-console-tabs { display:flex; flex-direction:column; gap:.3rem; }
   .poker-console-min .poker-console .poker-console-tabs .hud-icon-btn { width:100%; height:2.5rem; }
   .poker-console-min .poker-console .poker-ticker { left:calc(50% - 1.8rem); max-width:calc(100vw - 5.5rem); }
-  .poker-console-min .poker-console .poker-action-dock { position:fixed; left:calc(50% - 1.8rem); width:min(38rem,calc(100vw - 5.5rem)); }
-  .poker-console-min .poker-console .poker-deal-dock { position:fixed; left:calc(50% - 1.8rem); width:min(24rem,calc(100vw - 5.5rem)); }
-  .poker-playing-page.poker-console-min .poker-below-table .poker-action-dock,
-  .poker-playing-page.poker-console-min .poker-below-table .poker-deal-dock { left:calc(50% - 1.8rem); width:min(38rem,calc(100vw - 5.5rem)); }
+  .poker-console-min .poker-console .poker-action-dock { position:fixed; left:auto; right:calc(3.6rem + .4rem); transform:none; width:min(30rem,56vw); }
+  .poker-console-min .poker-console .poker-deal-dock { position:fixed; left:auto; right:calc(3.6rem + .4rem); transform:none; width:min(20rem,44vw); }
+  .poker-playing-page.poker-console-min .poker-below-table .poker-action-dock { left:auto; right:calc(3.6rem + .4rem); transform:none; width:min(30rem,56vw); }
+  .poker-playing-page.poker-console-min .poker-below-table .poker-deal-dock { left:auto; right:calc(3.6rem + .4rem); transform:none; width:min(20rem,44vw); }
 }
 
 /* Phone-height landscape (≈360–500px tall): compact the console so every
