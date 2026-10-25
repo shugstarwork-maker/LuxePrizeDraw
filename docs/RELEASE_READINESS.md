@@ -9,7 +9,7 @@ The separately reviewed branding PR must not be silently bundled into backend wo
 Run `npm ci` then `npm run verify`. This runs TypeScript checks, unit/API tests,
 isolated PostgreSQL-compatible migration/settlement tests and the application build.
 No live payment credentials or production database are required for these checks.
-A proposed workflow is supplied at docs/ci/review-workflow.yml. A repository administrator must review and install it at .github/workflows/review.yml; this integration could not publish that restricted workflow path. It is not active yet.
+The review workflow is installed at .github/workflows/review.yml and runs `npm run verify` on every pull request and on pushes to main. Making it a required check is a branch-protection setting a repository administrator still has to enable.
 Workflow execution depends on repository Actions settings and available allowance;
 this change does not buy runner capacity or configure branch protection.
 
