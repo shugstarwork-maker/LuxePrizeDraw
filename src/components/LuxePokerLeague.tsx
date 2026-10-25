@@ -54,13 +54,17 @@ const LEAGUE_TABLES: TableDef[] = [
 const emotes = ["Nice hand", "Good luck", "Well played", "Thinking..."];
 const gifts = [{ name: "Lucky chip", cost: 25, icon: "🪙" }, { name: "Gold crown", cost: 75, icon: "👑" }, { name: "Luxe sparkle", cost: 150, icon: "✨" }];
 
-// Seat slots around the oval artwork (percent coordinates). Slot 5 = bottom centre = you.
-// Every slot is inset ≥12% horizontally and ≥18% vertically so badges never
-// clip the felt edge or collide with the centre-felt board/pot zone.
-const SEAT_SLOTS = [180, 55, 125, 235, 305, 270].map((deg) => {
-  const th = (deg * Math.PI) / 180;
-  return { px: 50 + 38 * Math.cos(th), py: 46 - 28 * Math.sin(th), sc: 1.06 - 0.34 * ((Math.sin(th) + 1) / 2) };
-});
+// Seat slots pinned to the table rail (percent of the live layer) — every badge
+// sits ON the rail artwork at the marked positions, never floating mid-felt.
+// Slot 5 = bottom centre = you.
+const SEAT_SLOTS = [
+  { px: 13, py: 68, sc: 0.9 },   // left rail — lower
+  { px: 85, py: 25, sc: 0.76 },  // right rail — upper
+  { px: 17, py: 14, sc: 0.72 },  // left rail — upper
+  { px: 86, py: 72, sc: 0.9 },   // right rail — lower
+  { px: 63, py: 82, sc: 1 },     // bottom rail — right of the hero
+  { px: 45, py: 75, sc: 1.06 },  // hero — bottom centre
+];
 
 
 

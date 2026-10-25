@@ -5,9 +5,13 @@ import { readFileSync } from "node:fs";
 const src = readFileSync(new URL("../src/components/LuxePokerLeague.tsx", import.meta.url), "utf8");
 const css = readFileSync(new URL("../src/index.css", import.meta.url), "utf8");
 
-test("seat slots are inset from the felt edge — no badge clipping", () => {
-  assert.match(src, /50 \+ 38 \* Math\.cos\(th\)/);      // horizontal radius pulled in from 42
-  assert.match(src, /46 - 28 \* Math\.sin\(th\)/);       // vertical radius centred at 46%
+test("seat slots pin badges to the rail — the marked positions around the table edge", () => {
+  assert.match(src, /\{ px: 17, py: 14, sc: 0\.72 \}/);  // left rail — upper
+  assert.match(src, /\{ px: 85, py: 25, sc: 0\.76 \}/);  // right rail — upper
+  assert.match(src, /\{ px: 13, py: 68, sc: 0\.9 \}/);   // left rail — lower
+  assert.match(src, /\{ px: 86, py: 72, sc: 0\.9 \}/);   // right rail — lower
+  assert.match(src, /\{ px: 63, py: 82, sc: 1 \}/);      // bottom rail, right of the hero
+  assert.match(src, /\{ px: 45, py: 75, sc: 1\.06 \}/);  // hero — bottom centre
 });
 
 test("bet amounts render as chip stacks on the felt, not as pills on the seat badges", () => {
@@ -52,6 +56,13 @@ test("tournament ticker docks to the bottom of the table HUD, clear of the actio
   assert.doesNotMatch(css, /\.poker-ticker \{[^}]*top: 0/);       // no longer pinned to the top
 });
 
+test("in console mode the ticker leaves the column and becomes a bar across the top of the felt", () => {
+  assert.match(css, /\.poker-console \.poker-ticker \{ position:fixed; top:max\(\.35rem/); // top bar, not a console card
+  assert.match(css, /\.poker-console \.poker-ticker \{[^}]*left:41\.5%/);                  // centred on the 83% felt channel
+  assert.match(css, /\.poker-console \.poker-ticker \{[^}]*border-radius:999px/);          // pill bar styling
+  assert.match(css, /\.poker-console-min \.poker-console \.poker-ticker \{ left:calc\(50% - 1\.8rem\)/); // stays put when minimised
+});
+
 test("wide landscape becomes a control room: felt edge-to-edge left, black console column right", () => {
   assert.match(css, /min-aspect-ratio:2\/1/);                                            // wide-screen console mode exists
   assert.match(css, /\.poker-playing-page:has\(\.poker-console\) \.poker-playing-wrap \{ position:absolute; left:0; top:0; bottom:0; right:auto; width:83%/); // felt fills its own channel — the glass console never covers the rail's chips or cards
@@ -59,11 +70,12 @@ test("wide landscape becomes a control room: felt edge-to-edge left, black conso
   assert.match(css, /\.poker-playing-page \.poker-console \{ position:fixed; top:0; right:0; bottom:0; left:auto; width:17%/); // console owns the right column
 });
 
-test("console column stacks stats, chat, your cards on a black pad and the dock at its foot", () => {
-  assert.match(css, /\.poker-console \.poker-ticker \{ order:3; position:static/);        // ticker in the stack
-  assert.match(css, /\.poker-console \.hud-zone--bl \.hud-chat-pop \{ position:static/);  // chat inline, never over the felt
-  assert.match(css, /\.poker-console \.poker-console-hand \{ order:8;[^}]*background:rgba\(5,4,2,\.3\)/); // cards on clear glass — gold glows through
-  assert.match(css, /\.poker-console \.poker-action-dock \{ order:9; position:static/);   // dock at the foot
+test("console keeps only the option panels — cards and actions live on the felt as bars", () => {
+  assert.match(css, /\.poker-console \.hud-zone--bl \.hud-chat-pop \{ position:static/);   // chat inline, never over the felt
+  assert.match(css, /\.poker-console \.hud-zone--bl \.hud-icon-btn \{ display:none/);      // no duplicate chat button
+  assert.match(css, /\.poker-console \.poker-console-hand \{ display:none/);               // hero cards ride the seat badge
+  assert.match(css, /\.poker-console \.poker-action-dock \{ position:fixed; left:41\.5%/); // action bar across the felt bottom
+  assert.match(css, /\.poker-console \.poker-deal-dock \{ position:fixed; left:41\.5%/);   // deal bar across the felt bottom
 });
 
 test("console minimises into a tab strip, one tab per option, and the felt takes the space back", () => {
@@ -88,16 +100,22 @@ test("console offers players roster and how-to-play popovers from the options ro
   assert.match(src, /players=\{game \? game\.players\.map/);          // roster wired from the live game
 });
 
-test("console matches the pro-app sidebar: labelled nav, sections and a TABLE OPTIONS chevron list", () => {
+test("console matches the pro-app sidebar: coin table card, ring quick icons and a TABLE OPTIONS chevron list", () => {
   const hud = readFileSync(new URL("../src/components/PokerHudFrame.tsx", import.meta.url), "utf8");
   assert.match(hud, /<span>Leaderboard<\/span>/);                    // labelled nav buttons
   assert.match(hud, /<span>Sound<\/span>/);
+  assert.match(hud, /console-table-card__coin/);                     // crown coin emblem on the table card
+  assert.match(hud, /console-seat-panel__icon/);                     // framed wallet icon on SEAT & STACKS
   assert.match(hud, /Seat &amp; Stacks/);                            // section headers
   assert.match(hud, /Table Options/);
   assert.match(hud, /data-testid="poker-console-options"/);
   for (const row of ["Table Info", "Leaderboard", "Chat", "How to Play", "Leave Table"]) {
     assert.ok(hud.includes(`<span>${row}</span>`), `missing option row: ${row}`);
   }
+  assert.match(css, /\.console-table-card__coin \{[^}]*border-radius: 50%/);            // gold coin disc
+  assert.match(css, /poker-console-quick \.console-nav-btn svg \{[^}]*border-radius: ?50%/); // circular quick rings
+  assert.match(css, /\.poker-console \.poker-console-quick \{[^}]*border:1px solid/);       // framed quick panel
+  assert.match(css, /\.poker-console \.poker-console-options \{[^}]*border:1px solid/);     // framed options panel
   assert.match(css, /\.poker-console \.console-option-row \{[^}]*width:100%/);   // full-width rows
   assert.match(css, /\.poker-console \.console-section \{[^}]*text-transform:uppercase/);
   assert.match(hud, /onSettings/);                                   // settings cycles the theme

@@ -6,6 +6,9 @@ import {defineConfig} from 'vite';
 export default defineConfig(() => {
   return {
     plugins: [react(), tailwindcss()],
+    // publicDir copy flakes on this mount (ENOENT mid-copyDir) — the pipeline
+    // already syncs public/ into dist/ manually after every build.
+    publicDir: false,
     build: {
       rollupOptions: {
         output: {

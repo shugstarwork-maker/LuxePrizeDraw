@@ -30,8 +30,9 @@ test('dealer portrait has no visible two-card hand while opponent evaluation is 
 test('player seat is spaced from neighbours by the inline seat geometry, not CSS pins', () => {
   const src = readFileSync(new URL('../src/components/LuxePokerLeague.tsx', import.meta.url), 'utf8');
   const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
-  // SEAT_SLOTS insets every badge inside the felt (horizontal radius 38, not 42+).
-  assert.match(src, /50 \+ 38 \* Math\.cos\(th\)/);
+  // SEAT_SLOTS pins every badge to the rail with explicit percent coordinates.
+  assert.match(src, /\{ px: 45, py: 75, sc: 1\.06 \}/);   // hero — bottom centre
+  assert.match(src, /\{ px: 17, py: 14, sc: 0\.72 \}/);   // left rail — upper
   // No leftover !important seat pins that can drag badges on top of each other.
   assert.doesNotMatch(css, /data-seat-index="4"[^}]*left:[0-9]+% !important/);
   assert.doesNotMatch(css, /poker-seat-you[^}]*left:[0-9]+% !important/);

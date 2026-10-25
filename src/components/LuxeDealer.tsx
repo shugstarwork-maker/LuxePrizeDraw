@@ -21,7 +21,7 @@ export const LuxeDealer: React.FC<DealerProps> = ({ stage, active, mood }) => {
   const dealing = stage === "pre-flop";
   const key = mood === "win" ? "win" : mood === "lose" ? "lose" : active ? "yourmove" : dealing ? "deal" : stage in LINES ? stage : "idle";
   return (
-    <div className="pointer-events-none absolute left-1/2 top-1 z-30 flex -translate-x-1/2 flex-col items-center">
+    <div className="luxe-dealer-wrap pointer-events-none absolute left-1/2 top-1 z-30 flex -translate-x-1/2 flex-col items-center">
       <div key={key} className="luxe-dealer-bubble mb-1 rounded-xl border border-amber-200/40 bg-black/80 px-2 py-1 text-center text-[9px] font-bold leading-tight text-amber-100 backdrop-blur">
         {LINES[key]}
       </div>
