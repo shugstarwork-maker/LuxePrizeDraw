@@ -141,3 +141,17 @@ test("HUD frame exposes the console slots and the league table wires them", () =
 test("your seat badge never drifts off its slot onto the board", () => {
   assert.ok(!src.includes("slot.py + 8"), "seat-you vertical drift is back");
 });
+
+test("in-play chips are black-and-gold Luxe stacks with a spade face, like the rail artwork", () => {
+  assert.match(src, /poker-bet-chips__face/);                                   // spade face on the top chip
+  assert.match(css, /\.poker-bet-chips__stack i \{[^}]*#17130a/);               // black lacquer chip body
+  assert.match(css, /\.poker-bet-chips__stack i \{[^}]*outline:2px dashed rgba\(240,200,110/); // gold edge spots
+  assert.match(css, /\.poker-bet-chips__face \{[^}]*color:#f0c86e/);            // gold spade
+});
+
+test("lobby offers a way back to a live table — League/lobby visits no longer strand the player", () => {
+  assert.match(src, /data-testid="back-to-table"/);
+  assert.match(src, /setScreen\("table"\); \}\} className="rounded-full bg-gradient-to-b from-amber-300 to-amber-500 px-4/);
+  // The back button only shows while a seat is still live.
+  assert.match(src, /\{activeTable && game && <button onClick=\{\(\) => \{ play\("button"\); setScreen\("table"\)/);
+});
