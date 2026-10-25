@@ -57,6 +57,7 @@ const EconomicsPage = lazy(() => import("./components/EconomicsPage").then((m) =
 const PostalIntakePage = lazy(() => import("./components/PostalIntakePage").then((m) => ({ default: m.PostalIntakePage })));
 const ParticipationStandardsPage = lazy(() => import("./components/ParticipationStandardsPage").then((m) => ({ default: m.ParticipationStandardsPage })));
 const ResponsiblePlayPage = lazy(() => import("./components/ResponsiblePlayPage").then((m) => ({ default: m.ResponsiblePlayPage })));
+import { RealityCheck } from "./components/RealityCheck";
 const LaunchBuildPage = lazy(() => import("./components/LaunchBuildPage").then((m) => ({ default: m.LaunchBuildPage })));
 const HomePage = lazy(() => import("./components/HomePage").then((m) => ({ default: m.HomePage })));
 
@@ -102,7 +103,7 @@ export default function App() {
 
   const category = path === "/category" ? new URLSearchParams(window.location.search).get("name") : path === "/sports-cars" ? "Cars" : "";
   const backdropTheme = path === "/" ? "money" : category === "Cars" ? "cars" : category === "Cash" || category === "Bitcoin" ? "money" : undefined;
-  return <div className="storm-page luxe-brand-theme"><div className="storm-page__content"><OwnershipNotice />{page}<footer className="border-t border-white/10 bg-black/60 px-4 py-6 pb-28 text-center text-xs text-white/65 sm:pb-6"><a href="/terms" onClick={(e) => { e.preventDefault(); go("/terms"); }} className="font-bold text-amber-200 underline underline-offset-4">General terms for all draws</a><p className="mt-2">Pre-launch · Draft rules require legal approval before entries open.</p></footer><IntellectualPropertyNotice /></div><StormBackdrop theme={backdropTheme} />{path !== "/lobby" && <AudioControls />}<InstallAppPrompt /></div>;
+  return <div className="storm-page luxe-brand-theme"><div className="storm-page__content"><OwnershipNotice />{page}<footer className="border-t border-white/10 bg-black/60 px-4 py-6 pb-28 text-center text-xs text-white/65 sm:pb-6"><a href="/terms" onClick={(e) => { e.preventDefault(); go("/terms"); }} className="font-bold text-amber-200 underline underline-offset-4">General terms for all draws</a><p className="mt-2">Pre-launch · Draft rules require legal approval before entries open.</p></footer><IntellectualPropertyNotice /></div><StormBackdrop theme={backdropTheme} />{path !== "/lobby" && <AudioControls />}<InstallAppPrompt /><RealityCheck /></div>;
 }
 
 function SiteContent({ path }: { path: string }) {

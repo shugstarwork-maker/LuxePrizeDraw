@@ -86,3 +86,19 @@ test("checkout hard-locks behind an active exclusion and the page is routed", ()
   assert.match(app, /path === "\/responsible-play"/);
   assert.match(home, /go\("\/responsible-play"\)/);
 });
+
+const reality = readFileSync(new URL("../src/components/RealityCheck.tsx", import.meta.url), "utf8");
+
+test("reality-check pop-up is mounted globally and respects exclusions", () => {
+  assert.match(app, /<RealityCheck \/>/);
+  assert.match(reality, /data-testid="reality-check-popup"/);
+  assert.match(reality, /data-testid="reality-minutes"/);
+  assert.match(reality, /data-testid="reality-continue"/);
+  assert.match(reality, /data-testid="reality-break"/);
+  // never fires while a cooling-off or self-exclusion is active
+  assert.match(reality, /if \(playBlocked\(\)\.blocked\) \{ setDue\(null\); return; \}/);
+  // interval comes from the player-configured setting
+  assert.match(reality, /reminderMinutes\(\)/);
+  // break CTA routes to the Responsible Play Centre
+  assert.match(reality, /navigate\("\/responsible-play"\)/);
+});
