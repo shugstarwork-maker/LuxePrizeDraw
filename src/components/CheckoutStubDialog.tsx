@@ -1,4 +1,5 @@
-import { Lock, ShieldCheck, X } from "lucide-react";
+import { Lock, ShieldAlert, ShieldCheck, X } from "lucide-react";
+import { EXCLUSION_PERIODS, exclusionTimeLeft, playBlocked } from "../lib/responsiblePlay";
 
 export type PricedItem = {
   id: string;
@@ -14,6 +15,7 @@ export type PricedItem = {
  */
 export function CheckoutStubDialog({ item, onClose }: { item: PricedItem; onClose: () => void }) {
   const isCoinPack = item.id.startsWith("pack-");
+  const gate = playBlocked();
   return (
     <div className="ad-break" role="dialog" aria-modal="true" aria-label="Checkout preview">
       <div className="ad-break__card">
@@ -31,6 +33,13 @@ export function CheckoutStubDialog({ item, onClose }: { item: PricedItem; onClos
             <p className="text-2xl font-black text-amber-100">{item.priceGBP}</p>
           </div>
         </div>
+
+        {gate.blocked && (
+          <div className="mt-4 rounded-2xl border border-rose-300/40 bg-rose-400/10 p-4" role="alert" data-testid="checkout-excluded">
+            <p className="flex items-center gap-2 text-xs font-black text-rose-100"><ShieldAlert className="h-4 w-4" /> {EXCLUSION_PERIODS[gate.exclusion.kind].label} active</p>
+            <p className="mt-1 text-[11px] leading-relaxed text-rose-100/70">Purchases are locked while your break is running — {exclusionTimeLeft(gate.exclusion)} remaining. Visit the Responsible Play Centre for support links.</p>
+          </div>
+        )}
 
         <div className="mt-4 space-y-2 text-[11px] leading-relaxed text-white/55">
           <p className="flex items-start gap-2"><ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-300" /> {isCoinPack ? "Gold Coins are for fun only — zero real-world value, never redeemable for cash or prizes." : "Cosmetic only — this item can never be converted back into cash, prizes, or draw entries."}</p>

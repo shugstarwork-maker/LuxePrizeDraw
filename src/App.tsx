@@ -56,6 +56,7 @@ const CredentialsPartnershipsPage = lazy(() => import("./components/CredentialsP
 const EconomicsPage = lazy(() => import("./components/EconomicsPage").then((m) => ({ default: m.EconomicsPage })));
 const PostalIntakePage = lazy(() => import("./components/PostalIntakePage").then((m) => ({ default: m.PostalIntakePage })));
 const ParticipationStandardsPage = lazy(() => import("./components/ParticipationStandardsPage").then((m) => ({ default: m.ParticipationStandardsPage })));
+const ResponsiblePlayPage = lazy(() => import("./components/ResponsiblePlayPage").then((m) => ({ default: m.ResponsiblePlayPage })));
 const LaunchBuildPage = lazy(() => import("./components/LaunchBuildPage").then((m) => ({ default: m.LaunchBuildPage })));
 const HomePage = lazy(() => import("./components/HomePage").then((m) => ({ default: m.HomePage })));
 
@@ -82,6 +83,7 @@ export default function App() {
     : path === "/redeem" ? <><RedemptionStore /><MobileDock /></>
     : path === "/arena" ? <><SkillGamesArena /><MobileDock /></>
     : path === "/standards" ? <ParticipationStandardsPage />
+    : path === "/responsible-play" ? <ResponsiblePlayPage />
     : path === "/duel" ? <><DuelRoom /><ScottishHost /><MobileDock /></>
     : path === "/lobby" ? <NeonGameLobby soundEnabled={audio.enabled} onToggleSound={() => audio.setEnabled(!audio.enabled)} />
     : path === "/poker" ? <><LuxePokerLeague /><ScottishHost /></>

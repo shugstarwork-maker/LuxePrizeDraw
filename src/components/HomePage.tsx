@@ -227,7 +227,7 @@ export const HomePage: React.FC = () => (
         <button type="button" onClick={() => go("/draws")} className="text-left hover:text-amber-200">Prize draws</button>
         <button type="button" onClick={() => go("/serenity")} className="text-left hover:text-amber-200">Community Fund</button>
         <button type="button" onClick={() => go("/credentials")} className="text-left hover:text-amber-200">Partner with us</button>
-        <button type="button" onClick={() => go("/standards")} className="text-left hover:text-amber-200">Responsible play</button>
+        <button type="button" onClick={() => go("/responsible-play")} className="text-left hover:text-amber-200">Responsible play</button>
         <button type="button" onClick={() => go("/terms")} className="text-left hover:text-amber-200">Terms &amp; rules</button>
         <button type="button" onClick={() => go("/community")} className="text-left hover:text-amber-200">Community</button>
         <button type="button" onClick={() => go("/economics")} className="text-left hover:text-amber-200">Draw economics</button>
