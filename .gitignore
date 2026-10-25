@@ -6,3 +6,6 @@ coverage/
 *.log
 .env*
 !.env.example
+# Local demo account store (emails, password hashes, session tokens) — never commit
+data/accounts.json
+data/accounts.json.tmp
