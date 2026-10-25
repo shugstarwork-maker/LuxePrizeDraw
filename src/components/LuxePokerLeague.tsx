@@ -945,6 +945,7 @@ export const LuxePokerLeague: React.FC = () => {
       </div>}
       ticker={<PokerTournamentTicker playersRemaining={alivePlayers} totalSeats={game?.players.length ?? 6} yourPosition={null} currentBlinds={activeTable?.blinds ?? "—"} nextBlinds={nextTable.blinds} />}
       players={game ? game.players.map((p) => ({ name: p.name, chips: p.chips, isBot: p.isBot })) : []}
+      onSettings={() => { play("button"); setTableTheme((t) => t === "classic" ? "onyx" : t === "onyx" ? "noir" : "classic"); }}
       handStrip={you && you.cards.length > 0 && !you.sittingOut ? you.cards.map((c) => <CardView key={key(c)} card={c} />) : null}
       dock={<>
         {game && !game.handOver && yourTurn && <div className="poker-action-dock mt-5" role="group" aria-label="Poker actions">

@@ -62,8 +62,8 @@ test("wide landscape becomes a control room: felt edge-to-edge left, black conso
 test("console column stacks stats, chat, your cards on a black pad and the dock at its foot", () => {
   assert.match(css, /\.poker-console \.poker-ticker \{ order:3; position:static/);        // ticker in the stack
   assert.match(css, /\.poker-console \.hud-zone--bl \.hud-chat-pop \{ position:static/);  // chat inline, never over the felt
-  assert.match(css, /\.poker-console \.poker-console-hand \{ order:7;[^}]*background:#000/); // cards pop on black
-  assert.match(css, /\.poker-console \.poker-action-dock \{ order:8; position:static/);   // dock at the foot
+  assert.match(css, /\.poker-console \.poker-console-hand \{ order:8;[^}]*background:#000/); // cards pop on black
+  assert.match(css, /\.poker-console \.poker-action-dock \{ order:9; position:static/);   // dock at the foot
 });
 
 test("console minimises into a tab strip, one tab per option, and the felt takes the space back", () => {
@@ -86,6 +86,22 @@ test("console offers players roster and how-to-play popovers from the options ro
   assert.match(hud, /aria-label="How to play"/);
   assert.match(hud, /No-Limit Texas Hold'em/);
   assert.match(src, /players=\{game \? game\.players\.map/);          // roster wired from the live game
+});
+
+test("console matches the pro-app sidebar: labelled nav, sections and a TABLE OPTIONS chevron list", () => {
+  const hud = readFileSync(new URL("../src/components/PokerHudFrame.tsx", import.meta.url), "utf8");
+  assert.match(hud, /<span>Leaderboard<\/span>/);                    // labelled nav buttons
+  assert.match(hud, /<span>Sound<\/span>/);
+  assert.match(hud, /Seat &amp; Stacks/);                            // section headers
+  assert.match(hud, /Table Options/);
+  assert.match(hud, /data-testid="poker-console-options"/);
+  for (const row of ["Table Info", "Leaderboard", "Chat", "How to Play", "Leave Table"]) {
+    assert.ok(hud.includes(`<span>${row}</span>`), `missing option row: ${row}`);
+  }
+  assert.match(css, /\.poker-console \.console-option-row \{[^}]*width:100%/);   // full-width rows
+  assert.match(css, /\.poker-console \.console-section \{[^}]*text-transform:uppercase/);
+  assert.match(hud, /onSettings/);                                   // settings cycles the theme
+  assert.match(src, /setTableTheme\(\(t\) => t === "classic"/);
 });
 
 test("console wrapper is transparent outside wide landscape — classic layout untouched", () => {
