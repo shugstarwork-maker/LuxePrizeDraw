@@ -20,7 +20,7 @@ test('landscape table fills viewport with overlay controls and no page scrolling
   const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
   assert.match(css, /height:100dvh; min-height:0; padding:0; overflow:hidden/);
   assert.doesNotMatch(css, /100dvh - 10rem/);
-  assert.match(css, /poker-table-artwork > img \{ width:100%; height:100%; object-fit:cover/);
+  assert.match(css, /poker-table-artwork > img \{ width:100%; height:100%; object-fit:contain/);
 });
 
 test('deal control contrasts against scenery and portrait fullscreen keeps rotate gate', () => {

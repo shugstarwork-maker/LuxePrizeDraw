@@ -51,3 +51,14 @@ test("tournament ticker docks to the bottom of the table HUD, clear of the actio
   assert.match(css, /\.poker-playing-page \.poker-ticker \{[^}]*bottom:4\.6rem/); // landscape: lifted above the dock
   assert.doesNotMatch(css, /\.poker-ticker \{[^}]*top: 0/);       // no longer pinned to the top
 });
+
+test("wide landscape hands the black side columns to the UI rails", () => {
+  assert.match(css, /min-aspect-ratio:2\/1/);                       // wide-screen rail mode exists
+  assert.match(css, /\.poker-table-artwork \{ left:9%; width:82%/); // felt shrinks to the centre channel
+  assert.match(css, /\.poker-action-dock \{ position:fixed; right:1%/); // actions live in the right rail
+  assert.match(css, /\.poker-ticker \{ left:1%; bottom:auto; top:22%/); // ticker lives in the left rail
+});
+
+test("your seat badge never drifts off its slot onto the board", () => {
+  assert.ok(!src.includes("slot.py + 8"), "seat-you vertical drift is back");
+});

@@ -914,8 +914,8 @@
   .poker-playing-page,.poker-playing-page:fullscreen { position:fixed; inset:0; z-index:1000; width:100vw; height:100dvh; min-height:0; padding:0; overflow:hidden; background:#050403; }
   .poker-playing-page .poker-playing-wrap { width:100%; height:100%; max-width:none; padding:0; }
   .poker-playing-page .poker-game-article,.poker-playing-page .poker-surface-frame,.poker-playing-page .poker-table-scroll,.poker-playing-page .poker-table-artwork { position:absolute; inset:0; width:100%; height:100%; margin:0; padding:0; border:0; border-radius:0; overflow:hidden; box-shadow:none; }
-  .poker-playing-page .poker-table-artwork > img { width:100%; height:100%; object-fit:cover; }
-  .poker-playing-page .poker-table-artwork__live { inset:2.75rem 0 4.75rem; }
+  .poker-playing-page .poker-table-artwork > img { width:100%; height:100%; object-fit:contain; }
+  .poker-playing-page .poker-table-artwork__live { inset:2.75rem 0 6.5rem; }
   .poker-playing-page .poker-playing-wrap > header { position:absolute; z-index:120; top:max(.2rem,env(safe-area-inset-top)); right:max(.3rem,env(safe-area-inset-right)); left:auto; transform:none; width:auto; max-width:45%; min-height:1.6rem; padding:.1rem .4rem; background:#08060399; border-radius:999px; gap:.3rem; border:0; }
   .poker-playing-page .poker-playing-wrap > header button { padding:.15rem .45rem; font-size:.55rem; min-height:1.4rem; background:transparent; }
   .poker-playing-page .poker-playing-wrap > header span { font-size:.55rem; white-space:nowrap; }
@@ -945,6 +945,28 @@
   .poker-playing-page .poker-ticker { left:.5rem; right:auto; transform:none; max-width:52vw; overflow:hidden; bottom:4.6rem; }
   /* Bottom corners lift clear of the action dock. */
   .poker-playing-page .hud-zone--bl,.poker-playing-page .hud-zone--br { bottom:4.6rem; }
+}
+
+/* Wide landscape (phone sideways): the black side columns become the UI rails.
+   The felt shrinks to the centre channel; the action dock, ticker, seat panel
+   and chat live in the rails — nothing floats over the cards or the pot. */
+@media (orientation:landscape) and (max-height:1200px) and (min-aspect-ratio:2/1) {
+  .poker-playing-page .poker-playing-wrap,
+  .poker-playing-page .poker-game-article,
+  .poker-playing-page .poker-surface-frame,
+  .poker-playing-page .poker-table-scroll,
+  .poker-playing-page .poker-table-artwork { left:9%; width:82%; }
+  .poker-playing-page .poker-table-artwork__live { inset:1.5rem 0 1.5rem; }
+  .poker-playing-page .poker-table-artwork__live .poker-live-seats > div { max-width:13%; }
+  /* LEFT RAIL: table info card, tournament ticker, status and chat stacked down it. */
+  .poker-playing-page .poker-ticker { left:1%; bottom:auto; top:22%; max-width:9%; white-space:normal; border-radius:.7rem; border-top:1px solid rgba(217,183,100,.35); flex-wrap:wrap; gap:.2rem .4rem; }
+  .poker-playing-page .poker-table-artwork__state { left:9.5%; }
+  /* RIGHT RAIL: your seat panel above the vertical action dock. */
+  .poker-playing-page .poker-action-dock { position:fixed; right:1%; left:auto; bottom:max(.4rem,env(safe-area-inset-bottom)); width:9%; display:flex; flex-direction:column; gap:.35rem; padding:.4rem; border:1px solid rgba(217,183,100,.3); border-radius:.9rem; background:rgba(9,7,3,.92); }
+  .poker-playing-page .poker-action-dock > .flex:first-child { order:2; }
+  .poker-playing-page .poker-action-dock > .grid { display:flex; flex-direction:column; gap:.35rem; }
+  .poker-playing-page .poker-deal-dock { position:fixed; right:1%; left:auto; bottom:max(.4rem,env(safe-area-inset-bottom)); width:9%; }
+  .poker-playing-page .hud-zone--br { right:1%; bottom:auto; top:16%; }
 }
 
 @media (orientation:landscape) and (max-height:1200px) {
