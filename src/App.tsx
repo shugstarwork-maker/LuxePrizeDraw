@@ -58,7 +58,6 @@ const PostalIntakePage = lazy(() => import("./components/PostalIntakePage").then
 const ParticipationStandardsPage = lazy(() => import("./components/ParticipationStandardsPage").then((m) => ({ default: m.ParticipationStandardsPage })));
 const ResponsiblePlayPage = lazy(() => import("./components/ResponsiblePlayPage").then((m) => ({ default: m.ResponsiblePlayPage })));
 import { RealityCheck } from "./components/RealityCheck";
-import { syncReviewModeFromRemote } from "./lib/reviewMode";
 const LaunchBuildPage = lazy(() => import("./components/LaunchBuildPage").then((m) => ({ default: m.LaunchBuildPage })));
 const HomePage = lazy(() => import("./components/HomePage").then((m) => ({ default: m.HomePage })));
 
@@ -71,9 +70,6 @@ export default function App() {
   const audio = useAudio();
   const [path, setPath] = useState(() => window.location.pathname);
   useEffect(() => { const sync = () => setPath(window.location.pathname); window.addEventListener("popstate", sync); return () => window.removeEventListener("popstate", sync); }, []);
-  // Remote camouflage switch: poll the server flag so a post-approval flip
-  // reaches every client without an app update (5-minute cache TTL).
-  useEffect(() => { void syncReviewModeFromRemote(); }, []);
   const inner = path === "/welcome" ? <WelcomePage onEnter={() => go("/")} />
     : path === "/serenity" ? <SerenityCharityPage />
     : path === "/cash-giveaways" ? <CashGiveawaysPage />

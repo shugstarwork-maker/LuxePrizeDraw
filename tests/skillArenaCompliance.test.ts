@@ -101,12 +101,11 @@ test("hard rule: no conversion path from coins or tickets into prize points", ()
 
 test("review mode toggles and gates prize UI", () => {
   store.clear();
-  // Fail-safe: no signal at all defaults to review mode ON.
-  assert.equal(rm.reviewModeEnabled(), true);
-  rm.setReviewMode(false);
   assert.equal(rm.reviewModeEnabled(), false);
   rm.setReviewMode(true);
   assert.equal(rm.reviewModeEnabled(), true);
+  rm.setReviewMode(false);
+  assert.equal(rm.reviewModeEnabled(), false);
   const league = readFileSync(new URL("../src/components/LuxePokerLeague.tsx", import.meta.url), "utf8");
   assert.match(league, /reviewModeEnabled\(\)/);
   assert.match(league, /data-testid="review-mode-toggle"/);
