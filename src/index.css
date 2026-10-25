@@ -941,8 +941,8 @@
   .poker-playing-page .poker-table-artwork > img { object-fit:contain; }
   .poker-playing-page .poker-table-artwork__live { inset:2rem 3.5rem 4.25rem; }
   .poker-playing-page .poker-table-artwork__live .poker-live-seats > div { max-width:14%; }
-  /* Ticker tucks under the table-info HUD card instead of overlapping it. */
-  .poker-playing-page .poker-ticker { left:.5rem; right:auto; transform:none; max-width:52vw; overflow:hidden; top:4.5rem; }
+  /* Ticker docks bottom-left, lifted clear of the action dock and corner HUD zones. */
+  .poker-playing-page .poker-ticker { left:.5rem; right:auto; transform:none; max-width:52vw; overflow:hidden; bottom:4.6rem; }
   /* Bottom corners lift clear of the action dock. */
   .poker-playing-page .hud-zone--bl,.poker-playing-page .hud-zone--br { bottom:4.6rem; }
 }
@@ -1652,14 +1652,15 @@ body::after {
 }
 .hud-icon-btn:active { transform: scale(.94); }
 
-/* Tournament ticker — slim banner across the very top of the table HUD. */
+/* Tournament ticker — slim banner docked to the very bottom of the table HUD,
+   clear of the action dock. */
 .poker-ticker {
-  position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
   z-index: 1140; display: none;
   align-items: center; gap: .45rem;
   padding: .18rem .8rem;
-  border: 1px solid rgba(217, 183, 100, .35); border-top: none;
-  border-radius: 0 0 .7rem .7rem;
+  border: 1px solid rgba(217, 183, 100, .35); border-bottom: none;
+  border-radius: .7rem .7rem 0 0;
   background: rgba(9, 7, 3, .82);
   backdrop-filter: blur(6px);
   font-size: 9px; font-weight: 800; letter-spacing: .04em;

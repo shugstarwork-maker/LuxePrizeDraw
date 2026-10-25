@@ -44,3 +44,10 @@ test("no CSS override can force a seat badge on top of another seat", () => {
 test("pot chip stack renders centre-felt under the board in landscape", () => {
   assert.match(css, /\.poker-playing-page \.luxe-pot-chips \{ left:50%; top:56%/);
 });
+
+test("tournament ticker docks to the bottom of the table HUD, clear of the action dock", () => {
+  assert.match(css, /\.poker-ticker \{\s*position: fixed; bottom: 0/);
+  assert.match(css, /border-radius: \.7rem \.7rem 0 0/);         // flipped for the bottom edge
+  assert.match(css, /\.poker-playing-page \.poker-ticker \{[^}]*bottom:4\.6rem/); // landscape: lifted above the dock
+  assert.doesNotMatch(css, /\.poker-ticker \{[^}]*top: 0/);       // no longer pinned to the top
+});
