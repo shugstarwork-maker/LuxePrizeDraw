@@ -54,7 +54,7 @@ test("tournament ticker docks to the bottom of the table HUD, clear of the actio
 
 test("wide landscape becomes a control room: felt edge-to-edge left, black console column right", () => {
   assert.match(css, /min-aspect-ratio:2\/1/);                                            // wide-screen console mode exists
-  assert.match(css, /\.poker-playing-page:has\(\.poker-console\) \.poker-playing-wrap \{ position:absolute; left:0; top:0; bottom:0; right:auto; width:83%/); // felt fills the left channel
+  assert.match(css, /\.poker-playing-page:has\(\.poker-console\) \.poker-playing-wrap \{ position:absolute; left:0; top:0; bottom:0; right:auto; width:100%/); // felt fills the whole screen under the glass console
   assert.match(css, /\.poker-playing-page:has\(\.poker-console\) \.poker-table-artwork > img \{ object-fit:cover/);        // edge-to-edge felt
   assert.match(css, /\.poker-playing-page \.poker-console \{ position:fixed; top:0; right:0; bottom:0; left:auto; width:17%/); // console owns the right column
 });
@@ -62,7 +62,7 @@ test("wide landscape becomes a control room: felt edge-to-edge left, black conso
 test("console column stacks stats, chat, your cards on a black pad and the dock at its foot", () => {
   assert.match(css, /\.poker-console \.poker-ticker \{ order:3; position:static/);        // ticker in the stack
   assert.match(css, /\.poker-console \.hud-zone--bl \.hud-chat-pop \{ position:static/);  // chat inline, never over the felt
-  assert.match(css, /\.poker-console \.poker-console-hand \{ order:8;[^}]*background:#000/); // cards pop on black
+  assert.match(css, /\.poker-console \.poker-console-hand \{ order:8;[^}]*background:rgba\(5,4,2,\.35\)/); // cards on clear glass — felt shows through
   assert.match(css, /\.poker-console \.poker-action-dock \{ order:9; position:static/);   // dock at the foot
 });
 

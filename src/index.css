@@ -1833,22 +1833,23 @@ body::after {
 .poker-console__collapse, .poker-console-tabs, .poker-console-quick, .poker-console-options { display: none; }
 /* Console-only chrome stays hidden in the classic corner layout. */
 .console-section { display: none; }
-.console-nav-btn { display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: .6rem; border: 1px solid rgba(217, 183, 100, .45); background: rgba(9, 7, 3, .88); color: #ffe095; }
+.console-nav-btn { display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: .6rem; border: 1px solid rgba(217, 183, 100, .45); background: rgba(9, 7, 3, .4); color: #ffe095; }
 .console-nav-btn:active { transform: scale(.94); }
 .console-nav-btn span { display: none; }
 @media (orientation:landscape) and (max-height:1200px) and (min-aspect-ratio:2/1) {
-  /* The felt yields its right 17% to the console and fills the rest edge-to-edge.
-     Narrow the wrap only — the inner layers are inset:0 and follow it. */
-  .poker-playing-page:has(.poker-console) .poker-playing-wrap { position:absolute; left:0; top:0; bottom:0; right:auto; width:83%; }
+  /* The felt fills the whole screen edge-to-edge and the see-through glass
+     console floats on top of it — zero opaque obstruction anywhere. */
+  .poker-playing-page:has(.poker-console) .poker-playing-wrap { position:absolute; left:0; top:0; bottom:0; right:auto; width:100%; }
   .poker-playing-page:has(.poker-console) .poker-table-artwork > img { object-fit:cover; }
   .poker-playing-page:has(.poker-console) .poker-table-artwork__live { inset:2.2rem 0 1.2rem; }
   .poker-playing-page:has(.poker-console) .poker-table-artwork__live .poker-live-seats > div { max-width:11%; }
   .poker-playing-page:has(.poker-console) .poker-table-artwork__state { left:.5rem; bottom:.5rem; }
   .poker-playing-page:has(.poker-console) .poker-playing-wrap > header { display:none; }
-  .poker-playing-page:has(.poker-console) .poker-round-status { left:41.5%; }
+  .poker-playing-page:has(.poker-console) .poker-round-status { left:41.5%; } /* felt's visual centre — the console covers the rightmost stretch */
 
-  /* The console column itself. */
-  .poker-playing-page .poker-console { position:fixed; top:0; right:0; bottom:0; left:auto; width:17%; z-index:1180; display:flex; flex-direction:column; gap:.4rem; padding:max(.45rem,env(safe-area-inset-top)) .5rem max(.45rem,env(safe-area-inset-bottom)); background:linear-gradient(180deg,#0b0906,#050403); border-left:1px solid rgba(217,183,100,.35); box-shadow:-18px 0 40px rgba(0,0,0,.65); overflow-y:auto; }
+  /* The console column itself — a see-through glass panel: the felt artwork
+     stays visible through it, nothing opaque sits on the screen. */
+  .poker-playing-page .poker-console { position:fixed; top:0; right:0; bottom:0; left:auto; width:17%; z-index:1180; display:flex; flex-direction:column; gap:.3rem; padding:max(.45rem,env(safe-area-inset-top)) .5rem max(.45rem,env(safe-area-inset-bottom)); background:rgba(7,5,3,.34); backdrop-filter:blur(12px) saturate(1.15); -webkit-backdrop-filter:blur(12px) saturate(1.15); border-left:1px solid rgba(217,183,100,.4); box-shadow:-18px 0 40px rgba(0,0,0,.35); overflow-y:hidden; }
   .poker-console .hud-zone { position:static; }
   .poker-console .hud-panel { width:100%; max-width:none; }
 
@@ -1874,15 +1875,15 @@ body::after {
 
   /* TABLE OPTIONS — chevron rows. */
   .poker-console .poker-console-options { order:7; display:flex; flex-direction:column; gap:.25rem; }
-  .poker-console .console-option-row { display:flex; align-items:center; gap:.4rem; width:100%; padding:.42rem .5rem; border:1px solid rgba(217,183,100,.25); border-radius:.55rem; background:rgba(255,224,149,.03); color:rgba(255,240,200,.9); font-size:.6rem; font-weight:800; letter-spacing:.04em; text-align:left; }
+  .poker-console .console-option-row { display:flex; align-items:center; gap:.4rem; width:100%; padding:.32rem .5rem; border:1px solid rgba(217,183,100,.28); border-radius:.55rem; background:rgba(5,4,2,.38); color:rgba(255,240,200,.92); font-size:.6rem; font-weight:800; letter-spacing:.04em; text-align:left; }
   .poker-console .console-option-row > svg:first-child { color:#d9b764; flex-shrink:0; }
   .poker-console .console-option-row > span { flex:1; }
   .poker-console .console-option-row > svg:last-child { color:rgba(255,224,149,.4); flex-shrink:0; }
   .poker-console .console-option-row:active { transform:scale(.98); }
   .poker-console .poker-console-options .poker-console-pop { position:static; width:100%; max-height:22dvh; overflow-y:auto; }
 
-  /* Your cards face-up on the black pad — they pop against the console. */
-  .poker-console .poker-console-hand { order:8; display:flex; justify-content:center; gap:.35rem; padding:.55rem .4rem; border:1px solid rgba(217,183,100,.45); border-radius:.7rem; background:#000; }
+  /* Your cards on a clear glass pad — the felt shows right through. */
+  .poker-console .poker-console-hand { order:8; display:flex; justify-content:center; gap:.35rem; padding:.4rem .4rem; border:1px solid rgba(217,183,100,.45); border-radius:.7rem; background:rgba(5,4,2,.35); }
   .poker-console .poker-console-hand .luxe-playing-card { transform:none; width:clamp(2.2rem,3.4vw,3.4rem); height:clamp(3.1rem,4.8vw,4.9rem); }
 
   /* Action dock at the foot, one thumb-wide column. */
