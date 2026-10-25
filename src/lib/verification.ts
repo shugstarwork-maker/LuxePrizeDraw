@@ -16,7 +16,7 @@ export type KycStatus = "pending" | "approved" | "rejected" | "expired";
 
 export type SchemaTable = {
   name: string;
-  module: "A" | "B" | "C" | "payout" | "redemption" | "core" | "anticheat";
+  module: "A" | "B" | "C" | "D" | "payout" | "redemption" | "core" | "anticheat";
   purpose: string;
   keyColumns: string[];
   links: { to: string; via: string }[];
@@ -138,6 +138,58 @@ export const SCHEMA_MAP: SchemaTable[] = [
       { to: "users", via: "user_id" },
       { to: "integrity_flags", via: "flag_id" },
     ],
+  },
+  {
+    name: "admin_users",
+    module: "D",
+    purpose: "Back-office operators — reviewer / payments / superadmin roles, separate from player accounts.",
+    keyColumns: ["email (unique)", "role"],
+    links: [],
+  },
+  {
+    name: "admin_audit_log",
+    module: "D",
+    purpose: "Append-only record of every admin action (flag clears, hardware bans, payout approvals, AMOE credits). Immutable by permission.",
+    keyColumns: ["admin_id → admin_users", "action", "subject", "created_at"],
+    links: [{ to: "admin_users", via: "admin_id" }],
+  },
+  {
+    name: "postal_amoe_grants",
+    module: "D",
+    purpose: "Postal free-entry credits. One letter = fixed free tickets; unique index enforces one grant per account per ISO week.",
+    keyColumns: ["user_id → users", "tickets", "letter_ref", "credited_by → admin_users"],
+    links: [
+      { to: "users", via: "user_id" },
+      { to: "admin_users", via: "credited_by" },
+    ],
+  },
+  {
+    name: "spend_limits",
+    module: "D",
+    purpose: "Player-set monthly card cap (DCMS Voluntary Code). CHECK constraint keeps it at or below the £250 legal ceiling.",
+    keyColumns: ["user_id → users (pk)", "monthly_cap_pence ≤ 25000"],
+    links: [{ to: "users", via: "user_id" }],
+  },
+  {
+    name: "coin_purchases",
+    module: "D",
+    purpose: "Gold Coin bundle purchases — the only paid flow. Bonus tickets are recorded as free grants, never as sales.",
+    keyColumns: ["user_id → users", "pack_id", "coins", "amount_pence", "status"],
+    links: [{ to: "users", via: "user_id" }],
+  },
+  {
+    name: "ticket_grants",
+    module: "D",
+    purpose: "Double-entry ledger leg: every free ticket issued (daily claim, postal AMOE, purchase bonus).",
+    keyColumns: ["user_id → users", "amount", "source", "ref_id"],
+    links: [{ to: "users", via: "user_id" }],
+  },
+  {
+    name: "ticket_spends",
+    module: "D",
+    purpose: "Double-entry ledger leg: every ticket consumed by a prize entry. Grants must always cover spends. The token_ledger_audit view aggregates these with coin_purchases into the value-leak screen.",
+    keyColumns: ["user_id → users", "amount", "purpose", "ref_id"],
+    links: [{ to: "users", via: "user_id" }],
   },
 ];
 

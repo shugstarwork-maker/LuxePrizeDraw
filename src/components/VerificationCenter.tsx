@@ -26,6 +26,7 @@ const MODULE_LABEL: Record<string, string> = {
   payout: "Payout rails",
   redemption: "Prize redemption",
   anticheat: "Anti-cheat engine",
+  D: "Module D · back-office ops",
 };
 
 export function VerificationCenter() {  const steps = useMemo(() => verificationSteps(), []);

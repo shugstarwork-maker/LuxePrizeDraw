@@ -254,3 +254,97 @@ create table redemption_orders (
 -- users *───* users via collusion_signals (Module C)
 -- users 1───* enforcement_actions
 -- users 1───* redemption_orders *───1 redemption_items
+
+-- ── Module D: Back-office / admin operations ────────────────────────────────
+
+-- Admin operators (separate from player accounts; SSO + 2FA at the IdP).
+create table admin_users (
+  id          uuid primary key default gen_random_uuid(),
+  email       text not null unique,
+  role        text not null check (role in ('reviewer','payments','superadmin')),
+  created_at  timestamptz not null default now()
+);
+
+-- Append-only audit trail for every back-office action. No update/delete
+-- grants on this table — rows are immutable by permission, not by convention.
+create table admin_audit_log (
+  id          uuid primary key default gen_random_uuid(),
+  admin_id    uuid not null references admin_users(id) on delete restrict,
+  action      text not null,                  -- flag.cleared | flag.hardware_ban | payout.approved | payout.rejected | amoe.credit | tickets.granted
+  subject     text not null,                  -- user id / order id / flag id
+  detail      text not null,
+  created_at  timestamptz not null default now()
+);
+create index admin_audit_log_subject_idx on admin_audit_log (subject, created_at desc);
+
+-- Postal AMOE (Alternative Method of Entry). One physical letter = a fixed
+-- free Sweep Ticket grant; the letter reference ties the paper to the ledger.
+create table postal_amoe_grants (
+  id            uuid primary key default gen_random_uuid(),
+  user_id       uuid not null references users(id) on delete restrict,
+  tickets       integer not null check (tickets > 0),
+  letter_ref    text not null,                -- staff reference for the physical letter
+  received_at   timestamptz not null,         -- postmark / office receipt date
+  credited_by   uuid not null references admin_users(id) on delete restrict,
+  created_at    timestamptz not null default now()
+);
+-- One postal credit per account per ISO week.
+create unique index postal_amoe_one_per_week
+  on postal_amoe_grants (user_id, date_trunc('week', received_at));
+
+-- Player-set monthly spend limits (DCMS Voluntary Code). Always <= the legal
+-- £250 card ceiling; the lower of the two is enforced at purchase time.
+create table spend_limits (
+  user_id           uuid primary key references users(id) on delete cascade,
+  monthly_cap_pence integer not null check (monthly_cap_pence > 0 and monthly_cap_pence <= 25000),
+  set_at            timestamptz not null default now()
+);
+
+-- Unalterable economy view — the admin "is value leaking?" screen.
+-- Source of truth for the three flows: coins sold, free tickets granted,
+-- vouchers out the door.
+create view token_ledger_audit as
+select
+  (select coalesce(sum(coins), 0) from coin_purchases where status = 'settled')        as gold_coins_sold,
+  (select coalesce(sum(tickets), 0) from postal_amoe_grants)                            as tickets_from_amoe,
+  (select coalesce(sum(amount), 0) from ticket_grants)                                  as tickets_distributed_total,
+  (select coalesce(sum(amount), 0) from ticket_spends)                                  as tickets_spent,
+  (select count(*) from redemption_orders where status = 'fulfilled')                   as vouchers_redeemed_count;
+
+-- Gold Coin bundle purchases (the only paid flow; tickets are never sold).
+create table coin_purchases (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null references users(id) on delete restrict,
+  pack_id     text not null,                  -- COIN_PACKS id
+  coins       integer not null check (coins > 0),
+  bonus_tickets integer not null default 0,   -- free bonus tickets granted with the pack
+  amount_pence integer not null check (amount_pence > 0),
+  status      text not null default 'pending' check (status in ('pending','settled','refunded','chargeback')),
+  processor   text,                           -- high-risk gateway reference at launch
+  created_at  timestamptz not null default now()
+);
+
+-- ticket_grants / ticket_spends are the double-entry legs every ticket
+-- movement writes (daily claim, AMOE, bonus / prize-table entry).
+create table ticket_grants (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references users(id) on delete restrict,
+  amount     integer not null check (amount > 0),
+  source     text not null check (source in ('daily_claim','postal_amoe','purchase_bonus','promotion')),
+  ref_id     uuid,                            -- postal_amoe_grants.id or coin_purchases.id
+  created_at timestamptz not null default now()
+);
+create table ticket_spends (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references users(id) on delete restrict,
+  amount     integer not null check (amount > 0),
+  purpose    text not null check (purpose in ('prize_match_entry','prize_table_entry')),
+  ref_id     uuid,                            -- arena_matches.id
+  created_at timestamptz not null default now()
+);
+
+-- ── Relationship map (additions) ────────────────────────────────────────────
+-- admin_users 1───* admin_audit_log            (every action, immutable)
+-- admin_users 1───* postal_amoe_grants         (staff credit paper trail)
+-- users 1───1 spend_limits                     (custom cap <= £250 legal cap)
+-- users 1───* ticket_grants / ticket_spends    (double-entry ticket ledger)

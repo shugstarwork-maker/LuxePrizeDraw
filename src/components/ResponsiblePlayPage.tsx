@@ -5,7 +5,7 @@ import {
   activeExclusion, exclusionTimeLeft, reminderMinutes, sessionMinutes, setExclusion, setReminderMinutes,
   type ExclusionKind,
 } from "../lib/responsiblePlay";
-import { CARD_MONTHLY_CAP_PENCE, cardSpendThisMonthPence } from "../lib/currencies";
+import { CARD_MONTHLY_CAP_PENCE, cardSpendThisMonthPence, customMonthlyCapPence, effectiveMonthlyCapPence, setCustomMonthlyCapPence } from "../lib/currencies";
 import { formatPence } from "../lib/redemption";
 import { MobileDock } from "./MobileDock";
 
@@ -24,6 +24,8 @@ export function ResponsiblePlayPage() {
 
   const spent = cardSpendThisMonthPence();
   const mins = sessionMinutes();
+  const effectiveCap = effectiveMonthlyCapPence();
+  const customCap = customMonthlyCapPence();
 
   return <main className="min-h-screen bg-[#090a11] px-4 pb-28 pt-8 text-white sm:pt-12" data-testid="responsible-play">
     <div className="mx-auto max-w-4xl">
@@ -68,11 +70,22 @@ export function ResponsiblePlayPage() {
         {/* Spend cap visibility */}
         <section className="rounded-2xl border border-white/10 bg-white/[.04] p-5" data-testid="spend-cap-panel">
           <h2 className="flex items-center gap-2 text-sm font-black uppercase tracking-wider text-white/85"><Wallet className="h-4 w-4 text-amber-200" />Monthly spend cap</h2>
-          <p className="mt-3 font-mono text-3xl font-black text-amber-100" data-testid="spend-cap-figure">{formatPence(spent)} <span className="text-sm text-white/50">/ {formatPence(CARD_MONTHLY_CAP_PENCE)}</span></p>
+          <p className="mt-3 font-mono text-3xl font-black text-amber-100" data-testid="spend-cap-figure">{formatPence(spent)} <span className="text-sm text-white/50">/ {formatPence(effectiveCap)}</span></p>
           <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10">
-            <div className="h-full rounded-full bg-gradient-to-r from-emerald-300 to-amber-300" style={{ width: `${Math.min(100, (spent / CARD_MONTHLY_CAP_PENCE) * 100)}%` }} />
+            <div className="h-full rounded-full bg-gradient-to-r from-emerald-300 to-amber-300" style={{ width: `${Math.min(100, (spent / effectiveCap) * 100)}%` }} />
           </div>
-          <p className="mt-2 text-xs text-white/50">Card purchases are hard-capped at £250 per calendar month. Free postal entry never counts against it.</p>
+          <p className="mt-2 text-xs text-white/50">Card purchases are hard-capped at £250 per calendar month by the UK prize-draw code. Free postal entry never counts against it.</p>
+          <div className="mt-4 border-t border-white/10 pt-4" data-testid="custom-cap">
+            <p className="text-[10px] font-black uppercase tracking-wider text-white/60">Your own monthly limit {customCap !== null && <span className="ml-1 rounded-full bg-emerald-400/15 px-2 py-0.5 text-[9px] text-emerald-200">active: {formatPence(customCap)}</span>}</p>
+            <p className="mt-1 text-[10px] text-white/45">Set a personal cap below the legal £250 ceiling — it overrides everything.</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {[25, 50, 100].map((gbp) => (
+                <button key={gbp} onClick={() => { setCustomMonthlyCapPence(gbp * 100); setTick((n) => n + 1); }} data-testid={`custom-cap-${gbp}`}
+                  className={`rounded-xl border px-3 py-1.5 text-[11px] font-black transition ${customCap === gbp * 100 ? "border-emerald-300 bg-emerald-400/15 text-emerald-100" : "border-white/15 bg-black/25 text-white/55"}`}>£{gbp}</button>
+              ))}
+              {customCap !== null && <button onClick={() => { setCustomMonthlyCapPence(null); setTick((n) => n + 1); }} data-testid="custom-cap-clear" className="rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] font-black text-white/60">Reset to £250</button>}
+            </div>
+          </div>
         </section>
 
         {/* Cooling-off / self-exclusion */}

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { CircleCheck, KeyRound, LayoutDashboard, Lock, Plus, RefreshCw, ShieldCheck, Ticket, Trophy } from "lucide-react";
+import { AdminOpsCenter } from "./AdminOpsCenter";
 
 type Overview = { draws: number; openDraws: number; entries: number; accounts: number; freeTickets: number; redeemedTickets: number; settledDraws: number };
 type DrawRow = { id: string; title: string; status: string; prize_value_minor: number; ticket_price_minor: number; maximum_entries: number; entries: number; approved: boolean | null; due_at: string | null; drawn_at: string | null; closes_at: string };
@@ -155,6 +156,8 @@ export const AdminPanel: React.FC = () => {
           ))}
           <div className="sm:col-span-2"><button className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4AF37] px-4 py-3 text-xs font-black uppercase tracking-wider text-black"><Plus className="h-4 w-4" /> Create and open draw</button></div>
         </form>}
+
+        <AdminOpsCenter />
       </div>
     </main>
   );

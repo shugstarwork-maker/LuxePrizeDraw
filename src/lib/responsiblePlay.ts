@@ -12,12 +12,12 @@ const REMINDER_KEY = "luxe-session-reminder-v1";
 
 // ── Self-exclusion & cooling-off ────────────────────────────────────────────
 
-export type ExclusionKind = "cooling_off_24h" | "cooling_off_7d" | "self_exclusion_30d" | "self_exclusion_180d";
+export type ExclusionKind = "cooling_off_24h" | "cooling_off_7d" | "self_exclusion_30d" | "self_exclusion_180d" | "permanent";
 
 export type Exclusion = {
   kind: ExclusionKind;
   startedAt: number;   // epoch ms
-  endsAt: number;      // epoch ms
+  endsAt: number;      // epoch ms (far-future for permanent)
 };
 
 export const EXCLUSION_PERIODS: Record<ExclusionKind, { label: string; hours: number; blurb: string }> = {
@@ -25,6 +25,7 @@ export const EXCLUSION_PERIODS: Record<ExclusionKind, { label: string; hours: nu
   cooling_off_7d: { label: "7-day cooling-off", hours: 24 * 7, blurb: "A full week away. Locks play, purchases and league scoring." },
   self_exclusion_30d: { label: "30-day self-exclusion", hours: 24 * 30, blurb: "A formal exclusion. Cannot be lifted early once set." },
   self_exclusion_180d: { label: "6-month self-exclusion", hours: 24 * 180, blurb: "The strongest local control. Server-enforced and cross-device at launch." },
+  permanent: { label: "Permanent exclusion", hours: 100 * 365 * 24, blurb: "Locks this account for good. Irreversible — combined with GAMSTOP at launch for UK-wide coverage." },
 };
 
 function loadExclusion(): Exclusion | null {
@@ -61,6 +62,7 @@ export function playBlocked(): { blocked: true; exclusion: Exclusion } | { block
 }
 
 export function exclusionTimeLeft(ex: Exclusion): string {
+  if (ex.kind === "permanent") return "permanently";
   const ms = Math.max(0, ex.endsAt - Date.now());
   const hours = Math.ceil(ms / 3600_000);
   if (hours >= 48) return `${Math.ceil(hours / 24)} days`;

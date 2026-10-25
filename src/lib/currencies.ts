@@ -110,6 +110,40 @@ export function coinPackById(id: string): CoinPack | undefined {
 
 export const CARD_MONTHLY_CAP_PENCE = 25000; // £250.00
 
+// ── Player-set custom spend limit ───────────────────────────────────────────
+// DCMS Voluntary Code: players can set their OWN monthly cap on Gold Coin
+// bundles. It must always sit at or below the legal £250 ceiling and strictly
+// overrides it wherever lower.
+
+const CUSTOM_CAP_KEY = "luxe-custom-spend-cap-v1";
+
+/** Player's custom monthly cap in pence, or null when unset (legal cap applies). */
+export function customMonthlyCapPence(): number | null {
+  try {
+    const raw = localStorage.getItem(CUSTOM_CAP_KEY);
+    if (!raw) return null;
+    const v = Number(raw);
+    if (!Number.isFinite(v) || v <= 0) return null;
+    return Math.min(v, CARD_MONTHLY_CAP_PENCE);
+  } catch {
+    return null;
+  }
+}
+
+/** Set (or clear with null) the custom cap. Values above the legal £250
+ *  ceiling are clamped down — the legal cap always wins. */
+export function setCustomMonthlyCapPence(pence: number | null): void {
+  try {
+    if (pence === null) { localStorage.removeItem(CUSTOM_CAP_KEY); return; }
+    localStorage.setItem(CUSTOM_CAP_KEY, String(Math.min(Math.max(0, Math.round(pence)), CARD_MONTHLY_CAP_PENCE)));
+  } catch { /* demo only */ }
+}
+
+/** The cap currently in force: the player's custom limit if set, else the legal ceiling. */
+export function effectiveMonthlyCapPence(): number {
+  return customMonthlyCapPence() ?? CARD_MONTHLY_CAP_PENCE;
+}
+
 const SPEND_KEY = "luxe-coin-spend-v1";
 type SpendLedger = { month: string; spentPence: number };
 
@@ -127,20 +161,23 @@ export function cardSpendThisMonthPence(): number {
 }
 
 export function cardCapRemainingPence(): number {
-  return Math.max(0, CARD_MONTHLY_CAP_PENCE - spendLedger().spentPence);
+  return Math.max(0, effectiveMonthlyCapPence() - spendLedger().spentPence);
 }
 
 function priceToPence(priceGBP: string): number {
   return Math.round(parseFloat(priceGBP.replace("£", "")) * 100);
 }
 
-/** Would this pack purchase stay inside the £250 monthly card cap? */
+/** Would this pack purchase stay inside the monthly card cap (custom or legal)? */
 export function purchaseWithinCap(packId: string): { allowed: boolean; reason?: string } {
   const pack = coinPackById(packId);
   if (!pack) return { allowed: false, reason: "Unknown pack." };
   const price = priceToPence(pack.priceGBP);
   if (price > cardCapRemainingPence()) {
-    return { allowed: false, reason: `UK prize-draw code: card purchases are capped at £${CARD_MONTHLY_CAP_PENCE / 100} per month. You have £${(cardCapRemainingPence() / 100).toFixed(2)} left this month.` };
+    const custom = customMonthlyCapPence();
+    const cap = effectiveMonthlyCapPence();
+    const label = custom !== null ? `your custom limit of £${(cap / 100).toFixed(2)}` : `the UK prize-draw code cap of £${cap / 100}`;
+    return { allowed: false, reason: `Card purchases are capped at ${label} per month. You have £${(cardCapRemainingPence() / 100).toFixed(2)} left this month.` };
   }
   return { allowed: true };
 }
