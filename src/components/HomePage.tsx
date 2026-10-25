@@ -229,6 +229,7 @@ export const HomePage: React.FC = () => (
         <button type="button" onClick={() => go("/credentials")} className="min-h-6 py-1 text-left hover:text-amber-200">Partner with us</button>
         <button type="button" onClick={() => go("/responsible-play")} className="min-h-6 py-1 text-left hover:text-amber-200">Responsible play</button>
         <button type="button" onClick={() => go("/terms")} className="min-h-6 py-1 text-left hover:text-amber-200">Terms &amp; rules</button>
+        <button type="button" onClick={() => go("/privacy")} className="min-h-6 py-1 text-left hover:text-amber-200">Privacy &amp; cookies</button>
         <button type="button" onClick={() => go("/community")} className="min-h-6 py-1 text-left hover:text-amber-200">Community</button>
         <button type="button" onClick={() => go("/economics")} className="min-h-6 py-1 text-left hover:text-amber-200">Draw economics</button>
       </div>

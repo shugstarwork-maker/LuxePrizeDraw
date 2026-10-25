@@ -56,7 +56,7 @@ export function AccountCard({ chips }: { chips: number }) {
         </div>
       )}
 
-      <p className="mt-3 text-[10px] text-white/35">Free-play account — your password is stored only as a scrypt hash on our server. No deposits, no cash wagering, ever.</p>
+      <p className="mt-3 text-[10px] text-white/35">Free-play account — your password is stored only as a scrypt hash on our server. No deposits, no cash wagering, ever. <a href="/privacy" className="underline underline-offset-2">Privacy notice</a></p>
     </div>
   );
 }
