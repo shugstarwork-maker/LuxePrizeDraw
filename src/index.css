@@ -1830,6 +1830,7 @@ body::after {
    transparent (display:contents) and every child keeps its classic position. */
 .poker-console { display: contents; }
 .poker-console-hand { display: none; }
+.poker-console__collapse, .poker-console-tabs, .poker-console-quick { display: none; }
 @media (orientation:landscape) and (max-height:1200px) and (min-aspect-ratio:2/1) {
   /* The felt yields its right 17% to the console and fills the rest edge-to-edge.
      Narrow the wrap only — the inner layers are inset:0 and follow it. */
@@ -1846,7 +1847,10 @@ body::after {
   .poker-console .hud-zone { position:static; }
   .poker-console .hud-panel { width:100%; max-width:none; }
 
-  /* Control-room order: nav, table info, ticker, your seat, chat, cards, dock. */
+  /* Control-room order: minimise bar, nav, table info, ticker, your seat,
+     chat, players/help, cards on the black pad, dock at the foot. */
+  .poker-console .poker-console__collapse { order:0; display:flex; align-items:center; justify-content:center; gap:.3rem; width:100%; height:1.4rem; border:1px solid rgba(217,183,100,.3); border-radius:.5rem; background:rgba(255,224,149,.06); color:#ffe095; font-size:.55rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
+  .poker-console .poker-console__collapse:active { transform:scale(.97); }
   .poker-console .hud-zone--tr { order:1; display:flex; gap:.3rem; justify-content:space-between; }
   .poker-console .hud-zone--tr .hud-icon-btn { flex:1; }
   .poker-console .hud-zone--tl { order:2; display:block; }
@@ -1855,15 +1859,37 @@ body::after {
   .poker-console .hud-zone--bl { order:5; display:flex; flex-direction:column; align-items:stretch; gap:.3rem; }
   .poker-console .hud-zone--bl .hud-chat-pop { position:static; width:100%; max-height:22dvh; overflow-y:auto; }
   .poker-console .hud-zone--bl .hud-icon-btn { align-self:flex-start; }
+  .poker-console .poker-console-quick { order:6; display:flex; flex-wrap:wrap; gap:.3rem; }
+  .poker-console .poker-console-quick .hud-icon-btn { flex:1; }
+  .poker-console .poker-console-quick .poker-console-pop { width:100%; position:static; max-height:22dvh; overflow-y:auto; }
 
   /* Your cards face-up on the black pad — they pop against the console. */
-  .poker-console .poker-console-hand { order:6; display:flex; justify-content:center; gap:.35rem; padding:.55rem .4rem; border:1px solid rgba(217,183,100,.45); border-radius:.7rem; background:#000; }
+  .poker-console .poker-console-hand { order:7; display:flex; justify-content:center; gap:.35rem; padding:.55rem .4rem; border:1px solid rgba(217,183,100,.45); border-radius:.7rem; background:#000; }
   .poker-console .poker-console-hand .luxe-playing-card { transform:none; width:clamp(2.2rem,3.4vw,3.4rem); height:clamp(3.1rem,4.8vw,4.9rem); }
 
   /* Action dock at the foot, one thumb-wide column. */
-  .poker-console .poker-action-dock { order:7; position:static; width:100%; display:flex; flex-direction:column; align-items:stretch; gap:.35rem; padding:0; margin:0; margin-top:auto; transform:none; border:0; background:transparent; box-shadow:none; }
+  .poker-console .poker-action-dock { order:8; position:static; width:100%; display:flex; flex-direction:column; align-items:stretch; gap:.35rem; padding:0; margin:0; margin-top:auto; transform:none; border:0; background:transparent; box-shadow:none; }
   .poker-console .poker-action-dock > div { margin:0; }
   .poker-console .poker-action-dock > .grid { display:flex; flex-direction:column; gap:.35rem; }
   .poker-console .poker-action-dock button { min-height:2.6rem; }
-  .poker-console .poker-deal-dock { order:7; position:static; width:100%; margin:0; margin-top:auto; transform:none; }
+  .poker-console .poker-deal-dock { order:8; position:static; width:100%; margin:0; margin-top:auto; transform:none; }
+
+  /* ── Minimised: the console collapses to a slim tab strip and the felt
+        takes the space back. The dock floats bottom-centre so actions stay
+        reachable while the console is tucked away. ── */
+  .poker-playing-page.poker-console-min .poker-playing-wrap { width:calc(100% - 3.6rem); }
+  .poker-playing-page.poker-console-min .poker-round-status { left:50%; }
+  .poker-console-min .poker-console { width:3.4rem; padding:max(.45rem,env(safe-area-inset-top)) .3rem max(.45rem,env(safe-area-inset-bottom)); gap:.3rem; overflow:visible; }
+  .poker-console-min .poker-console .hud-zone,
+  .poker-console-min .poker-console .poker-ticker,
+  .poker-console-min .poker-console .poker-console-hand,
+  .poker-console-min .poker-console .poker-console-quick,
+  .poker-console-min .poker-console .poker-console__collapse { display:none; }
+  .poker-console-min .poker-console .poker-console-tabs { display:flex; flex-direction:column; gap:.3rem; }
+  .poker-console-min .poker-console .poker-console-tabs .hud-icon-btn { width:100%; height:2.5rem; }
+  .poker-console-min .poker-console .poker-action-dock { position:fixed; left:50%; right:auto; bottom:max(.4rem,env(safe-area-inset-bottom)); transform:translateX(-50%); width:min(38rem,calc(100vw - 5.5rem)); margin:0; z-index:1190; display:grid; grid-template-columns:9rem repeat(3,minmax(0,1fr)); align-items:center; gap:.5rem; padding:.4rem .6rem; border:1px solid #d9b764; border-radius:1rem; background:#090703f5; box-shadow:0 0 25px #000b; }
+  .poker-console-min .poker-console .poker-action-dock > .flex:first-child { grid-column:1; }
+  .poker-console-min .poker-console .poker-action-dock > .grid { display:contents; }
+  .poker-console-min .poker-console .poker-action-dock > .grid > * { grid-row:1; }
+  .poker-console-min .poker-console .poker-deal-dock { position:fixed; left:50%; right:auto; bottom:max(.4rem,env(safe-area-inset-bottom)); transform:translateX(-50%); width:min(38rem,calc(100vw - 5.5rem)); margin:0; z-index:1190; }
 }

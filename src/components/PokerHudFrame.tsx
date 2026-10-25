@@ -1,14 +1,17 @@
-import { ChevronLeft, Trophy, Volume2, VolumeX, MessageCircle } from "lucide-react";
-import type { ReactNode } from "react";
+import { ChevronLeft, Trophy, Volume2, VolumeX, MessageCircle, Users, HelpCircle, PanelRightClose, PanelRightOpen } from "lucide-react";
+import { useState, type MouseEvent, type ReactNode } from "react";
 
 /**
- * Zone B — the persistent HUD frame. The same four corners on every card-game
- * table (landscape only, via CSS) so players build muscle memory:
+ * Zone B — the persistent HUD frame. On wide landscape it becomes the
+ * control-room console: a black column on the right holding nav, table
+ * stats, ticker, your seat, chat, your cards and the action dock.
+ * The console minimises into a slim tab strip (one tab per option) so the
+ * felt can run nearly edge-to-edge; the action dock then floats bottom-centre.
+ * Everywhere else the wrapper is display:contents and the four corners pin:
  *   Top Left     table info & league standing
  *   Top Right    menu / leaderboard / audio shortcuts
  *   Bottom Left  chat & social toggle (opens the chat popover)
  *   Bottom Right player profile mini-card (bankroll + active bet)
- * Zone C (contextual action buttons) stays in the existing action dock.
  */
 export function PokerHudFrame({
   tableName,
@@ -27,6 +30,7 @@ export function PokerHudFrame({
   onChat,
   chatOpen,
   chatPanel,
+  players,
   ticker,
   handStrip,
   dock,
@@ -47,6 +51,8 @@ export function PokerHudFrame({
   onChat: () => void;
   chatOpen: boolean;
   chatPanel: ReactNode;
+  /** Seat roster for the Players popover in the console. */
+  players?: { name: string; chips: number; isBot: boolean }[];
   /** Console slots (wide landscape control-room): tournament ticker, your
    *  face-up cards on the black pad, and the action/deal dock. On narrower
    *  layouts these render in their classic positions instead. */
@@ -54,10 +60,24 @@ export function PokerHudFrame({
   handStrip?: ReactNode;
   dock?: ReactNode;
 }) {
+  const [playersOpen, setPlayersOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const minimise = (e: MouseEvent<HTMLElement>) => e.currentTarget.closest(".poker-playing-page")?.classList.add("poker-console-min");
+  const expand = (e: MouseEvent<HTMLElement>) => e.currentTarget.closest(".poker-playing-page")?.classList.remove("poker-console-min");
   return (
-    <>
-      <div className="poker-console" data-testid="poker-console">
-        <div className="hud-zone hud-zone--tl">
+    <div className="poker-console" data-testid="poker-console">
+      <button type="button" className="poker-console__collapse" aria-label="Minimise console to tabs" onClick={minimise}><PanelRightClose className="h-4 w-4" /><span>Minimise</span></button>
+      {/* Minimised state: one tab per option. Sound works in place; every
+          other tab re-opens the console straight to that option. */}
+      <div className="poker-console-tabs" data-testid="poker-console-tabs" role="toolbar" aria-label="Table options">
+        <button type="button" className="hud-icon-btn" aria-label="Expand console" onClick={expand}><PanelRightOpen className="h-4 w-4" /></button>
+        <button type="button" className="hud-icon-btn" aria-label="Back to lobby" onClick={onLobby}><ChevronLeft className="h-4 w-4" /></button>
+        <button type="button" className="hud-icon-btn" aria-label="League leaderboard" onClick={onLeaderboard}><Trophy className="h-4 w-4" /></button>
+        <button type="button" className="hud-icon-btn" aria-label="Open table chat" onClick={(e) => { expand(e); if (!chatOpen) onChat(); }}><MessageCircle className="h-4 w-4" /></button>
+        <button type="button" className="hud-icon-btn" aria-label={audioOn ? "Mute audio" : "Unmute audio"} onClick={onAudio}>{audioOn ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}</button>
+        <button type="button" className="hud-icon-btn" aria-label="How to play" onClick={(e) => { expand(e); setHelpOpen(true); setPlayersOpen(false); }}><HelpCircle className="h-4 w-4" /></button>
+      </div>
+      <div className="hud-zone hud-zone--tl">
         <div className="hud-panel" aria-label="Table information">
           <p className="hud-panel__row"><b>{tableName}</b></p>
           <p className="hud-panel__row">Blinds {blinds} · Hand #{handNumber}</p>
@@ -79,10 +99,20 @@ export function PokerHudFrame({
           <p className="hud-panel__row">Wallet {wallet.toLocaleString()}{activeBet > 0 ? <> · active bet <b>{activeBet.toLocaleString()}</b></> : ""}</p>
         </div>
       </div>
-        {ticker}
-        {handStrip && <div className="poker-console-hand" data-testid="poker-console-hand">{handStrip}</div>}
-        {dock}
+      <div className="poker-console-quick" data-testid="poker-console-quick">
+        {playersOpen && <div className="hud-chat-pop poker-console-pop" role="log" aria-label="Players at the table">
+          {(players ?? []).map((p) => <p key={p.name}><b>{p.name}</b>{p.isBot ? "" : " (you)"} — {p.chips.toLocaleString()}</p>)}
+        </div>}
+        {helpOpen && <div className="hud-chat-pop poker-console-pop" role="note" aria-label="How to play">
+          <p><b>No-Limit Texas Hold'em.</b> Two hole cards, five community cards — make the best five-card hand. Blinds rise on the ticker clock.</p>
+          <p>Free-play chips only — no cash value, ever.</p>
+        </div>}
+        <button type="button" className="hud-icon-btn" aria-label={playersOpen ? "Hide players" : "Show players"} onClick={() => { setPlayersOpen((v) => !v); setHelpOpen(false); }}><Users className="h-4 w-4" /></button>
+        <button type="button" className="hud-icon-btn" aria-label={helpOpen ? "Hide how to play" : "How to play"} onClick={() => { setHelpOpen((v) => !v); setPlayersOpen(false); }}><HelpCircle className="h-4 w-4" /></button>
       </div>
-    </>
+      {ticker}
+      {handStrip && <div className="poker-console-hand" data-testid="poker-console-hand">{handStrip}</div>}
+      {dock}
+    </div>
   );
 }

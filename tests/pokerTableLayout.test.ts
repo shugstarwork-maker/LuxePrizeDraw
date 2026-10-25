@@ -62,8 +62,30 @@ test("wide landscape becomes a control room: felt edge-to-edge left, black conso
 test("console column stacks stats, chat, your cards on a black pad and the dock at its foot", () => {
   assert.match(css, /\.poker-console \.poker-ticker \{ order:3; position:static/);        // ticker in the stack
   assert.match(css, /\.poker-console \.hud-zone--bl \.hud-chat-pop \{ position:static/);  // chat inline, never over the felt
-  assert.match(css, /\.poker-console \.poker-console-hand \{ order:6;[^}]*background:#000/); // cards pop on black
-  assert.match(css, /\.poker-console \.poker-action-dock \{ order:7; position:static/);   // dock at the foot
+  assert.match(css, /\.poker-console \.poker-console-hand \{ order:7;[^}]*background:#000/); // cards pop on black
+  assert.match(css, /\.poker-console \.poker-action-dock \{ order:8; position:static/);   // dock at the foot
+});
+
+test("console minimises into a tab strip, one tab per option, and the felt takes the space back", () => {
+  const hud = readFileSync(new URL("../src/components/PokerHudFrame.tsx", import.meta.url), "utf8");
+  assert.match(hud, /poker-console__collapse/);                       // minimise control
+  assert.match(hud, /data-testid="poker-console-tabs"/);              // the tab strip
+  assert.match(hud, /aria-label="Expand console"/);
+  assert.match(hud, /poker-console-min/);                             // class-driven toggle
+  assert.match(css, /\.poker-playing-page\.poker-console-min \.poker-playing-wrap \{ width:calc\(100% - 3\.6rem\)/); // felt widens
+  assert.match(css, /\.poker-console-min \.poker-console \{ width:3\.4rem/);           // strip width
+  assert.match(css, /\.poker-console-min \.poker-console \.poker-console-tabs \{ display:flex/);
+  // actions stay reachable while minimised — dock floats bottom-centre
+  assert.match(css, /\.poker-console-min \.poker-console \.poker-action-dock \{ position:fixed/);
+});
+
+test("console offers players roster and how-to-play popovers from the options row", () => {
+  const hud = readFileSync(new URL("../src/components/PokerHudFrame.tsx", import.meta.url), "utf8");
+  assert.match(hud, /data-testid="poker-console-quick"/);
+  assert.match(hud, /aria-label="Players at the table"/);
+  assert.match(hud, /aria-label="How to play"/);
+  assert.match(hud, /No-Limit Texas Hold'em/);
+  assert.match(src, /players=\{game \? game\.players\.map/);          // roster wired from the live game
 });
 
 test("console wrapper is transparent outside wide landscape — classic layout untouched", () => {
