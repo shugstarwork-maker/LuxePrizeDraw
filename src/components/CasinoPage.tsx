@@ -27,12 +27,12 @@ export const CASINO_PATHS = ["/casino", "/poker", "/blackjack", "/brag", "/chess
 export function CasinoPage() {
   const [entered, setEntered] = useState(false);
   if (!entered) return <main className="casino-welcome relative min-h-screen overflow-hidden bg-black text-white">
-    <img src="/prizes/original-poker-lounge.png" alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover opacity-45" />
-    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,.2),rgba(0,0,0,.92)_70%)]" />
-    <div className="relative flex min-h-screen flex-col items-center justify-center px-6 text-center">
+    <img src="/prizes/original-poker-lounge.png" alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover" />
+    <div className="absolute inset-x-0 bottom-0 h-[80%] bg-gradient-to-t from-black from-35% via-black/90 to-transparent" />
+    <div className="relative flex min-h-screen flex-col items-center justify-end px-6 pb-48 text-center">
       <p className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[.3em] text-amber-200"><Sparkles className="h-3.5 w-3.5" /> Members' free-play casino</p>
-      <h1 className="mt-5 font-serif text-5xl font-black leading-tight text-amber-100 sm:text-7xl">Welcome to<br />Luxe Casino</h1>
-      <p className="mx-auto mt-5 max-w-md text-sm leading-relaxed text-white/65">Cards, board games and arcade. Free play only, no cash value.</p>
+      <h1 className="cine-title mx-auto mt-4 max-w-xl text-4xl font-black leading-tight sm:text-5xl">Welcome to Luxe Casino</h1>
+      <p className="mx-auto mt-5 max-w-md text-sm leading-relaxed text-white/70">Cards, board games and arcade. Free play only, no cash value.</p>
       <button type="button" onClick={() => setEntered(true)} className="mt-10 rounded-full border border-amber-200/60 bg-gradient-to-b from-amber-200 to-amber-500 px-12 py-4 text-sm font-black uppercase tracking-[.2em] text-black shadow-[0_0_60px_rgba(232,187,70,.45)] transition hover:scale-[1.03]">Enter</button>
     </div>
   </main>;
