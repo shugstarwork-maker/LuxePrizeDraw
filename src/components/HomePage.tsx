@@ -4,6 +4,7 @@
 // only, community figures show £0 until real distributions exist. Nothing invented.
 import React from "react";
 import { ArrowRight, BadgeCheck, CarFront, Coins, Cpu, Crown, Gamepad2, Handshake, Heart, Palmtree, Scale, ShieldCheck, Sparkles, TreePine, Trophy, Users } from "lucide-react";
+import { DrawTermsButton, categoryFor } from "./DrawTermsSheet";
 
 const go = (path: string) => { window.history.pushState({}, "", path); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); };
 
@@ -111,7 +112,8 @@ export const HomePage: React.FC = () => (
         <p className="mt-2 text-xs text-white/50">Entries are not open yet — each draw below shows its confirmed prize detail. Entry price, closing date and entry limits publish with the approved rules before launch.</p>
         <div className="mt-5 grid gap-4 sm:grid-cols-3">
           {LIVE_PRIZES.map((p) => (
-            <button key={p.title} type="button" onClick={() => go("/draws")} className="cine-card group overflow-hidden rounded-2xl border border-amber-200/20 bg-gradient-to-b from-[#171106] to-[#0b0704] text-left transition hover:border-amber-200/50 active:scale-[.98]">
+            <div key={p.title} className="flex flex-col">
+            <button type="button" onClick={() => go("/draws")} className="cine-card group overflow-hidden rounded-2xl border border-amber-200/20 bg-gradient-to-b from-[#171106] to-[#0b0704] text-left transition hover:border-amber-200/50 active:scale-[.98]">
               <div className="cine-img relative h-44 overflow-hidden bg-black/40">
                 <img src={p.image} alt="" className="h-full w-full object-cover opacity-90 transition duration-500 group-hover:scale-105" />
                 <span className="absolute left-2 top-2 rounded-full bg-black/70 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-amber-200">{p.tag}</span>
@@ -123,6 +125,8 @@ export const HomePage: React.FC = () => (
                 <span className="mt-3 inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-amber-200">View prize <ArrowRight className="h-3 w-3 transition group-hover:translate-x-0.5" /></span>
               </div>
             </button>
+            <DrawTermsButton terms={{ drawName: p.title, category: categoryFor(`${p.title} ${p.tag}`), prize: `${p.title} (${p.value})`, entry: "to be confirmed" }} />
+            </div>
           ))}
         </div>
       </div>
@@ -222,15 +226,16 @@ export const HomePage: React.FC = () => (
 
     {/* ── H. Footer links ── */}
     <section className="border-t border-white/10 px-5 py-8">
-      <div className="mx-auto grid max-w-4xl grid-cols-2 gap-x-6 gap-y-2.5 text-xs font-bold text-white/60 sm:grid-cols-4">
-        <button type="button" onClick={() => go("/launch-build")} className="text-left hover:text-amber-200">How it works</button>
-        <button type="button" onClick={() => go("/draws")} className="text-left hover:text-amber-200">Prize draws</button>
-        <button type="button" onClick={() => go("/serenity")} className="text-left hover:text-amber-200">Community Fund</button>
-        <button type="button" onClick={() => go("/credentials")} className="text-left hover:text-amber-200">Partner with us</button>
-        <button type="button" onClick={() => go("/responsible-play")} className="text-left hover:text-amber-200">Responsible play</button>
-        <button type="button" onClick={() => go("/terms")} className="text-left hover:text-amber-200">Terms &amp; rules</button>
-        <button type="button" onClick={() => go("/community")} className="text-left hover:text-amber-200">Community</button>
-        <button type="button" onClick={() => go("/economics")} className="text-left hover:text-amber-200">Draw economics</button>
+      <div className="mx-auto grid max-w-4xl grid-cols-2 gap-x-6 gap-y-0.5 text-xs font-bold text-white/60 sm:grid-cols-4">
+        <button type="button" onClick={() => go("/launch-build")} className="min-h-6 py-1 text-left hover:text-amber-200">How it works</button>
+        <button type="button" onClick={() => go("/draws")} className="min-h-6 py-1 text-left hover:text-amber-200">Prize draws</button>
+        <button type="button" onClick={() => go("/serenity")} className="min-h-6 py-1 text-left hover:text-amber-200">Community Fund</button>
+        <button type="button" onClick={() => go("/credentials")} className="min-h-6 py-1 text-left hover:text-amber-200">Partner with us</button>
+        <button type="button" onClick={() => go("/responsible-play")} className="min-h-6 py-1 text-left hover:text-amber-200">Responsible play</button>
+        <button type="button" onClick={() => go("/terms")} className="min-h-6 py-1 text-left hover:text-amber-200">Terms &amp; rules</button>
+        <button type="button" onClick={() => go("/privacy")} className="min-h-6 py-1 text-left hover:text-amber-200">Privacy &amp; cookies</button>
+        <button type="button" onClick={() => go("/community")} className="min-h-6 py-1 text-left hover:text-amber-200">Community</button>
+        <button type="button" onClick={() => go("/economics")} className="min-h-6 py-1 text-left hover:text-amber-200">Draw economics</button>
       </div>
       <p className="mx-auto mt-6 flex max-w-4xl items-center gap-1.5 text-[10px] text-white/35"><Coins className="h-3.5 w-3.5 text-amber-200/60" />LuxePrizeDraw Ltd · pre-launch preview · draft rules require UK legal approval before entries open.</p>
     </section>

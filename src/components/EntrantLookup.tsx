@@ -38,7 +38,7 @@ export function EntrantLookup() {
         <MailSearch className="h-7 w-7 text-amber-200" />
       </div>
       <form onSubmit={lookup} className="mt-5 flex flex-col gap-3 sm:flex-row">
-        <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="The email you entered with"
+        <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="The email you entered with" aria-label="Email address you entered with" autoComplete="email"
           className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-3 text-sm text-white outline-none focus:border-amber-300" />
         <button disabled={loading} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-amber-300 px-5 py-3 text-xs font-black uppercase tracking-wider text-black disabled:opacity-50">
           {loading ? "Searching" : "Look up"}

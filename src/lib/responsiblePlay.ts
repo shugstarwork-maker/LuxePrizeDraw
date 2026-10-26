@@ -50,7 +50,8 @@ export function activeExclusion(): Exclusion | null {
  *  by design (mirrors the UK self-exclusion contract). */
 export function setExclusion(kind: ExclusionKind): Exclusion {
   const period = EXCLUSION_PERIODS[kind];
-  const ex: Exclusion = { kind, startedAt: Date.now(), endsAt: Date.now() + period.hours * 3600_000 };
+  const now = Date.now(); // read the clock once so the period is exact
+  const ex: Exclusion = { kind, startedAt: now, endsAt: now + period.hours * 3600_000 };
   try { localStorage.setItem(EXCLUSION_KEY, JSON.stringify(ex)); } catch { /* demo only */ }
   return ex;
 }

@@ -21,6 +21,9 @@ import { checkTrophyUnlocks, awardBracelet } from "../lib/pokerTrophies";
 import { classifyHand, recordHighlight, buildCardStrings } from "../lib/pokerHighlights";
 import { useAccount } from "../lib/useAccount";
 import { LeagueCelebration, type Celebration } from "./LeagueCelebration";
+import { LeagueLadder } from "./LeagueBadge";
+import { bumpStat, setStatMax } from "../lib/achievements";
+import { AchievementCabinet } from "./Achievements";
 import { LeagueRacePop, type RacePop } from "./LeagueRacePop";
 import { LeagueGlideOverlay, type GlideEvent } from "./LeagueGlideOverlay";
 import { LoungeTabBar } from "./LoungeTabBar";
@@ -65,6 +68,17 @@ const SEAT_SLOTS = [
   { px: 63, py: 82, sc: 1 },     // bottom rail — right of the hero
   { px: 45, py: 75, sc: 1.06 },  // hero — bottom centre
 ];
+// Where each seat's bet stack sits (same order as SEAT_SLOTS), in open felt beside
+// the seat. Measured at 740–1440px wide: the near-rail seats have no room above
+// them before the board, so their stacks sit to the side instead.
+const BET_SPOTS = [
+  { bx: 26, by: 46 },  // left lower — up and in, left of the board
+  { bx: 73, by: 27 },  // right upper
+  { bx: 28, by: 24 },  // left upper
+  { bx: 72, by: 50 },  // right lower — right of the board
+  { bx: 74, by: 79 },  // bottom right — between it and the right-lower seat
+  { bx: 33, by: 70 },  // hero — to your left, clear of your cards
+];
 
 
 
@@ -87,13 +101,11 @@ function RotateGate({ onBack }: { onBack: () => void }) {
 
 /** Chips a player has pushed in front of their seat this street — rendered as a
  *  small stack on the felt between the seat and the pot, clear of the board. */
-function BetChips({ amount, slot, isYou }: { amount: number; slot: { px: number; py: number }; isYou?: boolean; key?: string }) {
+function BetChips({ amount, spot, isYou }: { amount: number; spot: { bx: number; by: number }; isYou?: boolean; key?: string }) {
   // Same Luxe chip as the rail artwork: black lacquer, thick gold rim, gold
   // spade face — stacked taller for bigger bets.
   const chips = Math.min(6, Math.max(2, Math.round(amount / 25)));
-  // Nudge the stack toward the table centre so it reads "in front of" the seat.
-  const cx = slot.px + (50 - slot.px) * 0.3;
-  const cy = slot.py + (46 - slot.py) * 0.3;
+  const { bx: cx, by: cy } = spot;
   return (
     <div className="poker-bet-chips" data-testid="bet-chips" style={{ left: `${cx}%`, top: `${cy}%` }} aria-label={`${amount.toLocaleString()} virtual chips bet`}>
       <span className="poker-bet-chips__stack" aria-hidden="true">
@@ -247,7 +259,7 @@ export const LuxePokerLeague: React.FC = () => {
     if (!mv) return;
     const toTier = tierByIndex(mv.tierIndex);
     const fromTier = tierByIndex(mv.tierIndex + (mv.moved === "promote" ? -1 : 1));
-    setCelebration({ type: mv.moved, fromTier: fromTier.name, toTier: toTier.name, fromColour: fromTier.colour, toColour: toTier.colour });
+    setCelebration({ type: mv.moved, fromTier: fromTier.name, toTier: toTier.name, fromColour: fromTier.colour, toColour: toTier.colour, rank: ensureWeek().prevRank });
     play(mv.moved === "promote" ? "levelUp" : "tableKnock");
     // Trophy room: record the new tier (and bracelet for promotion finishes).
     const { season } = getSeason().info;
@@ -421,6 +433,7 @@ export const LuxePokerLeague: React.FC = () => {
       setWinFlash(true);
       window.setTimeout(() => setWinFlash(false), 1800);
       awardXp(20 * (tickets > 0 ? 2 : 1));
+      bumpStat("pokerHandsWon"); setStatMax("pokerBigPot", mine.amount); setStatMax("pokerBestStreak", stats.streak + 1);
       setStats((prev) => {
         const streak = prev.streak + 1;
         const next = { handsWon: prev.handsWon + 1, biggestPot: Math.max(prev.biggestPot, mine.amount), streak, bestStreak: Math.max(prev.bestStreak, streak) };
@@ -595,7 +608,10 @@ export const LuxePokerLeague: React.FC = () => {
   const dealerMood: "idle" | "win" | "lose" = potWinner === "player" || potWinner === "split" ? "win" : potWinner === "host" ? "lose" : "idle";
   const busted = Boolean(game?.handOver && you && you.chips <= 0);
 
-  if (screen === "welcome") return <LoungeWelcome
+  // The weekly move ceremony renders through a portal, so it shows on every screen.
+  const ceremony = <LeagueCelebration celebration={celebration} onDone={() => setCelebration(null)} />;
+
+  if (screen === "welcome") return <>{ceremony}<LoungeWelcome
     brand="Luxe Poker League"
     tagline="Members' free-play casino — pick a card game, sit at your league table and climb the weekly divisions. Virtual chips only, no cash value."
     art="/games/luxe-poker-table.png"
@@ -604,9 +620,9 @@ export const LuxePokerLeague: React.FC = () => {
     tab={lobbyTab}
     onTab={(t) => { play("button"); setLobbyTab(t); setScreen("lobby"); }}
     onEnter={() => { play("ticketSelect"); setLobbyTab("play"); setScreen("lobby"); }}
-  />;
+  /></>;
 
-  if (screen === "lobby") return <section id="poker-league" className="salon-selection min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-4 py-6 pb-28 text-white"><div className="mx-auto max-w-5xl"><header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-4 py-3"><span className="inline-flex items-center gap-2 font-black text-amber-100"><Crown className="h-5 w-5" />LUXE POKER LOUNGE</span>{activeTable && game && <button onClick={() => { play("button"); setScreen("table"); }} className="rounded-full bg-gradient-to-b from-amber-300 to-amber-500 px-4 py-1.5 text-xs font-black text-black shadow-lg active:scale-95" data-testid="back-to-table">← Back to table — hand in play</button>}<span className="rounded-full border border-amber-200/35 bg-amber-300/10 px-3 py-1.5 font-mono text-sm font-black text-amber-100">{chips.toLocaleString()} chips</span>{!reviewMode && <span className="rounded-full border border-sky-300/35 bg-sky-400/10 px-3 py-1.5 font-mono text-sm font-black text-sky-100" data-testid="sweep-ticket-balance" title="Sweep Tickets — always free, never sold">🎟 {wallet.sweepTickets}</span>}<button onClick={() => setEnabled(!enabled)} className="rounded-lg bg-white/10 p-2"><Volume2 className="h-4 w-4" /></button></header><nav className="mt-3 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[.18em]"><span className="rounded-full border border-amber-200/50 bg-amber-300/15 px-3.5 py-1.5 text-amber-100">♠ Card Lounge</span><button type="button" onClick={() => { window.history.pushState({}, "", "/challenge"); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-white/55 transition hover:border-amber-200/50 hover:text-amber-100">⚔ Challenge</button><button type="button" onClick={() => { window.history.pushState({}, "", "/portal"); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-white/55 transition hover:border-amber-200/50 hover:text-amber-100">Portal</button></nav>
+  if (screen === "lobby") return <section id="poker-league" className="salon-selection min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-4 py-6 pb-28 text-white">{ceremony}<div className="mx-auto max-w-5xl"><header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-4 py-3"><span className="inline-flex items-center gap-2 font-black text-amber-100"><Crown className="h-5 w-5" />LUXE POKER LOUNGE</span>{activeTable && game && <button onClick={() => { play("button"); setScreen("table"); }} className="rounded-full bg-gradient-to-b from-amber-300 to-amber-500 px-4 py-1.5 text-xs font-black text-black shadow-lg active:scale-95" data-testid="back-to-table">← Back to table — hand in play</button>}<span className="rounded-full border border-amber-200/35 bg-amber-300/10 px-3 py-1.5 font-mono text-sm font-black text-amber-100">{chips.toLocaleString()} chips</span>{!reviewMode && <span className="rounded-full border border-sky-300/35 bg-sky-400/10 px-3 py-1.5 font-mono text-sm font-black text-sky-100" data-testid="sweep-ticket-balance" title="Sweep Tickets — always free, never sold">🎟 {wallet.sweepTickets}</span>}<button onClick={() => setEnabled(!enabled)} className="rounded-lg bg-white/10 p-2"><Volume2 className="h-4 w-4" /></button></header><nav className="mt-3 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[.18em]"><button type="button" onClick={() => { setLobbyTab("play"); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="rounded-full border border-amber-200/50 bg-amber-300/15 px-3.5 py-1.5 text-amber-100">♠ Card Lounge</button><button type="button" onClick={() => { window.history.pushState({}, "", "/challenge"); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-white/55 transition hover:border-amber-200/50 hover:text-amber-100">⚔ Challenge</button><button type="button" onClick={() => { window.history.pushState({}, "", "/portal"); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-white/55 transition hover:border-amber-200/50 hover:text-amber-100">Portal</button></nav>
         {lobbyTab === "play" && <><div className="mt-8 text-center"><p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">Members’ casino · no cash value</p><h2 className="mt-3 text-4xl font-black">Your Weekly League</h2><p className="mt-3 text-sm text-white/60">Pick a card game, then tap your {leagueTier.name} League table below to take your seat. Win hands to climb the divisions. Free-play chips only, pure experience.</p></div><LoungeGamesCarousel onPlayGame={(id, href) => { if (id === "poker") { join(leagueTable); return; } window.history.pushState({}, "", href); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo(0, 0); }} /><button onClick={() => join(leagueTable)} className="group mt-7 block w-full overflow-hidden rounded-2xl border text-left transition active:scale-[.98] border-amber-200/40 hover:border-amber-200/80 bg-black/40"><div className={`relative h-32 bg-gradient-to-br ${leagueTable.tone}`}><img src={leagueTable.image} alt="" className="h-full w-full object-cover opacity-80 mix-blend-luminosity" /><span className="absolute right-2 top-2 rounded-full bg-black/70 px-2 py-1 text-[9px] font-black uppercase tracking-wider" style={{ color: leagueTier.colour }}>{leagueTier.name} League · your table</span></div><div className="flex items-center justify-between gap-3 p-4"><div><p className="font-black text-amber-100">{leagueTable.name}</p><p className="mt-1 flex items-center gap-1 text-[11px] text-white/55"><Users className="h-3 w-3" /> 6 seats · blinds {leagueTable.blinds} · buy-in {leagueTable.buyIn.toLocaleString()}</p></div><span className="rounded-full bg-gradient-to-b from-amber-300 to-amber-500 px-5 py-2.5 text-sm font-black text-black shadow-lg">Play now</span></div></button>{seatError && <p role="alert" className="poker-seat-error">{seatError}</p>}
         <div className="mt-8 rounded-[1.75rem] border border-emerald-200/25 bg-[linear-gradient(145deg,#06240f,#0a1206_70%)] p-5">
           <div className="flex items-center justify-between gap-3">
@@ -633,7 +649,7 @@ export const LuxePokerLeague: React.FC = () => {
           <p className="mt-3 text-[10px] text-white/35">Same integrity stack as solo tables: provably fair committed shuffle, append-only records, review before any league credit.</p>
         </div>
         </>}
-        {lobbyTab === "league" && <><div ref={boardCardRef} className={`mt-4 border p-5 transition-all duration-700 ${glide ? "-mx-4 rounded-none border-x-0" : "rounded-[1.75rem]"}`} style={{ borderColor: `${leagueTier.colour}55`, background: `linear-gradient(145deg,#1c150b, #0d0904 70%)`, boxShadow: glide ? `0 0 70px ${leagueTier.glow}` : `0 0 34px ${leagueTier.glow}` }}>
+        {lobbyTab === "league" && <><div className="mt-5"><LeagueLadder tierIndex={league.tierIndex} /></div><div ref={boardCardRef} className={`mt-4 border p-5 transition-all duration-700 ${glide ? "-mx-4 rounded-none border-x-0" : "rounded-[1.75rem]"}`} style={{ borderColor: `${leagueTier.colour}55`, background: `linear-gradient(145deg,#1c150b, #0d0904 70%)`, boxShadow: glide ? `0 0 70px ${leagueTier.glow}` : `0 0 34px ${leagueTier.glow}` }}>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-[10px] font-black uppercase tracking-[.22em]" style={{ color: leagueTier.colour }}>Weekly league · ends in {weekEndsIn()}</p>
@@ -706,9 +722,8 @@ export const LuxePokerLeague: React.FC = () => {
           </div>
         </div>
         <SeasonHub onPlayEvent={(label) => { note(`${label}: you're registered — your table run counts as your tournament result.`); join(leagueTable); }} />
-        <LeagueCelebration celebration={celebration} onDone={() => setCelebration(null)} />
         </>}
-        {lobbyTab === "profile" && <><AccountCard chips={chips} />
+        {lobbyTab === "profile" && <><AccountCard chips={chips} /><AchievementCabinet />
         <div className="mt-4 rounded-[1.75rem] border border-amber-200/25 bg-[linear-gradient(145deg,#241a08,#120d06_70%)] p-5">
           <p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">Luxe Lounge leaderboard</p>
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -822,7 +837,7 @@ export const LuxePokerLeague: React.FC = () => {
     const mpWinner: "player" | "host" | "split" | null = !g?.handOver || !g.winners.length ? null : g.winners.length > 1 ? "split" : g.winners[0].id === myId ? "player" : "host";
     const mpMood: "idle" | "win" | "lose" = mpWinner === "player" || mpWinner === "split" ? "win" : mpWinner === "host" ? "lose" : "idle";
     const mpSeated = Boolean(me && !me.sittingOut);
-    return <section id="poker-league" className="poker-playing-page min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-3 py-4 pb-28 text-white">
+    return <section id="poker-league" className="poker-playing-page min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-3 py-4 pb-28 text-white">{ceremony}
       <RotateGate onBack={() => { mp.leave(); setScreen("lobby"); }} />
       <div className="poker-playing-wrap mx-auto max-w-5xl">
         <header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-3 py-2">
@@ -852,10 +867,9 @@ export const LuxePokerLeague: React.FC = () => {
                   </div>;
                 })}{g.players.map((p, i) => {
                   if (p.bet <= 0 || p.sittingOut) return null;
-                  const slot = SEAT_SLOTS[Math.min(i, SEAT_SLOTS.length - 1)];
-                  return <BetChips key={`bet-${p.id}`} amount={p.bet} slot={slot} isYou={p.id === myId} />;
+                  return <BetChips key={`bet-${p.id}`} amount={p.bet} spot={BET_SPOTS[Math.min(i, BET_SPOTS.length - 1)]} isYou={p.id === myId} />;
                 })}</div>
-                <div className="poker-live-board flex justify-center gap-1">{[0, 1, 2, 3, 4].map((i) => g.board[i] ? <CardView key={key(g.board[i])} card={g.board[i]} /> : <div key={i} className="h-16 w-11 rounded-lg border border-dashed border-amber-100/30 bg-black/40 sm:h-20 sm:w-14" />)}</div>
+                <div className="poker-live-board flex justify-center gap-1">{[0, 1, 2, 3, 4].map((i) => g.board[i] ? <CardView key={key(g.board[i])} card={g.board[i]} /> : <div key={i} aria-hidden="true" className="invisible h-16 w-11 sm:h-20 sm:w-14" />)}</div>
                 {/* Your cards ride on your seat badge like every other player — no centre-felt hand strip. */}
               </PokerTableArtwork>
               <LuxeDealer stage={mpStage} active={Boolean(v.yourTurn)} mood={mpMood} />
@@ -892,7 +906,7 @@ export const LuxePokerLeague: React.FC = () => {
   const botSlots = game ? game.players.filter((p) => p.isBot) : [];
   const alivePlayers = game ? game.players.filter((p) => p.chips > 0).length : 0;
   const nextTable = LEAGUE_TABLES[Math.min(league.tierIndex + 1, LEAGUE_TABLES.length - 1)];
-  return <section id="poker-league" className="poker-playing-page min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-3 py-4 pb-28 text-white"><RotateGate onBack={leaveTable} />
+  return <section id="poker-league" className="poker-playing-page min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-3 py-4 pb-28 text-white">{ceremony}<RotateGate onBack={leaveTable} />
     <div className="poker-playing-wrap mx-auto max-w-5xl"><header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-3 py-2"><button onClick={() => setLeaveOpen(true)} className="inline-flex items-center gap-1 rounded-lg bg-white/10 px-3 py-2 text-xs font-black"><ChevronLeft className="h-4 w-4" />Lobby</button><span className="font-mono text-sm font-black text-amber-100">{chips.toLocaleString()} wallet · {you?.chips.toLocaleString() ?? 0} at table · <span style={{ color: leagueTier.colour }}>{leagueTier.name} {league.xp}XP</span></span><button onClick={() => setEnabled(!enabled)} className="rounded-lg bg-white/10 p-2"><Volume2 className="h-4 w-4" /></button></header><article className="poker-game-article relative mt-4 overflow-hidden rounded-[2rem] border border-amber-200/50 bg-[radial-gradient(ellipse_at_center,#2a2318,#151009_55%,#090604)] p-4 shadow-[0_0_70px_rgba(212,175,55,.22),inset_0_0_140px_rgba(0,0,0,0.5)] sm:p-6"><div className={`poker-surface-frame relative rounded-[2rem] ${winFlash ? "poker-win-flash" : ""} ${tableTheme === "onyx" ? "ring-4 ring-amber-400/50" : tableTheme === "noir" ? "ring-4 ring-zinc-400/50" : ""}`}>
               {winFlash && <div className="pointer-events-none absolute inset-0 z-20 flex items-start justify-center gap-2 pt-14">{[...Array(6)].map((_, i) => <span key={i} className="poker-chip-fly h-4 w-4 rounded-full border border-amber-200/70 bg-gradient-to-br from-amber-300 to-amber-600" style={{ animationDelay: `${i * 90}ms` }} />)}</div>}
               <PokerTableArtwork pot={game?.pot ?? 0} stage={dealerStage} winner={potWinner}><StudioBroadcastOverlay /><div className="poker-live-seats pointer-events-none absolute inset-0">{game && game.players.map((p) => {
@@ -912,8 +926,8 @@ export const LuxePokerLeague: React.FC = () => {
               })}{game && game.players.map((p) => {
                 if (p.bet <= 0 || p.sittingOut) return null;
                 const slotIndex = p.isBot ? botSlots.indexOf(p) : 5;
-                return <BetChips key={`bet-${p.id}`} amount={p.bet} slot={SEAT_SLOTS[slotIndex]} isYou={!p.isBot} />;
-              })}</div><div className="poker-live-board flex justify-center gap-1">{[0, 1, 2, 3, 4].map((i) => game?.board[i] ? <CardView key={key(game.board[i])} card={game.board[i]} /> : <div key={i} className="h-16 w-11 rounded-lg border border-dashed border-amber-100/30 bg-black/40 sm:h-20 sm:w-14" />)}</div>{/* Your cards ride on your seat badge like every other player. */}</PokerTableArtwork>
+                return <BetChips key={`bet-${p.id}`} amount={p.bet} spot={BET_SPOTS[slotIndex]} isYou={!p.isBot} />;
+              })}</div><div className="poker-live-board flex justify-center gap-1">{[0, 1, 2, 3, 4].map((i) => game?.board[i] ? <CardView key={key(game.board[i])} card={game.board[i]} /> : <div key={i} aria-hidden="true" className="invisible h-16 w-11 sm:h-20 sm:w-14" />)}</div>{/* Your cards ride on your seat badge like every other player. */}</PokerTableArtwork>
               <LuxeDealer stage={dealerStage} active={yourTurn} mood={dealerMood} />
             </div><div className="poker-below-table relative"><div className="mb-3 flex justify-center"><PokerFullscreen /></div><div className="poker-round-meta flex justify-between text-[10px] font-black uppercase tracking-wider text-white/60"><span>{activeTable?.name} · Hand #{game?.handNumber ?? 0} · Blinds {activeTable?.blinds}</span><span className="inline-flex items-center gap-1"><Timer className="h-3 w-3" />{yourTurn ? `00:${String(seconds).padStart(2, "0")}` : game?.handOver ? "Hand over" : "Playing"}</span></div><div className="poker-round-status mt-5 rounded-xl bg-black/35 p-3 text-center text-sm text-emerald-100" role="status">{status}</div>
             <div className="mt-2 flex flex-wrap justify-center gap-1.5">{feed.slice(0, 3).map((line, i) => <span key={`${line}-${i}`} className={`rounded-full px-2.5 py-1 text-[10px] ${i === 0 ? "bg-amber-300/15 text-amber-100" : "bg-white/5 text-white/40"}`}>{line}</span>)}</div>

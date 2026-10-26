@@ -1,4 +1,5 @@
 // Duolingo-style weekly leagues: ~40-player groups, top 10 up / middle stay / bottom 10 down.
+import { bumpStat, setStatMax } from "./achievements";
 export type LeagueTier = { name: string; colour: string; glow: string; promote: number; demote: number; blurb?: string };
 export const LEAGUE_TIERS: LeagueTier[] = [
   { name: "Bronze", colour: "#c98a4b", glow: "rgba(201,138,75,.4)", promote: 20, demote: 0, blurb: "New players · placement period" },
@@ -91,7 +92,7 @@ export function weeklyBoard(st: LeagueState): LeagueRow[] {
     return { name, xp, you: false, games, delta: 0, flag: LEAGUE_FLAGS[i % LEAGUE_FLAGS.length] };
   });
   // reconcile: weekly XP is derived from the confirmed ledger (chips never count)
-  const yourConfirmed = confirmedXP();
+  const yourConfirmed = confirmedXP(st.week); // the board's own week — last week's at rollover
   st.xp = yourConfirmed;
   // approximate last-week ranks for movement indicators
   const prevRng = mulberry32(st.seed + st.tierIndex * 977 + 41);
@@ -137,15 +138,16 @@ export function settleLedger(): number {
   return newlyConfirmed;
 }
 
-/** Points currently counting toward standings (confirmed only). */
-export function confirmedXP(): number {
+/** Points counting toward a week's standings (confirmed only). Each week starts from
+ *  zero: only points earned during that week count. */
+export function confirmedXP(week = weekKey()): number {
   settleLedger();
-  return loadLedger().filter((e) => e.status === "confirmed").reduce((n, e) => n + e.amount, 0);
+  return loadLedger().filter((e) => e.status === "confirmed" && weekKey(new Date(e.at)) === week).reduce((n, e) => n + e.amount, 0);
 }
 
-/** Provisional points awaiting the review window. */
-export function provisionalXP(): number {
-  return loadLedger().filter((e) => e.status === "provisional").reduce((n, e) => n + e.amount, 0);
+/** Provisional points (earned this week) awaiting the review window. */
+export function provisionalXP(week = weekKey()): number {
+  return loadLedger().filter((e) => e.status === "provisional" && weekKey(new Date(e.at)) === week).reduce((n, e) => n + e.amount, 0);
 }
 
 /** Void entries — confirmed cheating reverses their points, even after confirmation. */
@@ -196,6 +198,7 @@ export function recordDailyParticipation(): { state: LeagueState; paid: boolean 
   if (st.lastParticipationDay === todayKey()) return { state: st, paid: false };
   const next = { ...st, xp: st.xp + LEAGUE_XP.dailyParticipation, lastParticipationDay: todayKey() };
   localStorage.setItem(KEY, JSON.stringify(next));
+  bumpStat("daysPlayed");
   return { state: next, paid: true };
 }
 
@@ -285,6 +288,7 @@ export function consumeLeagueMove(): { moved: "promote" | "demote"; tierIndex: n
   const st = ensureWeek();
   if (st.moved !== "promote" && st.moved !== "demote") return null;
   const out = { moved: st.moved, tierIndex: st.tierIndex };
+  if (st.moved === "promote") { bumpStat("promotions"); setStatMax("bestTier", st.tierIndex); }
   localStorage.setItem(KEY, JSON.stringify({ ...st, moved: null }));
   return out;
 }
@@ -477,18 +481,6 @@ export async function submitHandForScoring(signal: { won: boolean; showdown: boo
 }
 
 /** Challenge-games scoring channel: same pattern as poker hands — server decides, local fallback when unreachable. */
-export const CHALLENGE_XP = { win: 3, draw: 1 } as const;
-export async function submitChallengeGameForScoring(game: "chess" | "connect4" | "draughts", result: "win" | "draw"): Promise<{ xp: number; confirmed: boolean } | null> {
-  try {
-    const res = await fetch("/api/challenge/score-game", {
-      method: "POST",
-      headers: { "content-type": "application/json", "x-player-id": playerId() },
-      body: JSON.stringify({ game, result }),
-    });
-    if (!res.ok || !(res.headers.get("content-type") ?? "").includes("application/json")) return null;
-    return (await res.json()) as { xp: number; confirmed: boolean };
-  } catch { return null; }
-}
 
 /** Competitive rating (Glicko-style), stored apart from XP and trust. */
 export function recordCompetitiveResult(won: boolean, fieldStrength = 1500): { rating: number } {

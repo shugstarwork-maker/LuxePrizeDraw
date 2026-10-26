@@ -23,8 +23,9 @@ test("bet amounts render as chip stacks on the felt, not as pills on the seat ba
 });
 
 test("bet chips sit between the seat and the pot, clear of the board", () => {
-  assert.match(src, /slot\.px \+ \(50 - slot\.px\) \* 0\.3/);   // nudged toward centre
-  assert.match(src, /slot\.py \+ \(46 - slot\.py\) \* 0\.3/);
+  assert.match(src, /const BET_SPOTS = \[/);                       // one measured spot per seat
+  assert.match(src, /\{ bx: 33, by: 70 \},  \/\/ hero/);          // your stack sits to your left, off your cards
+  assert.match(src, /spot=\{BET_SPOTS\[slotIndex\]\}/);
 });
 
 test("bet chips CSS keeps them off the seat layer and non-interactive", () => {
@@ -109,9 +110,11 @@ test("console matches the pro-app sidebar: coin table card, ring quick icons and
   assert.match(hud, /Seat &amp; Stacks/);                            // section headers
   assert.match(hud, /Table Options/);
   assert.match(hud, /data-testid="poker-console-options"/);
-  for (const row of ["Table Info", "Leaderboard", "Chat", "How to Play", "Leave Table"]) {
+  for (const row of ["Table Info", "How to Play", "Leave Table"]) {
     assert.ok(hud.includes(`<span>${row}</span>`), `missing option row: ${row}`);
   }
+  // Leaderboard, Chat and Sound already sit in the nav and quick rows — no duplicate option rows.
+  assert.ok(!hud.includes('aria-label="Open leaderboard"'), "duplicate Leaderboard option row is back");
   assert.match(css, /\.console-table-card__coin \{[^}]*border-radius: 50%/);            // gold coin disc
   assert.match(css, /poker-console-quick \.console-nav-btn svg \{[^}]*border-radius: ?50%/); // circular quick rings
   assert.match(css, /\.poker-console \.poker-console-quick \{[^}]*border:1px solid/);       // framed quick panel

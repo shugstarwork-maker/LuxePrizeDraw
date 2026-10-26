@@ -1,4 +1,5 @@
 import { DeckCard } from "./DeckCard";
+import { categoryFor } from "./DrawTermsSheet";
 import { RollingCardCarousel } from "./RollingCardCarousel";
 import { CircleAlert, Gift, Ticket } from "lucide-react";
 import { useState } from "react";
@@ -61,6 +62,7 @@ export function CategoryDrawCarousel({ category, entryBand }: { category: string
   return <section className="min-h-screen bg-[#08090f] py-8 sm:py-12"><div className="mx-auto max-w-3xl px-4 sm:px-6"><button onClick={() => { window.history.pushState({}, "", "/draws"); window.dispatchEvent(new PopStateEvent("popstate")); }} className="text-xs font-black uppercase tracking-wider text-amber-200">All prize collections</button><p className="mt-5 text-xs font-black uppercase tracking-[.2em] text-amber-200">{parsedCategory}</p><h1 className="mt-2 text-3xl font-black sm:text-5xl">Choose your entry tier.</h1><p className="mt-2 text-sm text-white/60">Each tier increases the planned prize value in this collection. Browse every prize choice now; entries and payments remain disabled until launch approval.</p><RollingCardCarousel items={tiers} getKey={item => item.entry} label="entry tier" activeIndex={tierIndex} onActiveChange={setTierIndex} renderItem={(tier, tierIndex) => <DeckCard image={images[parsedCategory][tierIndex]} title={names[parsedCategory][tierIndex]}
     facts={[[parsedCategory, Gift], [`${tier.entry} proposed entry`, Ticket], ["Entry not open", CircleAlert]]}
     stats={[{ value: `Up to ${tier.value}`, label: "Prize value" }, { value: tier.entry, label: "Entry" }, { value: "Pending", label: "Status" }]}
-    note="Subject to approved rules & prize verification" />
+    note="Subject to approved rules & prize verification"
+    terms={{ drawName: names[parsedCategory][tierIndex], category: categoryFor(`${parsedCategory} ${names[parsedCategory][tierIndex]}`), prize: `Up to ${tier.value}`, entry: tier.entry }} />
 } /></div></section>;
 }

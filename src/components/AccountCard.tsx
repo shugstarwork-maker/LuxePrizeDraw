@@ -11,6 +11,22 @@ export function AccountCard({ chips }: { chips: number }) {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [notice, setNotice] = useState("");
+
+  const forgotPassword = async () => {
+    setNotice("");
+    setBusy(true);
+    try { setNotice(await acct.requestPasswordReset(email.trim())); } finally { setBusy(false); }
+  };
+
+  const confirmDelete = async () => {
+    setBusy(true);
+    try {
+      if (await acct.deleteAccount(deletePassword)) { setConfirmingDelete(false); setDeletePassword(""); setNotice("Your account has been deleted."); }
+    } finally { setBusy(false); }
+  };
 
   const submit = async () => {
     setBusy(true);
@@ -28,31 +44,54 @@ export function AccountCard({ chips }: { chips: number }) {
         <UserRound className="h-5 w-5 shrink-0 text-sky-200/70" />
       </div>
 
+      {acct.profile && acct.error && <p role="alert" className="mt-2 text-[11px] text-rose-200">{acct.error}</p>}
       {acct.profile ? (
         <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-sky-200/20 bg-black/30 p-3.5">
           <div className="min-w-0">
             <p className="truncate text-sm font-black text-white/90">{acct.profile.name || acct.profile.email}</p>
             <p className="mt-0.5 font-mono text-[10px] text-sky-200/70">{acct.profile.id} · {acct.profile.chips.toLocaleString()} chips saved · {chips.toLocaleString()} on this device</p>
           </div>
-          <button onClick={() => acct.logout()} className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-[11px] font-black text-white/70 active:scale-[.97]"><LogOut className="h-3.5 w-3.5" />Sign out</button>
+          <div className="flex shrink-0 flex-col items-end gap-1.5">
+            <button onClick={() => acct.logout()} className="inline-flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-[11px] font-black text-white/70 active:scale-[.97]"><LogOut className="h-3.5 w-3.5" />Sign out</button>
+            <button onClick={() => void acct.logoutEverywhere()} className="min-h-6 text-[10px] font-bold text-white/45 underline underline-offset-2">Sign out on all devices</button>
+          </div>
         </div>
-      ) : (
+      ) : null}
+      {acct.profile && (
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] font-bold text-white/45">
+          <button onClick={() => void acct.exportData()} className="min-h-6 underline underline-offset-2">Download my data</button>
+          <button onClick={() => { setConfirmingDelete(!confirmingDelete); setDeletePassword(""); }} aria-expanded={confirmingDelete} className="min-h-6 text-rose-200/70 underline underline-offset-2">Delete account</button>
+        </div>
+      )}
+      {acct.profile && confirmingDelete && (
+        <div className="mt-2 rounded-xl border border-rose-300/30 bg-rose-950/30 p-3.5">
+          <p className="text-[11px] text-rose-100/90">This permanently deletes your account, saved chips and league identity, and signs you out on every device. It can't be undone.</p>
+          <input value={deletePassword} onChange={(e) => setDeletePassword(e.target.value)} type="password" autoComplete="current-password" placeholder="Your password" aria-label="Your password, to confirm deletion" className="mt-2.5 w-full rounded-xl border border-white/10 bg-black/40 px-3.5 py-2.5 text-sm text-white placeholder:text-white/30" />
+          <div className="mt-2 flex gap-2">
+            <button onClick={() => void confirmDelete()} disabled={busy || !deletePassword} className="flex-1 rounded-xl bg-rose-500 px-3 py-2 text-[11px] font-black text-white disabled:opacity-40">{busy ? "Deleting…" : "Delete permanently"}</button>
+            <button onClick={() => setConfirmingDelete(false)} className="rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-[11px] font-black text-white/70">Cancel</button>
+          </div>
+        </div>
+      )}
+      {!acct.profile && (
         <div className="mt-4">
           <div className="flex gap-2">
             <button onClick={() => setMode("signin")} className={`flex-1 rounded-xl border px-3 py-2 text-[11px] font-black ${mode === "signin" ? "border-sky-300/50 bg-sky-300/15 text-sky-100" : "border-white/10 bg-white/5 text-white/50"}`}>Sign in</button>
             <button onClick={() => setMode("signup")} className={`flex-1 rounded-xl border px-3 py-2 text-[11px] font-black ${mode === "signup" ? "border-sky-300/50 bg-sky-300/15 text-sky-100" : "border-white/10 bg-white/5 text-white/50"}`}>Create account</button>
           </div>
           <div className="mt-3 space-y-2">
-            {mode === "signup" && <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Display name" autoComplete="nickname" className="w-full rounded-xl border border-white/10 bg-black/40 px-3.5 py-2.5 text-sm text-white placeholder:text-white/30" />}
-            <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" type="email" autoComplete="email" className="w-full rounded-xl border border-white/10 bg-black/40 px-3.5 py-2.5 text-sm text-white placeholder:text-white/30" />
-            <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder={mode === "signup" ? "Password (8+ characters)" : "Password"} type="password" autoComplete={mode === "signup" ? "new-password" : "current-password"} className="w-full rounded-xl border border-white/10 bg-black/40 px-3.5 py-2.5 text-sm text-white placeholder:text-white/30" />
+            {mode === "signup" && <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Display name" aria-label="Display name" autoComplete="nickname" className="w-full rounded-xl border border-white/10 bg-black/40 px-3.5 py-2.5 text-sm text-white placeholder:text-white/30" />}
+            <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" aria-label="Email" type="email" autoComplete="email" className="w-full rounded-xl border border-white/10 bg-black/40 px-3.5 py-2.5 text-sm text-white placeholder:text-white/30" />
+            <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder={mode === "signup" ? "Password (8+ characters)" : "Password"} aria-label="Password" type="password" autoComplete={mode === "signup" ? "new-password" : "current-password"} className="w-full rounded-xl border border-white/10 bg-black/40 px-3.5 py-2.5 text-sm text-white placeholder:text-white/30" />
             <button onClick={() => void submit()} disabled={busy || !email.includes("@") || password.length < 8 || (mode === "signup" && !name.trim())} className="w-full rounded-xl bg-gradient-to-b from-sky-300 to-sky-500 px-4 py-2.5 text-sm font-black text-black shadow-lg disabled:opacity-40 active:scale-[.98]">{busy ? "One moment…" : mode === "signup" ? "Create free account" : "Sign in"}</button>
+            {mode === "signin" && <button onClick={() => void forgotPassword()} disabled={busy || !email.includes("@")} className="min-h-6 w-full text-center text-[11px] font-bold text-sky-200/80 underline underline-offset-2 disabled:opacity-40">Forgot password? Enter your email above, then tap here</button>}
           </div>
           {acct.error && <p role="alert" className="mt-2 text-[11px] text-rose-200">{acct.error}</p>}
         </div>
       )}
+      {notice && <p role="status" className="mt-2 text-[11px] text-sky-100/80">{notice}</p>}
 
-      <p className="mt-3 text-[10px] text-white/35">Free-play account — your password is stored as a salted hash on this device. No deposits, no cash wagering, ever.</p>
+      <p className="mt-3 text-[10px] text-white/35">Free-play account — your password is stored only as a scrypt hash on our server. No deposits, no cash wagering, ever. <a href="/privacy" className="underline underline-offset-2">Privacy notice</a></p>
     </div>
   );
 }

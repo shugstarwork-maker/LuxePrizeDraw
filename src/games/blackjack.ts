@@ -1,6 +1,7 @@
 // Luxe Blackjack — casino rules: dealer stands on all 17s, blackjack pays 3:2,
 // double down on any two cards, dealer peeks… simplified to player-vs-dealer with bot seats.
 import { POKER_RANKS, POKER_SUITS, type PokerCard } from "../lib/poker";
+import { secureShuffle } from "../lib/secureRandom";
 
 export type BjCard = PokerCard;
 export type BjPhase = "betting" | "playing" | "dealer" | "settled";
@@ -38,8 +39,7 @@ export function makeBjDeck(): BjCard[] {
   // 4-deck shoe, like casino blackjack
   const one = POKER_SUITS.flatMap((suit) => POKER_RANKS.map((rank, index) => ({ rank, suit, value: index + 2 })));
   const shoe = [...one, ...one, ...one, ...one];
-  for (let i = shoe.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [shoe[i], shoe[j]] = [shoe[j], shoe[i]]; }
-  return shoe;
+  return secureShuffle(shoe);
 }
 
 export function handValue(cards: BjCard[]): { total: number; soft: boolean } {

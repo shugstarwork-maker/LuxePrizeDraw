@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 test('chess has a dedicated route without host or mobile dock', () => {
   const app = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8');
-  assert.match(app, /path === "\/chess" \? <LuxeChessPage \/>/);
+  assert.match(app, /path === "\/chess" \? <GameLounge[^>]*><LuxeChessPage \/><\/GameLounge>/);
   const page = readFileSync(new URL('../src/components/LuxeChessPage.tsx', import.meta.url), 'utf8');
   assert.match(page, /<ChessBoard sound=/); assert.match(page, /href="\/arcade"/);
   assert.doesNotMatch(page, /ScottishHost|MobileDock|GoldGamesCarousel/);
