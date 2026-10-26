@@ -100,9 +100,9 @@ export default function App() {
     : path === "/lobby" ? <NeonGameLobby soundEnabled={audio.enabled} onToggleSound={() => audio.setEnabled(!audio.enabled)} />
     : path === "/poker" ? <><LuxePokerLeague /><ScottishHost /></>
     : path === "/league" ? <><PokerLeagueLanding /><ScottishHost /><MobileDock /></>
-    : path === "/chess" ? <GameLounge brand="Luxe Chess" tagline="Full legal rules and a 10-minute clock. Free play only, virtual chips, no cash value." art="/games/chess.svg" icon="♞"><LuxeChessPage /></GameLounge>
-    : path === "/blackjack" ? <><GameLounge brand="Luxe Blackjack" tagline="Beat the dealer to 21. Free play, virtual chips, no cash value." art="/games/blackjack-card.png" icon="♣"><CardLounge game="blackjack" /></GameLounge><ScottishHost /></>
-    : path === "/brag" ? <><GameLounge brand="3-Card Brag" tagline="The classic British card game. Free play, virtual chips, no cash value." art="/games/brag-card.png" icon="♥"><CardLounge game="brag" /></GameLounge><ScottishHost /></>
+    : path === "/chess" ? <GameLounge brand="Luxe Chess" tagline="Full legal rules and a 10-minute clock. Free play only, virtual chips, no cash value." art="/games/chess.svg" icon="♞" leagueGame="chess" leagueTitle="Chess"><LuxeChessPage /></GameLounge>
+    : path === "/blackjack" ? <><GameLounge brand="Luxe Blackjack" tagline="Beat the dealer to 21. Free play, virtual chips, no cash value." art="/games/blackjack-card.png" icon="♣" leagueGame="blackjack" leagueTitle="Blackjack"><CardLounge game="blackjack" /></GameLounge><ScottishHost /></>
+    : path === "/brag" ? <><GameLounge brand="3-Card Brag" tagline="The classic British card game. Free play, virtual chips, no cash value." art="/games/brag-card.png" icon="♥" leagueGame="brag" leagueTitle="3-Card Brag"><CardLounge game="brag" /></GameLounge><ScottishHost /></>
     : path === "/arcade" ? <><ArcadeHome /><ScottishHost /><MobileDock /></>
     : path === "/portal" ? <><PlayerPortal /><ScottishHost /><MobileDock /></>
     : path === "/challenge" ? <><ChallengeLounge /><ScottishHost /></>

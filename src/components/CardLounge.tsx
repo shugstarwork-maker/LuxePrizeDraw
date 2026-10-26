@@ -2,7 +2,9 @@
 // Used by Blackjack and 3 Card Brag — identical setup to the Luxe Poker Lounge.
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BookOpen, ChevronLeft, ChevronRight, Crown, Gift, Spade, Volume2, VolumeX } from "lucide-react";
-import { ensureWeek, leagueXPForHand, tierByIndex, weekEndsIn, weeklyBoard, weeklyCutoffs, recordWeeklyXP } from "../lib/pokerLeague";
+import { weekEndsIn } from "../lib/pokerLeague";
+import { gameLeagueState, recordGameResult } from "../lib/gameLeagues";
+import { LEAGUE_TIERS } from "../lib/pokerLeague";
 import { createBjTable, placeBets, bjAct, bjBotAction, handValue, type BjState } from "../games/blackjack";
 import { createBragTable, bragAnteUp, bragAct, bragValue, BRAG_LABELS, type BragState } from "../games/brag";
 import { LuxePlayingCard } from "./LuxePlayingCard";
@@ -58,18 +60,14 @@ export function CardLounge({ game }: { game: LoungeGame }) {
   const [muted, setMuted] = useState(false);
   const sfx = (e: Parameters<typeof audio.play>[0]) => { if (!muted) audio.play(e); };
   const [bet, setBet] = useState(50);
-  const [league, setLeague] = useState(() => ensureWeek());
-  const [leagueOpen, setLeagueOpen] = useState(false);
+  const [league, setLeague] = useState(() => gameLeagueState(game));
   const [rewardReady, setRewardReady] = useState(() => localStorage.getItem(DAILY_KEY) !== new Date().toDateString());
   const [bj, setBj] = useState<BjState | null>(null);
   const [brag, setBrag] = useState<BragState | null>(null);
   const settledRef = useRef(0);
   const botTimer = useRef<number | null>(null);
 
-  const leagueBoard = useMemo(() => weeklyBoard(league), [league]);
-  const leagueTier = tierByIndex(league.tierIndex);
-  const yourRank = leagueBoard.findIndex((r) => r.you) + 1;
-  const cutoffs = weeklyCutoffs(leagueBoard, league.tierIndex);
+  const leagueTier = league.tier;
 
   const note = (m: string) => setStatus(m);
   const dailyReward = () => {
@@ -77,7 +75,6 @@ export function CardLounge({ game }: { game: LoungeGame }) {
     localStorage.setItem(DAILY_KEY, new Date().toDateString());
     setRewardReady(false);
     setChips((v) => v + 200);
-    setLeague(recordWeeklyXP(10));
     note("Daily sign-in: 200 chips. Free-play only, no cash value.");
   };
 
@@ -150,7 +147,7 @@ export function CardLounge({ game }: { game: LoungeGame }) {
         if (cards?.length === 3 && bragValue(cards)[0] === 5) bumpStat("bragPrials"); // 5 = prial
       }
     }
-    if (committed > 0) setLeague(recordWeeklyXP(leagueXPForHand(won, committed > 0)));
+    if (committed > 0) setLeague(recordGameResult(game, won ? "win" : "loss"));
     note(s.lastAction);
     // reset seat chips so next hand re-seeds from wallet
     if (game === "blackjack") setBj((g) => g ? { ...g, seats: g.seats.map((p) => p.id === "you" ? { ...p, chips: 0 } : p) } : g);
@@ -214,27 +211,12 @@ export function CardLounge({ game }: { game: LoungeGame }) {
         <div className="mt-7 grid gap-3 sm:grid-cols-3">
           <button onClick={dailyReward} disabled={!rewardReady} className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-4 text-left disabled:opacity-40"><Gift className="h-5 w-5 text-emerald-200" /><b className="mt-3 block">{rewardReady ? "Daily sign-in: 200 chips" : "Daily chips claimed"}</b><small className="text-white/55">200 free-play chips every day</small></button>
           <div className="rounded-2xl border p-4" style={{ borderColor: `${leagueTier.colour}55`, background: `${leagueTier.glow}` }}>
-            <Crown className="h-5 w-5" style={{ color: leagueTier.colour }} /><b className="mt-3 block">{leagueTier.name} League</b><small className="text-white/55">Ends in {weekEndsIn()} · #{yourRank || "—"} of {leagueBoard.length}</small>
+            <Crown className="h-5 w-5" style={{ color: leagueTier.colour }} /><b className="mt-3 block">{leagueTier.name} League</b><small className="text-white/55">Ends in {weekEndsIn()} · {league.weekXP} XP this week</small>
           </div>
           <div className="rounded-2xl border border-amber-200/30 bg-amber-300/10 p-4"><Spade className="h-5 w-5 text-amber-200" /><b className="mt-3 block">Same wallet as poker</b><small className="text-white/55">Chips and league XP are shared across all Luxe lounges</small></div>
         </div>
 
-        {/* league board */}
-        <div className="mt-6 rounded-2xl border p-4" style={{ borderColor: `${leagueTier.colour}55`, background: "#0007" }}>
-          <p className="text-xs text-white/55">{league.tierIndex < 5 ? `Top ${Math.floor(leagueBoard.length / 2)} go up` : "Top division — hold your spot"}{league.tierIndex > 0 ? ` · bottom ${Math.floor(leagueBoard.length / 2)} drop down` : ""} · top half ({cutoffs.promoteXP}+ XP) promotes</p>
-          <div className="mt-3 max-h-56 space-y-1 overflow-y-auto pr-1">
-            {leagueBoard.slice(0, leagueOpen ? 30 : 10).map((row, i) => {
-              const rank = i + 1; const half = Math.floor(leagueBoard.length / 2);
-              const zone = league.tierIndex < 5 && rank <= half ? "promote" : league.tierIndex > 0 && rank > leagueBoard.length - half ? "demote" : "";
-              return <div key={row.name} className={`flex items-center gap-3 rounded-xl border px-3 py-2 ${row.you ? "border-amber-300/70 bg-amber-300/15" : zone === "promote" ? "border-emerald-300/25 bg-emerald-300/5" : zone === "demote" ? "border-rose-300/25 bg-rose-300/5" : "border-white/8 bg-black/25"}`}>
-                <span className={`w-7 text-center font-mono text-xs font-black ${zone === "promote" ? "text-emerald-300" : zone === "demote" ? "text-rose-300" : "text-white/40"}`}>{rank}</span>
-                <span className="flex-1 text-sm font-bold">{row.name}</span>
-                <span className="font-mono text-xs text-white/60">{row.xp} XP</span>
-              </div>;
-            })}
-          </div>
-          <button onClick={() => setLeagueOpen(!leagueOpen)} className="mt-3 w-full rounded-lg border border-white/10 bg-white/5 py-2 text-xs font-black">{leagueOpen ? "Show less" : "Show all 30 players"}</button>
-        </div>
+        <p className="mt-6 rounded-xl border border-white/10 bg-black/30 p-3 text-xs text-white/60">{leagueTier.name} League · {league.weekXP} XP this week · {league.games} games · {league.wins} wins{league.tierIndex < LEAGUE_TIERS.length - 1 ? ` · next league at ${league.nextAt} XP` : ""}. Only your own games count here.</p>
         {status !== "Choose a table to sit down." && <p className="mt-5 rounded-xl border border-amber-200/20 bg-amber-300/10 p-3 text-sm text-amber-100">{status}</p>}
         <p className="mt-6 text-center text-[10px] text-white/35">Free-play only · No deposits, cash wagering or cash-out · 18+ social play</p>
       </div>
