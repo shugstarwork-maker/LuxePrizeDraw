@@ -1,12 +1,78 @@
-import React from "react";
-import { ArrowRight, Heart, ShieldCheck, Sparkles, Trophy } from "lucide-react";
+// Cinematic welcome — the trailer plays full-screen behind the brand, then three
+// panels lead into draws, the casino and the weekly leagues. On wide screens the
+// vertical trailer sits in a framed column over a blurred still, so it isn't cropped.
+import React, { useEffect, useRef, useState } from "react";
+import { ArrowRight, ChevronDown, Crown, Heart, ShieldCheck, Trophy, Volume2, VolumeX } from "lucide-react";
 
-export const WelcomePage: React.FC<{ onEnter: () => void }> = ({ onEnter }) => (
-  <main className="relative min-h-screen overflow-hidden bg-[#050505] px-4 py-14 text-white sm:py-24">
-    <div className="welcome-orb welcome-orb--gold" /><div className="welcome-orb welcome-orb--rose" />
-    <section className="relative mx-auto grid min-h-[70vh] max-w-6xl items-center gap-10 lg:grid-cols-[1.15fr_.85fr]">
-      <div className="animate-fade-in"><p className="inline-flex items-center gap-2 rounded-full border border-amber-200/30 bg-amber-300/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-amber-100"><Sparkles className="h-3.5 w-3.5" /> A new kind of prize experience</p><div className="welcome-support-flash mt-5" role="status"><Heart className="h-5 w-5 fill-rose-300 text-rose-200" /><span>You’re not alone. <b>We care.</b></span></div><div className="welcome-awareness-badge mt-3"><ShieldCheck className="h-3.5 w-3.5" /> Mental Health Awareness</div><h1 className="mt-6 text-5xl font-black leading-[.9] tracking-tight sm:text-7xl">Welcome to<br /><span className="text-amber-200">LuxePrizeDraw Ltd.</span></h1><p className="mt-6 max-w-xl text-base leading-relaxed text-white/60 sm:text-lg">Explore prize experiences, community records, social games, and launch updates through a richer interactive world.</p><div className="mt-7 flex items-start gap-3 rounded-2xl border border-amber-200/20 bg-black/30 p-4 text-sm leading-relaxed text-amber-50"><ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" />Pre-launch experience. Entries, payments, prize issuance, and charity totals remain disabled until independently verified.</div><button onClick={onEnter} className="group mt-8 inline-flex items-center gap-2 rounded-xl bg-amber-300 px-6 py-4 text-xs font-black uppercase tracking-wider text-black transition hover:scale-[1.03]"><span>Enter the experience</span><ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></button></div>
-      <aside className="welcome-panel animate-welcome-rise rounded-[2rem] border border-white/15 bg-white/[.045] p-6 shadow-2xl sm:p-8"><div className="flex items-center justify-between"><span className="text-[10px] font-black uppercase tracking-[.18em] text-amber-200">Explore</span><Trophy className="h-6 w-6 text-amber-200" /></div><div className="mt-7 space-y-3">{[["Prize Draws", "Explore the collection"], ["Community", "Evidence-first records"], ["Play", "Poker and game demos"]].map(([title, detail], index) => <div key={title} className="flex items-center gap-4 rounded-2xl border border-white/10 bg-black/25 p-4"><span className="grid h-9 w-9 place-items-center rounded-xl bg-amber-300/10 font-mono text-amber-200">0{index + 1}</span><span><b className="block text-sm">{title}</b><small className="text-white/45">{detail}</small></span></div>)}</div><p className="mt-6 inline-flex items-center gap-2 text-xs text-rose-200"><Heart className="h-4 w-4 fill-rose-300" /> Built around transparent launch controls</p></aside>
+const go = (href: string) => { window.history.pushState({}, "", href); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); };
+
+const PANELS = [
+  { title: "Prize Draws", line: "Supercars, fine gold and five-star escapes.", image: "/welcome-media/supercar.jpg", href: "/draws", icon: Trophy },
+  { title: "Luxe Casino", line: "Hold'em, blackjack, brag, chess and more — free-play.", image: "/welcome-media/gold.jpg", href: "/casino", icon: Crown },
+  { title: "Weekly Leagues", line: "Climb ten divisions. Top ten go up every week.", image: "/welcome-media/holiday.jpg", href: "/poker", icon: ShieldCheck },
+];
+
+export const WelcomePage: React.FC<{ onEnter: () => void }> = ({ onEnter }) => {
+  const video = useRef<HTMLVideoElement>(null);
+  const [muted, setMuted] = useState(true);
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const m = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    setReduced(Boolean(m?.matches));
+    if (!m?.matches) video.current?.play().catch(() => { /* autoplay blocked — poster stays */ });
+  }, []);
+  const toggleSound = () => {
+    const v = video.current; if (!v) return;
+    v.muted = !v.muted; setMuted(v.muted);
+    if (v.paused) void v.play().catch(() => {});
+  };
+
+  return <main className="welcome-cine bg-[#050505] text-white">
+    <section className="welcome-cine__hero" aria-label="LuxePrizeDraw trailer">
+      <img className="welcome-cine__backdrop" src="/welcome-media/supercar.jpg" alt="" aria-hidden="true" />
+      <video ref={video} className="welcome-cine__video" src="/trailer.mp4" poster="/welcome-media/poster.jpg" muted loop playsInline preload="metadata" autoPlay={!reduced} aria-label="LuxePrizeDraw coming-soon trailer: headline supercar, 1kg fine gold, VIP holidays" />
+      <div className="welcome-cine__shade" aria-hidden="true" />
+      {/* Brand at the top and actions at the bottom, so the trailer's own captions
+          (lower middle) play clear. On wide screens both sit left of the video. */}
+      <div className="welcome-cine__lead">
+        <div className="welcome-cine__copy">
+          <span className="welcome-cine__crest"><Crown className="h-5 w-5" /></span>
+          <p className="welcome-cine__kicker">Welcome to</p>
+          <h1 className="welcome-cine__title">LuxePrizeDraw</h1>
+          <p className="welcome-cine__tagline">More than a prize draw.</p>
+        </div>
+        <div className="welcome-cine__actions">
+          <button type="button" onClick={onEnter} className="welcome-cine__enter">Enter the experience <ArrowRight className="h-4 w-4" /></button>
+        </div>
+      </div>
+      <button type="button" onClick={toggleSound} aria-pressed={!muted} aria-label={muted ? "Play trailer with sound" : "Mute trailer"} className="welcome-cine__sound">{muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}<span>{muted ? "Sound on" : "Sound off"}</span></button>
+      <a href="#welcome-ways" className="welcome-cine__scroll" aria-label="Scroll to explore"><ChevronDown className="h-6 w-6" /></a>
     </section>
-  </main>
-);
+
+    <p className="welcome-cine__note">Pre-launch experience. Entries, payments, prize issuance and charity totals stay disabled until independently verified.</p>
+
+    <section id="welcome-ways" className="mx-auto max-w-6xl px-4 pb-16 pt-10 sm:pb-24">
+      <p className="text-center text-[10px] font-black uppercase tracking-[.24em] text-amber-200">Three ways in</p>
+      <h2 className="mt-3 text-center font-serif text-3xl font-black text-amber-100 sm:text-5xl">Choose your world</h2>
+      <div className="mt-10 grid gap-5 md:grid-cols-3">
+        {PANELS.map(({ title, line, image, href, icon: Icon }, i) => <button key={title} type="button" onClick={() => go(href)} className="welcome-cine__panel" style={{ animationDelay: `${i * 120}ms` }}>
+          <img src={image} alt="" loading="lazy" decoding="async" />
+          <span className="welcome-cine__panel-shade" aria-hidden="true" />
+          <span className="welcome-cine__panel-body">
+            <Icon className="h-5 w-5 text-amber-200" />
+            <b>{title}</b>
+            <small>{line}</small>
+            <span className="welcome-cine__panel-cta">Explore <ArrowRight className="h-3.5 w-3.5" /></span>
+          </span>
+        </button>)}
+      </div>
+    </section>
+
+    <section className="border-t border-white/10 bg-black/40 px-4 py-10">
+      <div className="mx-auto flex max-w-3xl items-start gap-3 rounded-2xl border border-rose-200/20 bg-rose-300/5 p-5">
+        <Heart className="mt-0.5 h-5 w-5 shrink-0 fill-rose-300 text-rose-200" />
+        <p className="text-sm leading-relaxed text-white/70"><b className="text-rose-100">You're not alone. We care.</b> Play should always feel good. Set reminders and limits any time under <button type="button" onClick={() => go("/responsible-play")} className="font-bold text-amber-200 underline underline-offset-2">Responsible play</button>.</p>
+      </div>
+    </section>
+  </main>;
+};
