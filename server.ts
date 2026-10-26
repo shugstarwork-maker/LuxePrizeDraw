@@ -14,6 +14,9 @@ import * as pokerApi from "./api/poker";
 import * as mpPoker from "./api/pokerMultiplayer";
 import * as accounts from "./api/accounts";
 import * as worldRanking from "./api/worldRanking";
+import * as blackjackTable from "./api/blackjackTable";
+import * as bragTable from "./api/bragTable";
+import * as matches from "./api/matches";
 import { alertOps } from "./api/mailer";
 import http from "http";
 import dotenv from "dotenv";
@@ -1011,6 +1014,91 @@ app.post("/api/world/result", async (req, res) => {
     const out = await worldRanking.recordWorldResult(await accounts.worldStore(), profile.id, profile.name, String(req.body?.game ?? ""), String(req.body?.outcome ?? ""));
     if (out.ok === false) return res.status(out.error === "rate_limited" ? 429 : 400).json({ error: out.error });
     return res.json({ xp: out.awarded, weekXP: out.weekXP, games: out.games, wins: out.wins, confirmed: true });
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+// Server-run blackjack: the server deals, plays the bots and settles every hand.
+// Signed-in players are ranked; anonymous players get a server-run table without ranking.
+async function bjWho(req: express.Request): Promise<{ key: string; name: string | null }> {
+  const profile = await accounts.profileForToken(String(req.header("authorization") ?? "").replace(/^Bearer\s+/i, ""));
+  if (profile) return { key: profile.id, name: profile.name };
+  return { key: `anon:${pokerPlayer(req)}`, name: null };
+}
+app.post("/api/bj/table", async (req, res) => {
+  try {
+    const who = await bjWho(req);
+    const out = await blackjackTable.openTable(await accounts.worldStore(), who.key, Number(req.body?.minBet));
+    return out.ok === false ? res.status(400).json({ error: out.error }) : res.json(out.view);
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/bj/deal", async (req, res) => {
+  try {
+    const who = await bjWho(req);
+    const out = await blackjackTable.deal(await accounts.worldStore(), who.key, who.name, Number(req.body?.bet));
+    return out.ok === false ? res.status(out.error === "hand_in_progress" ? 409 : 400).json({ error: out.error }) : res.json(out.view);
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/bj/act", async (req, res) => {
+  try {
+    const who = await bjWho(req);
+    const out = await blackjackTable.act(await accounts.worldStore(), who.key, who.name, String(req.body?.action ?? ""));
+    return out.ok === false ? res.status(out.error === "not_your_turn" ? 409 : 400).json({ error: out.error }) : res.json(out.view);
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/brag/table", async (req, res) => {
+  try {
+    const who = await bjWho(req);
+    const out = await bragTable.openTable(await accounts.worldStore(), who.key, Number(req.body?.minAnte));
+    return out.ok === false ? res.status(400).json({ error: out.error }) : res.json(out.view);
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/brag/deal", async (req, res) => {
+  try {
+    const who = await bjWho(req);
+    const out = await bragTable.deal(await accounts.worldStore(), who.key, who.name, Number(req.body?.ante));
+    return out.ok === false ? res.status(out.error === "hand_in_progress" ? 409 : 400).json({ error: out.error }) : res.json(out.view);
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/brag/act", async (req, res) => {
+  try {
+    const who = await bjWho(req);
+    const out = await bragTable.act(await accounts.worldStore(), who.key, who.name, String(req.body?.action ?? ""));
+    return out.ok === false ? res.status(out.error === "not_your_turn" ? 409 : 400).json({ error: out.error }) : res.json(out.view);
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+// Online two-player board games: signed-in players only, so every game is ranked to an account.
+async function signedIn(req: express.Request): Promise<{ id: string; name: string } | null> {
+  const profile = await accounts.profileForToken(String(req.header("authorization") ?? "").replace(/^Bearer\s+/i, ""));
+  return profile ? { id: profile.id, name: profile.name } : null;
+}
+app.post("/api/match/queue", async (req, res) => {
+  try {
+    const me = await signedIn(req);
+    if (!me) return res.status(401).json({ error: "not_signed_in" });
+    const out = await matches.joinQueue(await accounts.worldStore(), me, String(req.body?.game ?? "") as matches.MatchGame);
+    return out.ok === false ? res.status(400).json({ error: out.error }) : res.json(out);
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/match/leave", async (req, res) => {
+  try {
+    const me = await signedIn(req);
+    if (!me) return res.status(401).json({ error: "not_signed_in" });
+    await matches.leaveQueue(await accounts.worldStore(), me.id);
+    return res.json({ ok: true });
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.get("/api/match/current", async (req, res) => {
+  try {
+    const me = await signedIn(req);
+    if (!me) return res.status(401).json({ error: "not_signed_in" });
+    return res.json(await matches.currentMatch(await accounts.worldStore(), me.id));
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/match/move", async (req, res) => {
+  try {
+    const me = await signedIn(req);
+    if (!me) return res.status(401).json({ error: "not_signed_in" });
+    const out = await matches.makeMove(await accounts.worldStore(), me.id, String(req.body?.matchId ?? ""), req.body?.move);
+    return out.ok === false ? res.status(400).json({ error: out.error }) : res.json(out);
   } catch (err) { return accountsUnavailable(res, err); }
 });
 app.get("/api/world/ranking", async (req, res) => {

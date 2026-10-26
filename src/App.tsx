@@ -14,6 +14,7 @@ import { CompetitiveHub } from "./components/CompetitiveHub";
 import { ExperienceNav } from "./components/ExperienceNav";
 import { FeaturedDraws } from "./components/FeaturedDraws";
 import { GameLounge } from "./components/GameLounge";
+import { GameFullscreen } from "./components/GameFullscreen";
 import { GamesArena } from "./components/GamesArena";
 import { LegalReadinessNotice } from "./components/LegalReadinessNotice";
 import { LaunchCommitment } from "./components/LaunchCommitment";
@@ -63,6 +64,9 @@ import { RealityCheck } from "./components/RealityCheck";
 import { markTried } from "./lib/achievements";
 import { AchievementToaster } from "./components/Achievements";
 
+/** Board and card game pages go full screen while they are played. Poker keeps its own rotate gate. */
+const FULLSCREEN_GAME_PATHS = ["/blackjack", "/brag", "/chess", "/challenge", "/duel", "/arena"];
+
 const GAME_ROUTES: Record<string, string> = { "/poker": "holdem", "/blackjack": "blackjack", "/brag": "brag", "/chess": "chess", "/duel": "duel", "/arena": "arena" };
 const LaunchBuildPage = lazy(() => import("./components/LaunchBuildPage").then((m) => ({ default: m.LaunchBuildPage })));
 const HomePage = lazy(() => import("./components/HomePage").then((m) => ({ default: m.HomePage })));
@@ -110,7 +114,7 @@ export default function App() {
     : path === "/prizes/luxury-supercar-experience" ? <><ExperienceNav /><PartnershipCampaignPage /><MobileDock /></>
     : path === "/category" ? <><CategoryDrawCarousel category={new URLSearchParams(window.location.search).get("name") || "Cash"} entryBand={new URLSearchParams(window.location.search).get("band") || undefined} /><ScottishHost /><MobileDock /></>
     : <SiteContent path={path} />;
-  const page = <Suspense fallback={<RouteFallback />}>{inner}</Suspense>;
+  const page = <Suspense fallback={<RouteFallback />}>{FULLSCREEN_GAME_PATHS.includes(path) ? <GameFullscreen>{inner}</GameFullscreen> : inner}</Suspense>;
 
   const category = path === "/category" ? new URLSearchParams(window.location.search).get("name") : path === "/sports-cars" ? "Cars" : "";
   const backdropTheme = path === "/" ? "money" : category === "Cars" ? "cars" : category === "Cash" || category === "Bitcoin" ? "money" : undefined;

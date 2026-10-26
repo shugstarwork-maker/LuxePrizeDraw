@@ -4,10 +4,10 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BookOpen, ChevronLeft, ChevronRight, Crown, Gift, Spade, Volume2, VolumeX } from "lucide-react";
 import { weekEndsIn } from "../lib/pokerLeague";
 import { gameLeagueState, recordGameResult } from "../lib/gameLeagues";
-import { submitWorldResult } from "../lib/worldRanking";
 import { LEAGUE_TIERS } from "../lib/pokerLeague";
-import { createBjTable, placeBets, bjAct, bjBotAction, handValue, type BjState } from "../games/blackjack";
-import { createBragTable, bragAnteUp, bragAct, bragValue, BRAG_LABELS, type BragState } from "../games/brag";
+import { handValue, type BjState } from "../games/blackjack";
+import { bjAct as bjActRemote, bjDeal, bjOpenTable, bragAct as bragActRemote, bragDeal, bragOpenTable } from "../lib/cardTableServer";
+import { bragValue, BRAG_LABELS, type BragState } from "../games/brag";
 import { LuxePlayingCard } from "./LuxePlayingCard";
 import { bumpStat } from "../lib/achievements";
 import { useAudio } from "../audio/AudioProvider";
@@ -66,7 +66,6 @@ export function CardLounge({ game }: { game: LoungeGame }) {
   const [bj, setBj] = useState<BjState | null>(null);
   const [brag, setBrag] = useState<BragState | null>(null);
   const settledRef = useRef(0);
-  const botTimer = useRef<number | null>(null);
 
   const leagueTier = league.tier;
 
@@ -82,8 +81,8 @@ export function CardLounge({ game }: { game: LoungeGame }) {
   const join = (t: typeof LOUNGE_TABLES[number]) => {
     if (chips < t.minBet) { note(`${t.name} needs at least ${t.minBet} chips. Collect daily chips below.`); return; }
     setTable(t); setBet(t.minBet); setScreen("table"); settledRef.current = 0;
-    if (game === "blackjack") setBj(createBjTable({ playerChips: 0, botCount: t.bots, botChips: 1000, minBet: t.minBet }));
-    else setBrag(createBragTable({ playerChips: 0, botCount: t.bots, botChips: 1000, minAnte: t.minBet }));
+    if (game === "blackjack") void bjOpenTable(t.minBet).then((r) => { if ("state" in r) setBj(r.state); else note("The table could not be opened. Try again."); });
+    else void bragOpenTable(t.minBet).then((r) => { if ("state" in r) setBrag(r.state); else note("The table could not be opened. Try again."); });
     note(`Welcome to the ${t.name}. Place your ${meta.minBetLabel.toLowerCase()} to start.`);
   };
   const leave = () => {
@@ -104,23 +103,19 @@ export function CardLounge({ game }: { game: LoungeGame }) {
     if (chips < reserve) { note(`This stake needs ${reserve.toLocaleString()} chips in reserve.`); return; }
     setChips((v) => v - reserve);
     sfx("chipDrop"); window.setTimeout(() => sfx("cardDeal"), 260);
-    if (game === "blackjack" && bj) {
-      const s = placeBets({ ...bj, seats: bj.seats.map((p) => p.id === "you" ? { ...p, chips: reserve } : p) }, bet);
-      setBj(s);
-    } else if (game === "brag" && brag) {
-      const s = bragAnteUp({ ...brag, seats: brag.seats.map((p) => p.id === "you" ? { ...p, chips: reserve } : p) }, bet);
-      setBrag(s);
+    if (game === "blackjack") {
+      // The server deals, plays the bots and settles the hand.
+      void bjDeal(bet).then((r) => {
+        if ("state" in r) setBj(r.state);
+        else { setChips((v) => v + reserve); note(r.error === "hand_in_progress" ? "Finish this hand first." : "That bet could not be placed. Try again."); }
+      });
+    } else if (game === "brag") {
+      void bragDeal(bet).then((r) => {
+        if ("state" in r) setBrag(r.state);
+        else { setChips((v) => v + reserve); note(r.error === "hand_in_progress" ? "Finish this hand first." : "That ante could not be placed. Try again."); }
+      });
     }
   };
-
-  // blackjack bot turns
-  useEffect(() => {
-    if (game !== "blackjack" || !bj || bj.phase !== "playing" || bj.turnSeat < 0) return;
-    const seat = bj.seats[bj.turnSeat];
-    if (!seat.isBot) return;
-    botTimer.current = window.setTimeout(() => setBj((g) => (g ? bjAct(g, seat.id, bjBotAction(g, seat)) : g)), 700 + Math.random() * 700);
-    return () => { if (botTimer.current) window.clearTimeout(botTimer.current); };
-  }, [game, bj]);
 
   // settle: pay winnings to wallet, record league XP
   useEffect(() => {
@@ -150,7 +145,6 @@ export function CardLounge({ game }: { game: LoungeGame }) {
     }
     if (committed > 0) {
       setLeague(recordGameResult(game, won ? "win" : "loss"));
-      void submitWorldResult(game, won ? "win" : "loss");
     }
     note(s.lastAction);
     // reset seat chips so next hand re-seeds from wallet
@@ -292,13 +286,13 @@ export function CardLounge({ game }: { game: LoungeGame }) {
         <button onClick={startHand} className="casino-dock__primary">{game === "blackjack" ? "Deal" : "Ante up"}</button>
       </> : null}
       {yourTurn ? <>
-        <button onClick={() => { sfx("cardDeal"); setBj((g) => g ? bjAct(g, "you", "hit") : g); }} className="casino-dock__primary casino-dock__primary--green">Hit</button>
-        <button onClick={() => { sfx("button"); setBj((g) => g ? bjAct(g, "you", "stand") : g); }} className="casino-dock__primary">Stand</button>
-        <button onClick={() => { sfx("chipDrop"); setBj((g) => g ? bjAct(g, "you", "double") : g); }} disabled={!youSeat || youSeat.cards.length !== 2} className="casino-dock__primary casino-dock__primary--rose">Double</button>
+        <button onClick={() => { sfx("cardDeal"); void bjActRemote("hit").then((r) => { if ("state" in r) setBj(r.state); }); }} className="casino-dock__primary casino-dock__primary--green">Hit</button>
+        <button onClick={() => { sfx("button"); void bjActRemote("stand").then((r) => { if ("state" in r) setBj(r.state); }); }} className="casino-dock__primary">Stand</button>
+        <button onClick={() => { sfx("chipDrop"); void bjActRemote("double").then((r) => { if ("state" in r) setBj(r.state); }); }} disabled={!youSeat || youSeat.cards.length !== 2} className="casino-dock__primary casino-dock__primary--rose">Double</button>
       </> : null}
       {game === "brag" && brag?.phase === "decide" ? <>
-        <button onClick={() => { sfx("chipDrop"); setBrag((g) => g ? bragAct(g, "you", "play") : g); }} className="casino-dock__primary">Play {bet.toLocaleString()}</button>
-        <button onClick={() => { sfx("button"); setBrag((g) => g ? bragAct(g, "you", "fold") : g); }} className="casino-dock__ghost">Fold</button>
+        <button onClick={() => { sfx("chipDrop"); void bragActRemote("play").then((r) => { if ("state" in r) setBrag(r.state); }); }} className="casino-dock__primary">Play {bet.toLocaleString()}</button>
+        <button onClick={() => { sfx("button"); void bragActRemote("fold").then((r) => { if ("state" in r) setBrag(r.state); }); }} className="casino-dock__ghost">Fold</button>
       </> : null}
       {game === "blackjack" && bj && (bj.phase === "playing" || bj.phase === "dealer") && !yourTurn ? <span className="casino-dock__wait">Dealer is playing…</span> : null}
       {phase === "settled" ? <button onClick={() => { sfx("button"); if (game === "blackjack") setBj((g) => g ? { ...g, phase: "betting" } : g); else setBrag((g) => g ? { ...g, phase: "ante" } : g); }} className="casino-dock__primary">Next hand</button> : null}
