@@ -1,6 +1,7 @@
 // Luxe 3 Card Brag — the British classic, casino style: ante, play or fold vs the dealer.
 // Dealer qualifies with Queen-high or better. Brag rankings: prial > running flush > run > flush > pair > high.
 import { POKER_RANKS, POKER_SUITS, type PokerCard } from "../lib/poker";
+import { secureShuffle } from "../lib/secureRandom";
 
 export type BragCard = PokerCard;
 export type BragPhase = "ante" | "decide" | "settled";
@@ -29,7 +30,7 @@ export const initialsOfBrag = (name: string) => name.split(/[\s.]+/).filter(Bool
 
 function shuffledDeck(): BragCard[] {
   const d = POKER_SUITS.flatMap((suit) => POKER_RANKS.map((rank, index) => ({ rank, suit, value: index + 2 })));
-  for (let i = d.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [d[i], d[j]] = [d[j], d[i]]; }
+  secureShuffle(d);
   return d;
 }
 
