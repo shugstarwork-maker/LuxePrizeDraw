@@ -21,7 +21,11 @@ const GAME_META: Record<ChallengeGameId, { title: string; image: string; detail:
 
 export const ChallengeLounge: React.FC = () => {
   const { enabled, setEnabled, play } = useAudio();
-  const [screen, setScreen] = useState<"welcome" | "lobby" | ChallengeGameId>("welcome");
+  // ?game=chess|connect4|draughts (from the casino carousel) opens that game directly.
+  const [screen, setScreen] = useState<"welcome" | "lobby" | ChallengeGameId>(() => {
+    const requested = new URLSearchParams(window.location.search).get("game");
+    return requested && requested in GAME_META ? requested as ChallengeGameId : "welcome";
+  });
   const [league, setLeague] = useState(() => currentLeague());
   const [leagueOpen, setLeagueOpen] = useState(false);
   const [notice, setNotice] = useState("");

@@ -52,6 +52,7 @@ const WelcomePage = lazy(() => import("./components/WelcomePage").then((m) => ({
 const SerenityCharityPage = lazy(() => import("./components/SerenityCharityPage").then((m) => ({ default: m.SerenityCharityPage })));
 const CashGiveawaysPage = lazy(() => import("./components/CashGiveawaysPage").then((m) => ({ default: m.CashGiveawaysPage })));
 const ResetPasswordPage = lazy(() => import("./components/ResetPasswordPage").then((m) => ({ default: m.ResetPasswordPage })));
+const CasinoPage = lazy(() => import("./components/CasinoPage").then((m) => ({ default: m.CasinoPage })));
 const PrivacyPage = lazy(() => import("./components/PrivacyPage").then((m) => ({ default: m.PrivacyPage })));
 const TermsPage = lazy(() => import("./components/TermsPage").then((m) => ({ default: m.TermsPage })));
 const CredentialsPartnershipsPage = lazy(() => import("./components/CredentialsPartnershipsPage").then((m) => ({ default: m.CredentialsPartnershipsPage })));
@@ -86,6 +87,7 @@ export default function App() {
     : path === "/studio" ? <StudioPanel />
     : path === "/verify" ? <><VerificationCenter /><MobileDock /></>
     : path === "/redeem" ? <><RedemptionStore /><MobileDock /></>
+    : path === "/casino" ? <><CasinoPage /><MobileDock /></>
     : path === "/arena" ? <><SkillGamesArena /><MobileDock /></>
     : path === "/standards" ? <ParticipationStandardsPage />
     : path === "/responsible-play" ? <ResponsiblePlayPage />
