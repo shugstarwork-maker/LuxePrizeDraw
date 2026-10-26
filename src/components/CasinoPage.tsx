@@ -26,40 +26,47 @@ export const CASINO_PATHS = ["/casino", "/poker", "/blackjack", "/brag", "/chess
 
 export function CasinoPage() {
   const [entered, setEntered] = useState(false);
-  if (!entered) return <main className="casino-welcome min-h-screen bg-[#070605] px-4 py-6 text-white">
-    <div className="mx-auto flex w-full max-w-sm flex-col gap-4">
-      <div className="flex items-center justify-between gap-2">
-        <span className="rounded-xl border border-amber-200/35 bg-black/60 px-3 py-2 text-xs font-black uppercase tracking-wide text-amber-100">£ Luxe Casino</span>
-        <span className="rounded-full border border-amber-200/35 bg-black/60 px-4 py-2 font-mono text-sm font-black text-amber-100">1,000 chips</span>
+  if (!entered) return <main className="casino-welcome min-h-screen bg-[#070605] px-3 py-4 pb-40 text-white">
+    <div className="mx-auto w-full max-w-sm overflow-hidden rounded-[1.5rem] border border-amber-200/30 bg-gradient-to-b from-[#0d0a06] via-[#070605] to-[#050403] shadow-[0_0_60px_rgba(232,187,70,.18)]">
+      <div className="flex items-center justify-between gap-2 px-3 py-3">
+        <span className="flex items-center gap-2 rounded-xl border border-amber-200/35 bg-black/60 px-2.5 py-2 text-[11px] font-black uppercase tracking-wide text-amber-100"><span className="grid h-5 w-5 place-items-center rounded-md bg-gradient-to-b from-amber-200 to-amber-500 text-[11px] text-black">£</span>Luxe Casino</span>
+        <span className="rounded-full border border-amber-200/35 bg-black/60 px-3 py-2 font-mono text-xs font-black text-amber-100">1,000 chips</span>
+        <span className="rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 px-3 py-2 text-[11px] font-black uppercase text-black">Bonus</span>
       </div>
 
-      <div className="pt-2 text-center">
-        <div className="mx-auto grid h-12 w-12 place-items-center text-3xl text-amber-200">♛</div>
-        <p className="mt-1 text-[11px] font-black uppercase tracking-[.35em] text-amber-200/80">Welcome to</p>
-        <h1 className="cine-title mt-1 font-serif text-4xl font-black leading-none text-amber-100 drop-shadow-[0_4px_24px_rgba(232,187,70,.35)] sm:text-5xl">Luxe Casino</h1>
-        <p className="mt-3 text-[11px] font-bold uppercase tracking-[.4em] text-amber-200/70">Play · Win · Get rewarded</p>
+      <div className="px-4 pb-3 pt-2 text-center">
+        <div className="text-2xl text-amber-200">♛</div>
+        <p className="font-serif text-[15px] font-black uppercase tracking-[.2em] text-amber-200">Welcome to</p>
+        <h1 className="cine-title font-serif text-[2.6rem] font-black uppercase leading-[0.95] tracking-tight" style={{ background: "linear-gradient(180deg,#fff3b0 0%,#f5c542 45%,#b8860b 75%,#f9e07a 100%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent", filter: "drop-shadow(0 4px 18px rgba(232,187,70,.35))" }}>Luxe<br />Casino</h1>
+        <p className="mt-2 text-[10px] font-bold uppercase tracking-[.38em] text-amber-200/75">Play · Win · Get rewarded</p>
       </div>
 
-      <div className="overflow-hidden rounded-[1.75rem] border border-amber-200/45 bg-gradient-to-b from-[#1a1206] to-black shadow-[0_0_60px_rgba(232,187,70,.2)]">
-        <div className="flex items-center justify-between border-b border-amber-200/20 px-5 py-3 text-xs font-black uppercase tracking-wider text-amber-100">
-          <span>Featured games</span><span>8 games</span>
-        </div>
-        <div className="px-6 pb-6 pt-8">
-          <div className="relative mx-auto flex h-44 items-center justify-center rounded-[50%] border-2 border-amber-300/70 bg-[radial-gradient(ellipse_at_center,#2a2a2a,#0b0b0b_70%)] shadow-[0_0_40px_rgba(232,187,70,.35),inset_0_0_30px_rgba(0,0,0,.8)]">
-            <div className="flex flex-col items-center gap-3">
-              <span className="rounded-full border border-amber-200/60 bg-black/50 px-4 py-1.5 text-xs font-black uppercase tracking-wide text-amber-100">Free-play chips</span>
-              <span className="grid h-14 w-14 place-items-center rounded-full border-2 border-amber-200/70 bg-black text-2xl text-amber-200">♠</span>
+      <div className="mx-3 overflow-hidden rounded-2xl border border-amber-200/40 bg-gradient-to-b from-[#16100a] to-black">
+        <div className="flex items-center justify-between px-4 py-2.5 text-[11px] font-black uppercase tracking-wide text-amber-100"><span>Featured table</span><span>8 games</span></div>
+        <div className="relative pb-4 pt-2">
+          <div className="flex items-end justify-center gap-1.5">
+            {[["A","♠","#f5f5f5"],["A","♥","#e0473a"],["A","♦","#e0473a"],["A","♣","#f5f5f5"]].map(([r, suit, c], i) => <span key={i} className="grid h-20 w-14 -rotate-[8deg] place-items-start rounded-lg border border-amber-200/60 bg-gradient-to-b from-[#1b1b1b] to-black p-1 text-left font-serif text-sm font-black shadow-[0_4px_14px_rgba(0,0,0,.7)]" style={{ color: c, transform: `rotate(${(i - 1.5) * 9}deg) translateY(${Math.abs(i - 1.5) * 4}px)` }}>{r}<span className="text-base leading-none">{suit}</span></span>)}
+          </div>
+          <div className="relative mx-auto mt-2 h-40 w-[92%]">
+            <span className="absolute -left-3 top-3 h-11 w-11 rounded-full border-[5px] border-amber-300/80 bg-[radial-gradient(circle,#2a2a2a,#0b0b0b)] shadow-[0_0_14px_rgba(232,187,70,.5)]" />
+            <span className="absolute -right-3 top-3 h-11 w-11 rounded-full border-[5px] border-amber-300/80 bg-[radial-gradient(circle,#2a2a2a,#0b0b0b)] shadow-[0_0_14px_rgba(232,187,70,.5)]" />
+            <div className="absolute inset-0 rounded-[50%] border-[3px] border-amber-300/80 bg-[radial-gradient(ellipse_at_center,#222,#070707_70%)] shadow-[0_0_40px_rgba(232,187,70,.4),inset_0_0_30px_rgba(0,0,0,.9)]" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+              <span className="rounded-full border border-amber-200/70 bg-black/70 px-4 py-1.5 text-[11px] font-black uppercase tracking-wide text-amber-100">Free-play chips</span>
+              <span className="grid h-12 w-12 place-items-center rounded-full border-2 border-amber-200/80 bg-black text-xl text-amber-200">♠</span>
             </div>
           </div>
-          <p className="mt-6 text-center font-serif text-2xl font-black uppercase tracking-wide text-amber-100">Cards · Board · Arcade</p>
-          <p className="mt-2 text-center text-[11px] font-bold uppercase tracking-[.3em] text-amber-200/70">The ultimate casino experience</p>
-          <button type="button" onClick={() => setEntered(true)} className="mx-auto mt-6 block w-full rounded-2xl bg-gradient-to-b from-amber-200 to-amber-500 py-4 text-base font-black uppercase tracking-[.2em] text-black shadow-[0_8px_40px_rgba(232,187,70,.45)] transition hover:scale-[1.02]">Enter</button>
         </div>
       </div>
 
-      <div className="flex justify-center gap-2 pt-1"><span className="h-1.5 w-10 rounded-full bg-amber-300" /><span className="h-1.5 w-1.5 rounded-full bg-white/30" /><span className="h-1.5 w-1.5 rounded-full bg-white/30" /></div>
-      <p className="text-center text-[11px] leading-relaxed text-white/55">Free-play only · chips have no cash value</p>
+      <div className="px-4 pb-4 pt-5 text-center">
+        <p className="font-serif text-xl font-black uppercase tracking-wide text-amber-100">Luxe Casino</p>
+        <p className="mt-1 text-[10px] font-bold uppercase tracking-[.3em] text-amber-200/75">The ultimate casino experience</p>
+        <button type="button" onClick={() => setEntered(true)} className="mt-4 w-full rounded-2xl bg-gradient-to-b from-amber-200 to-amber-500 py-4 text-sm font-black uppercase tracking-[.2em] text-black shadow-[0_8px_40px_rgba(232,187,70,.45)] transition hover:scale-[1.02]">▶ Enter</button>
+        <div className="mt-4 flex justify-center gap-2"><span className="h-1.5 w-8 rounded-full bg-amber-300" /><span className="h-1.5 w-1.5 rounded-full bg-white/30" /><span className="h-1.5 w-1.5 rounded-full bg-white/30" /></div>
+      </div>
     </div>
+    <p className="mx-auto mt-4 max-w-sm text-center text-[11px] leading-relaxed text-white/55">Free-play only · chips have no cash value</p>
   </main>;
   return <main className="min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_55%)] px-4 pb-32 pt-10 text-white">
     <div className="mx-auto max-w-5xl">
