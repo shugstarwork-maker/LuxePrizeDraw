@@ -10,6 +10,7 @@ import { ChessBoard, ConnectFourBoard, DraughtsBoard } from "./GamesArena";
 import { GAME_DAILY_XP_CAP, GAME_XP, gameLeagueState, recordGameResult, type GameLeagueState, type GameOutcome } from "../lib/gameLeagues";
 import { bumpStat, markTried } from "../lib/achievements";
 import { GameLeagueCard } from "./GameLeagueCard";
+import { OnlineMatch, type OnlineGame } from "./OnlineMatch";
 import { WorldRankingPanel } from "./WorldRankingPanel";
 
 const nav = (href: string) => { window.history.pushState({}, "", href); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); };
@@ -26,6 +27,7 @@ export const ChallengeLounge: React.FC = () => {
   const [screen, setScreen] = useState<"welcome" | "lobby" | ChallengeGameId>("welcome");
   const [leagues, setLeagues] = useState<Record<ChallengeGameId, GameLeagueState>>(() => ({ chess: gameLeagueState("chess"), connect4: gameLeagueState("connect4"), draughts: gameLeagueState("draughts") }));
   const [notice, setNotice] = useState("");
+  const [onlineGame, setOnlineGame] = useState<OnlineGame | null>(null);
   const [tab, setTab] = useState<"play" | "league" | "profile" | "rewards" | "social">("play");
   const deepLinked = useRef(false);
 
@@ -79,6 +81,10 @@ export const ChallengeLounge: React.FC = () => {
     onEnter={() => { play("ticketSelect"); setTab("play"); setScreen("lobby"); }}
   />;
 
+  if (screen === "lobby" && onlineGame) return <section className="salon-selection min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-4 py-6 pb-28 text-white">
+    <div className="mx-auto max-w-md"><OnlineMatch game={onlineGame} onClose={() => setOnlineGame(null)} /></div>
+  </section>;
+
   if (screen !== "lobby") {
     const meta = GAME_META[screen];
     const state = leagues[screen];
@@ -119,6 +125,13 @@ export const ChallengeLounge: React.FC = () => {
           <p className="mt-3 text-sm text-white/60">Each game has its own weekly league. Win games to climb that league. Free-play only.</p>
         </div>
         <ChallengeGamesCarousel onPlay={sitDown} />
+        <div className="mt-6 space-y-2">
+          <p className="text-center text-[10px] font-black uppercase tracking-[.2em] text-amber-200">Ranked online · two players</p>
+          <div className="grid gap-2 sm:grid-cols-3">
+            {GAME_IDS.map((g) => <button key={g} type="button" onClick={() => { play("ticketSelect"); setOnlineGame(g); }} className="rounded-xl border border-amber-200/40 bg-black/40 px-3 py-3 text-xs font-black uppercase tracking-wider text-amber-100 transition hover:border-amber-200/80">{GAME_META[g].title}</button>)}
+          </div>
+          <p className="text-center text-[10px] text-white/40">Ranked games are played against another signed-in player. The boards above are on this device only and are not ranked.</p>
+        </div>
       </>}
 
       {tab === "league" && <div className="mt-8 space-y-3">
