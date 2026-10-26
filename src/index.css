@@ -1537,6 +1537,41 @@ body::after {
 }
 @keyframes cine-shimmer { 0%, 100% { background-position: 120% 0; } 50% { background-position: -20% 0; } }
 
+/* Luxe Casino welcome gate: black-gold rays + title rules */
+.casino-welcome {
+  background:
+    radial-gradient(ellipse 90% 32% at 50% 0%, rgba(246, 201, 94, .16), transparent 62%),
+    linear-gradient(112deg, transparent 42%, rgba(246, 201, 94, .10) 47%, transparent 53%),
+    linear-gradient(112deg, transparent 58%, rgba(246, 201, 94, .06) 63%, transparent 70%),
+    linear-gradient(68deg, transparent 42%, rgba(246, 201, 94, .10) 47%, transparent 53%),
+    linear-gradient(68deg, transparent 58%, rgba(246, 201, 94, .06) 63%, transparent 70%),
+    #070605;
+}
+.casino-welcome-rays::before,
+.casino-welcome-rays::after {
+  content: "";
+  position: absolute;
+  top: -30%;
+  width: 55%;
+  height: 130%;
+  pointer-events: none;
+  background: repeating-linear-gradient(100deg, transparent 0 14px, rgba(246, 201, 94, .09) 14px 26px, transparent 26px 46px);
+  -webkit-mask-image: linear-gradient(180deg, #000, transparent 85%);
+  mask-image: linear-gradient(180deg, #000, transparent 85%);
+}
+.casino-welcome-rays::before { left: -14%; transform: rotate(14deg); }
+.casino-welcome-rays::after { right: -14%; transform: rotate(-14deg); }
+.casino-welcome-rule {
+  height: 2px;
+  flex: 0 0 2.2rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, #f0c86e 55%, #fff3b0);
+  box-shadow: 0 0 10px rgba(240, 200, 110, .55);
+}
+.casino-welcome-rule:last-child {
+  background: linear-gradient(270deg, transparent, #f0c86e 55%, #fff3b0);
+}
+
 /* Cinematic card: deep shadows, edge light, hover dolly */
 .cine-card {
   position: relative;

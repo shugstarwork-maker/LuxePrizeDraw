@@ -27,3 +27,14 @@ test("casino deep links into board games go through sitDown, so they count as ga
   assert.match(lounge, /sitDown\(requested as ChallengeGameId\)/);
   assert.match(lounge, /useState<"welcome" \| "lobby" \| ChallengeGameId>\("welcome"\)/);
 });
+
+test("casino welcome gate uses the Luxe gold treatment and hero artwork", () => {
+  const page = readFileSync(new URL("../src/components/CasinoPage.tsx", import.meta.url), "utf8");
+  assert.match(page, /casino-welcome/);
+  assert.match(page, /Welcome to/);
+  assert.match(page, /\/games\/casino-welcome-hero\.jpg/);
+  assert.match(page, /Featured table/);
+  const css = readFileSync(new URL("../src/index.css", import.meta.url), "utf8");
+  assert.match(css, /\.casino-welcome-rays::before/);
+  assert.match(css, /\.casino-welcome-rule/);
+});
