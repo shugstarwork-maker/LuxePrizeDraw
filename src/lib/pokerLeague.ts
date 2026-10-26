@@ -481,18 +481,6 @@ export async function submitHandForScoring(signal: { won: boolean; showdown: boo
 }
 
 /** Challenge-games scoring channel: same pattern as poker hands — server decides, local fallback when unreachable. */
-export const CHALLENGE_XP = { win: 3, draw: 1 } as const;
-export async function submitChallengeGameForScoring(game: "chess" | "connect4" | "draughts", result: "win" | "draw"): Promise<{ xp: number; confirmed: boolean } | null> {
-  try {
-    const res = await fetch("/api/challenge/score-game", {
-      method: "POST",
-      headers: { "content-type": "application/json", "x-player-id": playerId() },
-      body: JSON.stringify({ game, result }),
-    });
-    if (!res.ok || !(res.headers.get("content-type") ?? "").includes("application/json")) return null;
-    return (await res.json()) as { xp: number; confirmed: boolean };
-  } catch { return null; }
-}
 
 /** Competitive rating (Glicko-style), stored apart from XP and trust. */
 export function recordCompetitiveResult(won: boolean, fieldStrength = 1500): { rating: number } {

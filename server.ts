@@ -13,6 +13,7 @@ import { newConnectFour, playConnectFour, type ConnectFourState } from "./src/ga
 import * as pokerApi from "./api/poker";
 import * as mpPoker from "./api/pokerMultiplayer";
 import * as accounts from "./api/accounts";
+import * as worldRanking from "./api/worldRanking";
 import { alertOps } from "./api/mailer";
 import http from "http";
 import dotenv from "dotenv";
@@ -1001,26 +1002,32 @@ app.post("/api/poker/score-hand", (req, res) => {
   pokerApi.appendRecord("hand", { player: pid, hand: handNumber, won, showdown, xpAwarded: xp, held, trust: sh.trust });
   res.json({ xp, confirmed: true, held: held.length ? held.join(",") : undefined, trust: sh.trust });
 });
-// Challenge-games scoring: board games report a finished match; the server rate-caps
-// and decides the XP so client-reported scores are never trusted blindly.
-const challengeShadow = new Map<string, { day: string; dayGames: number }>();
-const CHALLENGE_XP = { win: 3, draw: 1 } as const;
-const CHALLENGE_DAILY_CAP = 30; // games per day that can earn XP
-app.post("/api/challenge/score-game", (req, res) => {
-  const pid = pokerPlayer(req);
-  const body = req.body ?? {};
-  const game = String(body.game ?? "").slice(0, 24);
-  if (!["chess", "connect4", "draughts"].includes(game)) return res.status(400).json({ error: "bad_game" });
-  const result = body.result === "draw" ? "draw" : "win";
-  const day = new Date().toDateString();
-  let sh = challengeShadow.get(pid);
-  if (!sh) { sh = { day, dayGames: 0 }; challengeShadow.set(pid, sh); }
-  if (sh.day !== day) { sh.day = day; sh.dayGames = 0; }
-  let xp: number = CHALLENGE_XP[result];
-  if (sh.dayGames >= CHALLENGE_DAILY_CAP) xp = 0;
-  else sh.dayGames += 1;
-  pokerApi.appendRecord("challenge-game", { player: pid, game, result, xpAwarded: xp });
-  res.json({ xp, confirmed: true });
+// World ranking: results are tied to a signed-in account (bearer token), never to a
+// client-chosen ID, and the server awards the XP. See api/worldRanking.ts.
+app.post("/api/world/result", async (req, res) => {
+  try {
+    const profile = await accounts.profileForToken(String(req.header("authorization") ?? "").replace(/^Bearer\s+/i, ""));
+    if (!profile) return res.status(401).json({ error: "not_signed_in" });
+    const out = await worldRanking.recordWorldResult(await accounts.worldStore(), profile.id, profile.name, String(req.body?.game ?? ""), String(req.body?.outcome ?? ""));
+    if (out.ok === false) return res.status(out.error === "rate_limited" ? 429 : 400).json({ error: out.error });
+    return res.json({ xp: out.awarded, weekXP: out.weekXP, games: out.games, wins: out.wins, confirmed: true });
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.get("/api/world/ranking", async (req, res) => {
+  try {
+    const game = String(req.query.game ?? "all");
+    const valid = game === "all" || (worldRanking.WORLD_GAMES as readonly string[]).includes(game);
+    if (!valid) return res.status(400).json({ error: "bad_game" });
+    const rows = await worldRanking.worldRanking(await accounts.worldStore(), game as worldRanking.WorldGame | "all", Number(req.query.limit ?? 50));
+    return res.json({ rows, week: worldRanking.weekStart(new Date()) });
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.get("/api/world/me", async (req, res) => {
+  try {
+    const profile = await accounts.profileForToken(String(req.header("authorization") ?? "").replace(/^Bearer\s+/i, ""));
+    if (!profile) return res.status(401).json({ error: "not_signed_in" });
+    return res.json(await worldRanking.worldStanding(await accounts.worldStore(), profile.id));
+  } catch (err) { return accountsUnavailable(res, err); }
 });
 app.get("/api/poker/mp/tables", (_req, res) => res.json({ tables: mpPoker.listMpTables() }));
 app.post("/api/poker/mp/tables", (req, res) => {

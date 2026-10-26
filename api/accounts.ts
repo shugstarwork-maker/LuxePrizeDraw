@@ -17,7 +17,7 @@ import { emailConfigured, sendEmail } from "./mailer";
 
 type Entry = { value: string; expiresAt?: number };
 
-interface Store {
+export interface Store {
   get(key: string): Promise<string | null>;
   set(key: string, value: string, ttlSeconds?: number): Promise<void>;
   /** Atomically add 1 and return the new count; the TTL is set when the key is created. */
@@ -78,6 +78,9 @@ function fileStore(): Store {
 }
 
 let cached: Store | null = null;
+/** The shared account store, for other server modules (e.g. the world ranking). */
+export function worldStore(): Promise<Store> { return store(); }
+
 async function store(): Promise<Store> {
   if (cached) return cached;
   if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
