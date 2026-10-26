@@ -36,3 +36,16 @@ test("a past week's snapshot never drops when the ledger has trimmed old entries
   assert.equal(st.weekSnapshots[lastWeek], 300);
   assert.equal(st.seasonXP, 300);
 });
+
+test("backfilling a past season never lowers its final week, even if the ledger was trimmed", () => {
+  // ref is not the live week (as at rollover, where ref is the finished season's
+  // final week); search forward so the loop always terminates.
+  let ref = new Date(Date.now() + 7 * DAY);
+  while (season.seasonInfo(ref).weekInSeason !== 4) ref = new Date(ref.getTime() + DAY);
+  const finalWeek = season.seasonInfo(ref).week;
+  store.set("luxe-poker-ledger", "[]");
+  const st = { weekSnapshots: { [finalWeek]: 500 }, seasonXP: 500 } as Parameters<typeof season.syncWeekSnapshots>[0];
+  season.syncWeekSnapshots(st, ref);
+  assert.equal(st.weekSnapshots[finalWeek], 500);
+  assert.equal(st.seasonXP, 500);
+});
