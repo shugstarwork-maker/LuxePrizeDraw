@@ -5,7 +5,23 @@ import { ShieldCheck, X } from "lucide-react";
 
 type Section = { title: string; items: string[] };
 
-export const CASINO_RULES: Record<"blackjack" | "brag", { title: string; sections: Section[] }> = {
+export type RulesGame = "blackjack" | "brag" | "chess";
+
+export const CASINO_RULES: Record<RulesGame, { title: string; sections: Section[] }> = {
+  chess: {
+    title: "Luxe Chess",
+    sections: [
+      { title: "Aim", items: ["Checkmate the other king: attack it so it has no legal escape."] },
+      { title: "Play", items: [
+        "Two players share this device. White moves first, then turns alternate.",
+        "Tap a piece to see its legal moves, then tap a highlighted square. Only legal moves are accepted, including castling and en passant.",
+        "A pawn reaching the far rank becomes a queen.",
+        "You must get out of check on your turn.",
+      ] },
+      { title: "Clock", items: ["Each side has 10 minutes. Your clock runs only on your turn.", "If your clock reaches zero, you lose."] },
+      { title: "Draws", items: ["Stalemate — the player to move has no legal move but isn't in check.", "The same position occurring three times.", "Not enough material left to checkmate.", "Fifty moves by each side with no capture or pawn move."] },
+    ],
+  },
   blackjack: {
     title: "Luxe Blackjack",
     sections: [
@@ -46,6 +62,13 @@ export const CASINO_RULES: Record<"blackjack" | "brag", { title: string; section
   },
 };
 
+export const CHESS_FAIR_PLAY: string[] = [
+  "Free-play only. Results earn league XP and badges, never cash or prizes.",
+  "Every move is checked against the full rules of chess — illegal moves can't be played.",
+  "Both clocks run identically and are visible to both players at all times.",
+  "Over 18s only. Take a break any time — set reminders or a cool-off under Responsible play.",
+];
+
 export const FAIR_PLAY: string[] = [
   "Free-play only. Chips have no cash value and can't be bought, sold, transferred or withdrawn.",
   "Every shuffle uses your device's cryptographic random generator — the same process for every player, every hand.",
@@ -56,8 +79,9 @@ export const FAIR_PLAY: string[] = [
 
 const go = (href: string) => { window.history.pushState({}, "", href); window.dispatchEvent(new PopStateEvent("popstate")); };
 
-export function CasinoRulesSheet({ game, onClose }: { game: "blackjack" | "brag"; onClose: () => void }) {
+export function CasinoRulesSheet({ game, onClose }: { game: RulesGame; onClose: () => void }) {
   const rules = CASINO_RULES[game];
+  const fairPlay = game === "chess" ? CHESS_FAIR_PLAY : FAIR_PLAY;
   if (typeof document === "undefined") return null;
   return createPortal(<div className="draw-terms" role="dialog" aria-modal="true" aria-labelledby="casino-rules-title" onClick={onClose}>
     <div className="draw-terms__sheet" onClick={(e) => e.stopPropagation()}>
@@ -74,7 +98,7 @@ export function CasinoRulesSheet({ game, onClose }: { game: "blackjack" | "brag"
       </section>)}
       <section className="mt-5 rounded-xl border border-emerald-300/25 bg-emerald-400/5 p-3">
         <h3 className="flex items-center gap-1.5 text-sm font-black text-emerald-100"><ShieldCheck className="h-4 w-4" />Fair play & protections</h3>
-        <ul className="mt-1.5 space-y-1.5">{FAIR_PLAY.map((i) => <li key={i} className="text-xs leading-relaxed text-white/70">· {i}</li>)}</ul>
+        <ul className="mt-1.5 space-y-1.5">{fairPlay.map((i) => <li key={i} className="text-xs leading-relaxed text-white/70">· {i}</li>)}</ul>
         <button type="button" onClick={() => { onClose(); go("/responsible-play"); }} className="mt-2 text-[11px] font-bold text-amber-200 underline underline-offset-2">Responsible play settings</button>
       </section>
     </div>
