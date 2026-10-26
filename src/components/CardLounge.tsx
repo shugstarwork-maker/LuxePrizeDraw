@@ -12,6 +12,13 @@ import { CasinoRulesSheet } from "./CasinoRulesSheet";
 
 export type LoungeGame = "blackjack" | "brag";
 
+/** Stake after tapping a chip: the first tap on a fresh minimum stake replaces it when
+ *  the chip is at least the minimum; otherwise chips add. Always within [min, max]. */
+export function nextStake(current: number, chip: number, min: number, max: number): number {
+  const next = current === min && chip >= min && chip !== current ? chip : current + chip;
+  return Math.min(max, Math.max(min, next));
+}
+
 const GAME_META: Record<LoungeGame, { title: string; tagline: string; minBetLabel: string; image: string }> = {
   blackjack: { title: "Luxe Blackjack", tagline: "Beat the dealer to 21 — blackjack pays 3:2.", minBetLabel: "Min bet", image: "/games/blackjack-card.png" },
   brag: { title: "3 Card Brag", tagline: "The British classic — prial, running flush, run.", minBetLabel: "Ante", image: "/games/brag-card.png" },
@@ -92,6 +99,7 @@ export function CardLounge({ game }: { game: LoungeGame }) {
     if (!table) return;
     if (chips < bet) { note("Not enough chips for that bet — lower it or collect daily chips."); return; }
     if (bet > table.minBet * 10) { note(`The ${table.name} maximum is ${(table.minBet * 10).toLocaleString()} chips.`); return; }
+    if (bet < table.minBet) { note(`The ${table.name} minimum is ${table.minBet.toLocaleString()} chips.`); return; }
     if (game === "brag" && chips < bet * 2) { note("Brag needs your ante plus a matching play bet — keep at least double the ante in your wallet."); return; }
     // Reserve the full stake the hand could need (blackjack double-down / brag play bet); unused chips return at settle.
     const reserve = bet * 2;
@@ -291,7 +299,7 @@ export function CardLounge({ game }: { game: LoungeGame }) {
     <div className="casino-dock" role="group" aria-label={`${meta.title} actions`}>
       {phase === "betting" || phase === "ante" ? <>
         <div className="casino-chips" role="group" aria-label="Choose your stake">
-          {chipValues.map((v) => <button key={v} type="button" className={`casino-chip casino-chip--${v}`} onClick={() => { sfx("chipStack"); setBet((b) => Math.min(maxBet, b === table?.minBet && v !== b ? v : b + v)); }} aria-label={`Add ${v}`}>{v}</button>)}
+          {chipValues.map((v) => <button key={v} type="button" className={`casino-chip casino-chip--${v}`} onClick={() => { sfx("chipStack"); setBet((b) => nextStake(b, v, table?.minBet ?? 25, maxBet)); }} aria-label={`Add ${v}`}>{v}</button>)}
           <button type="button" className="casino-dock__ghost" onClick={() => setBet(table?.minBet ?? 25)}>Reset</button>
         </div>
         <span className="casino-dock__stake">{game === "blackjack" ? "Bet" : "Ante"} <b>{bet.toLocaleString()}</b><small>max {maxBet.toLocaleString()}</small></span>

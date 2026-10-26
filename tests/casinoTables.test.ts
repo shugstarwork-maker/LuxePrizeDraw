@@ -36,3 +36,19 @@ test("the table enforces the published maximum bet and shows the rules", () => {
   assert.match(lounge, /<CasinoRulesSheet game=\{game\}/);
   assert.ok(!lounge.includes("const play = () => {};"), "card lounge sounds are wired, not a no-op");
 });
+
+test("chip taps never take the stake outside the table's limits", async () => {
+  const { nextStake } = await import("../src/components/CardLounge.tsx");
+  assert.equal(nextStake(50, 25, 50, 500), 75, "a 25 chip on a 50-minimum table adds, never drops to 25");
+  assert.equal(nextStake(100, 25, 100, 1000), 125);
+  assert.equal(nextStake(25, 100, 25, 250), 100, "first bigger chip replaces the minimum");
+  assert.equal(nextStake(225, 100, 25, 250), 250, "capped at the maximum");
+  const lounge = readFileSync(new URL("../src/components/CardLounge.tsx", import.meta.url), "utf8");
+  assert.match(lounge, /if \(bet < table\.minBet\)/);
+});
+
+test("last-move and check highlights survive the 3D board's bevel styling", () => {
+  const css = readFileSync(new URL("../src/index.css", import.meta.url), "utf8");
+  assert.match(css, /\.luxe-chess-table--3d \.luxe-chess-grid > button\.luxe-chess-square--last \{/);
+  assert.match(css, /\.luxe-chess-table--3d \.luxe-chess-grid > button\.luxe-chess-square--check \{/);
+});
