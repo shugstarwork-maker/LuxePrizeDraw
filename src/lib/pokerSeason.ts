@@ -125,6 +125,9 @@ function loadStore(): SeasonStore {
   const info = seasonInfo();
   if (st.season !== info.season) {
     // Season rollover: archive the finished season, then reset for the new one.
+    // First backfill its weeks from the ledger (dated inside its final week).
+    const finalWeek = new Date(Date.now() - info.weekInSeason * 7 * 86400000);
+    if (seasonInfo(finalWeek).season === st.season) syncWeekSnapshots(st, finalWeek);
     const lg = ensureWeek();
     const weeklyXP = Object.values(st.weekSnapshots);
     const played = st.events.filter((e) => e.registered && e.place != null);
@@ -153,15 +156,27 @@ function saveStore(st: SeasonStore) { localStorage.setItem(SEASON_KEY, JSON.stri
 export function getSeason(): { info: SeasonInfo; store: SeasonStore } {
   const info = seasonInfo();
   const st = loadStore();
-  const xp = confirmedXP() + provisionalXP();
-  if (st.weekSnapshots[info.week] !== xp) {
-    const prevTotal = Object.values(st.weekSnapshots).reduce((n, v) => n + v, 0);
-    st.weekSnapshots[info.week] = xp;
-    st.seasonXP = prevTotal - (st.weekSnapshots[info.week] - xp) + xp; // recompute below cleanly
-    st.seasonXP = Object.entries(st.weekSnapshots).filter(([w]) => w !== info.week).reduce((n, [, v]) => n + v, 0) + xp;
-    saveStore(st);
-  }
+  if (syncWeekSnapshots(st, new Date())) saveStore(st);
   return { info, store: st };
+}
+
+/** Rebuild each week of the season containing `ref` from the points ledger, so weeks
+ *  in which the season view was never opened still count. Weeks before the real
+ *  current week never go down (the ledger keeps a limited history); only the live
+ *  week tracks the ledger exactly — even when `ref` is in the past, as at rollover. */
+export function syncWeekSnapshots(st: SeasonStore, ref: Date): boolean {
+  const { weekInSeason } = seasonInfo(ref);
+  const live = weekKey(); // the real current week, not ref's
+  let changed = false;
+  for (let back = weekInSeason - 1; back >= 0; back--) {
+    const w = weekKey(new Date(ref.getTime() - back * 7 * 86400000));
+    const fromLedger = confirmedXP(w) + provisionalXP(w);
+    const next = w === live ? fromLedger : Math.max(st.weekSnapshots[w] ?? 0, fromLedger);
+    if (st.weekSnapshots[w] !== next) { st.weekSnapshots[w] = next; changed = true; }
+  }
+  const total = Object.values(st.weekSnapshots).reduce((n, v) => n + v, 0);
+  if (st.seasonXP !== total) { st.seasonXP = total; changed = true; }
+  return changed;
 }
 
 // ── Weekly leaderboard + division progress ──
