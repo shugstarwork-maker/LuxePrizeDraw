@@ -10,6 +10,7 @@ import { ChessBoard, ConnectFourBoard, DraughtsBoard } from "./GamesArena";
 import { CHALLENGE_XP, COHORT_SIZE, LEAGUE_TIERS, LEAGUE_XP, PROMOTE_COUNT, RELEGATE_COUNT, confirmedXP, currentLeague, provisionalXP, recordDailyParticipation, recordGamePlayed, recordWeeklyXP, submitChallengeGameForScoring, tierByIndex, weekEndsIn, weeklyBoard, weeklyCutoffs } from "../lib/pokerLeague";
 import { divisionProgress, getSeason } from "../lib/pokerSeason";
 import { LeagueGlideOverlay, type GlideEvent } from "./LeagueGlideOverlay";
+import { bumpStat, markTried } from "../lib/achievements";
 
 const nav = (href: string) => { window.history.pushState({}, "", href); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); };
 
@@ -55,6 +56,7 @@ export const ChallengeLounge: React.FC = () => {
 
   // A finished board game scores XP — server-verified when reachable, local credit otherwise.
   const reportResult = (game: ChallengeGameId) => (result: "win" | "draw") => {
+    if (result === "win") bumpStat(`${game}Finished`);
     void submitChallengeGameForScoring(game, result).then((verdict) => {
       const xp = verdict ? verdict.xp : CHALLENGE_XP[result];
       if (xp > 0) gainLeagueXp(xp);
@@ -64,6 +66,7 @@ export const ChallengeLounge: React.FC = () => {
 
   const sitDown = (id: ChallengeGameId) => {
     play("ticketSelect");
+    markTried(id);
     setLeague(recordGamePlayed());
     const dp = recordDailyParticipation();
     if (dp.paid) setNotice(`Daily participation: +${LEAGUE_XP.dailyParticipation} XP banked for your weekly league.`);

@@ -2,11 +2,12 @@
 // facts panel, stats row and a gold pill call-to-action.
 import { ChevronRight, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
+import { DrawTermsButton, type DrawTermsInfo } from "./DrawTermsSheet";
 
 export type DeckFact = [string, LucideIcon];
 export type DeckStat = { value: string; label: string };
 
-export function DeckCard({ image, title, facts = [], stats = [], cta, onCta, note, className, children }: {
+export function DeckCard({ image, title, facts = [], stats = [], cta, onCta, note, terms, className, children }: {
   image?: string;
   className?: string;
   title: string;
@@ -15,6 +16,8 @@ export function DeckCard({ image, title, facts = [], stats = [], cta, onCta, not
   cta?: string;
   onCta?: () => void;
   note?: string;
+  /** Prize draws pass their key terms; the card then links to them. */
+  terms?: DrawTermsInfo;
   children?: ReactNode;
 }) {
   return <article className={`deck-card${className ? ` ${className}` : ""}`}>
@@ -32,6 +35,7 @@ export function DeckCard({ image, title, facts = [], stats = [], cta, onCta, not
       </div>}
       {cta && onCta && <button type="button" className="deck-card__play" onClick={(e) => { e.stopPropagation(); onCta(); }}>{cta} <ChevronRight className="h-4 w-4" aria-hidden="true" /></button>}
       {note && <p className="deck-card__note">{note}</p>}
+      {terms && <DrawTermsButton terms={terms} />}
     </div>
   </article>;
 }

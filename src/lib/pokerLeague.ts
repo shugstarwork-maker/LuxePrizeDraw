@@ -1,4 +1,5 @@
 // Duolingo-style weekly leagues: ~40-player groups, top 10 up / middle stay / bottom 10 down.
+import { bumpStat, setStatMax } from "./achievements";
 export type LeagueTier = { name: string; colour: string; glow: string; promote: number; demote: number; blurb?: string };
 export const LEAGUE_TIERS: LeagueTier[] = [
   { name: "Bronze", colour: "#c98a4b", glow: "rgba(201,138,75,.4)", promote: 20, demote: 0, blurb: "New players · placement period" },
@@ -197,6 +198,7 @@ export function recordDailyParticipation(): { state: LeagueState; paid: boolean 
   if (st.lastParticipationDay === todayKey()) return { state: st, paid: false };
   const next = { ...st, xp: st.xp + LEAGUE_XP.dailyParticipation, lastParticipationDay: todayKey() };
   localStorage.setItem(KEY, JSON.stringify(next));
+  bumpStat("daysPlayed");
   return { state: next, paid: true };
 }
 
@@ -286,6 +288,7 @@ export function consumeLeagueMove(): { moved: "promote" | "demote"; tierIndex: n
   const st = ensureWeek();
   if (st.moved !== "promote" && st.moved !== "demote") return null;
   const out = { moved: st.moved, tierIndex: st.tierIndex };
+  if (st.moved === "promote") { bumpStat("promotions"); setStatMax("bestTier", st.tierIndex); }
   localStorage.setItem(KEY, JSON.stringify({ ...st, moved: null }));
   return out;
 }
