@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BookOpen, ChevronLeft, ChevronRight, Crown, Gift, Spade, Volume2, VolumeX } from "lucide-react";
 import { weekEndsIn } from "../lib/pokerLeague";
 import { gameLeagueState, recordGameResult } from "../lib/gameLeagues";
+import { submitWorldResult } from "../lib/worldRanking";
 import { LEAGUE_TIERS } from "../lib/pokerLeague";
 import { createBjTable, placeBets, bjAct, bjBotAction, handValue, type BjState } from "../games/blackjack";
 import { createBragTable, bragAnteUp, bragAct, bragValue, BRAG_LABELS, type BragState } from "../games/brag";
@@ -147,7 +148,10 @@ export function CardLounge({ game }: { game: LoungeGame }) {
         if (cards?.length === 3 && bragValue(cards)[0] === 5) bumpStat("bragPrials"); // 5 = prial
       }
     }
-    if (committed > 0) setLeague(recordGameResult(game, won ? "win" : "loss"));
+    if (committed > 0) {
+      setLeague(recordGameResult(game, won ? "win" : "loss"));
+      void submitWorldResult(game, won ? "win" : "loss");
+    }
     note(s.lastAction);
     // reset seat chips so next hand re-seeds from wallet
     if (game === "blackjack") setBj((g) => g ? { ...g, seats: g.seats.map((p) => p.id === "you" ? { ...p, chips: 0 } : p) } : g);

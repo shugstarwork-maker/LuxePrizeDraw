@@ -7,10 +7,11 @@ import { LoungeWelcome } from "./LoungeWelcome";
 import { useAudio } from "../audio/AudioProvider";
 import { ChallengeGamesCarousel, type ChallengeGameId } from "./ChallengeGamesCarousel";
 import { ChessBoard, ConnectFourBoard, DraughtsBoard } from "./GamesArena";
-import { submitChallengeGameForScoring } from "../lib/pokerLeague";
+import { submitWorldResult } from "../lib/worldRanking";
 import { GAME_DAILY_XP_CAP, GAME_XP, gameLeagueState, recordGameResult, type GameLeagueState, type GameOutcome } from "../lib/gameLeagues";
 import { bumpStat, markTried } from "../lib/achievements";
 import { GameLeagueCard } from "./GameLeagueCard";
+import { WorldRankingPanel } from "./WorldRankingPanel";
 
 const nav = (href: string) => { window.history.pushState({}, "", href); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); };
 
@@ -47,7 +48,7 @@ export const ChallengeLounge: React.FC = () => {
   // A finished game is recorded locally in its own league, and sent to the server scoring endpoint when reachable.
   const reportResult = (game: ChallengeGameId) => (result: "win" | "draw") => {
     if (result === "win") bumpStat(`${game}Finished`);
-    void submitChallengeGameForScoring(game, result);
+    void submitWorldResult(game, result);
     recordOutcome(game, result);
   };
 
@@ -123,6 +124,7 @@ export const ChallengeLounge: React.FC = () => {
 
       {tab === "league" && <div className="mt-8 space-y-3">
         {GAME_IDS.map((g) => <div key={g}><GameLeagueCard title={GAME_META[g].title} state={leagues[g]} /></div>)}
+        <WorldRankingPanel />
         <p className="text-[10px] leading-relaxed text-white/40">Each game has its own league. XP comes only from finished games: +{GAME_XP.win} for a win, +{GAME_XP.draw} for a draw, up to {GAME_DAILY_XP_CAP} XP per game per day.</p>
       </div>}
 

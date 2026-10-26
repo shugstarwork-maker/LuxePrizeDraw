@@ -8,6 +8,7 @@ import { AccountCard } from "./AccountCard";
 import { AchievementCabinet } from "./Achievements";
 import { gameLeagueState, type LeagueGame } from "../lib/gameLeagues";
 import { GameLeagueCard } from "./GameLeagueCard";
+import { WorldRankingPanel } from "./WorldRankingPanel";
 import { useAudio } from "../audio/AudioProvider";
 
 export type GameLoungeProps = {
@@ -56,6 +57,7 @@ export function GameLounge({ brand, tagline, art, icon, leagueGame, leagueTitle,
         {leagueGame
           ? <GameLeagueCard title={leagueTitle ?? brand} state={gameLeagueState(leagueGame)} />
           : <p className="rounded-2xl border border-white/10 bg-black/30 p-4 text-center text-sm text-white/60">{brand} does not have its own league yet.</p>}
+        <WorldRankingPanel />
         <p className="text-[10px] leading-relaxed text-white/40">Each game has its own league. Only finished games earn XP.</p>
       </div>}
 
