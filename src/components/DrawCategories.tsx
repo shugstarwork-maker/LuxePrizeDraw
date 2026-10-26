@@ -5,6 +5,7 @@ import { DeckCard, deckGo } from "./DeckCard";
 import { RollingCardCarousel } from "./RollingCardCarousel";
 import { CASH_DRAW_PROPOSALS, formatCashEntry } from "./CashPrizesCarousel";
 import { ticketsSold, ticketsToUnlock } from "../lib/drawProgress";
+import { HeadlineLuxeCard } from "./FeaturedDraws";
 import { Banknote, CarFront, Cpu, Gem, ShieldCheck, Sparkles, Ticket, Trophy } from "lucide-react";
 
 const vehicles = [
@@ -101,6 +102,7 @@ export function LuxePrizesCategory() {
     <div className="mx-auto max-w-7xl px-4 sm:px-6">
       <WinnersBanner category="Luxe Prizes" />
       <div className="mt-9"><CategoryHeader eyebrow="Luxe prizes" title="Gold and diamonds." intro="Each prize shows its cash equivalent. Winners may take the item or its cash equivalent." icon={Gem} /></div>
+      <div className="mt-9"><HeadlineLuxeCard /></div>
       <RollingCardCarousel items={luxePrizes} getKey={(p) => p.title} label="Luxe prizes" className="mt-9" compactControls
         renderItem={(p) => <DeckCard image={p.image} video={p.video} title={p.title} progress={{ sold: ticketsSold(p.title) }}
           facts={p.facts.map((s) => [s, ShieldCheck] as [string, typeof ShieldCheck])}
