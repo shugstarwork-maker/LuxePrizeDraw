@@ -65,6 +65,17 @@ const SEAT_SLOTS = [
   { px: 63, py: 82, sc: 1 },     // bottom rail — right of the hero
   { px: 45, py: 75, sc: 1.06 },  // hero — bottom centre
 ];
+// Where each seat's bet stack sits (same order as SEAT_SLOTS), in open felt beside
+// the seat. Measured at 740–1440px wide: the near-rail seats have no room above
+// them before the board, so their stacks sit to the side instead.
+const BET_SPOTS = [
+  { bx: 26, by: 46 },  // left lower — up and in, left of the board
+  { bx: 73, by: 27 },  // right upper
+  { bx: 28, by: 24 },  // left upper
+  { bx: 72, by: 50 },  // right lower — right of the board
+  { bx: 74, by: 79 },  // bottom right — between it and the right-lower seat
+  { bx: 33, by: 70 },  // hero — to your left, clear of your cards
+];
 
 
 
@@ -87,13 +98,11 @@ function RotateGate({ onBack }: { onBack: () => void }) {
 
 /** Chips a player has pushed in front of their seat this street — rendered as a
  *  small stack on the felt between the seat and the pot, clear of the board. */
-function BetChips({ amount, slot, isYou }: { amount: number; slot: { px: number; py: number }; isYou?: boolean; key?: string }) {
+function BetChips({ amount, spot, isYou }: { amount: number; spot: { bx: number; by: number }; isYou?: boolean; key?: string }) {
   // Same Luxe chip as the rail artwork: black lacquer, thick gold rim, gold
   // spade face — stacked taller for bigger bets.
   const chips = Math.min(6, Math.max(2, Math.round(amount / 25)));
-  // Nudge the stack toward the table centre so it reads "in front of" the seat.
-  const cx = slot.px + (50 - slot.px) * 0.3;
-  const cy = slot.py + (46 - slot.py) * 0.3;
+  const { bx: cx, by: cy } = spot;
   return (
     <div className="poker-bet-chips" data-testid="bet-chips" style={{ left: `${cx}%`, top: `${cy}%` }} aria-label={`${amount.toLocaleString()} virtual chips bet`}>
       <span className="poker-bet-chips__stack" aria-hidden="true">
@@ -852,10 +861,9 @@ export const LuxePokerLeague: React.FC = () => {
                   </div>;
                 })}{g.players.map((p, i) => {
                   if (p.bet <= 0 || p.sittingOut) return null;
-                  const slot = SEAT_SLOTS[Math.min(i, SEAT_SLOTS.length - 1)];
-                  return <BetChips key={`bet-${p.id}`} amount={p.bet} slot={slot} isYou={p.id === myId} />;
+                  return <BetChips key={`bet-${p.id}`} amount={p.bet} spot={BET_SPOTS[Math.min(i, BET_SPOTS.length - 1)]} isYou={p.id === myId} />;
                 })}</div>
-                <div className="poker-live-board flex justify-center gap-1">{[0, 1, 2, 3, 4].map((i) => g.board[i] ? <CardView key={key(g.board[i])} card={g.board[i]} /> : <div key={i} className="h-16 w-11 rounded-lg border border-dashed border-amber-100/30 bg-black/40 sm:h-20 sm:w-14" />)}</div>
+                <div className="poker-live-board flex justify-center gap-1">{[0, 1, 2, 3, 4].map((i) => g.board[i] ? <CardView key={key(g.board[i])} card={g.board[i]} /> : <div key={i} aria-hidden="true" className="invisible h-16 w-11 sm:h-20 sm:w-14" />)}</div>
                 {/* Your cards ride on your seat badge like every other player — no centre-felt hand strip. */}
               </PokerTableArtwork>
               <LuxeDealer stage={mpStage} active={Boolean(v.yourTurn)} mood={mpMood} />
@@ -912,8 +920,8 @@ export const LuxePokerLeague: React.FC = () => {
               })}{game && game.players.map((p) => {
                 if (p.bet <= 0 || p.sittingOut) return null;
                 const slotIndex = p.isBot ? botSlots.indexOf(p) : 5;
-                return <BetChips key={`bet-${p.id}`} amount={p.bet} slot={SEAT_SLOTS[slotIndex]} isYou={!p.isBot} />;
-              })}</div><div className="poker-live-board flex justify-center gap-1">{[0, 1, 2, 3, 4].map((i) => game?.board[i] ? <CardView key={key(game.board[i])} card={game.board[i]} /> : <div key={i} className="h-16 w-11 rounded-lg border border-dashed border-amber-100/30 bg-black/40 sm:h-20 sm:w-14" />)}</div>{/* Your cards ride on your seat badge like every other player. */}</PokerTableArtwork>
+                return <BetChips key={`bet-${p.id}`} amount={p.bet} spot={BET_SPOTS[slotIndex]} isYou={!p.isBot} />;
+              })}</div><div className="poker-live-board flex justify-center gap-1">{[0, 1, 2, 3, 4].map((i) => game?.board[i] ? <CardView key={key(game.board[i])} card={game.board[i]} /> : <div key={i} aria-hidden="true" className="invisible h-16 w-11 sm:h-20 sm:w-14" />)}</div>{/* Your cards ride on your seat badge like every other player. */}</PokerTableArtwork>
               <LuxeDealer stage={dealerStage} active={yourTurn} mood={dealerMood} />
             </div><div className="poker-below-table relative"><div className="mb-3 flex justify-center"><PokerFullscreen /></div><div className="poker-round-meta flex justify-between text-[10px] font-black uppercase tracking-wider text-white/60"><span>{activeTable?.name} · Hand #{game?.handNumber ?? 0} · Blinds {activeTable?.blinds}</span><span className="inline-flex items-center gap-1"><Timer className="h-3 w-3" />{yourTurn ? `00:${String(seconds).padStart(2, "0")}` : game?.handOver ? "Hand over" : "Playing"}</span></div><div className="poker-round-status mt-5 rounded-xl bg-black/35 p-3 text-center text-sm text-emerald-100" role="status">{status}</div>
             <div className="mt-2 flex flex-wrap justify-center gap-1.5">{feed.slice(0, 3).map((line, i) => <span key={`${line}-${i}`} className={`rounded-full px-2.5 py-1 text-[10px] ${i === 0 ? "bg-amber-300/15 text-amber-100" : "bg-white/5 text-white/40"}`}>{line}</span>)}</div>

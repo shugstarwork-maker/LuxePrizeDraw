@@ -5,8 +5,9 @@ import { useState, type MouseEvent, type ReactNode } from "react";
  * Zone B — the persistent HUD frame. On wide landscape it becomes the
  * control-room console: a black column on the right styled after pro poker
  * apps — labelled nav buttons, the table card, SEAT & STACKS, a labelled
- * Chat / Settings / Players row, a TABLE OPTIONS list with chevron rows,
- * then the ticker, your cards on the black pad and the action dock.
+ * Chat / Settings / Players row, a TABLE OPTIONS list (only options not
+ * already in the nav or quick row), then your cards and the action dock,
+ * which stays pinned to the bottom of the column so it never covers the felt.
  * The console minimises into a slim tab strip (one tab per option) so the
  * felt can run nearly edge-to-edge; the action dock then floats bottom-centre.
  * Everywhere else the wrapper is display:contents and the four corners pin:
@@ -100,7 +101,7 @@ export function PokerHudFrame({
           <span className="console-table-card__body">
             <p className="hud-panel__row console-table-card__title"><b>{tableName}</b></p>
             <p className="hud-panel__row">Blinds {blinds} · Hand #{handNumber}</p>
-            <p className="hud-panel__row"><span style={{ color: tierColour }}>{tierName} League</span> · {leagueXp} XP</p>
+            <p className="hud-panel__row console-table-card__tier"><span style={{ color: tierColour }}>{tierName}</span> · {leagueXp} XP</p>
           </span>
         </div>
       </div>
@@ -139,9 +140,6 @@ export function PokerHudFrame({
       <div className="poker-console-options" data-testid="poker-console-options">
         <p className="console-section">Table Options</p>
         <button type="button" className="console-option-row" aria-label="Table info" onClick={() => { setInfoOpen((v) => !v); setPlayersOpen(false); setHelpOpen(false); }}><Info className="h-3.5 w-3.5" /><span>Table Info</span><ChevronRight className="h-3.5 w-3.5" /></button>
-        <button type="button" className="console-option-row" aria-label="Open leaderboard" onClick={onLeaderboard}><Trophy className="h-3.5 w-3.5" /><span>Leaderboard</span><ChevronRight className="h-3.5 w-3.5" /></button>
-        <button type="button" className="console-option-row" aria-label="Open chat" onClick={onChat}><MessageCircle className="h-3.5 w-3.5" /><span>Chat</span><ChevronRight className="h-3.5 w-3.5" /></button>
-        <button type="button" className="console-option-row" aria-label={audioOn ? "Mute sound" : "Unmute sound"} onClick={onAudio}>{audioOn ? <Volume2 className="h-3.5 w-3.5" /> : <VolumeX className="h-3.5 w-3.5" />}<span>Sound {audioOn ? "on" : "off"}</span><ChevronRight className="h-3.5 w-3.5" /></button>
         <button type="button" className="console-option-row" aria-label="How to play" onClick={openHelp}><HelpCircle className="h-3.5 w-3.5" /><span>How to Play</span><ChevronRight className="h-3.5 w-3.5" /></button>
         <button type="button" className="console-option-row" aria-label="Leave table" onClick={onLobby}><LogOut className="h-3.5 w-3.5" /><span>Leave Table</span><ChevronRight className="h-3.5 w-3.5" /></button>
         {infoOpen && <div className="hud-chat-pop poker-console-pop" role="note" aria-label="Table info detail">
