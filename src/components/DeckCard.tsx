@@ -7,8 +7,10 @@ import { DrawTermsButton, type DrawTermsInfo } from "./DrawTermsSheet";
 export type DeckFact = [string, LucideIcon];
 export type DeckStat = { value: string; label: string };
 
-export function DeckCard({ image, title, facts = [], stats = [], cta, onCta, note, terms, className, children }: {
+export function DeckCard({ image, video, title, facts = [], stats = [], cta, onCta, note, terms, className, children }: {
   image?: string;
+  /** Short looping clip; the image, if given, is shown until it loads. */
+  video?: string;
   className?: string;
   title: string;
   facts?: readonly DeckFact[];
@@ -21,7 +23,7 @@ export function DeckCard({ image, title, facts = [], stats = [], cta, onCta, not
   children?: ReactNode;
 }) {
   return <article className={`deck-card${className ? ` ${className}` : ""}`}>
-    {image ? <img className="deck-card__bg" src={image} alt={`${title} preview`} loading="lazy" decoding="async" /> : <div className="deck-card__bg deck-card__bg--plain" aria-hidden="true" />}
+    {video ? <video className="deck-card__bg" src={video} poster={image} autoPlay muted loop playsInline preload="none" aria-label={`${title} preview`} /> : image ? <img className="deck-card__bg" src={image} alt={`${title} preview`} loading="lazy" decoding="async" /> : <div className="deck-card__bg deck-card__bg--plain" aria-hidden="true" />}
     <div className="deck-card__shade" aria-hidden="true" />
     <span className="deck-card__vertical" aria-hidden="true">{title}</span>
     {facts.length > 0 && <div className="deck-card__panel">
