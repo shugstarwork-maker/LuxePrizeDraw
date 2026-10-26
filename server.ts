@@ -14,6 +14,7 @@ import * as pokerApi from "./api/poker";
 import * as mpPoker from "./api/pokerMultiplayer";
 import * as accounts from "./api/accounts";
 import * as worldRanking from "./api/worldRanking";
+import * as blackjackTable from "./api/blackjackTable";
 import { alertOps } from "./api/mailer";
 import http from "http";
 import dotenv from "dotenv";
@@ -1011,6 +1012,34 @@ app.post("/api/world/result", async (req, res) => {
     const out = await worldRanking.recordWorldResult(await accounts.worldStore(), profile.id, profile.name, String(req.body?.game ?? ""), String(req.body?.outcome ?? ""));
     if (out.ok === false) return res.status(out.error === "rate_limited" ? 429 : 400).json({ error: out.error });
     return res.json({ xp: out.awarded, weekXP: out.weekXP, games: out.games, wins: out.wins, confirmed: true });
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+// Server-run blackjack: the server deals, plays the bots and settles every hand.
+// Signed-in players are ranked; anonymous players get a server-run table without ranking.
+async function bjWho(req: express.Request): Promise<{ key: string; name: string | null }> {
+  const profile = await accounts.profileForToken(String(req.header("authorization") ?? "").replace(/^Bearer\s+/i, ""));
+  if (profile) return { key: profile.id, name: profile.name };
+  return { key: `anon:${pokerPlayer(req)}`, name: null };
+}
+app.post("/api/bj/table", async (req, res) => {
+  try {
+    const who = await bjWho(req);
+    const out = await blackjackTable.openTable(await accounts.worldStore(), who.key, Number(req.body?.minBet));
+    return out.ok === false ? res.status(400).json({ error: out.error }) : res.json(out.view);
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/bj/deal", async (req, res) => {
+  try {
+    const who = await bjWho(req);
+    const out = await blackjackTable.deal(await accounts.worldStore(), who.key, who.name, Number(req.body?.bet));
+    return out.ok === false ? res.status(out.error === "hand_in_progress" ? 409 : 400).json({ error: out.error }) : res.json(out.view);
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/bj/act", async (req, res) => {
+  try {
+    const who = await bjWho(req);
+    const out = await blackjackTable.act(await accounts.worldStore(), who.key, who.name, String(req.body?.action ?? ""));
+    return out.ok === false ? res.status(out.error === "not_your_turn" ? 409 : 400).json({ error: out.error }) : res.json(out.view);
   } catch (err) { return accountsUnavailable(res, err); }
 });
 app.get("/api/world/ranking", async (req, res) => {
