@@ -71,6 +71,19 @@ export const ChallengeLounge: React.FC = () => {
     window.scrollTo(0, 0);
   };
 
+  // ?game=chess|connect4|draughts (from the casino carousel) sits you straight down,
+  // through sitDown so the game counts toward weekly games and the daily bonus.
+  const deepLinked = useRef(false);
+  useEffect(() => {
+    if (deepLinked.current) return;
+    deepLinked.current = true;
+    const requested = new URLSearchParams(window.location.search).get("game");
+    if (!requested || !(requested in GAME_META)) return;
+    window.history.replaceState({}, "", "/challenge"); // a reload shouldn't count the game twice
+    sitDown(requested as ChallengeGameId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const dailyReward = () => {
     if (!rewardReady) return;
     play("success");
