@@ -43,7 +43,7 @@ export function DeckCard({ image, video, title, facts = [], stats = [], cta, onC
       {cta && onCta && <button type="button" className="deck-card__play" onClick={(e) => { e.stopPropagation(); onCta(); }}>{cta} <ChevronRight className="h-4 w-4" aria-hidden="true" /></button>}
       {progress && <div className="deck-card__progress">
         <div className="deck-card__track" role="progressbar" aria-label={`Tickets sold toward unlocking ${title}`} aria-valuemin={0} aria-valuemax={progress.needed ?? 0} aria-valuenow={progress.sold}><span style={{ width: `${progress.needed ? Math.min(100, (progress.sold / progress.needed) * 100) : 0}%` }} /></div>
-        <small>{progress.needed ? `${formatTickets(progress.sold)} of ${formatTickets(progress.needed)} tickets to unlock` : "Tickets to unlock: TBC"}</small>
+        <small>{formatTickets(progress.sold)} tickets sold</small>
       </div>}
       {note && <p className="deck-card__note">{note}</p>}
       {terms && <DrawTermsButton terms={terms} />}
