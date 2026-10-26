@@ -4,10 +4,10 @@
 import { useState, type ReactNode } from "react";
 import { LoungeWelcome } from "./LoungeWelcome";
 import { LoungeTabBar, type LoungeTab } from "./LoungeTabBar";
-import { LeagueLadder } from "./LeagueBadge";
 import { AccountCard } from "./AccountCard";
 import { AchievementCabinet } from "./Achievements";
-import { currentLeague, tierByIndex } from "../lib/pokerLeague";
+import { gameLeagueState, type LeagueGame } from "../lib/gameLeagues";
+import { GameLeagueCard } from "./GameLeagueCard";
 import { useAudio } from "../audio/AudioProvider";
 
 export type GameLoungeProps = {
@@ -15,6 +15,9 @@ export type GameLoungeProps = {
   tagline: string;
   art: string;
   icon: string;
+  /** The game's own league, if it has one. Games without a league show a note instead. */
+  leagueGame?: LeagueGame;
+  leagueTitle?: string;
   children: ReactNode;
 };
 
@@ -23,13 +26,11 @@ const readChips = (): number => {
   try { return Number(localStorage.getItem("luxe-poker-chips") ?? localStorage.getItem("luxe-demo-poker-chips")) || 1000; } catch { return 1000; }
 };
 
-export function GameLounge({ brand, tagline, art, icon, children }: GameLoungeProps) {
+export function GameLounge({ brand, tagline, art, icon, leagueGame, leagueTitle, children }: GameLoungeProps) {
   const { play } = useAudio();
   const [chips] = useState(readChips);
   const [entered, setEntered] = useState(false);
   const [tab, setTab] = useState<LoungeTab>("play");
-  const league = currentLeague();
-  const tier = tierByIndex(league.tierIndex);
 
   if (!entered) return <LoungeWelcome
     brand={brand}
@@ -52,12 +53,10 @@ export function GameLounge({ brand, tagline, art, icon, children }: GameLoungePr
       {tab === "play" && <div className="mt-6">{children}</div>}
 
       {tab === "league" && <div className="mt-6 space-y-4">
-        <div className="text-center">
-          <p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">{tier.name} League</p>
-          <h2 className="mt-2 text-3xl font-black">Weekly divisions</h2>
-          <p className="mt-2 text-sm text-white/60">Win games in this lounge to earn league XP and climb the divisions.</p>
-        </div>
-        <LeagueLadder tierIndex={league.tierIndex} />
+        {leagueGame
+          ? <GameLeagueCard title={leagueTitle ?? brand} state={gameLeagueState(leagueGame)} />
+          : <p className="rounded-2xl border border-white/10 bg-black/30 p-4 text-center text-sm text-white/60">{brand} does not have its own league yet.</p>}
+        <p className="text-[10px] leading-relaxed text-white/40">Each game has its own league. Only finished games earn XP.</p>
       </div>}
 
       {tab === "profile" && <div className="mt-6 space-y-4">
