@@ -4,6 +4,7 @@
 // only, community figures show £0 until real distributions exist. Nothing invented.
 import React from "react";
 import { ArrowRight, BadgeCheck, CarFront, Coins, Cpu, Crown, Gamepad2, Handshake, Heart, Palmtree, Scale, ShieldCheck, Sparkles, TreePine, Trophy, Users } from "lucide-react";
+import { DrawTermsButton, categoryFor } from "./DrawTermsSheet";
 
 const go = (path: string) => { window.history.pushState({}, "", path); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); };
 
@@ -111,7 +112,8 @@ export const HomePage: React.FC = () => (
         <p className="mt-2 text-xs text-white/50">Entries are not open yet — each draw below shows its confirmed prize detail. Entry price, closing date and entry limits publish with the approved rules before launch.</p>
         <div className="mt-5 grid gap-4 sm:grid-cols-3">
           {LIVE_PRIZES.map((p) => (
-            <button key={p.title} type="button" onClick={() => go("/draws")} className="cine-card group overflow-hidden rounded-2xl border border-amber-200/20 bg-gradient-to-b from-[#171106] to-[#0b0704] text-left transition hover:border-amber-200/50 active:scale-[.98]">
+            <div key={p.title} className="flex flex-col">
+            <button type="button" onClick={() => go("/draws")} className="cine-card group overflow-hidden rounded-2xl border border-amber-200/20 bg-gradient-to-b from-[#171106] to-[#0b0704] text-left transition hover:border-amber-200/50 active:scale-[.98]">
               <div className="cine-img relative h-44 overflow-hidden bg-black/40">
                 <img src={p.image} alt="" className="h-full w-full object-cover opacity-90 transition duration-500 group-hover:scale-105" />
                 <span className="absolute left-2 top-2 rounded-full bg-black/70 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-amber-200">{p.tag}</span>
@@ -123,6 +125,8 @@ export const HomePage: React.FC = () => (
                 <span className="mt-3 inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-amber-200">View prize <ArrowRight className="h-3 w-3 transition group-hover:translate-x-0.5" /></span>
               </div>
             </button>
+            <DrawTermsButton terms={{ drawName: p.title, category: categoryFor(`${p.title} ${p.tag}`), prize: `${p.title} (${p.value})`, entry: "to be confirmed" }} />
+            </div>
           ))}
         </div>
       </div>
