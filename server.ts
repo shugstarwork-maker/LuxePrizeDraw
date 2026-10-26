@@ -16,6 +16,7 @@ import * as accounts from "./api/accounts";
 import * as worldRanking from "./api/worldRanking";
 import * as blackjackTable from "./api/blackjackTable";
 import * as bragTable from "./api/bragTable";
+import * as matches from "./api/matches";
 import { alertOps } from "./api/mailer";
 import http from "http";
 import dotenv from "dotenv";
@@ -1062,6 +1063,42 @@ app.post("/api/brag/act", async (req, res) => {
     const who = await bjWho(req);
     const out = await bragTable.act(await accounts.worldStore(), who.key, who.name, String(req.body?.action ?? ""));
     return out.ok === false ? res.status(out.error === "not_your_turn" ? 409 : 400).json({ error: out.error }) : res.json(out.view);
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+// Online two-player board games: signed-in players only, so every game is ranked to an account.
+async function signedIn(req: express.Request): Promise<{ id: string; name: string } | null> {
+  const profile = await accounts.profileForToken(String(req.header("authorization") ?? "").replace(/^Bearer\s+/i, ""));
+  return profile ? { id: profile.id, name: profile.name } : null;
+}
+app.post("/api/match/queue", async (req, res) => {
+  try {
+    const me = await signedIn(req);
+    if (!me) return res.status(401).json({ error: "not_signed_in" });
+    const out = await matches.joinQueue(await accounts.worldStore(), me, String(req.body?.game ?? "") as matches.MatchGame);
+    return out.ok === false ? res.status(400).json({ error: out.error }) : res.json(out);
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/match/leave", async (req, res) => {
+  try {
+    const me = await signedIn(req);
+    if (!me) return res.status(401).json({ error: "not_signed_in" });
+    await matches.leaveQueue(await accounts.worldStore(), me.id);
+    return res.json({ ok: true });
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.get("/api/match/current", async (req, res) => {
+  try {
+    const me = await signedIn(req);
+    if (!me) return res.status(401).json({ error: "not_signed_in" });
+    return res.json(await matches.currentMatch(await accounts.worldStore(), me.id));
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/match/move", async (req, res) => {
+  try {
+    const me = await signedIn(req);
+    if (!me) return res.status(401).json({ error: "not_signed_in" });
+    const out = await matches.makeMove(await accounts.worldStore(), me.id, String(req.body?.matchId ?? ""), req.body?.move);
+    return out.ok === false ? res.status(400).json({ error: out.error }) : res.json(out);
   } catch (err) { return accountsUnavailable(res, err); }
 });
 app.get("/api/world/ranking", async (req, res) => {
