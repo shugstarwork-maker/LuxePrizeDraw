@@ -21,7 +21,6 @@ import { LuxuryHolidaysSection } from "./components/LuxuryHolidaysSection";
 import { LuxeHost } from "./components/LuxeHost";
 import { MembershipPreview } from "./components/MembershipPreview";
 import { MobileDock } from "./components/MobileDock";
-import { PrizeExperience } from "./components/PrizeExperience";
 import { PrestigeCarsDraws } from "./components/PrestigeCarsDraws";
 import { PrizePlatform } from "./components/PrizePlatform";
 import { PartnerShowcase } from "./components/PartnerShowcase";
@@ -119,6 +118,6 @@ export default function App() {
 }
 
 function SiteContent({ path }: { path: string }) {
-  const content = path === "/" ? <HomePage /> : path === "/community" ? <><LaunchCommitment /><CommunitySuggestionBoard /><CommunityLeaderboards /></> : path === "/play" ? <><CompetitiveHub /><GamesArena /></> : <><HomeBrandBanner /><FeaturedDraws /><CashPrizesCarousel /><LuxuryHolidaysSection /><PrestigeCarsDraws /><PrizePlatform /><TrustBadges /><PartnerShowcase /><PrizeExperience /><PrizeStandings /><MembershipPreview /><CashLaunchReadiness /><div className="px-4 py-5 text-center"><button type="button" onClick={() => go("/launch-build")} className="text-sm text-amber-200 underline">Review the proposed launch catalogue</button></div><LaunchCommitment /></>;
+  const content = path === "/" ? <HomePage /> : path === "/community" ? <><LaunchCommitment /><CommunitySuggestionBoard /><CommunityLeaderboards /></> : path === "/play" ? <><CompetitiveHub /><GamesArena /></> : <><HomeBrandBanner /><FeaturedDraws /><CashPrizesCarousel /><LuxuryHolidaysSection /><PrestigeCarsDraws /><PrizePlatform /><TrustBadges /><PartnerShowcase /><PrizeStandings /><MembershipPreview /><CashLaunchReadiness /><div className="px-4 py-5 text-center"><button type="button" onClick={() => go("/launch-build")} className="text-sm text-amber-200 underline">Review the proposed launch catalogue</button></div><LaunchCommitment /></>;
   return <><LegalReadinessNotice /><ExperienceNav /><CommunityTicker /><div className="cine-page"><main className="animate-page-enter pb-24 sm:pb-0">{content}</main></div><ScottishHost /><MobileDock /></>;
 }
