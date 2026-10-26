@@ -1998,3 +1998,39 @@ body::after {
   .poker-playing-page .poker-action-dock,
   .poker-playing-page .poker-deal-dock { width:min(38rem, calc(100% - 2 * (24% + 1rem))); }
 }
+
+/* ── League ladder (Duolingo-style division row) and weekly move ceremony ── */
+.league-ladder { display:flex; align-items:flex-end; gap:.35rem; overflow-x:auto; padding:.4rem .2rem .2rem; scrollbar-width:none; }
+.league-ladder::-webkit-scrollbar { display:none; }
+.league-ladder__step { flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:.15rem; opacity:.85; }
+.league-ladder__step--you { opacity:1; }
+.league-ladder__step--you span { font-size:.55rem; font-weight:900; letter-spacing:.12em; text-transform:uppercase; }
+
+.league-move { position:fixed; inset:0; z-index:3000; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1.2rem; padding:2rem 1rem; overflow:hidden;
+  background:radial-gradient(circle at 50% 38%, #2a1f08 0%, #0a0805 60%); color:#fff; animation:league-move-in .35s ease-out; }
+.league-move--down { background:radial-gradient(circle at 50% 38%, #1d1420 0%, #08060a 60%); }
+.league-move__kicker { font-size:.7rem; font-weight:900; letter-spacing:.22em; text-transform:uppercase; color:#ffffffb0; text-align:center; }
+.league-move__viewport { position:relative; width:100%; height:9.5rem; overflow:hidden;
+  -webkit-mask-image:linear-gradient(90deg, transparent, #000 25%, #000 75%, transparent); mask-image:linear-gradient(90deg, transparent, #000 25%, #000 75%, transparent); }
+.league-move__track { position:absolute; left:50%; top:0; bottom:0; display:flex; align-items:center; will-change:transform; }
+.league-move__badge { display:flex; justify-content:center; opacity:.55; transition:opacity .4s; }
+.league-move__badge--focus { opacity:1; }
+.league-move__badge--landed { animation:league-badge-burst .7s cubic-bezier(.22,1.6,.36,1); }
+.league-move__you { position:absolute; left:50%; bottom:0; transform:translateX(-50%); display:inline-flex; align-items:center; gap:.25rem; padding:.15rem .55rem; border-radius:999px; background:#10b981; color:#03140d; font-size:.6rem; font-weight:900; letter-spacing:.14em; }
+.league-move--down .league-move__you { background:#f43f5e; color:#fff; }
+.league-move__copy { max-width:26rem; text-align:center; opacity:0; transform:translateY(12px); transition:opacity .5s, transform .5s; }
+.league-move__copy--in { opacity:1; transform:none; }
+.league-move__copy h2 { font-family:Georgia, serif; font-size:clamp(1.8rem, 7vw, 2.6rem); font-weight:900; line-height:1.1; text-shadow:0 4px 30px #0009; }
+.league-move__copy p { margin-top:.7rem; font-size:.85rem; line-height:1.55; color:#ffffffb8; }
+.league-move__continue { width:min(22rem, 100%); padding:1rem; border-radius:1rem; font-weight:900; letter-spacing:.18em; text-transform:uppercase;
+  background:linear-gradient(#fcd34d,#f59e0b); color:#1a1205; box-shadow:0 6px 0 #92400e, 0 14px 40px #f59e0b55; transition:transform .1s, box-shadow .1s, opacity .3s; }
+.league-move__continue:active { transform:translateY(4px); box-shadow:0 2px 0 #92400e; }
+.league-move__continue:disabled { opacity:0; pointer-events:none; }
+.league-move__confetti { position:absolute; inset:0; pointer-events:none; }
+.league-move__confetti span { position:absolute; top:-1rem; width:.55rem; height:.9rem; border-radius:2px; background:linear-gradient(#ffe08a,#e8a71c); animation:league-confetti-fall 2.6s ease-in forwards; }
+.league-move__confetti span:nth-child(3n) { background:linear-gradient(#a7f3d0,#10b981); }
+.league-move__confetti span:nth-child(3n+1) { background:linear-gradient(#fecdd3,#f43f5e); }
+@keyframes league-move-in { from { opacity:0; } to { opacity:1; } }
+@keyframes league-badge-burst { 0% { transform:scale(.6); } 60% { transform:scale(1.18); } 100% { transform:scale(1); } }
+@media (prefers-reduced-motion:reduce) { .league-move, .league-move__badge--landed, .league-move__confetti span { animation:none; } .league-move__copy { transition:none; } }
+
