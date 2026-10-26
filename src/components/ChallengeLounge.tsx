@@ -7,7 +7,6 @@ import { LoungeWelcome } from "./LoungeWelcome";
 import { useAudio } from "../audio/AudioProvider";
 import { ChallengeGamesCarousel, type ChallengeGameId } from "./ChallengeGamesCarousel";
 import { ChessBoard, ConnectFourBoard, DraughtsBoard } from "./GamesArena";
-import { submitWorldResult } from "../lib/worldRanking";
 import { GAME_DAILY_XP_CAP, GAME_XP, gameLeagueState, recordGameResult, type GameLeagueState, type GameOutcome } from "../lib/gameLeagues";
 import { bumpStat, markTried } from "../lib/achievements";
 import { GameLeagueCard } from "./GameLeagueCard";
@@ -48,7 +47,7 @@ export const ChallengeLounge: React.FC = () => {
   // A finished game is recorded locally in its own league, and sent to the server scoring endpoint when reachable.
   const reportResult = (game: ChallengeGameId) => (result: "win" | "draw") => {
     if (result === "win") bumpStat(`${game}Finished`);
-    void submitWorldResult(game, result);
+    // Not ranked: these boards are two players on one device, so one person could play both sides.
     recordOutcome(game, result);
   };
 
