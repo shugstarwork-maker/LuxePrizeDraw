@@ -124,7 +124,7 @@ test("arena component renders games, formats, queue and rules; route registered"
   assert.match(arena, /data-testid="arena-rules"/);
   assert.match(arena, /applyResult\(game/);
   const app = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
-  assert.match(app, /path === "\/arena" \? <><SkillGamesArena/);
+  assert.match(app, /path === "\/arena" \? <><GameLounge[^>]*><SkillGamesArena \/><\/GameLounge>/);
 });
 
 test("equal prominence: free ticket claim sits in the pack grid with identical styling", () => {

@@ -13,6 +13,7 @@ import { CommunityTicker } from "./components/CommunityTicker";
 import { CompetitiveHub } from "./components/CompetitiveHub";
 import { ExperienceNav } from "./components/ExperienceNav";
 import { FeaturedDraws } from "./components/FeaturedDraws";
+import { GameLounge } from "./components/GameLounge";
 import { GamesArena } from "./components/GamesArena";
 import { LegalReadinessNotice } from "./components/LegalReadinessNotice";
 import { LaunchCommitment } from "./components/LaunchCommitment";
@@ -92,16 +93,16 @@ export default function App() {
     : path === "/verify" ? <><VerificationCenter /><MobileDock /></>
     : path === "/redeem" ? <><RedemptionStore /><MobileDock /></>
     : path === "/casino" ? <><CasinoPage /><MobileDock /></>
-    : path === "/arena" ? <><SkillGamesArena /><MobileDock /></>
+    : path === "/arena" ? <><GameLounge brand="Skill Games Arena" tagline="Short skill games that bank league XP. Free play, virtual chips, no cash value." art="/games/arena-panorama.svg" icon="★"><SkillGamesArena /></GameLounge></>
     : path === "/standards" ? <ParticipationStandardsPage />
     : path === "/responsible-play" ? <ResponsiblePlayPage />
-    : path === "/duel" ? <><DuelRoom /><ScottishHost /><MobileDock /></>
+    : path === "/duel" ? <><GameLounge brand="Head-to-Head Duel" tagline="Quick-fire skill rounds against another player. Free play, no cash value." art="/games/duel-neon.svg" icon="⚔"><DuelRoom /></GameLounge><ScottishHost /></>
     : path === "/lobby" ? <NeonGameLobby soundEnabled={audio.enabled} onToggleSound={() => audio.setEnabled(!audio.enabled)} />
     : path === "/poker" ? <><LuxePokerLeague /><ScottishHost /></>
     : path === "/league" ? <><PokerLeagueLanding /><ScottishHost /><MobileDock /></>
-    : path === "/chess" ? <LuxeChessPage />
-    : path === "/blackjack" ? <><CardLounge game="blackjack" /><div className="poker-external-chrome"><ScottishHost /><MobileDock /></div></>
-    : path === "/brag" ? <><CardLounge game="brag" /><div className="poker-external-chrome"><ScottishHost /><MobileDock /></div></>
+    : path === "/chess" ? <GameLounge brand="Luxe Chess" tagline="Full legal rules and a 10-minute clock. Free play only, virtual chips, no cash value." art="/games/chess.svg" icon="♞"><LuxeChessPage /></GameLounge>
+    : path === "/blackjack" ? <><GameLounge brand="Luxe Blackjack" tagline="Beat the dealer to 21. Free play, virtual chips, no cash value." art="/games/blackjack-card.png" icon="♣"><CardLounge game="blackjack" /></GameLounge><ScottishHost /></>
+    : path === "/brag" ? <><GameLounge brand="3-Card Brag" tagline="The classic British card game. Free play, virtual chips, no cash value." art="/games/brag-card.png" icon="♥"><CardLounge game="brag" /></GameLounge><ScottishHost /></>
     : path === "/arcade" ? <><ArcadeHome /><ScottishHost /><MobileDock /></>
     : path === "/portal" ? <><PlayerPortal /><ScottishHost /><MobileDock /></>
     : path === "/challenge" ? <><ChallengeLounge /><ScottishHost /></>
