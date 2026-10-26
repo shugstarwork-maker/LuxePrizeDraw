@@ -21,3 +21,9 @@ test("every card and board game is on the casino carousel and routes somewhere r
     assert.ok(CASINO_PATHS.includes(path), `${path} should highlight the Casino button`);
   }
 });
+
+test("casino deep links into board games go through sitDown, so they count as games played", () => {
+  const lounge = readFileSync(new URL("../src/components/ChallengeLounge.tsx", import.meta.url), "utf8");
+  assert.match(lounge, /sitDown\(requested as ChallengeGameId\)/);
+  assert.match(lounge, /useState<"welcome" \| "lobby" \| ChallengeGameId>\("welcome"\)/);
+});

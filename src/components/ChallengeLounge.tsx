@@ -21,11 +21,7 @@ const GAME_META: Record<ChallengeGameId, { title: string; image: string; detail:
 
 export const ChallengeLounge: React.FC = () => {
   const { enabled, setEnabled, play } = useAudio();
-  // ?game=chess|connect4|draughts (from the casino carousel) opens that game directly.
-  const [screen, setScreen] = useState<"welcome" | "lobby" | ChallengeGameId>(() => {
-    const requested = new URLSearchParams(window.location.search).get("game");
-    return requested && requested in GAME_META ? requested as ChallengeGameId : "welcome";
-  });
+  const [screen, setScreen] = useState<"welcome" | "lobby" | ChallengeGameId>("welcome");
   const [league, setLeague] = useState(() => currentLeague());
   const [leagueOpen, setLeagueOpen] = useState(false);
   const [notice, setNotice] = useState("");
@@ -74,6 +70,19 @@ export const ChallengeLounge: React.FC = () => {
     setScreen(id);
     window.scrollTo(0, 0);
   };
+
+  // ?game=chess|connect4|draughts (from the casino carousel) sits you straight down,
+  // through sitDown so the game counts toward weekly games and the daily bonus.
+  const deepLinked = useRef(false);
+  useEffect(() => {
+    if (deepLinked.current) return;
+    deepLinked.current = true;
+    const requested = new URLSearchParams(window.location.search).get("game");
+    if (!requested || !(requested in GAME_META)) return;
+    window.history.replaceState({}, "", "/challenge"); // a reload shouldn't count the game twice
+    sitDown(requested as ChallengeGameId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const dailyReward = () => {
     if (!rewardReady) return;

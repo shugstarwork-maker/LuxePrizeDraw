@@ -1977,7 +1977,6 @@ body::after {
    column, pinned to its bottom, instead of floating across the felt where it
    covered seats and the pot. Everything else keeps its existing position. */
 @media (orientation:landscape) and (max-height:1200px) and (min-aspect-ratio:2/1) {
-  .poker-playing-page .poker-console { overflow-y:auto; }
   .poker-playing-page:not(.poker-console-min) .poker-console .poker-action-dock,
   .poker-playing-page:not(.poker-console-min) .poker-console .poker-deal-dock {
     position:sticky; bottom:0; left:auto; right:auto; transform:none; order:20; flex:0 0 auto;
