@@ -61,6 +61,10 @@ const PostalIntakePage = lazy(() => import("./components/PostalIntakePage").then
 const ParticipationStandardsPage = lazy(() => import("./components/ParticipationStandardsPage").then((m) => ({ default: m.ParticipationStandardsPage })));
 const ResponsiblePlayPage = lazy(() => import("./components/ResponsiblePlayPage").then((m) => ({ default: m.ResponsiblePlayPage })));
 import { RealityCheck } from "./components/RealityCheck";
+import { markTried } from "./lib/achievements";
+import { AchievementToaster } from "./components/Achievements";
+
+const GAME_ROUTES: Record<string, string> = { "/poker": "holdem", "/blackjack": "blackjack", "/brag": "brag", "/chess": "chess", "/duel": "duel", "/arena": "arena" };
 const LaunchBuildPage = lazy(() => import("./components/LaunchBuildPage").then((m) => ({ default: m.LaunchBuildPage })));
 const HomePage = lazy(() => import("./components/HomePage").then((m) => ({ default: m.HomePage })));
 
@@ -73,6 +77,8 @@ export default function App() {
   const audio = useAudio();
   const [path, setPath] = useState(() => window.location.pathname);
   useEffect(() => { const sync = () => setPath(window.location.pathname); window.addEventListener("popstate", sync); return () => window.removeEventListener("popstate", sync); }, []);
+  // Opening a casino game counts toward the explorer badges (board games via ?game= are counted on sit-down).
+  useEffect(() => { const game = GAME_ROUTES[path]; if (game) markTried(game); }, [path]);
   const inner = path === "/welcome" ? <WelcomePage onEnter={() => go("/")} />
     : path === "/serenity" ? <SerenityCharityPage />
     : path === "/cash-giveaways" ? <CashGiveawaysPage />
@@ -109,7 +115,7 @@ export default function App() {
 
   const category = path === "/category" ? new URLSearchParams(window.location.search).get("name") : path === "/sports-cars" ? "Cars" : "";
   const backdropTheme = path === "/" ? "money" : category === "Cars" ? "cars" : category === "Cash" || category === "Bitcoin" ? "money" : undefined;
-  return <div className="storm-page luxe-brand-theme"><div className="storm-page__content"><OwnershipNotice />{page}<footer className="border-t border-white/10 bg-black/60 px-4 py-6 pb-28 text-center text-xs text-white/65 sm:pb-6"><a href="/terms" onClick={(e) => { e.preventDefault(); go("/terms"); }} className="font-bold text-amber-200 underline underline-offset-4">General terms for all draws</a><span className="mx-2 text-white/30">·</span><a href="/privacy" onClick={(e) => { e.preventDefault(); go("/privacy"); }} className="font-bold text-amber-200 underline underline-offset-4">Privacy &amp; cookies</a><p className="mt-2">Pre-launch · Draft rules require legal approval before entries open.</p></footer><IntellectualPropertyNotice /></div><StormBackdrop theme={backdropTheme} />{path !== "/lobby" && <AudioControls />}<InstallAppPrompt /><RealityCheck /></div>;
+  return <div className="storm-page luxe-brand-theme"><div className="storm-page__content"><OwnershipNotice />{page}<footer className="border-t border-white/10 bg-black/60 px-4 py-6 pb-28 text-center text-xs text-white/65 sm:pb-6"><a href="/terms" onClick={(e) => { e.preventDefault(); go("/terms"); }} className="font-bold text-amber-200 underline underline-offset-4">General terms for all draws</a><span className="mx-2 text-white/30">·</span><a href="/privacy" onClick={(e) => { e.preventDefault(); go("/privacy"); }} className="font-bold text-amber-200 underline underline-offset-4">Privacy &amp; cookies</a><p className="mt-2">Pre-launch · Draft rules require legal approval before entries open.</p></footer><IntellectualPropertyNotice /></div><StormBackdrop theme={backdropTheme} />{path !== "/lobby" && <AudioControls />}<InstallAppPrompt /><RealityCheck /><AchievementToaster /></div>;
 }
 
 function SiteContent({ path }: { path: string }) {

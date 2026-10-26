@@ -2088,3 +2088,21 @@ body::after {
 @media (min-width:640px) { .draw-terms { align-items:center; } .draw-terms__sheet { border-bottom:1px solid #c4a25c66; border-radius:1.5rem; } }
 @keyframes draw-terms-up { from { transform:translateY(40px); opacity:0; } to { transform:none; opacity:1; } }
 @media (prefers-reduced-motion:reduce) { .draw-terms, .draw-terms__sheet { animation:none; } }
+
+/* ── Achievements ── */
+.achievement-toast { position:fixed; z-index:3100; left:50%; top:max(1rem, env(safe-area-inset-top)); transform:translateX(-50%); display:flex; align-items:center; gap:.8rem; width:min(24rem, calc(100vw - 1.5rem));
+  padding:.7rem .9rem; border:1.5px solid; border-radius:1.2rem; background:linear-gradient(145deg,#1c1508,#0a0805); cursor:pointer; animation:achievement-in .55s cubic-bezier(.22,1.5,.36,1); }
+.achievement-toast__medal { flex:0 0 auto; animation:achievement-spin .9s cubic-bezier(.22,1.4,.36,1); }
+.achievement-toast__kicker { font-size:.58rem; font-weight:900; letter-spacing:.16em; text-transform:uppercase; }
+.achievement-toast__title { font-family:Georgia, serif; font-size:1.15rem; font-weight:900; color:#fff; }
+.achievement-toast__detail { font-size:.72rem; color:#ffffffa8; }
+.achievement-tile { display:flex; flex-direction:column; align-items:center; gap:.2rem; padding:.55rem .3rem; border:1px solid #ffffff12; border-radius:1rem; background:#0005; text-align:center; }
+.achievement-tile b { font-size:.62rem; line-height:1.15; color:#ffffff99; }
+.achievement-tile small { font-size:.55rem; color:#ffffff66; }
+.achievement-tile--earned { border-color:#e8bb4655; background:#e8bb4610; }
+.achievement-tile--earned b { color:#ffe9a8; }
+.achievement-tile__bar { display:block; width:80%; height:.22rem; border-radius:99px; background:#ffffff14; overflow:hidden; }
+.achievement-tile__bar i { display:block; height:100%; background:linear-gradient(90deg,#c98a4b,#f6c945); }
+@keyframes achievement-in { from { opacity:0; transform:translate(-50%,-24px) scale(.92); } to { opacity:1; transform:translate(-50%,0) scale(1); } }
+@keyframes achievement-spin { from { transform:rotateY(180deg) scale(.6); } to { transform:none; } }
+@media (prefers-reduced-motion:reduce) { .achievement-toast, .achievement-toast__medal { animation:none; } }

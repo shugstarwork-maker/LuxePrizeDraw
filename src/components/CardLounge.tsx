@@ -6,6 +6,7 @@ import { ensureWeek, leagueXPForHand, tierByIndex, weekEndsIn, weeklyBoard, week
 import { createBjTable, placeBets, bjAct, bjBotAction, handValue, type BjState } from "../games/blackjack";
 import { createBragTable, bragAnteUp, bragAct, bragValue, BRAG_LABELS, type BragState } from "../games/brag";
 import { LuxePlayingCard } from "./LuxePlayingCard";
+import { bumpStat } from "../lib/achievements";
 
 export type LoungeGame = "blackjack" | "brag";
 
@@ -121,6 +122,16 @@ export function CardLounge({ game }: { game: LoungeGame }) {
     const back = you.chips; // engine returns winnings to seat chips
     setChips((v) => v + back);
     const won = back > committed;
+    if (committed > 0) {
+      if (game === "blackjack") {
+        if (won) bumpStat("bjHandsWon");
+        if ((you as { result?: string }).result === "blackjack") bumpStat("bjNaturals");
+      } else {
+        if (won) bumpStat("bragHandsWon");
+        const cards = (you as { cards?: Parameters<typeof bragValue>[0] }).cards;
+        if (cards?.length === 3 && bragValue(cards)[0] === 5) bumpStat("bragPrials"); // 5 = prial
+      }
+    }
     if (committed > 0) setLeague(recordWeeklyXP(leagueXPForHand(won, committed > 0)));
     note(s.lastAction);
     // reset seat chips so next hand re-seeds from wallet

@@ -22,6 +22,8 @@ import { classifyHand, recordHighlight, buildCardStrings } from "../lib/pokerHig
 import { useAccount } from "../lib/useAccount";
 import { LeagueCelebration, type Celebration } from "./LeagueCelebration";
 import { LeagueLadder } from "./LeagueBadge";
+import { bumpStat, setStatMax } from "../lib/achievements";
+import { AchievementCabinet } from "./Achievements";
 import { LeagueRacePop, type RacePop } from "./LeagueRacePop";
 import { LeagueGlideOverlay, type GlideEvent } from "./LeagueGlideOverlay";
 import { LoungeTabBar } from "./LoungeTabBar";
@@ -431,6 +433,7 @@ export const LuxePokerLeague: React.FC = () => {
       setWinFlash(true);
       window.setTimeout(() => setWinFlash(false), 1800);
       awardXp(20 * (tickets > 0 ? 2 : 1));
+      bumpStat("pokerHandsWon"); setStatMax("pokerBigPot", mine.amount); setStatMax("pokerBestStreak", stats.streak + 1);
       setStats((prev) => {
         const streak = prev.streak + 1;
         const next = { handsWon: prev.handsWon + 1, biggestPot: Math.max(prev.biggestPot, mine.amount), streak, bestStreak: Math.max(prev.bestStreak, streak) };
@@ -720,7 +723,7 @@ export const LuxePokerLeague: React.FC = () => {
         </div>
         <SeasonHub onPlayEvent={(label) => { note(`${label}: you're registered — your table run counts as your tournament result.`); join(leagueTable); }} />
         </>}
-        {lobbyTab === "profile" && <><AccountCard chips={chips} />
+        {lobbyTab === "profile" && <><AccountCard chips={chips} /><AchievementCabinet />
         <div className="mt-4 rounded-[1.75rem] border border-amber-200/25 bg-[linear-gradient(145deg,#241a08,#120d06_70%)] p-5">
           <p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">Luxe Lounge leaderboard</p>
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">

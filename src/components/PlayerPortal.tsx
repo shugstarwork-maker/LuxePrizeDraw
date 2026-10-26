@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { EntrantLookup } from "./EntrantLookup";
 import { TrophyRoom } from "./TrophyRoom";
+import { AchievementCabinet } from "./Achievements";
 import { HighlightsFeed } from "./HighlightsFeed";
 import {
   confirmedXP, currentLeague, loadLedger, playerFlag, provisionalXP, setPlayerFlag, tierByIndex, weeklyBoard, weeklyCutoffs,
@@ -187,6 +188,7 @@ export function PlayerPortal() {
             {/* ── Trophy room: 3D display case of league honours ── */}
             <article className="rounded-3xl border border-white/10 bg-white/[.035] p-5 sm:p-6">
               <TrophyRoom />
+              <AchievementCabinet />
             </article>
 
             {/* ── Bad beat timeline: auto-clipped highlights ── */}
