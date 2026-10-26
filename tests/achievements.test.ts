@@ -48,3 +48,10 @@ test("the toaster is mounted once at the app root", () => {
   const app = readFileSync(new URL("../src/App.tsx", import.meta.url), "utf8");
   assert.equal(app.match(/<AchievementToaster \/>/g)?.length, 1);
 });
+
+test("card lounge counts wins from the engine result, not returned chips (a push is not a win)", () => {
+  const lounge = readFileSync(new URL("../src/components/CardLounge.tsx", import.meta.url), "utf8");
+  assert.ok(!/const won = back > committed/.test(lounge), "returned chips include the unused reserve");
+  assert.match(lounge, /const won = result === "win" \|\| result === "blackjack";/);
+  assert.match(lounge, /\{ blackjack\?: boolean \}\)\.blackjack\) bumpStat\("bjNaturals"\)/);
+});

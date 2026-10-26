@@ -121,11 +121,14 @@ export function CardLounge({ game }: { game: LoungeGame }) {
     const committed = game === "blackjack" ? (you as { bet: number }).bet : (you as { ante: number }).ante + (you as { playBet: number }).playBet;
     const back = you.chips; // engine returns winnings to seat chips
     setChips((v) => v + back);
-    const won = back > committed;
+    // Use the engine's result: returned chips include the unused reserve, so comparing
+    // them with the stake would count a push as a win.
+    const result = (you as { result?: string }).result;
+    const won = result === "win" || result === "blackjack";
     if (committed > 0) {
       if (game === "blackjack") {
         if (won) bumpStat("bjHandsWon");
-        if ((you as { result?: string }).result === "blackjack") bumpStat("bjNaturals");
+        if ((you as { blackjack?: boolean }).blackjack) bumpStat("bjNaturals"); // natural, even if it pushes
       } else {
         if (won) bumpStat("bragHandsWon");
         const cards = (you as { cards?: Parameters<typeof bragValue>[0] }).cards;
