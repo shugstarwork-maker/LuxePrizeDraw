@@ -4,7 +4,7 @@ import "./components/launchShowcase.css";
 import React, { Suspense, lazy, useEffect, useState } from "react";
 import { CashLaunchReadiness } from "./components/CashLaunchReadiness";
 import { TrustBadges } from "./components/TrustBadges";
-import { CashCategory, LuxePrizesCategory, QuickDrawsCategory, VehicleCategory } from "./components/DrawCategories";
+import { CashCategory, GamingCategory, LuxePrizesCategory, QuickDrawsCategory, VehicleCategory } from "./components/DrawCategories";
 import { AudioControls } from "./components/AudioControls";
 import { InstallAppPrompt } from "./components/InstallAppPrompt";
 import { CommunityLeaderboards } from "./components/CommunityLeaderboards";
@@ -117,6 +117,6 @@ export default function App() {
 }
 
 function SiteContent({ path }: { path: string }) {
-  const content = path === "/" ? <HomePage /> : path === "/community" ? <><LaunchCommitment /><CommunitySuggestionBoard /><CommunityLeaderboards /></> : path === "/play" ? <><CompetitiveHub /><GamesArena /></> : <><HomeBrandBanner /><FeaturedDraws /><VehicleCategory /><CashCategory /><LuxePrizesCategory /><LuxuryHolidaysSection /><QuickDrawsCategory /><PrizePlatform /><TrustBadges /><PartnerShowcase /><PrizeStandings /><MembershipPreview /><CashLaunchReadiness /><div className="px-4 py-5 text-center"><button type="button" onClick={() => go("/launch-build")} className="text-sm text-amber-200 underline">Review the proposed launch catalogue</button></div><LaunchCommitment /></>;
+  const content = path === "/" ? <HomePage /> : path === "/community" ? <><LaunchCommitment /><CommunitySuggestionBoard /><CommunityLeaderboards /></> : path === "/play" ? <><CompetitiveHub /><GamesArena /></> : <><HomeBrandBanner /><FeaturedDraws /><GamingCategory /><VehicleCategory /><CashCategory /><LuxePrizesCategory /><LuxuryHolidaysSection /><QuickDrawsCategory /><PrizePlatform /><TrustBadges /><PartnerShowcase /><PrizeStandings /><MembershipPreview /><CashLaunchReadiness /><div className="px-4 py-5 text-center"><button type="button" onClick={() => go("/launch-build")} className="text-sm text-amber-200 underline">Review the proposed launch catalogue</button></div><LaunchCommitment /></>;
   return <><LegalReadinessNotice /><ExperienceNav /><CommunityTicker /><div className="cine-page"><main className="animate-page-enter pb-24 sm:pb-0">{content}</main></div><ScottishHost /><MobileDock /></>;
 }

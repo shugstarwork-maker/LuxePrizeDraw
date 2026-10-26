@@ -3,11 +3,15 @@
 import { ChevronRight, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { DrawTermsButton, type DrawTermsInfo } from "./DrawTermsSheet";
+import { formatTickets } from "../lib/drawProgress";
+
+/** Tickets sold toward unlocking a draw; `needed` is undefined while the target is TBC. */
+export type DeckProgress = { sold: number; needed?: number };
 
 export type DeckFact = [string, LucideIcon];
 export type DeckStat = { value: string; label: string };
 
-export function DeckCard({ image, video, title, facts = [], stats = [], cta, onCta, note, terms, className, children }: {
+export function DeckCard({ image, video, title, facts = [], stats = [], cta, onCta, note, terms, progress, className, children }: {
   image?: string;
   /** Short looping clip; the image, if given, is shown until it loads. */
   video?: string;
@@ -20,6 +24,7 @@ export function DeckCard({ image, video, title, facts = [], stats = [], cta, onC
   note?: string;
   /** Prize draws pass their key terms; the card then links to them. */
   terms?: DrawTermsInfo;
+  progress?: DeckProgress;
   children?: ReactNode;
 }) {
   return <article className={`deck-card${className ? ` ${className}` : ""}`}>
@@ -36,6 +41,10 @@ export function DeckCard({ image, video, title, facts = [], stats = [], cta, onC
         {stats.slice(0, 3).map((s) => <span key={s.label}><b>{s.value}</b><small>{s.label}</small></span>)}
       </div>}
       {cta && onCta && <button type="button" className="deck-card__play" onClick={(e) => { e.stopPropagation(); onCta(); }}>{cta} <ChevronRight className="h-4 w-4" aria-hidden="true" /></button>}
+      {progress && <div className="deck-card__progress">
+        <div className="deck-card__track" role="progressbar" aria-label={`Tickets sold toward unlocking ${title}`} aria-valuemin={0} aria-valuemax={progress.needed ?? 0} aria-valuenow={progress.sold}><span style={{ width: `${progress.needed ? Math.min(100, (progress.sold / progress.needed) * 100) : 0}%` }} /></div>
+        <small>{progress.needed ? `${formatTickets(progress.sold)} of ${formatTickets(progress.needed)} tickets to unlock` : "Tickets to unlock: TBC"}</small>
+      </div>}
       {note && <p className="deck-card__note">{note}</p>}
       {terms && <DrawTermsButton terms={terms} />}
     </div>
