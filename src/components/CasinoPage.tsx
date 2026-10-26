@@ -1,5 +1,6 @@
-// Casino — every free-play game (cards, board games, arcade) on one carousel.
-import { Crown, Dices, ShieldCheck, Users, type LucideIcon } from "lucide-react";
+// Casino — a cinematic welcome gate, then every free-play game on one carousel.
+import { useState } from "react";
+import { Crown, Dices, ShieldCheck, Sparkles, Users, type LucideIcon } from "lucide-react";
 import { DeckCard } from "./DeckCard";
 import { RollingCardCarousel } from "./RollingCardCarousel";
 
@@ -24,19 +25,24 @@ const KIND_LABEL: Record<string, string> = { Cards: "Card game", Board: "Board g
 export const CASINO_PATHS = ["/casino", "/poker", "/blackjack", "/brag", "/chess", "/challenge", "/duel", "/arena", "/arcade", "/lobby", "/league"];
 
 export function CasinoPage() {
-  return <main className="min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_55%)] px-4 pb-32 pt-8 text-white">
+  const [entered, setEntered] = useState(false);
+  if (!entered) return <main className="casino-welcome relative min-h-screen overflow-hidden bg-black text-white">
+    <img src="/prizes/original-poker-lounge.png" alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover opacity-45" />
+    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,.2),rgba(0,0,0,.92)_70%)]" />
+    <div className="relative flex min-h-screen flex-col items-center justify-center px-6 text-center">
+      <p className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[.3em] text-amber-200"><Sparkles className="h-3.5 w-3.5" /> Members' free-play casino</p>
+      <h1 className="mt-5 font-serif text-5xl font-black leading-tight text-amber-100 sm:text-7xl">Welcome to<br />Luxe Casino</h1>
+      <p className="mx-auto mt-5 max-w-md text-sm leading-relaxed text-white/65">Cards, board games and arcade. Free play only, no cash value.</p>
+      <button type="button" onClick={() => setEntered(true)} className="mt-10 rounded-full border border-amber-200/60 bg-gradient-to-b from-amber-200 to-amber-500 px-12 py-4 text-sm font-black uppercase tracking-[.2em] text-black shadow-[0_0_60px_rgba(232,187,70,.45)] transition hover:scale-[1.03]">Enter</button>
+    </div>
+  </main>;
+  return <main className="min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_55%)] px-4 pb-32 pt-10 text-white">
     <div className="mx-auto max-w-5xl">
-      <header className="text-center">
-        <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl border border-amber-200/40 bg-black/40 shadow-[0_0_40px_rgba(232,187,70,.25)]"><Crown className="h-6 w-6 text-amber-200" /></span>
-        <p className="mt-4 text-[10px] font-black uppercase tracking-[.24em] text-amber-200">Members' free-play casino</p>
-        <h1 className="mt-2 font-serif text-4xl font-black text-amber-100 sm:text-6xl">Luxe Casino</h1>
-        <p className="mx-auto mt-3 max-w-xl text-sm text-white/60">Cards, board games and arcade — every game in one place. Win to bank league XP and climb the weekly divisions.</p>
-      </header>
       <RollingCardCarousel
         items={CASINO_GAMES}
         getKey={(g) => g.id}
         label="casino game"
-        className="mt-8"
+        className="mt-4"
         interval={6000}
         renderItem={(g) => <DeckCard
           className="coverflow-draw"
@@ -48,7 +54,6 @@ export function CasinoPage() {
           onCta={() => go(g.href)}
         />}
       />
-      <p className="mx-auto mt-8 flex max-w-2xl items-start gap-2 rounded-xl border border-white/10 bg-black/30 p-3 text-[11px] leading-relaxed text-white/55"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />Free-play only: chips and points have no cash value and can't be bought, sold or withdrawn. Set session reminders any time under Responsible play.</p>
     </div>
   </main>;
 }
