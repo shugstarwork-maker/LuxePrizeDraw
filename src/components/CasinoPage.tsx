@@ -28,12 +28,10 @@ export function CasinoPage() {
   const [entered, setEntered] = useState(false);
   if (!entered) return <main className="casino-welcome relative min-h-screen overflow-hidden bg-black text-white">
     <img src="/prizes/original-poker-lounge.png" alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover" />
-    <div className="absolute inset-x-0 bottom-0 h-[80%] bg-gradient-to-t from-black from-35% via-black/90 to-transparent" />
-    <div className="relative flex min-h-screen flex-col items-center justify-end px-6 pb-48 text-center">
-      <p className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[.3em] text-amber-200"><Sparkles className="h-3.5 w-3.5" /> Members' free-play casino</p>
-      <h1 className="cine-title mx-auto mt-4 max-w-xl text-4xl font-black leading-tight sm:text-5xl">Welcome to Luxe Casino</h1>
-      <p className="mx-auto mt-5 max-w-md text-sm leading-relaxed text-white/70">Cards, board games and arcade. Free play only, no cash value.</p>
-      <button type="button" onClick={() => setEntered(true)} className="mt-10 rounded-full border border-amber-200/60 bg-gradient-to-b from-amber-200 to-amber-500 px-12 py-4 text-sm font-black uppercase tracking-[.2em] text-black shadow-[0_0_60px_rgba(232,187,70,.45)] transition hover:scale-[1.03]">Enter</button>
+    <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/80 to-transparent" />
+    <div className="relative flex min-h-screen flex-col items-center justify-end px-6 pb-44 text-center">
+      <h1 className="cine-title mx-auto mb-8 max-w-xl text-4xl font-black leading-tight drop-shadow-[0_4px_24px_rgba(0,0,0,.9)] sm:text-5xl">Welcome to Luxe Casino</h1>
+      <button type="button" onClick={() => setEntered(true)} className="rounded-full border border-amber-200/60 bg-gradient-to-b from-amber-200 to-amber-500 px-12 py-4 text-sm font-black uppercase tracking-[.2em] text-black shadow-[0_0_60px_rgba(232,187,70,.45)] transition hover:scale-[1.03]">Enter</button>
     </div>
   </main>;
   return <main className="min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_55%)] px-4 pb-32 pt-10 text-white">
