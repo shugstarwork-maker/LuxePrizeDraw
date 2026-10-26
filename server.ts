@@ -15,6 +15,7 @@ import * as mpPoker from "./api/pokerMultiplayer";
 import * as accounts from "./api/accounts";
 import * as worldRanking from "./api/worldRanking";
 import * as blackjackTable from "./api/blackjackTable";
+import * as bragTable from "./api/bragTable";
 import { alertOps } from "./api/mailer";
 import http from "http";
 import dotenv from "dotenv";
@@ -1039,6 +1040,27 @@ app.post("/api/bj/act", async (req, res) => {
   try {
     const who = await bjWho(req);
     const out = await blackjackTable.act(await accounts.worldStore(), who.key, who.name, String(req.body?.action ?? ""));
+    return out.ok === false ? res.status(out.error === "not_your_turn" ? 409 : 400).json({ error: out.error }) : res.json(out.view);
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/brag/table", async (req, res) => {
+  try {
+    const who = await bjWho(req);
+    const out = await bragTable.openTable(await accounts.worldStore(), who.key, Number(req.body?.minAnte));
+    return out.ok === false ? res.status(400).json({ error: out.error }) : res.json(out.view);
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/brag/deal", async (req, res) => {
+  try {
+    const who = await bjWho(req);
+    const out = await bragTable.deal(await accounts.worldStore(), who.key, who.name, Number(req.body?.ante));
+    return out.ok === false ? res.status(out.error === "hand_in_progress" ? 409 : 400).json({ error: out.error }) : res.json(out.view);
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/brag/act", async (req, res) => {
+  try {
+    const who = await bjWho(req);
+    const out = await bragTable.act(await accounts.worldStore(), who.key, who.name, String(req.body?.action ?? ""));
     return out.ok === false ? res.status(out.error === "not_your_turn" ? 409 : 400).json({ error: out.error }) : res.json(out.view);
   } catch (err) { return accountsUnavailable(res, err); }
 });
