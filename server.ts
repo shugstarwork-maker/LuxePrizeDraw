@@ -13,6 +13,7 @@ import { newConnectFour, playConnectFour, type ConnectFourState } from "./src/ga
 import * as pokerApi from "./api/poker";
 import * as mpPoker from "./api/pokerMultiplayer";
 import * as accounts from "./api/accounts";
+import { alertOps } from "./api/mailer";
 import http from "http";
 import dotenv from "dotenv";
 
@@ -39,6 +40,17 @@ async function withAiCapacity<T>(work: () => Promise<T>) {
 
 app.use(express.json({ limit: "32kb", verify: (req, _res, buffer) => { (req as express.Request & { rawBody?: Buffer }).rawBody = Buffer.from(buffer); } }));
 app.set("query parser", "simple");
+// Render (and most hosts) put one proxy in front of the app; trust it so req.ip is the client.
+app.set("trust proxy", 1);
+
+// Health check for the host (Render "Health Check Path": /health). It always answers 200
+// while the process is serving, so a storage outage doesn't trigger restart loops; the
+// body reports whether account storage is usable, for uptime monitors and debugging.
+app.get("/health", async (_req, res) => {
+  const accountStorage = await accounts.storageStatus();
+  res.setHeader("cache-control", "no-store");
+  res.json({ ok: true, uptimeSeconds: Math.round(process.uptime()), accountStorage });
+});
 
 app.get("/api/ticket-draws/status", async (req, res) => {
   const response = await ticketStatus(new Request(`http://localhost${req.originalUrl}`));
@@ -827,12 +839,25 @@ app.get("/api/arcade/readiness", (_req, res) => res.json({ onlinePlayEnabled: Bo
 
 
 // ── Player accounts (free-play identity; sessions via bearer token) ──
+const bearer = (req: express.Request) => String(req.header("authorization") ?? "").replace(/^Bearer\s+/i, "");
+function accountsUnavailable(res: express.Response, err: unknown) {
+  alertOps("Account storage unavailable", `Account API returned 503: ${err instanceof Error ? err.message : String(err)}`);
+  return res.status(503).json({ error: "account_storage_unavailable" });
+}
+// Password-reset emails per client IP per hour (in memory; per-email limits live in the store).
+const resetRequestsByIp = new Map<string, { count: number; resetAt: number }>();
+function resetRequestAllowed(ip: string) {
+  const now = Date.now();
+  const entry = resetRequestsByIp.get(ip);
+  if (!entry || entry.resetAt < now) { resetRequestsByIp.set(ip, { count: 1, resetAt: now + 3_600_000 }); return true; }
+  return ++entry.count <= 10;
+}
 app.post("/api/accounts/signup", async (req, res) => {
   try {
     const out = await accounts.createAccount(String(req.body?.email ?? ""), String(req.body?.password ?? ""), String(req.body?.name ?? ""));
     if (!out.ok) return res.status(400).json({ error: (out as { ok: false; error: string }).error });
     return res.json(out);
-  } catch { return res.status(503).json({ error: "account_storage_unavailable" }); }
+  } catch (err) { return accountsUnavailable(res, err); }
 });
 app.post("/api/accounts/login", async (req, res) => {
   try {
@@ -842,14 +867,14 @@ app.post("/api/accounts/login", async (req, res) => {
       return res.status(error === "too_many_attempts" ? 429 : 401).json({ error });
     }
     return res.json(out);
-  } catch { return res.status(503).json({ error: "account_storage_unavailable" }); }
+  } catch (err) { return accountsUnavailable(res, err); }
 });
 app.get("/api/accounts/me", async (req, res) => {
   try {
     const profile = await accounts.profileForToken(String(req.header("authorization") ?? "").replace(/^Bearer\s+/i, ""));
     if (!profile) return res.status(401).json({ error: "not_signed_in" });
     return res.json({ profile });
-  } catch { return res.status(503).json({ error: "account_storage_unavailable" }); }
+  } catch (err) { return accountsUnavailable(res, err); }
 });
 app.post("/api/accounts/logout", async (req, res) => {
   await accounts.logout(String(req.header("authorization") ?? "").replace(/^Bearer\s+/i, ""));
@@ -860,7 +885,43 @@ app.post("/api/accounts/logout-everywhere", async (req, res) => {
     const ok = await accounts.logoutEverywhere(String(req.header("authorization") ?? "").replace(/^Bearer\s+/i, ""));
     if (!ok) return res.status(401).json({ error: "not_signed_in" });
     return res.json({ ok: true });
-  } catch { return res.status(503).json({ error: "account_storage_unavailable" }); }
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.get("/api/accounts/export", async (req, res) => {
+  try {
+    const data = await accounts.exportAccount(bearer(req));
+    if (!data) return res.status(401).json({ error: "not_signed_in" });
+    res.setHeader("content-disposition", 'attachment; filename="luxeprizedraw-account.json"');
+    return res.json(data);
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/accounts/delete", async (req, res) => {
+  try {
+    const out = await accounts.deleteAccount(bearer(req), String(req.body?.password ?? ""));
+    if (!out.ok) {
+      const error = (out as { ok: false; error: string }).error;
+      return res.status(error === "too_many_attempts" ? 429 : 401).json({ error });
+    }
+    return res.json({ ok: true });
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/accounts/password-reset/request", async (req, res) => {
+  if (!resetRequestAllowed(req.ip ?? "unknown")) return res.status(429).json({ error: "too_many_attempts" });
+  try {
+    const out = await accounts.requestPasswordReset(String(req.body?.email ?? ""));
+    if (!out.ok) {
+      const error = (out as { ok: false; error: string }).error;
+      return res.status(error === "email_unavailable" ? 503 : 400).json({ error });
+    }
+    return res.json({ ok: true });
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/accounts/password-reset/confirm", async (req, res) => {
+  try {
+    const out = await accounts.confirmPasswordReset(String(req.body?.token ?? ""), String(req.body?.password ?? ""));
+    if (!out.ok) return res.status(400).json({ error: (out as { ok: false; error: string }).error });
+    return res.json({ ok: true });
+  } catch (err) { return accountsUnavailable(res, err); }
 });
 app.post("/api/accounts/chips", async (req, res) => {
   try {
@@ -868,7 +929,7 @@ app.post("/api/accounts/chips", async (req, res) => {
     if (!profile) return res.status(401).json({ error: "not_signed_in" });
     await accounts.saveChips(profile.id, Number(req.body?.chips ?? 0));
     res.json({ ok: true });
-  } catch { res.status(503).json({ error: "account_storage_unavailable" }); }
+  } catch (err) { accountsUnavailable(res, err); }
 });
 
 // ── Server-authoritative Luxe Poker: cards, actions, outcomes and points are decided here ──

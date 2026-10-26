@@ -51,6 +51,7 @@ const PartnershipCampaignPage = lazy(() => import("./components/PartnershipCampa
 const WelcomePage = lazy(() => import("./components/WelcomePage").then((m) => ({ default: m.WelcomePage })));
 const SerenityCharityPage = lazy(() => import("./components/SerenityCharityPage").then((m) => ({ default: m.SerenityCharityPage })));
 const CashGiveawaysPage = lazy(() => import("./components/CashGiveawaysPage").then((m) => ({ default: m.CashGiveawaysPage })));
+const ResetPasswordPage = lazy(() => import("./components/ResetPasswordPage").then((m) => ({ default: m.ResetPasswordPage })));
 const PrivacyPage = lazy(() => import("./components/PrivacyPage").then((m) => ({ default: m.PrivacyPage })));
 const TermsPage = lazy(() => import("./components/TermsPage").then((m) => ({ default: m.TermsPage })));
 const CredentialsPartnershipsPage = lazy(() => import("./components/CredentialsPartnershipsPage").then((m) => ({ default: m.CredentialsPartnershipsPage })));
@@ -76,6 +77,7 @@ export default function App() {
     : path === "/cash-giveaways" ? <CashGiveawaysPage />
     : path === "/terms" ? <TermsPage />
     : path === "/privacy" ? <PrivacyPage />
+    : path === "/reset-password" ? <ResetPasswordPage />
     : path === "/credentials" ? <CredentialsPartnershipsPage />
     : path === "/economics" ? <EconomicsPage />
     : path === "/launch-build" ? <LaunchBuildPage />

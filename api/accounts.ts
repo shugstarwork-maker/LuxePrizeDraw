@@ -3,6 +3,7 @@
 // salted SHA-256 still sign in and are re-hashed with scrypt on their next login.
 // Sessions are random 256-bit tokens stored with a 30-day TTL; "sign out everywhere"
 // revokes every session issued before it. Repeated failed sign-ins are rate limited.
+// Players can export or delete their account, and reset a forgotten password by email.
 // Storage: Upstash Redis when configured. If Redis is configured but unreachable the
 // account API fails closed (503) instead of writing accounts to a local file. The
 // local JSON file is only used when Redis is not configured at all (demo/offline
@@ -12,6 +13,7 @@ import crypto from "crypto";
 import fs from "fs";
 import path from "path";
 import { Redis } from "@upstash/redis";
+import { emailConfigured, sendEmail } from "./mailer";
 
 type Entry = { value: string; expiresAt?: number };
 
@@ -20,6 +22,8 @@ interface Store {
   set(key: string, value: string, ttlSeconds?: number): Promise<void>;
   /** Atomically add 1 and return the new count; the TTL is set when the key is created. */
   incr(key: string, ttlSeconds: number): Promise<number>;
+  /** Atomically read and delete a key, so only one caller ever gets its value. */
+  take(key: string): Promise<string | null>;
   del(key: string): Promise<void>;
 }
 
@@ -31,6 +35,7 @@ function redisStore(): Store {
     async get(key) { const v = await r.get<string>(key); return v == null ? null : typeof v === "string" ? v : JSON.stringify(v); },
     async set(key, value, ttl) { if (ttl) await r.set(key, value, { ex: ttl }); else await r.set(key, value); },
     async del(key) { await r.del(key); },
+    async take(key) { const v = await r.getdel<string>(key); return v == null ? null : typeof v === "string" ? v : JSON.stringify(v); },
     async incr(key, ttl) {
       const n = await r.incr(key);
       // Also repair a key left without a TTL (e.g. if a previous EXPIRE call failed).
@@ -60,6 +65,7 @@ function fileStore(): Store {
     async get(key) { return read()[key]?.value ?? null; },
     async set(key, value, ttl) { const all = read(); all[key] = { value, expiresAt: ttl ? Date.now() + ttl * 1000 : undefined }; write(all); },
     async del(key) { const all = read(); delete all[key]; write(all); },
+    async take(key) { const all = read(); const v = all[key]?.value ?? null; if (v !== null) { delete all[key]; write(all); } return v; },
     // Synchronous read-modify-write, so atomic within this single-process demo store.
     async incr(key, ttl) {
       const all = read();
@@ -195,11 +201,16 @@ export async function login(email: string, password: string): Promise<{ ok: true
     return { ok: false, error: "bad_credentials" };
   }
   await s.del(attemptKey);
-  if (needsRehash(rec.passHash)) rec.passHash = await hashPassword(password, rec.salt);
-  rec.lastSeenAt = Date.now();
-  await s.set(`acc:id:${rec.id}`, JSON.stringify(rec));
-  const token = await issueSession(s, rec.id);
-  return { ok: true, profile: toProfile(rec), token };
+  const rehashed = needsRehash(rec.passHash) ? await hashPassword(password, rec.salt) : null;
+  // Re-read just before writing: if the account was deleted or its password reset while
+  // this sign-in was hashing, don't write the stale record back.
+  const latest = await readRecord(s, rec.id);
+  if (!latest || latest.passHash !== rec.passHash) return { ok: false, error: "bad_credentials" };
+  if (rehashed) latest.passHash = rehashed;
+  latest.lastSeenAt = Date.now();
+  await s.set(`acc:id:${latest.id}`, JSON.stringify(latest));
+  const token = await issueSession(s, latest.id);
+  return { ok: true, profile: toProfile(latest), token };
 }
 
 async function recordForToken(s: Store, token: string): Promise<AccountRecord | null> {
@@ -241,4 +252,97 @@ export async function saveChips(accountId: string, chips: number): Promise<void>
   if (!rec) return;
   rec.chips = Math.max(0, Math.min(1_000_000, Math.floor(chips)));
   await s.set(`acc:id:${accountId}`, JSON.stringify(rec));
+}
+
+/** Which account store is in use, for the health endpoint. Never throws. */
+export async function storageStatus(): Promise<"redis" | "file" | "unavailable"> {
+  try {
+    const s = await store();
+    if (!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN)) return "file";
+    // Probe on every call: the cached client says nothing about whether Redis is up now.
+    await Promise.race([s.get("acc:__probe__"), new Promise((_, rej) => setTimeout(() => rej(new Error("redis timeout")), 3000))]);
+    return "redis";
+  } catch { return "unavailable"; }
+}
+
+/** Everything held on the server about the token's account (UK GDPR access/portability). */
+export async function exportAccount(token: string): Promise<Record<string, unknown> | null> {
+  const rec = await recordForToken(await store(), token);
+  if (!rec) return null;
+  return {
+    exportedAt: new Date().toISOString(),
+    account: { ...toProfile(rec), createdAt: new Date(rec.createdAt).toISOString(), lastSeenAt: new Date(rec.lastSeenAt).toISOString() },
+    notes: [
+      "Your password is stored only as a scrypt hash and is not included.",
+      "Game progress and settings kept in your browser's local storage are not held on our server.",
+    ],
+  };
+}
+
+/** Permanently delete the token's account after re-checking the password. */
+export async function deleteAccount(token: string, password: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  const s = await store();
+  const rec = await recordForToken(s, token);
+  if (!rec) return { ok: false, error: "not_signed_in" };
+  const attemptKey = `attempts:${rec.email}`;
+  if ((await s.incr(attemptKey, FAILED_LOGIN_WINDOW_S)) > MAX_FAILED_LOGINS) return { ok: false, error: "too_many_attempts" };
+  if (!(await verifyPassword(password, rec.salt, rec.passHash))) return { ok: false, error: "bad_credentials" };
+  // Revoke first so any session (on any device) stops working even if a later write lags.
+  // The marker holds only the random account id and is kept so revoked tokens stay dead.
+  await s.set(`acc:revoked:${rec.id}`, String(Number.MAX_SAFE_INTEGER));
+  await s.del(`acc:email:${rec.email}`);
+  await s.del(`acc:id:${rec.id}`);
+  await s.del(`sess:${token}`);
+  await s.del(attemptKey);
+  return { ok: true };
+}
+
+const RESET_TTL_S = 30 * 60;
+const MAX_RESET_REQUESTS = 3;
+const RESET_REQUEST_WINDOW_S = 60 * 60;
+const resetKey = (token: string) => `reset:${crypto.createHash("sha256").update(token).digest("hex")}`;
+
+/**
+ * Email a one-time reset link if the address has an account. The result is the same
+ * whether or not it does, so the endpoint can't be used to discover accounts.
+ */
+export async function requestPasswordReset(email: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  const appUrl = process.env.APP_URL;
+  if (!emailConfigured() || !appUrl || !/^https?:\/\//.test(appUrl)) return { ok: false, error: "email_unavailable" };
+  const e = normalizeEmail(email);
+  if (!EMAIL_RE.test(e)) return { ok: false, error: "invalid_email" };
+  const s = await store();
+  if ((await s.incr(`resetreq:${e}`, RESET_REQUEST_WINDOW_S)) > MAX_RESET_REQUESTS) return { ok: true };
+  const id = await s.get(`acc:email:${e}`);
+  if (!id) return { ok: true };
+  const token = crypto.randomBytes(32).toString("hex");
+  await s.set(resetKey(token), id, RESET_TTL_S);
+  const link = `${appUrl.replace(/\/$/, "")}/reset-password?token=${token}`;
+  await sendEmail({
+    to: e,
+    subject: "Reset your LuxePrizeDraw password",
+    text: `Someone asked to reset the password for your LuxePrizeDraw free-play account.\n\nTo choose a new password, open this link within 30 minutes:\n${link}\n\nIf you didn't ask for this, ignore this email and your password stays the same.`,
+  });
+  return { ok: true };
+}
+
+/** Set a new password from a reset link; signs the account out everywhere. */
+export async function confirmPasswordReset(token: string, password: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (password.length < 8) return { ok: false, error: "password_too_short" };
+  if (!/^[0-9a-f]{64}$/.test(token)) return { ok: false, error: "invalid_reset_link" };
+  const s = await store();
+  // take() reads and deletes in one step, so two simultaneous uses of a link can't both succeed.
+  const id = await s.take(resetKey(token));
+  if (!id) return { ok: false, error: "invalid_reset_link" };
+  // Hash before reading the record so the read-modify-write window stays short.
+  const salt = crypto.randomBytes(16).toString("hex");
+  const passHash = await hashPassword(password, salt);
+  const rec = await readRecord(s, id);
+  if (!rec) return { ok: false, error: "invalid_reset_link" };
+  rec.salt = salt;
+  rec.passHash = passHash;
+  await s.set(`acc:id:${rec.id}`, JSON.stringify(rec));
+  await s.set(`acc:revoked:${rec.id}`, String(Date.now() + 1));
+  await s.del(`attempts:${rec.email}`);
+  return { ok: true };
 }
