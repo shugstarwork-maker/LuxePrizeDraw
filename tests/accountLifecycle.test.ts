@@ -70,6 +70,16 @@ test("reset emails a one-time link that sets the password and signs out everywhe
   assert.deepEqual(await accounts.confirmPasswordReset(token, "another-password"), { ok: false, error: "invalid_reset_link" }, "links are single-use");
 });
 
+test("two simultaneous uses of one reset link: only one succeeds", async () => {
+  withEmail();
+  await accounts.createAccount("race@luxeprize.test", "old-password-2", "R");
+  sent.length = 0;
+  await accounts.requestPasswordReset("race@luxeprize.test");
+  const token = linkToken(sent[0].text);
+  const results = await Promise.all([accounts.confirmPasswordReset(token, "first-password-1"), accounts.confirmPasswordReset(token, "second-password-1")]);
+  assert.equal(results.filter((r) => r.ok).length, 1);
+});
+
 test("reset requests for unknown emails look the same and send nothing", async () => {
   withEmail();
   sent.length = 0;

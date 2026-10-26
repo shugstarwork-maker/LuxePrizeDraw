@@ -22,6 +22,8 @@ interface Store {
   set(key: string, value: string, ttlSeconds?: number): Promise<void>;
   /** Atomically add 1 and return the new count; the TTL is set when the key is created. */
   incr(key: string, ttlSeconds: number): Promise<number>;
+  /** Atomically read and delete a key, so only one caller ever gets its value. */
+  take(key: string): Promise<string | null>;
   del(key: string): Promise<void>;
 }
 
@@ -33,6 +35,7 @@ function redisStore(): Store {
     async get(key) { const v = await r.get<string>(key); return v == null ? null : typeof v === "string" ? v : JSON.stringify(v); },
     async set(key, value, ttl) { if (ttl) await r.set(key, value, { ex: ttl }); else await r.set(key, value); },
     async del(key) { await r.del(key); },
+    async take(key) { const v = await r.getdel<string>(key); return v == null ? null : typeof v === "string" ? v : JSON.stringify(v); },
     async incr(key, ttl) {
       const n = await r.incr(key);
       // Also repair a key left without a TTL (e.g. if a previous EXPIRE call failed).
@@ -62,6 +65,7 @@ function fileStore(): Store {
     async get(key) { return read()[key]?.value ?? null; },
     async set(key, value, ttl) { const all = read(); all[key] = { value, expiresAt: ttl ? Date.now() + ttl * 1000 : undefined }; write(all); },
     async del(key) { const all = read(); delete all[key]; write(all); },
+    async take(key) { const all = read(); const v = all[key]?.value ?? null; if (v !== null) { delete all[key]; write(all); } return v; },
     // Synchronous read-modify-write, so atomic within this single-process demo store.
     async incr(key, ttl) {
       const all = read();
@@ -254,7 +258,10 @@ export async function saveChips(accountId: string, chips: number): Promise<void>
 export async function storageStatus(): Promise<"redis" | "file" | "unavailable"> {
   try {
     const s = await store();
-    return process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN && s ? "redis" : "file";
+    if (!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN)) return "file";
+    // Probe on every call: the cached client says nothing about whether Redis is up now.
+    await Promise.race([s.get("acc:__probe__"), new Promise((_, rej) => setTimeout(() => rej(new Error("redis timeout")), 3000))]);
+    return "redis";
   } catch { return "unavailable"; }
 }
 
@@ -324,10 +331,9 @@ export async function confirmPasswordReset(token: string, password: string): Pro
   if (password.length < 8) return { ok: false, error: "password_too_short" };
   if (!/^[0-9a-f]{64}$/.test(token)) return { ok: false, error: "invalid_reset_link" };
   const s = await store();
-  const key = resetKey(token);
-  const id = await s.get(key);
+  // take() reads and deletes in one step, so two simultaneous uses of a link can't both succeed.
+  const id = await s.take(resetKey(token));
   if (!id) return { ok: false, error: "invalid_reset_link" };
-  await s.del(key);
   // Hash before reading the record so the read-modify-write window stays short.
   const salt = crypto.randomBytes(16).toString("hex");
   const passHash = await hashPassword(password, salt);
