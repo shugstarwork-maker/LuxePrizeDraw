@@ -1,14 +1,23 @@
 // Shared Luxe card lounge: lobby carousel + landscape table + weekly league + shared chip wallet.
 // Used by Blackjack and 3 Card Brag — identical setup to the Luxe Poker Lounge.
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Crown, Gift, Spade, Volume2, VolumeX } from "lucide-react";
+import { BookOpen, ChevronLeft, ChevronRight, Crown, Gift, Spade, Volume2, VolumeX } from "lucide-react";
 import { ensureWeek, leagueXPForHand, tierByIndex, weekEndsIn, weeklyBoard, weeklyCutoffs, recordWeeklyXP } from "../lib/pokerLeague";
 import { createBjTable, placeBets, bjAct, bjBotAction, handValue, type BjState } from "../games/blackjack";
 import { createBragTable, bragAnteUp, bragAct, bragValue, BRAG_LABELS, type BragState } from "../games/brag";
 import { LuxePlayingCard } from "./LuxePlayingCard";
 import { bumpStat } from "../lib/achievements";
+import { useAudio } from "../audio/AudioProvider";
+import { CasinoRulesSheet } from "./CasinoRulesSheet";
 
 export type LoungeGame = "blackjack" | "brag";
+
+/** Stake after tapping a chip: the first tap on a fresh minimum stake replaces it when
+ *  the chip is at least the minimum; otherwise chips add. Always within [min, max]. */
+export function nextStake(current: number, chip: number, min: number, max: number): number {
+  const next = current === min && chip >= min && chip !== current ? chip : current + chip;
+  return Math.min(max, Math.max(min, next));
+}
 
 const GAME_META: Record<LoungeGame, { title: string; tagline: string; minBetLabel: string; image: string }> = {
   blackjack: { title: "Luxe Blackjack", tagline: "Beat the dealer to 21 — blackjack pays 3:2.", minBetLabel: "Min bet", image: "/games/blackjack-card.png" },
@@ -23,7 +32,6 @@ const LOUNGE_TABLES = [
 
 const CHIPS_KEY = "luxe-demo-poker-chips";
 const DAILY_KEY = "luxe-demo-daily-chips";
-const play = () => {};
 
 function useWallet() {
   const [chips, setChips] = useState(() => Number(localStorage.getItem(CHIPS_KEY)) || 1000);
@@ -40,12 +48,15 @@ const CardFace: React.FC<{ c?: { rank: string; suit: string }; hidden?: boolean 
 
 export function CardLounge({ game }: { game: LoungeGame }) {
   const meta = GAME_META[game];
+  const audio = useAudio();
+  const [rulesOpen, setRulesOpen] = useState(false);
   const [chips, setChips] = useWallet();
   const [screen, setScreen] = useState<"lobby" | "table">("lobby");
   const [table, setTable] = useState<typeof LOUNGE_TABLES[number] | null>(null);
   const [slide, setSlide] = useState(0);
   const [status, setStatus] = useState("Choose a table to sit down.");
   const [muted, setMuted] = useState(false);
+  const sfx = (e: Parameters<typeof audio.play>[0]) => { if (!muted) audio.play(e); };
   const [bet, setBet] = useState(50);
   const [league, setLeague] = useState(() => ensureWeek());
   const [leagueOpen, setLeagueOpen] = useState(false);
@@ -87,11 +98,14 @@ export function CardLounge({ game }: { game: LoungeGame }) {
   const startHand = () => {
     if (!table) return;
     if (chips < bet) { note("Not enough chips for that bet — lower it or collect daily chips."); return; }
+    if (bet > table.minBet * 10) { note(`The ${table.name} maximum is ${(table.minBet * 10).toLocaleString()} chips.`); return; }
+    if (bet < table.minBet) { note(`The ${table.name} minimum is ${table.minBet.toLocaleString()} chips.`); return; }
     if (game === "brag" && chips < bet * 2) { note("Brag needs your ante plus a matching play bet — keep at least double the ante in your wallet."); return; }
     // Reserve the full stake the hand could need (blackjack double-down / brag play bet); unused chips return at settle.
     const reserve = bet * 2;
     if (chips < reserve) { note(`This stake needs ${reserve.toLocaleString()} chips in reserve.`); return; }
     setChips((v) => v - reserve);
+    sfx("chipDrop"); window.setTimeout(() => sfx("cardDeal"), 260);
     if (game === "blackjack" && bj) {
       const s = placeBets({ ...bj, seats: bj.seats.map((p) => p.id === "you" ? { ...p, chips: reserve } : p) }, bet);
       setBj(s);
@@ -125,6 +139,7 @@ export function CardLounge({ game }: { game: LoungeGame }) {
     // them with the stake would count a push as a win.
     const result = (you as { result?: string }).result;
     const won = result === "win" || result === "blackjack";
+    if (committed > 0) sfx(won ? "coinWin" : result === "push" ? "notification" : "error");
     if (committed > 0) {
       if (game === "blackjack") {
         if (won) bumpStat("bjHandsWon");
@@ -227,66 +242,82 @@ export function CardLounge({ game }: { game: LoungeGame }) {
   }
 
   // ── Table ──
-  return <section id={`lounge-${game}`} className="poker-playing-page min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-3 py-4 pb-28 text-white">
-    <div className="poker-landscape-gate" role="status"><span aria-hidden="true">↻</span><h2>Turn your phone sideways</h2><p>{meta.title} is played in landscape. Rotate your phone to see the table and controls.</p><button type="button" onClick={leave}>Back to the lobby</button></div>
-    <div className="poker-playing-wrap mx-auto max-w-5xl">
-      <header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-3 py-2">
-        <button onClick={leave} className="inline-flex items-center gap-1 rounded-lg bg-white/10 px-3 py-2 text-xs font-black"><ChevronLeft className="h-4 w-4" />Lobby</button>
-        <span className="font-mono text-sm font-black text-amber-100">{chips.toLocaleString()} wallet · <span style={{ color: leagueTier.colour }}>{leagueTier.name} {league.xp}XP</span></span>
-        <button onClick={() => setMuted(!muted)} aria-label={muted ? "Turn sound on" : "Turn sound off"} aria-pressed={muted} className="rounded-lg bg-white/10 p-2">{muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}</button>
-      </header>
-      <article className="poker-game-article relative mt-4 overflow-hidden rounded-[2rem] border border-amber-200/50 p-4 sm:p-6">
-        <div className="poker-surface-frame relative rounded-[2rem]">
-          <div className="lounge-table-felt">
-            <img src={meta.image} alt="" className="lounge-table-felt__bg" />
-            {/* dealer */}
-            <div className="lounge-dealer-row">
-              <span className="lounge-dealer-tag">Dealer {s && (game === "blackjack" ? (bj?.dealerHoleHidden ? "" : `· ${handValue(bj.dealer).total}`) : brag?.dealerRevealed ? `· ${BRAG_LABELS[bragValue(brag.dealer)[0]]}` : "")}</span>
-              <div className="lounge-cards-row">
-                {game === "blackjack" && bj?.dealer.map((c, i) => <CardFace key={i} c={c} hidden={bj.dealerHoleHidden && i === 1} />)}
-                {game === "brag" && brag?.dealer.map((c, i) => <CardFace key={i} c={c} hidden={!brag.dealerRevealed} />)}
-              </div>
-            </div>
-            {/* seats */}
-            <div className="lounge-seats-row">
-              {s?.seats.map((p) => {
-                const isYou = p.id === "you";
-                const cards = p.cards;
-                const value = game === "blackjack" ? handValue(cards).total : undefined;
-                const label = game === "brag" && cards.length === 3 ? BRAG_LABELS[bragValue(cards)[0]] : undefined;
-                const result = (p as { result?: string }).result;
-                return <div key={p.id} className={`lounge-seat ${isYou ? "lounge-seat--you" : ""} ${result === "win" || result === "blackjack" ? "lounge-seat--won" : result === "lose" ? "lounge-seat--lost" : ""}`}>
-                  <span className="lounge-seat__name">{p.name}</span>
-                  <div className="lounge-cards-row">{cards.map((c, i) => <CardFace key={i} c={isYou || phase === "settled" ? c : undefined} hidden={!isYou && phase !== "settled"} />)}</div>
-                  <span className="lounge-seat__meta">{isYou && cards.length > 0 ? (value !== undefined ? value : label) : ""} {result ? `· ${result.toUpperCase()}` : ""}</span>
-                  <span className="lounge-seat__bet">{(game === "blackjack" ? (p as { bet: number }).bet : (p as { ante: number }).ante) > 0 ? `Bet ${game === "blackjack" ? (p as { bet: number }).bet : (p as { ante: number }).ante}` : ""}</span>
-                </div>;
-              })}
-            </div>
-            <p className="lounge-table-status">{s?.lastAction ?? status}</p>
+  // Seats sit on the lower arc of the table; you take the centre slot, bots fill outward.
+  const seatOrder = [3, 2, 4, 1, 5, 0, 6];
+  const seatPos = (slot: number) => { const a = (170 - slot * (160 / 6)) * Math.PI / 180; return { left: `${50 + 44 * Math.cos(a)}%`, top: `${20 + 52 * Math.sin(a)}%` }; };
+  const maxBet = (table?.minBet ?? 25) * 10;
+  const chipValues = [25, 50, 100, 250].filter((v) => v <= maxBet);
+  const dealerTotal = game === "blackjack" ? (bj && bj.dealer.length ? (bj.dealerHoleHidden ? null : handValue(bj.dealer).total) : null) : null;
+  const dealerLabel = game === "brag" && brag?.dealerRevealed && brag.dealer.length === 3 ? BRAG_LABELS[bragValue(brag.dealer)[0]] : null;
+  const resultLabel: Record<string, string> = { win: "Win", lose: "Lose", push: "Push", blackjack: "Blackjack!" };
+  return <section id={`lounge-${game}`} className={`casino-scene casino-scene--${game} poker-playing-page min-h-screen text-white`}>
+    <div className="poker-landscape-gate" role="status"><span aria-hidden="true">↻</span><h2>Turn your phone sideways</h2><p>{meta.title} is played in landscape. Rotate your phone to see the table and controls.</p><button type="button" onClick={leave}>Back to lobby</button><button type="button" className="poker-gate-play" onClick={(e) => { e.currentTarget.closest(".poker-playing-page")?.classList.add("poker-gate-dismissed"); }}>Play in portrait anyway</button></div>
+    <header className="casino-hud">
+      <button onClick={leave} className="casino-hud__btn"><ChevronLeft className="h-4 w-4" />Lobby</button>
+      <span className="casino-hud__title">{meta.title} · {table?.name}</span>
+      <span className="casino-hud__wallet">{chips.toLocaleString()} <small>chips</small> · <span style={{ color: leagueTier.colour }}>{leagueTier.name}</span></span>
+      <button onClick={() => setRulesOpen(true)} className="casino-hud__btn"><BookOpen className="h-4 w-4" />Rules</button>
+      <button onClick={() => setMuted(!muted)} aria-label={muted ? "Turn sound on" : "Turn sound off"} aria-pressed={muted} className="casino-hud__btn">{muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}</button>
+    </header>
+
+    <div className="casino-table">
+      <div className="casino-felt">
+        <svg className="casino-felt__print" viewBox="0 0 1000 420" aria-hidden="true">
+          <defs><path id={`arc-${game}`} d="M 170 150 Q 500 330 830 150" /></defs>
+          <text><textPath href={`#arc-${game}`} startOffset="50%" textAnchor="middle">{game === "blackjack" ? "BLACKJACK PAYS 3 TO 2" : "PRIAL · RUNNING FLUSH · RUN · FLUSH · PAIR"}</textPath></text>
+          <text x="500" y="282" textAnchor="middle" className="casino-felt__sub">{game === "blackjack" ? "Dealer stands on all 17s · Double on any two cards" : "Dealer qualifies with Queen high · Ante bonus on prial, running flush & run"}</text>
+        </svg>
+        {game === "blackjack" && <span className="casino-shoe" aria-hidden="true" />}
+        <span className="casino-tray" aria-hidden="true">{[...Array(8)].map((_, i) => <i key={i} />)}</span>
+
+        <div className="casino-dealer">
+          <span className="casino-dealer__tag">Dealer{dealerTotal !== null ? ` · ${dealerTotal}` : ""}{dealerLabel ? ` · ${dealerLabel}` : ""}</span>
+          <div className="casino-cards">
+            {game === "blackjack" && bj?.dealer.map((c, i) => <span key={`${bj.handNumber}-d${i}`} className="casino-card-slot" style={{ ["--deal" as string]: i * 6 + 5 }}><CardFace c={c} hidden={bj.dealerHoleHidden && i === 1} /></span>)}
+            {game === "brag" && brag?.dealer.map((c, i) => <span key={`${brag.handNumber}-d${i}`} className="casino-card-slot" style={{ ["--deal" as string]: i * 6 + 5 }}><CardFace c={c} hidden={!brag.dealerRevealed} /></span>)}
           </div>
         </div>
-      </article>
 
-      {/* controls */}
-      <div className="poker-below-table mt-4 flex flex-col items-center gap-3">
-        {phase === "betting" || phase === "ante" ? <div className="flex items-center gap-3 rounded-2xl border border-amber-200/40 bg-black/50 p-3">
-          <input type="range" min={table?.minBet ?? 25} max={Math.max(chips, table?.minBet ?? 25)} step={25} value={bet} onChange={(e) => setBet(Number(e.target.value))} className="w-40 accent-amber-300" />
-          <span className="font-mono text-sm font-black text-amber-100">{bet}</span>
-          <button onClick={startHand} className="rounded-xl bg-gradient-to-b from-amber-200 to-amber-500 px-5 py-3 text-sm font-black text-black">{game === "blackjack" ? "Deal" : "Ante up"}</button>
-        </div> : null}
-        {yourTurn ? <div className="flex gap-3 rounded-2xl border border-amber-200/40 bg-black/50 p-3">
-          <button onClick={() => setBj((g) => g ? bjAct(g, "you", "hit") : g)} className="rounded-xl bg-gradient-to-b from-emerald-200 to-emerald-500 px-6 py-3 text-sm font-black text-black">Hit</button>
-          <button onClick={() => setBj((g) => g ? bjAct(g, "you", "stand") : g)} className="rounded-xl bg-gradient-to-b from-amber-200 to-amber-500 px-6 py-3 text-sm font-black text-black">Stand</button>
-          <button onClick={() => setBj((g) => g ? bjAct(g, "you", "double") : g)} disabled={!youSeat || youSeat.cards.length !== 2} className="rounded-xl bg-gradient-to-b from-rose-300 to-rose-500 px-6 py-3 text-sm font-black text-black disabled:opacity-40">Double</button>
-        </div> : null}
-        {game === "brag" && brag?.phase === "decide" ? <div className="flex gap-3 rounded-2xl border border-amber-200/40 bg-black/50 p-3">
-          <button onClick={() => setBrag((g) => g ? bragAct(g, "you", "play") : g)} className="rounded-xl bg-gradient-to-b from-amber-200 to-amber-500 px-6 py-3 text-sm font-black text-black">Play {bet}</button>
-          <button onClick={() => setBrag((g) => g ? bragAct(g, "you", "fold") : g)} className="rounded-xl border border-white/20 bg-white/10 px-6 py-3 text-sm font-black">Fold</button>
-        </div> : null}
-        {phase === "settled" ? <button onClick={() => { if (game === "blackjack") setBj((g) => g ? { ...g, phase: "betting" } : g); else setBrag((g) => g ? { ...g, phase: "ante" } : g); }} className="rounded-xl bg-gradient-to-b from-amber-200 to-amber-500 px-6 py-3 text-sm font-black text-black">Next hand</button> : null}
-        <p className="text-[10px] text-white/40">Free-play chips · No cash value · Same wallet & league as Luxe Poker</p>
+        {s?.seats.map((p, order) => {
+          const isYou = p.id === "you";
+          const value = game === "blackjack" && p.cards.length ? handValue(p.cards).total : undefined;
+          const label = game === "brag" && p.cards.length === 3 && (isYou || phase === "settled") ? BRAG_LABELS[bragValue(p.cards)[0]] : undefined;
+          const result = (p as { result?: string }).result;
+          const stake = game === "blackjack" ? (p as { bet: number }).bet : (p as { ante: number }).ante + (p as { playBet: number }).playBet;
+          const turn = game === "blackjack" && bj?.phase === "playing" && bj.seats[bj.turnSeat]?.id === p.id;
+          return <div key={p.id} className={`casino-seat${isYou ? " casino-seat--you" : ""}${turn ? " casino-seat--turn" : ""}${result ? ` casino-seat--${result}` : ""}`} style={seatPos(seatOrder[order] ?? order)}>
+            <div className="casino-cards">{p.cards.map((c, i) => <span key={`${s.handNumber}-${p.id}-${i}`} className="casino-card-slot" style={{ ["--deal" as string]: i * 6 + order }}><CardFace c={isYou || phase === "settled" ? c : undefined} hidden={!isYou && phase !== "settled"} /></span>)}</div>
+            {stake > 0 && <span className="casino-seat__stake"><i aria-hidden="true" />{stake.toLocaleString()}</span>}
+            <span className="casino-seat__plate"><b>{isYou ? "You" : p.name}</b>{(value !== undefined && (isYou || phase === "settled")) ? <em>{value}</em> : label ? <em>{label}</em> : null}</span>
+            {result && <span className="casino-seat__result">{resultLabel[result] ?? result}</span>}
+          </div>;
+        })}
+        <p className="casino-status" role="status">{s?.lastAction ?? status}</p>
       </div>
     </div>
+
+    <div className="casino-dock" role="group" aria-label={`${meta.title} actions`}>
+      {phase === "betting" || phase === "ante" ? <>
+        <div className="casino-chips" role="group" aria-label="Choose your stake">
+          {chipValues.map((v) => <button key={v} type="button" className={`casino-chip casino-chip--${v}`} onClick={() => { sfx("chipStack"); setBet((b) => nextStake(b, v, table?.minBet ?? 25, maxBet)); }} aria-label={`Add ${v}`}>{v}</button>)}
+          <button type="button" className="casino-dock__ghost" onClick={() => setBet(table?.minBet ?? 25)}>Reset</button>
+        </div>
+        <span className="casino-dock__stake">{game === "blackjack" ? "Bet" : "Ante"} <b>{bet.toLocaleString()}</b><small>max {maxBet.toLocaleString()}</small></span>
+        <button onClick={startHand} className="casino-dock__primary">{game === "blackjack" ? "Deal" : "Ante up"}</button>
+      </> : null}
+      {yourTurn ? <>
+        <button onClick={() => { sfx("cardDeal"); setBj((g) => g ? bjAct(g, "you", "hit") : g); }} className="casino-dock__primary casino-dock__primary--green">Hit</button>
+        <button onClick={() => { sfx("button"); setBj((g) => g ? bjAct(g, "you", "stand") : g); }} className="casino-dock__primary">Stand</button>
+        <button onClick={() => { sfx("chipDrop"); setBj((g) => g ? bjAct(g, "you", "double") : g); }} disabled={!youSeat || youSeat.cards.length !== 2} className="casino-dock__primary casino-dock__primary--rose">Double</button>
+      </> : null}
+      {game === "brag" && brag?.phase === "decide" ? <>
+        <button onClick={() => { sfx("chipDrop"); setBrag((g) => g ? bragAct(g, "you", "play") : g); }} className="casino-dock__primary">Play {bet.toLocaleString()}</button>
+        <button onClick={() => { sfx("button"); setBrag((g) => g ? bragAct(g, "you", "fold") : g); }} className="casino-dock__ghost">Fold</button>
+      </> : null}
+      {game === "blackjack" && bj && (bj.phase === "playing" || bj.phase === "dealer") && !yourTurn ? <span className="casino-dock__wait">Dealer is playing…</span> : null}
+      {phase === "settled" ? <button onClick={() => { sfx("button"); if (game === "blackjack") setBj((g) => g ? { ...g, phase: "betting" } : g); else setBrag((g) => g ? { ...g, phase: "ante" } : g); }} className="casino-dock__primary">Next hand</button> : null}
+    </div>
+    <p className="casino-footnote">Free-play chips · No cash value · Same wallet &amp; league as Luxe Poker · <button type="button" onClick={() => setRulesOpen(true)} className="underline underline-offset-2">Rules &amp; fair play</button></p>
+    {rulesOpen && <CasinoRulesSheet game={game} onClose={() => setRulesOpen(false)} />}
   </section>;
 }

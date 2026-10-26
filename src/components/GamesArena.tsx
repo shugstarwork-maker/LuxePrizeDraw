@@ -8,6 +8,7 @@ import { chessLegalMoves, newChess, playChess, type ChessMatch } from "../games/
 import { newConnectFour, playConnectFour, type ConnectFourState } from "../games/connectFour";
 import { OnlineConnectFour } from "./OnlineConnectFour";
 import { draughtsMoves, newDraughts, playDraughts, type DraughtsState } from "../games/draughts";
+import { CasinoRulesSheet } from "./CasinoRulesSheet";
 
 type GameId = "chess" | "connect4" | "draughts";
 const games: { id: GameId; title: string; detail: string; image: string }[] = [
@@ -38,6 +39,7 @@ function useResultReport(status: string, onResult?: (result: BoardResult) => voi
 }
 
 export function ChessBoard({ sound, onResult, onState }: { sound: BoardSound; onResult?: (result: BoardResult) => void; onState?: (s: BoardState) => void }) {
+  const [chessRulesOpen, setChessRulesOpen] = useState(false);
   const [match, setMatch] = useState<ChessMatch>(newChess); const [selected, setSelected] = useState<string | null>(null); const [clock, setClock] = useState({ w: 600, b: 600 });
   useResultReport(match.status, onResult);
   const chess = useMemo(() => new Chess(match.fen), [match.fen]); const turn = chess.turn(); const legal = selected ? chessLegalMoves(match, selected as never).map((move) => move.to) : [];
@@ -46,7 +48,31 @@ export function ChessBoard({ sound, onResult, onState }: { sound: BoardSound; on
   useEffect(() => { if (clock.w === 0 || clock.b === 0) setMatch((value) => ({ ...value, status: clock.w === 0 ? "black_won" : "white_won" })); }, [clock]);
   const tap = (square: string) => { if (match.status !== "playing") return; const piece = chess.get(square as never); if (!selected) { if (piece?.color === turn) { setSelected(square); sound("ticketSelect"); } return; } if (selected === square) return setSelected(null); try { const next = playChess(match, selected as never, square as never); setMatch(next); setSelected(null); sound(next.status === "playing" ? piece ? "ticketSelect" : "button" : "success"); } catch { if (piece?.color === turn) { setSelected(square); sound("button"); } else sound("error"); } };
   const reset = () => { setMatch(newChess()); setSelected(null); setClock({ w: 600, b: 600 }); sound("button"); };
-  return <GameShell title="Chess" status={statusText(match.status)} reset={reset} detail={`${turn === "w" ? "White" : "Black"} to move · ${match.history.join(" ") || "Opening position"}`}><div className="mb-4 grid grid-cols-2 gap-3 text-center"><Clock label="White" value={clock.w} active={turn === "w"} /><Clock label="Black" value={clock.b} active={turn === "b"} /></div><LuxeChessFrame><div className="luxe-chess-grid grid grid-cols-8 overflow-hidden">{chess.board().map((row, r) => row.map((piece, c) => { const square = notation(r, c); return <button key={square} aria-label={`${square}${piece ? ` ${piece.color === "w" ? "White" : "Black"} ${piece.type}` : " empty"}`} aria-pressed={selected === square} onClick={() => tap(square)} className={`aspect-square text-3xl transition sm:text-5xl ${(r + c) % 2 ? "luxe-chess-square--dark" : "luxe-chess-square--light"} ${selected === square ? "ring-4 ring-cyan-300" : legal.includes(square as never) ? "ring-4 ring-emerald-300/80" : ""}`}>{piece ? <span className={piece.color === "w" ? "luxe-chess-piece luxe-chess-piece--ivory" : "luxe-chess-piece luxe-chess-piece--onyx"}>{({ p: "♟", r: "♜", n: "♞", b: "♝", q: "♛", k: "♚" } as Record<string,string>)[piece.type].replace("♟",piece.color === "w" ? "♙" : "♟").replace("♜",piece.color === "w" ? "♖" : "♜").replace("♞",piece.color === "w" ? "♘" : "♞").replace("♝",piece.color === "w" ? "♗" : "♝").replace("♛",piece.color === "w" ? "♕" : "♛").replace("♚",piece.color === "w" ? "♔" : "♚")}</span> : null}</button>; }))}</div></LuxeChessFrame></GameShell>;
+  // Cinematic layer: last-move and check highlights, captured pieces, a move list and a result banner.
+  const kingInCheck = chess.inCheck() ? (() => { for (const [r, row] of chess.board().entries()) for (const [c, p] of row.entries()) if (p?.type === "k" && p.color === turn) return notation(r, c); return null; })() : null;
+  const onBoard: Record<string, number> = {}; for (const row of chess.board()) for (const p of row) if (p) onBoard[p.color + p.type] = (onBoard[p.color + p.type] ?? 0) + 1;
+  const START: Record<string, number> = { p: 8, n: 2, b: 2, r: 2, q: 1 };
+  const GLYPH: Record<string, string> = { wp: "♙", wn: "♘", wb: "♗", wr: "♖", wq: "♕", wk: "♔", bp: "♟", bn: "♞", bb: "♝", br: "♜", bq: "♛", bk: "♚" };
+  const taken = (color: "w" | "b") => Object.entries(START).flatMap(([t, n]) => Array(Math.max(0, n - (onBoard[color + t] ?? 0))).fill(GLYPH[color + t])).join("");
+  const pairs: string[][] = []; match.history.forEach((m, i) => { if (i % 2 === 0) pairs.push([m]); else pairs[pairs.length - 1].push(m); });
+  const chessResult = match.status === "playing" ? "Match in progress"
+    : match.status === "draw" ? `Draw — ${chess.isStalemate() ? "stalemate" : chess.isInsufficientMaterial() ? "insufficient material" : chess.isDrawByFiftyMoves() ? "fifty-move rule" : "threefold repetition"}`
+    : `${match.status === "white_won" ? "White" : "Black"} wins ${(match.status === "white_won" ? clock.b : clock.w) === 0 ? "on time" : "by checkmate"}`;
+  return <GameShell title="Chess" status={chessResult} reset={reset} detail={`${turn === "w" ? "White" : "Black"} to move · move ${Math.floor(match.history.length / 2) + 1}${kingInCheck && match.status === "playing" ? " · Check!" : ""}`}>
+    <div className="luxe-chess-stage">
+      <div className="luxe-chess-stage__board">
+        <LuxeChessFrame><div className="luxe-chess-grid grid grid-cols-8 overflow-hidden">{chess.board().map((row, r) => row.map((piece, c) => { const square = notation(r, c); const last = match.lastMove && (match.lastMove.from === square || match.lastMove.to === square); return <button key={square} aria-label={`${square}${piece ? ` ${piece.color === "w" ? "White" : "Black"} ${piece.type}` : " empty"}`} aria-pressed={selected === square} onClick={() => tap(square)} className={`aspect-square text-3xl transition sm:text-5xl ${(r + c) % 2 ? "luxe-chess-square--dark" : "luxe-chess-square--light"}${last ? " luxe-chess-square--last" : ""}${kingInCheck === square ? " luxe-chess-square--check" : ""} ${selected === square ? "ring-4 ring-cyan-300" : ""}`}>{piece ? <span key={`${square}-${match.history.length}`} className={`${piece.color === "w" ? "luxe-chess-piece luxe-chess-piece--ivory" : "luxe-chess-piece luxe-chess-piece--onyx"}${match.lastMove?.to === square ? " luxe-chess-piece--arrive" : ""}`}>{GLYPH[piece.color + piece.type]}</span> : null}{legal.includes(square as never) ? <i className={piece ? "luxe-chess-hint luxe-chess-hint--capture" : "luxe-chess-hint"} aria-hidden="true" /> : null}</button>; }))}</div></LuxeChessFrame>
+        {match.status !== "playing" && <div className="luxe-chess-result" role="status"><span>{match.status === "draw" ? "½ – ½" : "♛"}</span><b>{chessResult}</b><button type="button" onClick={reset}>Play again</button></div>}
+      </div>
+      <aside className="luxe-chess-stage__side" aria-label="Match details">
+        <div className="grid grid-cols-2 gap-2 text-center"><Clock label="White" value={clock.w} active={turn === "w" && match.status === "playing"} /><Clock label="Black" value={clock.b} active={turn === "b" && match.status === "playing"} /></div>
+        <div className="luxe-chess-captured"><small>Taken by White</small><span className="luxe-chess-piece--onyx">{taken("b") || "—"}</span><small>Taken by Black</small><span className="luxe-chess-piece--ivory">{taken("w") || "—"}</span></div>
+        <ol className="luxe-chess-moves" aria-label="Moves">{pairs.length ? pairs.map((p, i) => <li key={i}><em>{i + 1}.</em><span>{p[0]}</span><span>{p[1] ?? ""}</span></li>) : <li className="text-white/40">Opening position</li>}</ol>
+        <button type="button" onClick={() => setChessRulesOpen(true)} className="luxe-chess-rules-btn">Rules &amp; fair play</button>
+      </aside>
+    </div>
+    {chessRulesOpen && <CasinoRulesSheet game="chess" onClose={() => setChessRulesOpen(false)} />}
+  </GameShell>;
 }
 type C4Cell = { row: number; col: number };
 function winningLine(state: ConnectFourState): C4Cell[] {
