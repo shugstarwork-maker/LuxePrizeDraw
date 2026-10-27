@@ -204,6 +204,16 @@ function toProfile(rec: AccountRecord): AccountProfile {
   return profile;
 }
 
+/** Finds an account by its ID or by email, for staff support. Returns null if there is none. */
+export async function findProfile(input: string): Promise<AccountProfile | null> {
+  const s = await store();
+  const q = input.trim();
+  const id = q.includes("@") ? await s.get(`acc:email:${normalizeEmail(q)}`) : q;
+  if (!id) return null;
+  const rec = await readRecord(s, id);
+  return rec ? toProfile(rec) : null;
+}
+
 async function readRecord(s: Store, id: string): Promise<AccountRecord | null> {
   const raw = await s.get(`acc:id:${id}`);
   if (!raw) return null;
