@@ -1067,16 +1067,24 @@
 .luxe-chess-signature { padding-top:.8rem; text-align:center; color:#e9c872; font:.7rem Georgia,serif; letter-spacing:.2em; }
 
 /* CSS 3D board; square hit targets stay attached to their visible surfaces. */
-.luxe-chess-perspective { perspective:1100px; padding:.5rem 0 1.5rem; }
-.luxe-chess-table--3d .luxe-chess-rail { transform:rotateX(22deg); transform-style:preserve-3d; transform-origin:center; box-shadow:0 7px 0 #a17422,0 14px 0 #50340f,0 20px 0 #191005,0 30px 35px #000b; }
-.luxe-chess-table--3d .luxe-chess-grid { transform-style:preserve-3d; }
+.luxe-chess-perspective { perspective:1100px; perspective-origin:50% 18%; padding:.4rem 0 1rem; }
+.luxe-chess-table--3d .luxe-chess-rail { transform:rotateX(52deg); transform-style:preserve-3d; transform-origin:center center; box-shadow:0 7px 0 #a17422,0 14px 0 #50340f,0 20px 0 #191005,0 30px 35px #000b; }
+.luxe-chess-table--3d .luxe-chess-grid { overflow:visible; transform-style:preserve-3d; }
 .luxe-chess-table--3d .luxe-chess-grid > button { transform-style:preserve-3d; box-shadow:inset 0 1px #fff3,inset 0 -2px #0004; }
-.luxe-chess-table--3d .luxe-chess-piece { transform:translateZ(12px) rotateX(-15deg); filter:drop-shadow(0 7px 3px #0009); }
+.luxe-chess-table--3d .luxe-chess-piece { position:relative; transform:translateZ(26px) rotateX(-52deg); transform-style:preserve-3d; filter:drop-shadow(0 16px 4px #000b); }
+.luxe-chess-table--3d .luxe-chess-piece::after { content:""; position:absolute; left:18%; right:18%; bottom:.02em; height:.28em; border-radius:50%; background:radial-gradient(ellipse, #000a, transparent 72%); transform:translateZ(-12px) rotateX(70deg); pointer-events:none; }
 .luxe-chess-table--3d .luxe-chess-piece--ivory { text-shadow:0 1px #c7ad6a,0 2px #ad8c42,0 3px #806024,0 4px #3c2b0d; }
 .luxe-chess-table--3d .luxe-chess-piece--onyx { text-shadow:0 1px #e2c780,0 2px #a68237,0 3px #57431c,0 4px #000; }
 .luxe-chess-view-toggle { display:block; margin:0 auto .5rem; min-height:2.75rem; padding:.5rem 1rem; border:1px solid #ffe09a; border-radius:.75rem; background:linear-gradient(#ffe9a5,#b7892c); color:#160e03; font-weight:800; }
 .luxe-chess-view-toggle:focus-visible { outline:3px solid #fff; outline-offset:3px; }
-@media(max-width:480px) { .luxe-chess-table--3d .luxe-chess-rail { transform:rotateX(15deg); } }
+.luxe-chess-grid > button[data-rank="1"]::before { content:attr(data-file); position:absolute; right:.12rem; bottom:.02rem; font-size:.62rem; font-weight:800; line-height:1; letter-spacing:0; pointer-events:none; }
+.luxe-chess-grid > button[data-file="a"]::after { content:attr(data-rank); position:absolute; left:.12rem; top:.04rem; font-size:.62rem; font-weight:800; line-height:1; pointer-events:none; }
+.luxe-chess-square--light::before, .luxe-chess-square--light::after { color:#4a2e12; }
+.luxe-chess-square--dark::before, .luxe-chess-square--dark::after { color:#f3ddb0; }
+@media(max-width:480px) {
+  .luxe-chess-table--3d .luxe-chess-rail { transform:rotateX(46deg); }
+  .luxe-chess-table--3d .luxe-chess-piece { transform:translateZ(18px) rotateX(-46deg); }
+}
 
 .luxe-chess-play-page { min-height:100dvh; padding:1rem; background:radial-gradient(ellipse at top,#362608,#050403 65%); color:#ffe6a0; }
 .luxe-chess-play-page > nav { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:.75rem; max-width:90rem; margin:0 auto 1rem; padding:.75rem; border:1px solid #b79a54; border-radius:1rem; background:#080603; }
@@ -1085,6 +1093,9 @@
 .luxe-chess-open { margin-bottom:1rem; }
 .luxe-chess-play-page__game { max-width:90rem; margin:auto; }
 .luxe-chess-play-page .luxe-chess-table { max-width:56rem; }
+.luxe-chess-play-page .luxe-chess-brand { padding:.1rem 0 .35rem; }
+.luxe-chess-play-page .luxe-chess-brand > span { font-size:1.1rem; }
+.luxe-chess-play-page .luxe-chess-brand h3 { font-size:clamp(1.3rem, 3vw, 1.8rem); }
 .luxe-chess-play-page .luxe-chess-grid > button { font-size:clamp(1.8rem,7vw,4.5rem); }
 .luxe-chess-play-page > p { text-align:center; margin-top:1rem; font-size:.8rem; }
 .luxe-chess-play-page :is(a,button):focus-visible { outline:3px solid white; outline-offset:2px; }
@@ -2264,7 +2275,16 @@ body::after {
   .luxe-chess-play-page .luxe-chess-table { max-width:none; }
 }
 @keyframes luxe-chess-check { 50% { box-shadow:inset 0 0 0 999px #ef444433, inset 0 0 26px 10px #ef4444; } }
-@keyframes luxe-chess-arrive { from { transform:scale(1.35); filter:drop-shadow(0 0 14px #f6c945); } to { transform:none; } }
+@keyframes luxe-chess-arrive { from { transform:translateZ(44px) rotateX(-52deg) scale(1.12); filter:drop-shadow(0 0 14px #f6c945); } to { transform:translateZ(26px) rotateX(-52deg); } }
+.cine-room { position:relative; isolation:isolate; }
+.cine-room::before { content:""; position:absolute; z-index:0; left:50%; top:-8%; width:min(42rem, 70%); height:68%; transform:translateX(-50%); pointer-events:none; background:linear-gradient(180deg, rgba(255, 232, 180, .22), transparent 78%); filter:blur(10px); animation:cine-spot 8s ease-in-out infinite; }
+.cine-room > * { position:relative; z-index:1; }
+.luxe-chess-play-page.cine-room { background:radial-gradient(ellipse 50% 24% at 50% 0%, rgba(255, 214, 130, .2), transparent 70%), radial-gradient(ellipse at 50% 115%, #24180c, #050403 52%); }
+.luxe-chess-table--3d .luxe-chess-perspective { position:relative; }
+.luxe-chess-table--3d .luxe-chess-perspective::after { content:""; position:absolute; left:14%; right:14%; bottom:0; height:1.6rem; pointer-events:none; background:radial-gradient(ellipse, rgba(255, 214, 120, .32), transparent 72%); filter:blur(7px); }
+.cine-room .c4-disc, .cine-room .draughts-piece { transform:translateZ(12px); }
+@keyframes cine-spot { 50% { opacity:.55; transform:translateX(-42%); } }
+@media (prefers-reduced-motion:reduce) { .cine-room::before { animation:none; } }
 @keyframes luxe-chess-result { from { opacity:0; transform:scale(.92); } to { opacity:1; transform:none; } }
 @media (prefers-reduced-motion:reduce) { .luxe-chess-square--check, .luxe-chess-piece--arrive, .luxe-chess-result { animation:none; } }
 /* Portrait phone: the same landscape Luxe table sits in a 16:9 band, centred
@@ -2369,7 +2389,7 @@ html.luxury-portrait .poker-playing-page .poker-console .poker-deal-dock { min-h
   /* Phones on their side: the board takes the full height, flat, with the panel beside it. */
   .luxe-chess-brand, .luxe-chess-play-page > p { display:none; }
   .luxe-chess-perspective { padding:0; }
-  .luxe-chess-table--3d .luxe-chess-rail { transform:none; }
+  .luxe-chess-table--3d .luxe-chess-rail, .luxe-chess-table--3d .luxe-chess-piece { transform:none; }
   .luxe-chess-stage { grid-template-columns:minmax(0, calc(100svh - 2.5rem)) minmax(12rem, 1fr); }
   .luxe-chess-moves { max-height:6.5rem; }
 }

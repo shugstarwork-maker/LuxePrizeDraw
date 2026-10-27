@@ -23,5 +23,11 @@ test('3D board provides a flat-view alternative and preserves board content', ()
   assert.match(html, /aria-pressed="false"/);
   const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
   assert.match(css, /perspective:1100px/);
-  assert.match(css, /transform:rotateX\(22deg\)/);
+  assert.match(css, /perspective-origin:50% 18%/);
+  assert.match(css, /transform:rotateX\(52deg\)/);
+  assert.match(css, /translateZ\(26px\) rotateX\(-52deg\)/);
+  const page = readFileSync(new URL('../src/components/LuxeChessPage.tsx', import.meta.url), 'utf8');
+  assert.match(page, /cine-room/);
+  const arena = readFileSync(new URL('../src/components/GamesArena.tsx', import.meta.url), 'utf8');
+  assert.match(arena, /cine-room/);
 });
