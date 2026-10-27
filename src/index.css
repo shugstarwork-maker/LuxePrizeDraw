@@ -587,9 +587,11 @@
 @media (prefers-reduced-motion:reduce) { .compact-coverflow__card { transition:none; } }
 
 /* Shared stacked-deck card design */
-.deck-card { position:relative; overflow:hidden; height:clamp(24rem,110vw,28rem); border:1px solid #c4a25c88; border-radius:1.75rem; background:#0a0805; box-shadow:0 22px 48px #000c, 0 0 34px #e8bb4622; }
-.deck-card__bg { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
-.deck-card__progress { margin-top:.6rem; }
+.deck-card { position:relative; overflow:hidden; display:flex; flex-direction:column; height:clamp(24rem,110vw,28rem); border:1px solid #c4a25c88; border-radius:1.75rem; background:#0a0805; box-shadow:0 22px 48px #000c, 0 0 34px #e8bb4622; }
+.deck-card__stage { position:relative; flex:1 1 auto; min-height:0; overflow:hidden; background:#0a0805; }
+.deck-card__bg { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center; }
+.deck-card__progress { margin-top:0; min-width:0; }
+.deck-card__bar .deck-card__progress small { color:#ffffff99; }
 .deck-card__track { position:relative; height:6px; border-radius:999px; background:rgba(255,255,255,.14); overflow:hidden; }
 .deck-card__track span { position:absolute; inset:0 auto 0 0; background:linear-gradient(90deg,#f5d77a,#d4af37); }
 .deck-card__progress small { display:block; margin-top:.35rem; font-size:10px; font-weight:700; letter-spacing:.06em; color:rgba(255,255,255,.6); }
@@ -599,15 +601,25 @@
 .deck-card__panel { position:absolute; left:.8rem; top:16%; display:flex; flex-direction:column; gap:.15rem; padding:.8rem .85rem; max-width:62%; border-radius:1.1rem; background:#ffffff14; border:1px solid #ffffff2b; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); z-index:2; }
 .deck-card__panel p { display:flex; align-items:center; gap:.5rem; padding:.28rem .15rem; font-size:.66rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:#fff; }
 .deck-card__panel p svg { color:#ffe6a0; flex:none; }
-.deck-card__bottom { position:absolute; left:0; right:0; bottom:0; padding:0 2.4rem 1.1rem 1.1rem; display:flex; flex-direction:column; gap:.6rem; z-index:2; }
-.deck-card__title { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+.deck-card__bar { flex:none; display:flex; flex-direction:column; gap:.28rem; padding:.42rem .7rem .5rem; background:linear-gradient(180deg,#1c150c,#0c0a07); border-top:1px solid #e7c56a66; }
+.deck-card__bar-head { display:flex; align-items:center; justify-content:space-between; gap:.5rem; min-width:0; }
+.deck-card__title { margin:0; min-width:0; overflow:hidden; font-size:.78rem; font-weight:900; letter-spacing:.01em; color:#fff; white-space:nowrap; text-overflow:ellipsis; }
+.deck-card__bar-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.4rem; margin:0; }
+.deck-card__bar-grid div { min-width:0; }
+.deck-card__bar-grid dt { font-size:.48rem; font-weight:800; letter-spacing:.08em; line-height:1.15; text-transform:uppercase; color:#e7c56a; }
+.deck-card__bar-grid dd { margin:0; overflow:hidden; font-size:.74rem; font-weight:900; line-height:1.15; color:#fff; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+.deck-card__facts { margin:0; overflow:hidden; font-size:.62rem; font-weight:700; letter-spacing:.04em; color:#ffe6a0cc; white-space:nowrap; text-overflow:ellipsis; }
+.deck-card__extra { min-width:0; }
+.deck-card__meta { display:flex; flex-wrap:wrap; align-items:center; gap:.15rem .55rem; }
+.luxe-brand-theme .deck-card__bar .cash-prize-heading { font-size:.78rem; line-height:1.2; text-shadow:none; }
 .deck-card__stats { display:flex; justify-content:space-between; gap:.5rem; }
 .deck-card__stats span { display:flex; flex-direction:column; min-width:0; }
 .deck-card__stats b { font-size:clamp(.95rem,4vw,1.25rem); font-weight:900; color:#fff; text-shadow:0 1px 6px #000; }
 .deck-card__stats small { font-size:.56rem; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:#ffe6a0; text-shadow:0 1px 4px #000; }
-.deck-card__play { display:flex; align-items:center; justify-content:center; gap:.35rem; padding:.75rem 1rem; border-radius:999px; background:linear-gradient(#fff0b0,#ffbd22); color:#140c00; font-weight:900; font-size:.95rem; box-shadow:0 10px 24px rgba(251,191,36,.35); }
+.deck-card__play { display:inline-flex; flex:none; align-items:center; justify-content:center; gap:.2rem; padding:.32rem .7rem; border-radius:999px; background:linear-gradient(#fff0b0,#ffbd22); color:#140c00; font-weight:900; font-size:.68rem; }
 .deck-card__play:focus-visible { outline:3px solid white; outline-offset:3px; }
-.deck-card__note { font-size:.6rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:#ffe6a0cc; text-shadow:0 1px 4px #000; text-align:center; }
+.deck-card__note { margin:0; font-size:.56rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:#ffe6a0aa; }
+
 .seasonal-snow { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
 .seasonal-snow > span { position:absolute; top:-2rem; border-radius:50%; background:#fff; opacity:.7; box-shadow:0 0 5px #d9eeff80; animation:seasonal-snowfall linear infinite; }
 .santa-flight { position:absolute; top:12%; left:0; display:flex; align-items:center; gap:.4rem; width:max-content; font-size:clamp(1.5rem,3vw,2.5rem); pointer-events:none; animation:santa-crossing 32s linear infinite; filter:drop-shadow(0 3px 8px #0008); }
@@ -1164,13 +1176,16 @@
 
 /* Shared draw amounts only: never animate pending labels or game balances. */
 @keyframes draw-gold-pulse { 0%,100% { opacity:1; filter:brightness(1.15); } 50% { opacity:.7; filter:brightness(.95); } }
-.draw-value-highlights dd.draw-gold-amount,.cash-swell-card .cash-prize-heading,.headline-choice-title strong { animation:cash-letter-swell 7s ease-in-out infinite,draw-gold-pulse 3s ease-in-out infinite; transform-origin:left center; }
+.draw-value-highlights dd.draw-gold-amount,.headline-choice-title strong { animation:cash-letter-swell 7s ease-in-out infinite,draw-gold-pulse 3s ease-in-out infinite; transform-origin:left center; }
+@keyframes cash-amount-pulse { 0%,100% { opacity:1; filter:brightness(1.15); } 50% { opacity:.65; filter:brightness(.95); } }
+.cash-swell-card :is(.cash-prize-heading,.cash-entry-amount) { animation:cash-letter-swell 7s ease-in-out infinite,cash-amount-pulse 3s ease-in-out infinite; transform-origin:left center; }
+.cash-swell-card .cash-entry-amount { display:inline-block; }
 .headline-gold-flames { position:relative; isolation:isolate; }
 .headline-gold-flames::before { content:''; position:absolute; inset:-.15em -.05em -.05em; z-index:-1; pointer-events:none; background:radial-gradient(ellipse at 10% 80%,#ffd34b99,transparent 20%),radial-gradient(ellipse at 35% 65%,#ffbd2699,transparent 23%),radial-gradient(ellipse at 60% 75%,#ffe9a0aa,transparent 20%),radial-gradient(ellipse at 85% 70%,#daa52099,transparent 22%); filter:blur(8px); transform-origin:center bottom; animation:headline-gold-flame 4s ease-in-out infinite; }
 @keyframes headline-gold-flame { 0%,100% { transform:scaleY(.8); opacity:.45; } 50% { transform:scaleY(1.2) translateY(-.08em); opacity:.7; } }
-@media(hover:hover) { .draw-value-highlights:hover dd.draw-gold-amount,.headline-choice-title:hover strong,.headline-choice-title:hover strong::before { animation-play-state:paused; } }
-.draw-value-highlights:focus-within dd.draw-gold-amount,.headline-luxe-card:focus-within .headline-gold-flames,.headline-luxe-card:focus-within .headline-gold-flames::before { animation-play-state:paused; }
-@media(prefers-reduced-motion:reduce) { .draw-value-highlights dd.draw-gold-amount,.cash-swell-card .cash-prize-heading,.headline-choice-title strong { animation:none; transform:none; opacity:1; filter:none; }.headline-gold-flames::before { animation:none; display:none; } }
+@media(hover:hover) { .draw-value-highlights:hover dd.draw-gold-amount,.headline-choice-title:hover strong,.headline-choice-title:hover strong::before,.cash-swell-card:hover :is(.cash-prize-heading,.cash-entry-amount) { animation-play-state:paused; } }
+.draw-value-highlights:focus-within dd.draw-gold-amount,.headline-luxe-card:focus-within .headline-gold-flames,.headline-luxe-card:focus-within .headline-gold-flames::before,.cash-swell-card:focus-within :is(.cash-prize-heading,.cash-entry-amount) { animation-play-state:paused; }
+@media(prefers-reduced-motion:reduce) { .draw-value-highlights dd.draw-gold-amount,.cash-swell-card .cash-prize-heading,.cash-swell-card .cash-entry-amount,.headline-choice-title strong { animation:none; transform:none; opacity:1; filter:none; }.headline-gold-flames::before { animation:none; display:none; } }
 
 /* Holiday-choice examples: vivid scenery with contained, readable gold copy. */
 .luxury-holidays .holiday-card-photo { filter:brightness(.92) saturate(1.45) contrast(1.08); }
@@ -1301,13 +1316,13 @@
   .lounge-table-status { font-size:.6rem; }
 }
 
-/* Cash prizes — huge scrolling gold banner */
-.cash-banner { position:relative; overflow:hidden; margin:0 0 1.5rem; margin-left:calc(50% - 50vw); margin-right:calc(50% - 50vw); width:100vw; border-block:2px solid #ffdf80; background:linear-gradient(90deg,#1a1204,#3a2a08 30%,#ffe08a 50%,#3a2a08 70%,#1a1204); background-size:220% 100%; animation:cash-banner-sheen 3.2s linear infinite; }
-.cash-banner__track { display:flex; width:max-content; white-space:nowrap; animation:cash-banner-scroll 14s linear infinite; }
-.cash-banner__track span { font-family:Georgia,'Times New Roman',serif; font-size:clamp(1.5rem,6.5vw,2.7rem); font-weight:900; letter-spacing:.06em; line-height:1.1; padding:.4em 0; color:#ffd24a; text-shadow:0 0 14px #ffbf00aa, 0 3px 0 #7a5210, 0 0 42px #ffb30066; animation:cash-banner-flash 1.1s ease-in-out infinite; }
+/* Latest-winners strip — a slim gold ticker, not a full-height banner */
+.cash-banner { position:relative; overflow:hidden; margin:0 0 .85rem; margin-left:calc(50% - 50vw); margin-right:calc(50% - 50vw); width:100vw; border-block:1px solid #ffdf80; background:linear-gradient(90deg,#1a1204,#3a2a08 30%,#ffe08a 50%,#3a2a08 70%,#1a1204); background-size:220% 100%; animation:cash-banner-sheen 3.2s linear infinite; }
+.cash-banner__track { display:flex; width:max-content; white-space:nowrap; animation:cash-banner-scroll 18s linear infinite; }
+.cash-banner__track span { font-family:Georgia,'Times New Roman',serif; font-size:clamp(.8rem,2.6vw,1.15rem); font-weight:900; letter-spacing:.08em; line-height:1.2; padding:.28em 0; color:#ffd24a; text-shadow:0 0 8px #ffbf0088, 0 1px 0 #7a5210; animation:cash-banner-flash 1.1s ease-in-out infinite; }
 @keyframes cash-banner-scroll { from { transform:translateX(0); } to { transform:translateX(-50%); } }
 @keyframes cash-banner-sheen { from { background-position:0% 0; } to { background-position:220% 0; } }
-@keyframes cash-banner-flash { 0%,100% { color:#ffd24a; text-shadow:0 0 14px #ffbf00aa,0 3px 0 #7a5210,0 0 42px #ffb30066; } 50% { color:#fff3c4; text-shadow:0 0 26px #ffdf80,0 3px 0 #7a5210,0 0 70px #ffd24a; } }
+@keyframes cash-banner-flash { 0%,100% { color:#ffd24a; text-shadow:0 0 8px #ffbf0088,0 1px 0 #7a5210; } 50% { color:#fff3c4; text-shadow:0 0 12px #ffdf80,0 1px 0 #7a5210; } }
 @media (prefers-reduced-motion:reduce) { .cash-banner__track,.cash-banner,.cash-banner__track span { animation:none; } }
 
 /* Duolingo-style league race FX */
@@ -1365,7 +1380,8 @@
 .headline-deck__headline { font-weight:900; font-size:clamp(1.35rem,6.4vw,1.9rem); line-height:1.08; letter-spacing:.02em; color:#fff; text-shadow:0 2px 12px #000, 0 0 26px #00000088; max-width:88%; }
 .headline-deck__headline b { color:#ffd35c; }
 .headline-deck__headline i { font-style:normal; color:#ffe6a0; font-size:.62em; letter-spacing:.14em; text-transform:uppercase; }
-.headline-luxe-deck .deck-card__stats b { font-size:clamp(.95rem,4vw,1.2rem); }
+.headline-luxe-deck .deck-card__bar .headline-deck__headline { font-size:.95rem; max-width:100%; text-shadow:none; }
+.headline-luxe-deck .deck-card__bar .headline-deck__eyebrow { text-shadow:none; }
 
 /* ── Cinematic Connect Four ── */
 .c4-scene .board3d-tilt { transform: rotateX(30deg); }
@@ -1536,6 +1552,41 @@ body::after {
   animation: cine-shimmer 7s ease-in-out infinite;
 }
 @keyframes cine-shimmer { 0%, 100% { background-position: 120% 0; } 50% { background-position: -20% 0; } }
+
+/* Luxe Casino welcome gate: black-gold rays + title rules */
+.casino-welcome {
+  background:
+    radial-gradient(ellipse 90% 32% at 50% 0%, rgba(246, 201, 94, .16), transparent 62%),
+    linear-gradient(112deg, transparent 42%, rgba(246, 201, 94, .10) 47%, transparent 53%),
+    linear-gradient(112deg, transparent 58%, rgba(246, 201, 94, .06) 63%, transparent 70%),
+    linear-gradient(68deg, transparent 42%, rgba(246, 201, 94, .10) 47%, transparent 53%),
+    linear-gradient(68deg, transparent 58%, rgba(246, 201, 94, .06) 63%, transparent 70%),
+    #070605;
+}
+.casino-welcome-rays::before,
+.casino-welcome-rays::after {
+  content: "";
+  position: absolute;
+  top: -30%;
+  width: 55%;
+  height: 130%;
+  pointer-events: none;
+  background: repeating-linear-gradient(100deg, transparent 0 14px, rgba(246, 201, 94, .09) 14px 26px, transparent 26px 46px);
+  -webkit-mask-image: linear-gradient(180deg, #000, transparent 85%);
+  mask-image: linear-gradient(180deg, #000, transparent 85%);
+}
+.casino-welcome-rays::before { left: -14%; transform: rotate(14deg); }
+.casino-welcome-rays::after { right: -14%; transform: rotate(-14deg); }
+.casino-welcome-rule {
+  height: 2px;
+  flex: 0 0 2.2rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, #f0c86e 55%, #fff3b0);
+  box-shadow: 0 0 10px rgba(240, 200, 110, .55);
+}
+.casino-welcome-rule:last-child {
+  background: linear-gradient(270deg, transparent, #f0c86e 55%, #fff3b0);
+}
 
 /* Cinematic card: deep shadows, edge light, hover dolly */
 .cine-card {
@@ -2216,6 +2267,104 @@ body::after {
 @keyframes luxe-chess-arrive { from { transform:scale(1.35); filter:drop-shadow(0 0 14px #f6c945); } to { transform:none; } }
 @keyframes luxe-chess-result { from { opacity:0; transform:scale(.92); } to { opacity:1; transform:none; } }
 @media (prefers-reduced-motion:reduce) { .luxe-chess-square--check, .luxe-chess-piece--arrive, .luxe-chess-result { animation:none; } }
+/* Portrait phone: the same landscape Luxe table sits in a 16:9 band, centred
+   on black, console beside the felt. The rotate gate stays in the DOM for
+   orientation truth, but it does not cover this band. */
+html.luxury-portrait:has(.poker-playing-page),
+html.luxury-portrait:has(.poker-playing-page) body,
+html.luxury-portrait:has(.poker-playing-page) .storm-page { background:#000; overflow:hidden; }
+html.luxury-portrait:has(.poker-playing-page) .lightning-backdrop,
+html.luxury-portrait:has(.poker-playing-page) .storm-page__content > aside,
+html.luxury-portrait:has(.poker-playing-page) .storm-page__content > footer,
+html.luxury-portrait:has(.poker-playing-page) .app-audio-controls,
+html.luxury-portrait:has(.poker-playing-page) [role="dialog"][aria-label="Install the LuxePrizeDraw app"] { display:none; }
+html.luxury-portrait .poker-playing-page {
+  position:fixed; z-index:80; left:50%; top:50%; transform:translate(-50%, -50%);
+  width:min(100vw, calc(100dvh * 16 / 9)); aspect-ratio:16 / 9; height:auto; min-height:0; max-height:100dvh;
+  margin:0; padding:0; overflow:hidden; background:#050403; border-radius:0;
+}
+html.luxury-portrait .poker-playing-page .poker-landscape-gate { display:none; }
+html.luxury-portrait .poker-playing-page .poker-playing-wrap { visibility:visible !important; position:absolute; inset:0 auto 0 0; width:73%; max-width:none; height:100%; margin:0; padding:0; }
+html.luxury-portrait .poker-playing-page:not(:has(.poker-console)) .poker-playing-wrap { width:100%; }
+html.luxury-portrait .poker-playing-page .poker-playing-wrap > header,
+html.luxury-portrait .poker-playing-page .poker-fullscreen-controls,
+html.luxury-portrait .poker-playing-page .poker-round-meta,
+html.luxury-portrait .poker-playing-page .poker-social-controls,
+html.luxury-portrait .poker-playing-page .poker-round-status,
+html.luxury-portrait .poker-playing-page .luxe-dealer-wrap,
+html.luxury-portrait .poker-playing-page .poker-ticker,
+html.luxury-portrait .poker-playing-page .luxe-pot-chips,
+html.luxury-portrait .poker-playing-page .poker-thinking-note,
+html.luxury-portrait .poker-playing-page [data-testid="poker-disclaimer"] { display:none; }
+html.luxury-portrait .poker-playing-page .poker-game-article,
+html.luxury-portrait .poker-playing-page .poker-surface-frame,
+html.luxury-portrait .poker-playing-page .poker-table-scroll,
+html.luxury-portrait .poker-playing-page .poker-table-artwork { position:absolute; inset:0; width:100%; height:100%; margin:0; padding:0; border:0; border-radius:0; overflow:hidden; box-shadow:none; }
+html.luxury-portrait .poker-playing-page .poker-table-artwork > img { width:100%; height:100%; object-fit:cover; object-position:50% 62%; transform:scale(1.08); }
+html.luxury-portrait .poker-playing-page .poker-table-artwork__live { inset:7% 3% 8% 3%; }
+html.luxury-portrait .poker-playing-page .poker-table-artwork__state { position:absolute; left:1.2vw; bottom:1.2vw; z-index:6; max-width:40%; display:flex; flex-direction:column; align-items:flex-start; gap:.15vw; margin:0; padding:.45vw .7vw; border:1px solid rgba(217,183,100,.55); border-top:1px solid rgba(217,183,100,.55); border-radius:.6vw; background:rgba(8,6,3,.88); font-size:1.35vw; line-height:1.25; text-align:left; }
+html.luxury-portrait .poker-playing-page .poker-below-table { position:absolute; z-index:6; left:1.5%; bottom:2%; width:46%; margin:0; }
+html.luxury-portrait .poker-playing-page .poker-below-table > * { display:none; }
+html.luxury-portrait .poker-playing-page .poker-below-table > .grid,
+html.luxury-portrait .poker-playing-page .poker-below-table > .poker-action-dock,
+html.luxury-portrait .poker-playing-page .poker-below-table > .poker-deal-dock { display:grid; }
+html.luxury-portrait .poker-playing-page .poker-live-seats > div { width:16% !important; max-width:16% !important; padding:0 !important; border-color:transparent !important; background:transparent !important; box-shadow:none !important; backdrop-filter:none !important; }
+html.luxury-portrait .poker-playing-page [data-seat-index="0"] { left:7% !important; top:58% !important; }
+html.luxury-portrait .poker-playing-page [data-seat-index="1"] { left:84% !important; top:24% !important; }
+html.luxury-portrait .poker-playing-page [data-seat-index="2"] { left:14% !important; top:20% !important; }
+html.luxury-portrait .poker-playing-page [data-seat-index="3"] { left:86% !important; top:58% !important; }
+html.luxury-portrait .poker-playing-page [data-seat-index="4"] { left:68% !important; top:80% !important; }
+html.luxury-portrait .poker-playing-page [data-seat-index="5"] { left:40% !important; top:78% !important; }
+html.luxury-portrait .poker-playing-page .player-turn-ring { width:6.2vw; height:6.2vw; }
+html.luxury-portrait .poker-playing-page .poker-live-seats b { font-size:1.55vw !important; margin-top:.1vw !important; text-shadow:0 1px 2px #000; }
+html.luxury-portrait .poker-playing-page .poker-live-seats small { font-size:1.4vw !important; color:#ffe6a0 !important; }
+html.luxury-portrait .poker-playing-page .poker-seat-hand span { height:4vw !important; width:2.8vw !important; font-size:1.5vw !important; }
+html.luxury-portrait .poker-playing-page .poker-bet-chips { scale:.42; }
+html.luxury-portrait .poker-playing-page .poker-bet-chips b { font-size:1.5vw; }
+html.luxury-portrait .poker-playing-page .poker-console {
+  position:absolute; top:0; right:0; bottom:0; left:auto; width:27%; z-index:5;
+  display:flex; flex-direction:column; gap:.55vw; padding:1vw .7vw;
+  overflow-x:hidden; overflow-y:auto; scrollbar-width:none;
+  background:linear-gradient(180deg,#120f0a,#070605 28%);
+  border-left:1px solid rgba(217,183,100,.45); box-shadow:none;
+}
+html.luxury-portrait .poker-playing-page .poker-console::-webkit-scrollbar { display:none; }
+html.luxury-portrait .poker-playing-page .poker-console .hud-zone { position:static; display:block; }
+html.luxury-portrait .poker-playing-page .poker-console .hud-zone--tr { display:flex; gap:.35vw; order:1; }
+html.luxury-portrait .poker-playing-page .poker-console .hud-zone--tl { order:2; }
+html.luxury-portrait .poker-playing-page .poker-console .hud-zone--br { order:4; }
+html.luxury-portrait .poker-playing-page .poker-console .hud-zone--bl { order:5; display:flex; }
+html.luxury-portrait .poker-playing-page .poker-console .hud-zone--bl .hud-icon-btn { display:none; }
+html.luxury-portrait .poker-playing-page .poker-console .hud-zone--bl .hud-chat-pop { position:static; width:100%; max-height:18vw; }
+html.luxury-portrait .poker-playing-page .poker-console .poker-console-quick { order:6; display:flex; flex-wrap:wrap; justify-content:space-around; gap:.2vw; border:1px solid rgba(217,183,100,.4); border-radius:.7vw; background:rgba(5,4,2,.55); padding:.4vw .15vw; }
+html.luxury-portrait .poker-playing-page .poker-console .poker-console-options { order:7; display:flex; flex-direction:column; gap:.28vw; border:1px solid rgba(217,183,100,.4); border-radius:.7vw; background:rgba(5,4,2,.55); padding:.4vw; }
+html.luxury-portrait .poker-playing-page .poker-console .poker-console__collapse,
+html.luxury-portrait .poker-playing-page .poker-console .poker-console-tabs,
+html.luxury-portrait .poker-playing-page .poker-console .poker-console-hand,
+html.luxury-portrait .poker-playing-page .poker-console .poker-ticker { display:none; }
+html.luxury-portrait .poker-playing-page .poker-console .console-section { display:flex; align-items:center; gap:.3vw; margin:0 0 .25vw; font-size:1.2vw; font-weight:900; letter-spacing:.12em; text-transform:uppercase; color:#d9b764; }
+html.luxury-portrait .poker-playing-page .poker-console .hud-zone--tr .hud-icon-btn { flex:0 0 auto; width:2.6vw; height:auto; min-height:5vw; border-radius:.55vw; background:rgba(5,4,2,.7); }
+html.luxury-portrait .poker-playing-page .poker-console .console-nav-btn { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.12vw; width:auto; height:auto; min-height:5vw; padding:.25vw .1vw; border-radius:.6vw; border-color:rgba(217,183,100,.5); background:rgba(5,4,2,.7); }
+html.luxury-portrait .poker-playing-page .poker-console .console-nav-btn span { display:block; font-size:1.25vw; font-weight:800; letter-spacing:.03em; text-transform:uppercase; line-height:1.1; }
+html.luxury-portrait .poker-playing-page .poker-console .console-nav-btn svg,
+html.luxury-portrait .poker-playing-page .poker-console .hud-icon-btn svg { width:1.7vw; height:1.7vw; }
+html.luxury-portrait .poker-playing-page .poker-console .hud-panel { width:100%; max-width:none; padding:.4vw .55vw; border-radius:.6vw; font-size:1.35vw; }
+html.luxury-portrait .poker-playing-page .poker-console .hud-panel__row { white-space:normal; font-size:1.3vw; line-height:1.25; }
+html.luxury-portrait .poker-playing-page .poker-console .console-table-card__title { font-size:1.35vw; letter-spacing:.04em; text-transform:uppercase; color:#ffe095; }
+html.luxury-portrait .poker-playing-page .poker-console .console-table-card__coin { width:3vw; height:3vw; }
+html.luxury-portrait .poker-playing-page .poker-console .console-seat-panel__icon { width:2.2vw; height:2.2vw; }
+html.luxury-portrait .poker-playing-page .poker-console .poker-console-quick .console-nav-btn { flex:0 0 auto; border:0; background:transparent; min-height:0; padding:0; gap:.15vw; }
+html.luxury-portrait .poker-playing-page .poker-console .poker-console-quick .console-nav-btn svg { box-sizing:border-box; width:3.2vw; height:3.2vw; padding:.65vw; border:1px solid rgba(217,183,100,.65); border-radius:50%; background:rgba(217,183,100,.06); }
+html.luxury-portrait .poker-playing-page .poker-console .console-option-row { display:flex; align-items:center; gap:.35vw; width:100%; padding:.28vw .4vw; border:1px solid rgba(217,183,100,.28); border-radius:.4vw; background:rgba(5,4,2,.38); color:rgba(255,240,200,.92); font-size:1.35vw; font-weight:800; text-align:left; }
+html.luxury-portrait .poker-playing-page .poker-console .console-option-row > span { flex:1; }
+html.luxury-portrait .poker-playing-page .poker-console .console-option-row svg { width:1.45vw; height:1.45vw; flex-shrink:0; }
+html.luxury-portrait .poker-playing-page .poker-console:has(.poker-action-dock) .poker-console-options,
+html.luxury-portrait .poker-playing-page .poker-console:has(.poker-deal-dock) .poker-console-options { margin-bottom:14vw; }
+html.luxury-portrait .poker-playing-page .poker-console .poker-action-dock,
+html.luxury-portrait .poker-playing-page .poker-console .poker-deal-dock { position:absolute; order:20; left:.35vw; right:.35vw; bottom:.35vw; transform:none; width:auto; margin:0; padding:.3vw; z-index:4; background:#0a0805; border:1px solid rgba(217,183,100,.45); border-radius:.5vw; }
+html.luxury-portrait .poker-playing-page .poker-console .poker-action-dock button,
+html.luxury-portrait .poker-playing-page .poker-console .poker-deal-dock { min-height:0; padding:.4vw; font-size:1.35vw; }
+
 @media (orientation:landscape) and (max-height:500px) {
   /* Phones on their side: the board takes the full height, flat, with the panel beside it. */
   .luxe-chess-brand, .luxe-chess-play-page > p { display:none; }

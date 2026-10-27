@@ -339,10 +339,10 @@ export const LuxePokerLeague: React.FC = () => {
 
   useEffect(() => { localStorage.setItem("luxe-poker-chips", String(chips)); }, [chips]);
 
-  // Landscape-only play: pure CSS — portrait shows a blocking rotate gate,
-  // landscape pins the table to the viewport (position:fixed inset:0). No JS
-  // sizing: screen.height/innerHeight disagree on real phones and caused the
-  // oversized-canvas "black screen" on rotate.
+  // Portrait phones letterbox this same landscape table into a 16:9 band
+  // (black above and below). The luxury-portrait class is still the live
+  // width-vs-height truth — CSS orientation queries alone misreport on some
+  // Android WebViews and used to trap the table off-screen.
 
   const note = (message: string) => { setStatus(message); setFeed((items) => [message, ...items].slice(0, 4)); };
   // Server-run table: the server deals, plays the bots and holds the stacks; the lounge shows its state.
@@ -858,7 +858,7 @@ export const LuxePokerLeague: React.FC = () => {
                   const isWinner = g.handOver && !p.sittingOut && g.winners.some((w) => w.id === p.id);
                   const seat = v.seats.find((x) => x.id === p.id);
                   const showCards = Boolean(p.cards[0]) && (isMe || (g.stage === "showdown" && !p.folded && !p.sittingOut));
-                  return <div key={p.id} className={`pointer-events-auto absolute w-[4.9rem] rounded-2xl border px-1.5 py-1 text-center shadow-2xl backdrop-blur-md transition ${p.sittingOut ? "opacity-30" : p.folded ? "opacity-45" : ""} ${isWinner ? "border-emerald-300 bg-emerald-300/20" : isTurn ? "border-amber-200 bg-amber-300/20 poker-turn-ring" : isMe ? "poker-seat-you border-amber-200/70 bg-amber-300/10" : "border-white/15 bg-black/55"}`} style={{ left: `${slot.px}%`, top: `${slot.py}%`, zIndex: 10 + Math.round(slot.py), transform: `translate(-50%,-50%) scale(${slot.sc})` }}>
+                  return <div key={p.id} data-seat-index={Math.min(i, SEAT_SLOTS.length - 1)} className={`pointer-events-auto absolute w-[4.9rem] rounded-2xl border px-1.5 py-1 text-center shadow-2xl backdrop-blur-md transition ${p.sittingOut ? "opacity-30" : p.folded ? "opacity-45" : ""} ${isWinner ? "border-emerald-300 bg-emerald-300/20" : isTurn ? "border-amber-200 bg-amber-300/20 poker-turn-ring" : isMe ? "poker-seat-you border-amber-200/70 bg-amber-300/10" : "border-white/15 bg-black/55"}`} style={{ left: `${slot.px}%`, top: `${slot.py}%`, zIndex: 10 + Math.round(slot.py), transform: `translate(-50%,-50%) scale(${slot.sc})` }}>
                     <PlayerTurnRing active={isTurn} seconds={isTurn ? 20 : 20} name={p.name}>{isMe && avatar ? <img src={avatar} alt="Your avatar" className="h-full w-full object-cover" /> : p.initials}</PlayerTurnRing>
                     <b className="mt-1 block truncate text-[9px] text-amber-100">{p.name}{isMe ? " — you" : ""}{g.players[g.dealerIndex]?.id === p.id ? " 🔘" : ""}{!seat?.connected && <span className="text-rose-300"> · offline</span>}</b>
                     <small className="block text-[8px] text-white/55">{p.sittingOut ? "Watching" : p.chips.toLocaleString()}{p.allIn ? " · ALL-IN" : ""}{p.folded ? " · folded" : ""}</small>
@@ -916,7 +916,7 @@ export const LuxePokerLeague: React.FC = () => {
                 const isTurn = !game.handOver && game.players[game.turnIndex]?.id === p.id;
                 const isWinner = game.handOver && !p.sittingOut && game.winners.some((w) => w.id === p.id);
                 const showCards = !p.isBot || (game.stage === "showdown" && !p.folded && !p.sittingOut);
-                return <div key={p.id} onClick={() => p.isBot && setSelectedSeat(p.name)} data-seat={p.id} className={`${isYou ? "poker-seat-you " : ""}pointer-events-auto absolute w-[4.9rem] rounded-2xl border px-1.5 py-1 text-center shadow-2xl backdrop-blur-md transition ${p.sittingOut ? "opacity-30" : p.folded ? "opacity-45" : ""} ${isWinner ? "border-emerald-300 bg-emerald-300/20" : isTurn ? "border-amber-200 bg-amber-300/20 poker-turn-ring" : !p.isBot ? "border-amber-200/70 bg-amber-300/10" : selectedSeat === p.name ? "border-fuchsia-300 bg-fuchsia-300/15" : "border-white/15 bg-black/55"}`} style={{ left: `${slot.px}%`, top: `${slot.py}%`, zIndex: 10 + Math.round(slot.py), transform: `translate(-50%,-50%) scale(${slot.sc.toFixed(2)})` }}>
+                return <div key={p.id} onClick={() => p.isBot && setSelectedSeat(p.name)} data-seat={p.id} data-seat-index={slotIndex} className={`${isYou ? "poker-seat-you " : ""}pointer-events-auto absolute w-[4.9rem] rounded-2xl border px-1.5 py-1 text-center shadow-2xl backdrop-blur-md transition ${p.sittingOut ? "opacity-30" : p.folded ? "opacity-45" : ""} ${isWinner ? "border-emerald-300 bg-emerald-300/20" : isTurn ? "border-amber-200 bg-amber-300/20 poker-turn-ring" : !p.isBot ? "border-amber-200/70 bg-amber-300/10" : selectedSeat === p.name ? "border-fuchsia-300 bg-fuchsia-300/15" : "border-white/15 bg-black/55"}`} style={{ left: `${slot.px}%`, top: `${slot.py}%`, zIndex: 10 + Math.round(slot.py), transform: `translate(-50%,-50%) scale(${slot.sc.toFixed(2)})` }}>
                   {!p.isBot ? <label className="block cursor-pointer"><PlayerTurnRing active={isTurn} seconds={seconds} name={p.name}>{avatar ? <img src={avatar} alt="Your avatar" className="h-full w-full object-cover" /> : p.initials}</PlayerTurnRing><input aria-label="Upload avatar" type="file" accept="image/*" className="hidden" onChange={(e) => chooseAvatar(e.target.files?.[0])} /></label> : <PlayerTurnRing active={isTurn} seconds={20} name={p.name}>{p.initials}</PlayerTurnRing>}
                   <b className="mt-1 block truncate text-[9px] text-amber-100">{p.name}{!p.sittingOut && game.players[game.dealerIndex]?.id === p.id ? " 🔘" : ""}</b>
                   <small className="text-[8px] text-white/55">{p.sittingOut ? (p.isBot ? "Away" : "Watching") : p.chips.toLocaleString()}{p.allIn ? " · ALL-IN" : ""}</small>
@@ -951,7 +951,7 @@ export const LuxePokerLeague: React.FC = () => {
         Everywhere else the wrapper is display:contents and each child keeps its
         classic position (dock under the table, ticker bottom-left, corners). */}
     <PokerHudFrame
-      tableName={activeTable?.name ?? "League table"} blinds={activeTable?.blinds ?? "—"} handNumber={game?.handNumber ?? 0}
+      tableName={activeTable?.name ?? `${leagueTier.name} League Table`} blinds={activeTable?.blinds ?? leagueTable.blinds} handNumber={game?.handNumber ?? 0}
       tierName={leagueTier.name} tierColour={leagueTier.colour} leagueXp={league.xp}
       wallet={chips} atTable={you?.chips ?? 0} activeBet={you?.bet ?? 0}
       audioOn={enabled} onAudio={() => setEnabled(!enabled)}

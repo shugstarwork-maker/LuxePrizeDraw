@@ -1,5 +1,4 @@
-// Draws page categories, in order: Veno Scorp, Moss Prestige cars, cash, luxe prizes and quick
-// cash draws (the holiday carousel sits between luxe prizes and quick draws). Every
+// Draws page categories: vehicles, cash, luxe prizes and quick cash draws. Every
 // card uses the shared DeckCard + RollingCardCarousel. Nothing here takes entries
 // or payments; "Enter now" opens the full terms page only.
 import { DeckCard, deckGo } from "./DeckCard";
@@ -10,20 +9,21 @@ import { HeadlineLuxeCard } from "./FeaturedDraws";
 import { Banknote, CarFront, Cpu, Gem, ShieldCheck, Sparkles, Ticket, Trophy } from "lucide-react";
 
 const vehicles = [
-  { name: "2019 BMW M4 Competition Convertible", image: "/draw-art/car-bmw-m4.jpg", video: "/draw-art/car-bmw-m4.mp4", specs: ["3.0L BiTurbo petrol", "450 PS · Automatic DCT", "25,000 miles"] },
-  { name: "Audi R8", image: "/draw-art/car-audi-r8.jpg", video: "/draw-art/car-audi-r8.mp4", specs: ["V10 mid-engine", "Quattro all-wheel drive", "Moss Prestige preview"] },
-  { name: "Volkswagen Golf R32", image: "/draw-art/car-golf-r32.jpg", video: "/draw-art/car-golf-r32.mp4", specs: ["Classic performance coupé", "Manual or DSG", "Moss Prestige preview"] },
+  { name: "2019 BMW M4 Competition Convertible", image: "/draw-art/car-bmw-m4.jpg", video: "/draw-art/car-bmw-m4-cine.mp4", specs: ["3.0L BiTurbo petrol", "450 PS · Automatic DCT", "25,000 miles"] },
+  { name: "Audi R8", image: "/draw-art/car-audi-r8.jpg", video: "/draw-art/car-audi-r8-cine.mp4", specs: ["V10 mid-engine", "Quattro all-wheel drive", "Moss Prestige preview"] },
+  { name: "Volkswagen Golf R32", image: "/draw-art/car-golf-r32.jpg", video: "/draw-art/car-golf-r32-cine.mp4", specs: ["Classic performance coupé", "Manual or DSG", "Moss Prestige preview"] },
 ];
 
 const venoPrizes = [
-  { id: "gaming-pc", name: "RTX 5090 Gaming PC", image: "/draw-art/gaming-pc.jpg", video: "/draw-art/gaming-pc.mp4", specs: ["AMD Ryzen 9 9950X3D", "ASUS ROG Astral RTX 5090 32GB", "64GB DDR5 · liquid cooled"], value: "£8,000" },
+  { id: "gaming-pc", name: "RTX 5090 Gaming PC", image: "/draw-art/gaming-pc.jpg", video: "/draw-art/gaming-pc-cine.mp4", specs: ["AMD Ryzen 9 9950X3D", "ASUS ROG Astral RTX 5090 32GB", "64GB DDR5 · liquid cooled"], value: "£8,000" },
   { id: "veno-ryzen-build", name: "Ryzen 9 Gaming Build", image: "/draw-art/veno-ryzen-build.jpg", video: "/draw-art/veno-ryzen-build.mp4", specs: ["AMD Ryzen 9 9950X3D", "64GB DDR5", "Value to be confirmed"], value: "TBC" },
   { id: "veno-rog-build", name: "RTX 5090 Gaming Build", image: "/draw-art/veno-rog-build.jpg", video: "/draw-art/veno-rog-build.mp4", specs: ["ASUS ROG Astral RTX 5090 32GB", "Liquid cooled", "Value to be confirmed"], value: "TBC" },
 ];
 
 const luxePrizes = [
-  { title: "1kg Fine Gold Bar", image: "/draw-art/luxe-gold-bar.jpg", video: "/draw-art/luxe-gold-bar.mp4", facts: ["999.9 fine gold", "Or cash equivalent", "Tracked fulfilment"], value: "1kg gold", equivalent: "Cash equivalent on request" },
-  { title: "Diamond Collection", image: "/draw-art/luxe-diamonds.jpg", video: "/draw-art/luxe-diamonds.mp4", facts: ["Certified stones", "Or cash equivalent", "Insured delivery"], value: "Diamonds", equivalent: "Cash equivalent on request" },
+  { title: "1kg Fine Gold Bar", image: "/draw-art/luxe-gold-held.jpg", video: "/draw-art/luxe-gold-bar-cine.mp4", facts: ["999.9 fine gold", "Or cash equivalent", "Tracked fulfilment"], value: "1kg gold", equivalent: "On request" },
+  { title: "Diamond Collection", image: "/draw-art/luxe-diamonds-held.jpg", video: "/draw-art/luxe-diamonds-cine.mp4", facts: ["Certified stones", "Or cash equivalent", "Insured delivery"], value: "Diamonds", equivalent: "On request" },
+  { title: "Luxe Garden Summer House", image: "/draw-art/summerhouse.jpg", video: "/draw-art/summerhouse-cine.mp4", facts: ["Glass pavilion at dusk", "Or cash equivalent", "Built to order"], value: "Summer house", equivalent: "On request" },
 ];
 
 // Short quick draws: prize is paid out when the pool fills. Fees are shown, not charged.
@@ -87,11 +87,11 @@ export function CashCategory() {
   return <section id="cash-draws" className="border-y border-emerald-200/15 bg-[#010c08]/70 py-20 sm:py-28">
     <div className="mx-auto max-w-7xl px-4 sm:px-6">
       <WinnersBanner category="Cash" />
-      <div className="mt-9"><CategoryHeader eyebrow="Cash only" title="Cash prize draws." intro="Cash prizes only. Every draw shows its entry fee and prize; prize amounts are shown in full before entry." icon={Banknote} /></div>
+      <div className="mt-9"><CategoryHeader eyebrow="Cash only" title="Cash prize draws." intro="Cash prizes from £1,000. Each card shows how many tickets at the proposed entry price would cover that prize. The count is indicative, not a confirmed entry cap, and entries are not open." icon={Banknote} /></div>
       <RollingCardCarousel items={CASH_DRAW_PROPOSALS} getKey={(p) => p.id} label="Cash prize draws" className="mt-9" compactControls
-        renderItem={(p, index) => <DeckCard className="cinematic" title={p.title} image={`/draw-art/cash-${p.entryPence}p.jpg`} video={`/draw-art/cash-${p.entryPence}p.mp4`} progress={{ sold: ticketsSold(p.id), needed: ticketsToUnlock(p.valueGBP, p.entryPence) }}
+        renderItem={(p, index) => <DeckCard className="cinematic cash-swell-card coverflow-draw" titleClassName="cash-prize-heading" title={p.title} image={`/draw-art/cash-${p.entryPence}p.jpg`} video={`/draw-art/cash-${p.entryPence}p-cine.mp4`} progress={{ sold: ticketsSold(p.id), needed: ticketsToUnlock(p.valueGBP, p.entryPence) }}
           facts={[[`Entry ${formatCashEntry(p.entryPence)}`, Ticket], ["CASH ONLY", Banknote], [`Draw ${index + 1} of ${CASH_DRAW_PROPOSALS.length}`, Trophy]]}
-          stats={[{ value: money(p.valueGBP), label: "Prize" }, { value: formatCashEntry(p.entryPence), label: "Entry" }, { value: "Preview", label: "Status" }]}
+          stats={[{ value: money(p.valueGBP), label: "Prize" }, { value: formatCashEntry(p.entryPence), label: "Entry", amount: true }, { value: "Preview", label: "Status" }]}
           cta="Enter now" onCta={terms}
           note="Cash only · preview · entries disabled until licensed" />} />
     </div>
@@ -102,7 +102,7 @@ export function LuxePrizesCategory() {
   return <section id="luxe-prizes" className="border-y border-amber-200/15 bg-black/35 py-20 sm:py-28">
     <div className="mx-auto max-w-7xl px-4 sm:px-6">
       <WinnersBanner category="Luxe Prizes" />
-      <div className="mt-9"><CategoryHeader eyebrow="Luxe prizes" title="Gold and diamonds." intro="Each prize shows its cash equivalent. Winners may take the item or its cash equivalent." icon={Gem} /></div>
+      <div className="mt-9"><CategoryHeader eyebrow="Luxe prizes" title="Gold, diamonds and a summer house." intro="The bar, the stones and a glass summer house, each with its cash equivalent. Winners may take the item or its cash equivalent." icon={Gem} /></div>
       <div className="mt-9"><HeadlineLuxeCard /></div>
       <RollingCardCarousel items={luxePrizes} getKey={(p) => p.title} label="Luxe prizes" className="mt-9" compactControls
         renderItem={(p) => <DeckCard className="cinematic" image={p.image} video={p.video} title={p.title} progress={{ sold: ticketsSold(p.title) }}
@@ -118,9 +118,9 @@ export function QuickDrawsCategory() {
   return <section id="quick-draws" className="border-y border-emerald-200/15 bg-[#010c08]/70 py-20 sm:py-28">
     <div className="mx-auto max-w-7xl px-4 sm:px-6">
       <WinnersBanner category="Quick Draws" />
-      <div className="mt-9"><CategoryHeader eyebrow="Quick cash draws" title="Up to £750, fast draws." intro="Cash only. Each draw closes when enough tickets are sold; administration and processing fees come out of the pool before the prize. Minimum purchase applies." icon={Trophy} /></div>
+      <div className="mt-9"><CategoryHeader eyebrow="Quick cash draws" title="Up to £750, fast draws." intro="Cash only. The ticket count on each card is the indicative number that would cover the proposed prize. It is not a confirmed entry cap. Entries are not open." icon={Trophy} /></div>
       <RollingCardCarousel items={quickDraws} getKey={(d) => d.id} label="Quick cash draws" className="mt-9" compactControls
-        renderItem={(d) => <DeckCard className="cinematic" image={`/draw-art/quick-${d.prize}.jpg`} video={`/draw-art/quick-${d.prize}.mp4`} title={`${money(d.prize)} Quick Draw`} progress={{ sold: ticketsSold(d.id), needed: ticketsToUnlock(d.prize, d.entryPence) }}
+        renderItem={(d) => <DeckCard className="cinematic" image={`/draw-art/quick-${d.prize}.jpg`} video={`/draw-art/quick-${d.prize}-cine.mp4`} title={`${money(d.prize)} Quick Draw`} progress={{ sold: ticketsSold(d.id), needed: ticketsToUnlock(d.prize, d.entryPence) }}
           facts={[[`Entry ${d.entry}`, Ticket], [`Min ${d.minTickets} tickets`, Ticket], ["CASH ONLY", Banknote]]}
           stats={[{ value: money(d.prize), label: "Prize" }, { value: d.entry, label: "Entry" }, { value: `${d.minTickets}+`, label: "Min tickets" }]}
           cta="Enter now" onCta={terms}

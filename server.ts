@@ -22,6 +22,7 @@ import * as holdemTable from "./api/holdemTable";
 import * as chat from "./api/chat";
 import { chatEnabled as chatEnabledNow } from "./api/chat";
 import { alertOps } from "./api/mailer";
+import { installSitePrivacy } from "./api/sitePrivacy";
 import http from "http";
 import dotenv from "dotenv";
 
@@ -59,6 +60,10 @@ app.get("/health", async (_req, res) => {
   res.setHeader("cache-control", "no-store");
   res.json({ ok: true, uptimeSeconds: Math.round(process.uptime()), accountStorage });
 });
+
+// Production keeps the catalogue off the public internet. /health is registered
+// above this gate so Render can still probe the process.
+installSitePrivacy(app);
 
 app.get("/api/ticket-draws/status", async (req, res) => {
   const response = await ticketStatus(new Request(`http://localhost${req.originalUrl}`));
@@ -794,6 +799,9 @@ async function startServer() {
       server: { middlewareMode: true },
       appType: "spa",
     });
+    // Vite publicDir is off because the copy step flakes. Serve public/ in dev
+    // so prize artwork resolves the same way production does.
+    app.use(express.static(path.join(process.cwd(), "public")));
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), "dist");

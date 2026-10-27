@@ -6,6 +6,7 @@ import crypto from "crypto";
 import { WebSocketServer, WebSocket } from "ws";
 import type { IncomingMessage, Server } from "http";
 import * as accounts from "./accounts";
+import { requestHasSiteAccess } from "./sitePrivacy";
 import * as wallet from "./wallet";
 import { withLock } from "./lock";
 import { applyAction, botAction, createTable, dealHand, makeHoldemDeck, shuffleHoldem, type BotStyle, type HoldemAction, type HoldemCard, type HoldemState } from "../src/games/holdem";
@@ -324,6 +325,7 @@ export function attachMultiplayerPoker(server: Server) {
   }, 5_000);
 
   wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
+    if (!requestHasSiteAccess(req)) { ws.close(); return; }
     // The wallet is the signed-in account the connection's token belongs to; anonymous players get their own wallet.
     const token = new URL(req.url ?? "/", "http://ws.local").searchParams.get("token") ?? "";
     const accountP: Promise<string | null> = token

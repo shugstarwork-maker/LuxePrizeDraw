@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Crown, Trophy, Volume2, VolumeX, MessageCircle, Users, HelpCircle, PanelRightClose, PanelRightOpen, Settings, Info, LogOut, Wallet } from "lucide-react";
+import { ChevronLeft, ChevronRight, Coins, Crown, Trophy, Volume2, VolumeX, MessageCircle, Users, HelpCircle, PanelRightClose, PanelRightOpen, Settings, Info, LogOut, Wallet } from "lucide-react";
 import { useState, type MouseEvent, type ReactNode } from "react";
 
 /**
@@ -101,7 +101,7 @@ export function PokerHudFrame({
           <span className="console-table-card__body">
             <p className="hud-panel__row console-table-card__title"><b>{tableName}</b></p>
             <p className="hud-panel__row">Blinds {blinds} · Hand #{handNumber}</p>
-            <p className="hud-panel__row console-table-card__tier"><span style={{ color: tierColour }}>{tierName}</span> · {leagueXp} XP</p>
+            <p className="hud-panel__row console-table-card__tier"><span style={{ color: tierColour }}>{tierName} League</span> · {leagueXp} XP</p>
           </span>
         </div>
       </div>
@@ -110,7 +110,7 @@ export function PokerHudFrame({
 
       {/* Seat & stacks. */}
       <div className="hud-zone hud-zone--br">
-        <p className="console-section"><Wallet className="h-3 w-3" />Seat &amp; Stacks</p>
+        <p className="console-section"><Coins className="h-3 w-3" />Seat &amp; Stacks</p>
         <div className="hud-panel console-seat-panel" aria-label="Your seat">
           <span className="console-seat-panel__icon" aria-hidden="true"><Wallet className="h-3.5 w-3.5" /></span>
           <span className="console-seat-panel__body">
@@ -140,6 +140,9 @@ export function PokerHudFrame({
       <div className="poker-console-options" data-testid="poker-console-options">
         <p className="console-section">Table Options</p>
         <button type="button" className="console-option-row" aria-label="Table info" onClick={() => { setInfoOpen((v) => !v); setPlayersOpen(false); setHelpOpen(false); }}><Info className="h-3.5 w-3.5" /><span>Table Info</span><ChevronRight className="h-3.5 w-3.5" /></button>
+        <button type="button" className="console-option-row" aria-label="Leaderboard in table options" onClick={onLeaderboard}><Trophy className="h-3.5 w-3.5" /><span>Leaderboard</span><ChevronRight className="h-3.5 w-3.5" /></button>
+        <button type="button" className="console-option-row" aria-label="Chat in table options" onClick={onChat}><MessageCircle className="h-3.5 w-3.5" /><span>Chat</span><ChevronRight className="h-3.5 w-3.5" /></button>
+        <button type="button" className="console-option-row" aria-label="Sound in table options" onClick={onAudio}>{audioOn ? <Volume2 className="h-3.5 w-3.5" /> : <VolumeX className="h-3.5 w-3.5" />}<span>Sound</span><ChevronRight className="h-3.5 w-3.5" /></button>
         <button type="button" className="console-option-row" aria-label="How to play" onClick={openHelp}><HelpCircle className="h-3.5 w-3.5" /><span>How to Play</span><ChevronRight className="h-3.5 w-3.5" /></button>
         <button type="button" className="console-option-row" aria-label="Leave table" onClick={onLobby}><LogOut className="h-3.5 w-3.5" /><span>Leave Table</span><ChevronRight className="h-3.5 w-3.5" /></button>
         {infoOpen && <div className="hud-chat-pop poker-console-pop" role="note" aria-label="Table info detail">

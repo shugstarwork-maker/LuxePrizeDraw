@@ -33,7 +33,10 @@ test('player seat is spaced from neighbours by the inline seat geometry, not CSS
   // SEAT_SLOTS pins every badge to the rail with explicit percent coordinates.
   assert.match(src, /\{ px: 45, py: 75, sc: 1\.06 \}/);   // hero — bottom centre
   assert.match(src, /\{ px: 17, py: 14, sc: 0\.72 \}/);   // left rail — upper
-  // No leftover !important seat pins that can drag badges on top of each other.
-  assert.doesNotMatch(css, /data-seat-index="4"[^}]*left:[0-9]+% !important/);
-  assert.doesNotMatch(css, /poker-seat-you[^}]*left:[0-9]+% !important/);
+  // Landscape keeps the inline geometry. Portrait letterbox may nudge seats
+  // onto the oval rail, and those pins stay inside the luxury-portrait block.
+  const landscapeCss = css.split("Portrait phone: the same landscape")[0];
+  assert.doesNotMatch(landscapeCss, /data-seat-index="4"[^}]*left:[0-9]+% !important/);
+  assert.doesNotMatch(landscapeCss, /poker-seat-you[^}]*left:[0-9]+% !important/);
+  assert.match(css, /html\.luxury-portrait \.poker-playing-page \[data-seat-index="5"\]/);
 });
