@@ -1180,6 +1180,34 @@ app.post("/api/holdem/leave", async (req, res) => {
     return out.ok === false ? res.status(400).json({ error: out.error }) : res.json(out);
   } catch (err) { return accountsUnavailable(res, err); }
 });
+// Staff support lookup (read-only). Needs ADMIN_PASSWORD set on the server; off when it is not.
+const adminAttempts = new Map<string, { count: number; until: number }>();
+app.get("/api/admin/player", async (req, res) => {
+  const expected = process.env.ADMIN_PASSWORD ?? "";
+  if (!expected) return res.status(404).json({ error: "not_found" });
+  const ip = req.ip ?? "unknown";
+  const now = Date.now();
+  const attempts = adminAttempts.get(ip);
+  if (attempts && attempts.until > now && attempts.count >= 10) return res.status(429).json({ error: "too_many_attempts" });
+  const given = Buffer.from(String(req.header("x-admin-password") ?? ""));
+  const want = Buffer.from(expected);
+  const ok = given.length === want.length && crypto.timingSafeEqual(given, want);
+  if (!ok) {
+    const next = attempts && attempts.until > now ? { count: attempts.count + 1, until: attempts.until } : { count: 1, until: now + 15 * 60 * 1000 };
+    adminAttempts.set(ip, next);
+    return res.status(401).json({ error: "wrong_password" });
+  }
+  adminAttempts.delete(ip);
+  try {
+    const q = String(req.query.q ?? "");
+    const profile = await accounts.findProfile(q);
+    if (!profile) return res.status(404).json({ error: "no_such_player" });
+    const store = await accounts.worldStore();
+    const chips = await wallet.balance(store, profile.id);
+    const world = await worldRanking.worldStanding(store, profile.id);
+    return res.json({ profile: { id: profile.id, name: profile.name, email: profile.email, createdAt: profile.createdAt }, chips, world });
+  } catch (err) { return accountsUnavailable(res, err); }
+});
 app.get("/api/world/ranking", async (req, res) => {
   try {
     const game = String(req.query.game ?? "all");

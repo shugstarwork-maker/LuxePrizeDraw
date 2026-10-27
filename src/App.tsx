@@ -15,6 +15,7 @@ import { ExperienceNav } from "./components/ExperienceNav";
 import { FeaturedDraws } from "./components/FeaturedDraws";
 import { GameLounge } from "./components/GameLounge";
 import { GameFullscreen } from "./components/GameFullscreen";
+import { AdminWallet } from "./components/AdminWallet";
 import { GamesArena } from "./components/GamesArena";
 import { LegalReadinessNotice } from "./components/LegalReadinessNotice";
 import { LaunchCommitment } from "./components/LaunchCommitment";
@@ -92,6 +93,7 @@ export default function App() {
     : path === "/economics" ? <EconomicsPage />
     : path === "/launch-build" ? <LaunchBuildPage />
     : path === "/postal-intake" ? <PostalIntakePage />
+    : path === "/admin-wallet" ? <AdminWallet />
     : path === "/admin" ? <AdminPanel />
     : path === "/studio" ? <StudioPanel />
     : path === "/verify" ? <><VerificationCenter /><MobileDock /></>
