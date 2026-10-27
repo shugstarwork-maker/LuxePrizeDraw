@@ -98,11 +98,11 @@ export function CashCategory() {
   </section>;
 }
 
-export function LuxePrizesCategory() {
-  return <section id="luxe-prizes" className="border-y border-amber-200/15 bg-black/35 py-20 sm:py-28">
+export function UniqueLuxeCategory() {
+  return <section id="unique-luxe" className="border-y border-amber-200/15 bg-black/35 py-20 sm:py-28">
     <div className="mx-auto max-w-7xl px-4 sm:px-6">
-      <WinnersBanner category="Luxe Prizes" />
-      <div className="mt-9"><CategoryHeader eyebrow="Luxe prizes" title="Gold, diamonds and a summer house." intro="The bar, the stones and a glass summer house, each with its cash equivalent. Winners may take the item or its cash equivalent." icon={Gem} /></div>
+      <WinnersBanner category="Unique Luxe" />
+      <div className="mt-9"><CategoryHeader eyebrow="Unique luxe" title="Gold, diamonds, bitcoin and summer houses." intro="A solid gold bar, a diamond collection, the bitcoin headline prize and a bespoke Luxe garden summer house. Each has a cash equivalent, and winners may take the item or its cash equivalent." icon={Gem} /></div>
       <div className="mt-9"><HeadlineLuxeCard /></div>
       <RollingCardCarousel items={luxePrizes} getKey={(p) => p.title} label="Luxe prizes" className="mt-9" compactControls
         renderItem={(p) => <DeckCard className="cinematic" image={p.image} video={p.video} title={p.title} progress={{ sold: ticketsSold(p.title) }}
