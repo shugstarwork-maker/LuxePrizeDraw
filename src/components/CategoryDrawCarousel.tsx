@@ -18,13 +18,13 @@ const images: Record<Category, string[]> = {
   "Luxe Holidays": [
     "/draw-art/holidays/paris.jpg",
     "/draw-art/holidays/london-suite.jpg",
-    "/draw-art/holidays/monaco.jpg",
-    "/draw-art/holidays/maldives.jpg",
     "/draw-art/holidays/new-york.jpg",
+    "/draw-art/holidays/dubai.jpg",
+    "/draw-art/holidays/tokyo.jpg",
     "/draw-art/holidays/milan.jpg",
-    "/draw-art/holidays/london-bridge.jpg",
-    "/draw-art/holidays/santorini.jpg",
-    "/draw-art/holidays/mykonos.jpg",
+    "/draw-art/holidays/rome.jpg",
+    "/draw-art/holidays/singapore.jpg",
+    "/draw-art/holidays/monaco.jpg",
   ],
   "Gaming Packages": [
     "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1484704849700-f032a568e944?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=1400&q=85",
@@ -45,7 +45,7 @@ const images: Record<Category, string[]> = {
 
 const names: Record<Category, string[]> = {
   Cars: ["High-end car experience", "Performance driving day", "Premium city-car experience", "Performance coupe", "High-end sports car", "Luxury GT experience", "Sports-car collection", "Supercar experience", "Supercar collection"],
-  "Luxe Holidays": ["Paris landmark escape", "London city stay", "Monaco Riviera escape", "Maldives villa escape", "New York skyline experience", "Milan fashion escape", "London luxury stay", "Santorini clifftop escape", "Mykonos villa escape"],
+  "Luxe Holidays": ["Paris city escape", "London city stay", "New York skyline stay", "Dubai skyline escape", "Tokyo city stay", "Milan city escape", "Rome city stay", "Singapore skyline stay", "Monaco city escape"],
   "Gaming Packages": ["Premium home-tech bundle", "Gaming accessory set", "Creator starter kit", "Creator studio setup", "High-end gaming suite", "Home-cinema technology", "Future-tech collection", "Ultimate creator suite", "Smart-home collection"],
   "Luxe Summer Houses": ["Contemporary luxury home", "Coastal residence", "Hillside villa", "City penthouse", "Private estate", "Waterfront home", "Architectural villa", "Country retreat", "Signature residence"],
   "Cash": ["£500 cash prize", "£750 cash prize", "£1,250 cash prize", "£2,500 cash prize", "£5,000 cash prize", "£10,000 cash prize", "£20,000 cash jackpot", "£35,000 cash jackpot", "£50,000 cash jackpot"],
@@ -55,7 +55,20 @@ const names: Record<Category, string[]> = {
 
 const categories: Category[] = ["Cars", "Luxe Holidays", "Cash", "Bitcoin", "Gold Bullion", "Gaming Packages", "Luxe Summer Houses"];
 
-/** Cinematic promo clip per category. Luxe Holidays keep stills, so the shared villa reel is not painted on those cards. */
+/** One film per city, in the same order as the holiday stills. The shared villa reel is not painted on these cards. */
+const holidayVideos = [
+  "/draw-art/holidays/paris.mp4",
+  "/draw-art/holidays/london-suite.mp4",
+  "/draw-art/holidays/new-york.mp4",
+  "/draw-art/holidays/dubai.mp4",
+  "/draw-art/holidays/tokyo.mp4",
+  "/draw-art/holidays/milan.mp4",
+  "/draw-art/holidays/rome.mp4",
+  "/draw-art/holidays/singapore.mp4",
+  "/draw-art/holidays/monaco.mp4",
+];
+
+/** Cinematic promo clip per category. Holiday cards use holidayVideos instead of the shared villa reel. */
 const videos: Record<Category, string> = {
   Cars: "/draw-art/car-luxe-gt-cine.mp4",
   "Luxe Holidays": "/draw-art/holiday-cine.mp4",
@@ -79,7 +92,7 @@ export function CategoryDrawCarousel({ category, entryBand }: { category: string
   const [tierIndex, setTierIndex] = useState(initialTier);
   const { play } = useAudio();
   
-  return <section className="min-h-screen bg-[#08090f] py-8 sm:py-12"><div className="mx-auto max-w-3xl px-4 sm:px-6"><button onClick={() => { window.history.pushState({}, "", "/draws"); window.dispatchEvent(new PopStateEvent("popstate")); }} className="text-xs font-black uppercase tracking-wider text-amber-200">All prize collections</button><p className="mt-5 text-xs font-black uppercase tracking-[.2em] text-amber-200">{parsedCategory}</p><h1 className="mt-2 text-3xl font-black sm:text-5xl">Choose your entry tier.</h1><p className="mt-2 text-sm text-white/60">Each tier increases the planned prize value in this collection. Browse every prize choice now; entries and payments remain disabled until launch approval.</p><RollingCardCarousel items={tiers} getKey={item => item.entry} label="entry tier" activeIndex={tierIndex} onActiveChange={setTierIndex} renderItem={(tier, tierIndex) => <DeckCard image={images[parsedCategory][tierIndex]} video={parsedCategory === "Luxe Holidays" ? undefined : videos[parsedCategory]} title={names[parsedCategory][tierIndex]}
+  return <section className="min-h-screen bg-[#08090f] py-8 sm:py-12"><div className="mx-auto max-w-3xl px-4 sm:px-6"><button onClick={() => { window.history.pushState({}, "", "/draws"); window.dispatchEvent(new PopStateEvent("popstate")); }} className="text-xs font-black uppercase tracking-wider text-amber-200">All prize collections</button><p className="mt-5 text-xs font-black uppercase tracking-[.2em] text-amber-200">{parsedCategory}</p><h1 className="mt-2 text-3xl font-black sm:text-5xl">Choose your entry tier.</h1><p className="mt-2 text-sm text-white/60">Each tier increases the planned prize value in this collection. Browse every prize choice now; entries and payments remain disabled until launch approval.</p><RollingCardCarousel items={tiers} getKey={item => item.entry} label="entry tier" activeIndex={tierIndex} onActiveChange={setTierIndex} renderItem={(tier, tierIndex) => <DeckCard image={images[parsedCategory][tierIndex]} video={parsedCategory === "Luxe Holidays" ? holidayVideos[tierIndex] : videos[parsedCategory]} title={names[parsedCategory][tierIndex]}
     facts={[[parsedCategory, Gift], [`${tier.entry} proposed entry`, Ticket], ["Entry not open", CircleAlert]]}
     stats={[{ value: `Up to ${tier.value}`, label: "Prize value" }, { value: tier.entry, label: "Entry" }, { value: "Pending", label: "Status" }]}
     note="Subject to approved rules & prize verification"

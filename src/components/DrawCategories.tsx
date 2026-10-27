@@ -21,8 +21,9 @@ const gamingPrizes = [
 ];
 
 const luxePrizes = [
-  { title: "1kg Fine Gold Bar", image: "/draw-art/luxe-gold-bar.jpg", video: "/draw-art/luxe-gold-bar-cine.mp4", facts: ["999.9 fine gold", "Or cash equivalent", "Tracked fulfilment"], value: "1kg gold", equivalent: "Cash equivalent on request" },
-  { title: "Diamond Collection", image: "/draw-art/luxe-diamonds.jpg", video: "/draw-art/luxe-diamonds-cine.mp4", facts: ["Certified stones", "Or cash equivalent", "Insured delivery"], value: "Diamonds", equivalent: "Cash equivalent on request" },
+  { title: "1kg Fine Gold Bar", image: "/draw-art/luxe-gold-held.jpg", video: "/draw-art/luxe-gold-bar-cine.mp4", facts: ["999.9 fine gold", "Or cash equivalent", "Tracked fulfilment"], value: "1kg gold", equivalent: "Cash equivalent on request" },
+  { title: "Diamond Collection", image: "/draw-art/luxe-diamonds-held.jpg", video: "/draw-art/luxe-diamonds-cine.mp4", facts: ["Certified stones", "Or cash equivalent", "Insured delivery"], value: "Diamonds", equivalent: "Cash equivalent on request" },
+  { title: "Luxe Garden Summer House", image: "/draw-art/summerhouse.jpg", video: "/draw-art/summerhouse-cine.mp4", facts: ["Glass pavilion at dusk", "Or cash equivalent", "Built to order"], value: "Summer house", equivalent: "Cash equivalent on request" },
 ];
 
 // Short quick draws: prize is paid out when the pool fills. Fees are shown, not charged.
@@ -101,7 +102,7 @@ export function LuxePrizesCategory() {
   return <section id="luxe-prizes" className="border-y border-amber-200/15 bg-black/35 py-20 sm:py-28">
     <div className="mx-auto max-w-7xl px-4 sm:px-6">
       <WinnersBanner category="Luxe Prizes" />
-      <div className="mt-9"><CategoryHeader eyebrow="Luxe prizes" title="Gold and diamonds." intro="Each prize shows its cash equivalent. Winners may take the item or its cash equivalent." icon={Gem} /></div>
+      <div className="mt-9"><CategoryHeader eyebrow="Luxe prizes" title="Gold, diamonds and a summer house." intro="The bar, the stones and a glass summer house, each with its cash equivalent. Winners may take the item or its cash equivalent." icon={Gem} /></div>
       <div className="mt-9"><HeadlineLuxeCard /></div>
       <RollingCardCarousel items={luxePrizes} getKey={(p) => p.title} label="Luxe prizes" className="mt-9" compactControls
         renderItem={(p) => <DeckCard image={p.image} video={p.video} title={p.title} progress={{ sold: ticketsSold(p.title) }}

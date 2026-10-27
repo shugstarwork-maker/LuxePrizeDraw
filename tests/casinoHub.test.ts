@@ -53,6 +53,6 @@ test("every draw carousel card carries a cinematic promo video in the app-traile
   assert.match(featured, /featured-gold-cine\.mp4/);
   assert.match(hols, /holiday-cine\.mp4/);
   assert.match(tiers, /videos: Record<Category, string>/);
-  assert.match(tiers, /video=\{parsedCategory === "Luxe Holidays" \? undefined : videos\[parsedCategory\]\}/);
+  assert.match(tiers, /video=\{parsedCategory === "Luxe Holidays" \? holidayVideos\[tierIndex\] : videos\[parsedCategory\]\}/);
   assert.match(tiers, /holiday-cine\.mp4/);
 });
