@@ -1,6 +1,6 @@
 // World ranking: real results from the server, this week, for every game or one game.
 import { useEffect, useState } from "react";
-import { fetchWorldRanking, type WorldGame, type WorldRow } from "../lib/worldRanking";
+import { fetchWorldRanking, fetchWorldStanding, type WorldGame, type WorldRow } from "../lib/worldRanking";
 
 const TABS: { id: WorldGame | "all"; label: string }[] = [
   { id: "all", label: "All games" }, { id: "blackjack", label: "Blackjack" }, { id: "brag", label: "Brag" },
@@ -10,6 +10,11 @@ const TABS: { id: WorldGame | "all"; label: string }[] = [
 export function WorldRankingPanel() {
   const [game, setGame] = useState<WorldGame | "all">("all");
   const [rows, setRows] = useState<WorldRow[] | null>(null);
+  const [mine, setMine] = useState<number | null>(null);
+
+  useEffect(() => {
+    void fetchWorldStanding().then((s) => setMine(s ? s.total : null));
+  }, []);
 
   useEffect(() => {
     let live = true;
@@ -24,6 +29,7 @@ export function WorldRankingPanel() {
       {TABS.map((t) => <button key={t.id} type="button" onClick={() => setGame(t.id)} aria-pressed={game === t.id}
         className={`rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-wider ${game === t.id ? "border-amber-200 bg-amber-300/20 text-amber-100" : "border-white/15 text-white/60"}`}>{t.label}</button>)}
     </div>
+    {mine !== null && <p className="mt-3 text-sm text-amber-100">Your total this week: <b>{mine} XP</b></p>}
     {rows === null && <p className="mt-4 text-sm text-white/50">Loading…</p>}
     {rows?.length === 0 && <p className="mt-4 text-sm text-white/60">No recorded results yet this week. Sign in and finish a game to appear here.</p>}
     {rows && rows.length > 0 && <div className="mt-4 space-y-1">

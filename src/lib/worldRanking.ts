@@ -32,3 +32,16 @@ export async function fetchWorldRanking(game: WorldGame | "all"): Promise<WorldR
     return [];
   }
 }
+
+/** The signed-in player's total this week across all games, or null when signed out. */
+export async function fetchWorldStanding(): Promise<{ total: number } | null> {
+  const token = accountToken();
+  if (!token) return null;
+  try {
+    const res = await fetch("/api/world/me", { headers: { authorization: `Bearer ${token}` } });
+    if (!res.ok) return null;
+    return (await res.json()) as { total: number };
+  } catch {
+    return null;
+  }
+}

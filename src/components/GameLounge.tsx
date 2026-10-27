@@ -8,6 +8,7 @@ import { AccountCard } from "./AccountCard";
 import { AchievementCabinet } from "./Achievements";
 import { gameLeagueState, type LeagueGame } from "../lib/gameLeagues";
 import { GameLeagueCard } from "./GameLeagueCard";
+import { claimDailyChips } from "../lib/cardTableServer";
 import { WorldRankingPanel } from "./WorldRankingPanel";
 import { useAudio } from "../audio/AudioProvider";
 
@@ -66,11 +67,7 @@ export function GameLounge({ brand, tagline, art, icon, leagueGame, leagueTitle,
         <AchievementCabinet />
       </div>}
 
-      {tab === "rewards" && <div className="mt-6 text-center">
-        <p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">Rewards</p>
-        <h2 className="mt-2 text-3xl font-black">Free-play rewards</h2>
-        <p className="mx-auto mt-3 max-w-md text-sm text-white/60">Rewards are free-play only and carry no cash value. Daily and weekly rewards will appear here.</p>
-      </div>}
+      {tab === "rewards" && <RewardsPanel />}
 
       {tab === "social" && <div className="mt-6 text-center">
         <p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">Social</p>
@@ -81,4 +78,25 @@ export function GameLounge({ brand, tagline, art, icon, leagueGame, leagueTitle,
       <LoungeTabBar tab={tab} onTab={(t) => { play("button"); setTab(t); }} />
     </div>
   </section>;
+}
+
+/** Free-play daily sign-in, granted once a day on the server. Chips have no cash value. */
+function RewardsPanel() {
+  const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState(false);
+  const collect = () => {
+    setBusy(true);
+    void claimDailyChips().then((r) => {
+      setBusy(false);
+      if (!r) return setMessage("Daily chips could not be collected. Try again.");
+      setMessage(r.granted ? "Daily sign-in collected: 200 free-play chips." : "Daily chips already collected today.");
+    });
+  };
+  return <div className="mt-6 text-center">
+    <p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">Rewards</p>
+    <h2 className="mt-2 text-3xl font-black">Free-play rewards</h2>
+    <p className="mx-auto mt-3 max-w-md text-sm text-white/60">Rewards are free-play only and carry no cash value.</p>
+    <button type="button" onClick={collect} disabled={busy} className="mt-5 rounded-xl border border-emerald-300/40 bg-emerald-300/10 px-5 py-3 text-xs font-black uppercase tracking-wider text-emerald-100 disabled:opacity-40">Collect daily chips</button>
+    {message && <p className="mt-3 text-sm text-emerald-100" role="status">{message}</p>}
+  </div>;
 }
