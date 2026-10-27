@@ -19,6 +19,8 @@ import * as bragTable from "./api/bragTable";
 import * as matches from "./api/matches";
 import * as wallet from "./api/wallet";
 import * as holdemTable from "./api/holdemTable";
+import * as chat from "./api/chat";
+import { chatEnabled as chatEnabledNow } from "./api/chat";
 import { alertOps } from "./api/mailer";
 import http from "http";
 import dotenv from "dotenv";
@@ -1198,6 +1200,96 @@ app.get("/api/admin/player", async (req, res) => {
     const chips = await wallet.balance(store, profile.id);
     const world = await worldRanking.worldStanding(store, profile.id);
     return res.json({ profile: { id: profile.id, name: profile.name, email: profile.email, createdAt: profile.createdAt }, chips, world });
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+// Lounge chat, with safety controls (see api/chat.ts). Off unless CHAT_ENABLED=true.
+const chatOff = (res: express.Response) => res.status(503).json({ error: "chat_disabled" });
+app.get("/api/chat/messages", async (req, res) => {
+  if (!chatEnabledNow()) return chatOff(res);
+  try {
+    const me = await signedIn(req);
+    return res.json({ messages: await chat.listMessages(await accounts.worldStore(), me?.id ?? null) });
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/chat/age", async (req, res) => {
+  if (!chatEnabledNow()) return chatOff(res);
+  try {
+    const me = await signedIn(req);
+    if (!me) return res.status(401).json({ error: "not_signed_in" });
+    if (req.body?.over18 !== true) return res.status(400).json({ error: "must_confirm" });
+    await chat.confirmAge(await accounts.worldStore(), me.id);
+    return res.json({ ok: true });
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/chat/messages", async (req, res) => {
+  if (!chatEnabledNow()) return chatOff(res);
+  try {
+    const me = await signedIn(req);
+    if (!me) return res.status(401).json({ error: "not_signed_in" });
+    const out = await chat.postMessage(await accounts.worldStore(), me, String(req.body?.text ?? ""));
+    return out.ok === false ? res.status(out.error === "slow_down" ? 429 : 400).json({ error: out.error }) : res.json(out.value);
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/chat/report", async (req, res) => {
+  if (!chatEnabledNow()) return chatOff(res);
+  try {
+    const me = await signedIn(req);
+    if (!me) return res.status(401).json({ error: "not_signed_in" });
+    const out = await chat.report(await accounts.worldStore(), me.id, String(req.body?.messageId ?? ""), String(req.body?.reason ?? "Reported by player"));
+    return out.ok === false ? res.status(400).json({ error: out.error }) : res.json({ reportId: out.value });
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/chat/block", async (req, res) => {
+  if (!chatEnabledNow()) return chatOff(res);
+  try {
+    const me = await signedIn(req);
+    if (!me) return res.status(401).json({ error: "not_signed_in" });
+    await chat.blockAuthor(await accounts.worldStore(), me.id, String(req.body?.authorId ?? ""));
+    return res.json({ ok: true });
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+
+// Staff chat tools: reports and bans. Same staff password as the lookup page.
+function staffGate(req: express.Request, res: express.Response): boolean {
+  const expected = process.env.ADMIN_PASSWORD ?? "";
+  if (!expected) { res.status(404).json({ error: "not_found" }); return false; }
+  const ip = req.ip ?? "unknown";
+  const now = Date.now();
+  const attempts = adminAttempts.get(ip);
+  if (attempts && attempts.until > now && attempts.count >= 10) { res.status(429).json({ error: "too_many_attempts" }); return false; }
+  const given = Buffer.from(String(req.header("x-admin-password") ?? ""));
+  const want = Buffer.from(expected);
+  if (given.length === want.length && crypto.timingSafeEqual(given, want)) { adminAttempts.delete(ip); return true; }
+  adminAttempts.set(ip, attempts && attempts.until > now ? { count: attempts.count + 1, until: attempts.until } : { count: 1, until: now + 15 * 60 * 1000 });
+  res.status(401).json({ error: "wrong_password" });
+  return false;
+}
+app.get("/api/admin/chat/reports", async (req, res) => {
+  if (!staffGate(req, res)) return;
+  try { return res.json({ reports: await chat.openReports(await accounts.worldStore()) }); } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/admin/chat/ban", async (req, res) => {
+  if (!staffGate(req, res)) return;
+  try {
+    const accountId = String(req.body?.accountId ?? "");
+    if (!accountId) return res.status(400).json({ error: "missing_account" });
+    await chat.banAccount(await accounts.worldStore(), accountId, String(req.body?.reason ?? "Staff decision"));
+    return res.json({ ok: true });
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/admin/chat/unban", async (req, res) => {
+  if (!staffGate(req, res)) return;
+  try {
+    await chat.unbanAccount(await accounts.worldStore(), String(req.body?.accountId ?? ""));
+    return res.json({ ok: true });
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/admin/chat/resolve", async (req, res) => {
+  if (!staffGate(req, res)) return;
+  try {
+    const outcome = req.body?.outcome === "upheld" ? "upheld" : "dismissed";
+    const found = await chat.resolveReport(await accounts.worldStore(), String(req.body?.reportId ?? ""), outcome);
+    return found ? res.json({ ok: true }) : res.status(404).json({ error: "no_such_report" });
   } catch (err) { return accountsUnavailable(res, err); }
 });
 app.get("/api/world/ranking", async (req, res) => {

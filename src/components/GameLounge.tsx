@@ -10,6 +10,7 @@ import { gameLeagueState, type LeagueGame } from "../lib/gameLeagues";
 import { GameLeagueCard } from "./GameLeagueCard";
 import { claimDailyChips } from "../lib/cardTableServer";
 import { WorldRankingPanel } from "./WorldRankingPanel";
+import { LoungeChat } from "./LoungeChat";
 import { useAudio } from "../audio/AudioProvider";
 
 export type GameLoungeProps = {
@@ -69,11 +70,7 @@ export function GameLounge({ brand, tagline, art, icon, leagueGame, leagueTitle,
 
       {tab === "rewards" && <RewardsPanel />}
 
-      {tab === "social" && <div className="mt-6 text-center">
-        <p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">Social</p>
-        <h2 className="mt-2 text-3xl font-black">Lounge chat</h2>
-        <p className="mx-auto mt-3 max-w-md text-sm text-white/60">Lounge chat and friends are not available yet.</p>
-      </div>}
+      {tab === "social" && <LoungeChat />}
 
       <LoungeTabBar tab={tab} onTab={(t) => { play("button"); setTab(t); }} />
     </div>
