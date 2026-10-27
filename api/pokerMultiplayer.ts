@@ -4,7 +4,10 @@
 // append-only hash-chained record as solo tables. Free-play chips only — no cash value.
 import crypto from "crypto";
 import { WebSocketServer, WebSocket } from "ws";
-import type { Server } from "http";
+import type { IncomingMessage, Server } from "http";
+import * as accounts from "./accounts";
+import * as wallet from "./wallet";
+import { withLock } from "./lock";
 import { applyAction, botAction, createTable, dealHand, makeHoldemDeck, shuffleHoldem, type BotStyle, type HoldemAction, type HoldemCard, type HoldemState } from "../src/games/holdem";
 import { appendRecord } from "./poker";
 
@@ -31,9 +34,85 @@ export type MpTable = {
   lastActionAt: number;
   createdAt: number;
   pendingSeats?: { playerId: string; name: string }[];
+  /** Wallet each human seat was paid from; stacks go back to the same wallet. */
+  wallets: Record<string, string>;
+  /** Seats that asked to leave (or lost their connection) and are cashed out when the hand ends. */
+  leaving: Record<string, boolean>;
 };
 
 const mpTables = new Map<string, MpTable>();
+
+async function store() { return accounts.worldStore(); }
+
+/** Credits a wallet from a table stack. Failures are logged, never silently dropped. */
+function creditWallet(walletKey: string, amount: number): void {
+  if (amount <= 0) return;
+  void store()
+    .then((s) => wallet.credit(s, walletKey, amount))
+    .catch((err) => console.error("table stack could not be returned", walletKey, amount, err));
+}
+
+/** Saves a table so a restart does not strand the chips seated at it. */
+function persist(t: MpTable): void {
+  void store().then(async (s) => {
+    await s.set(`mp:table:${t.id}`, JSON.stringify(t), 24 * 3600);
+    await withLock(s, "mp:index", async () => {
+      const ids = JSON.parse((await s.get("mp:tables")) ?? "[]") as string[];
+      if (!ids.includes(t.id)) await s.set("mp:tables", JSON.stringify([...ids, t.id]));
+    });
+  }).catch((err) => console.error("table could not be saved", t.id, err));
+}
+
+/** Loads saved tables at start-up. Seated humans are cashed out when their next hand ends. */
+async function restoreTables(): Promise<void> {
+  const s = await store();
+  const ids = JSON.parse((await s.get("mp:tables")) ?? "[]") as string[];
+  for (const id of ids) {
+    const raw = await s.get(`mp:table:${id}`);
+    if (!raw) continue;
+    const t = JSON.parse(raw) as MpTable;
+    for (const p of t.players) {
+      p.connected = false;
+      if (!p.id.startsWith("bot-")) t.leaving[p.id] = true;
+    }
+    mpTables.set(id, t);
+  }
+}
+
+/** A player leaves: a waiting seat is refunded; a seated player is cashed out now, or when the hand in progress ends. */
+function leaveSeat(t: MpTable, seatId: string): void {
+  const waiting = (t.pendingSeats ?? []).some((p) => p.playerId === seatId);
+  if (waiting) {
+    t.pendingSeats = (t.pendingSeats ?? []).filter((p) => p.playerId !== seatId);
+    if (t.wallets[seatId]) creditWallet(t.wallets[seatId], t.buyIn);
+    delete t.wallets[seatId];
+    return;
+  }
+  const seat = t.players.find((p) => p.id === seatId);
+  if (!seat) return;
+  seat.connected = false;
+  if (t.state.handOver) { removeSeat(t, seatId); return; }
+  // Mid-hand: fold them if it is their move, and cash them out when the hand ends.
+  t.leaving[seatId] = true;
+  const sp = t.state.players.find((x) => x.id === seatId);
+  if (sp && !sp.folded && !sp.sittingOut) {
+    try { t.state = applyAction(t.state, seatId, "fold", 0); } catch { /* not their move: the turn timer handles it */ }
+    settleIfOver(t);
+  }
+}
+
+/** Takes a seat's stack off the table and pays it to its wallet. */
+function removeSeat(t: MpTable, seatId: string): void {
+  const sp = t.state.players.find((p) => p.id === seatId);
+  const stack = sp ? sp.chips : 0;
+  const walletKey = t.wallets[seatId];
+  t.players = t.players.filter((p) => p.id !== seatId).map((p, i) => ({ ...p, seatIndex: i }));
+  t.state = { ...t.state, players: t.state.players.filter((p) => p.id !== seatId) };
+  delete t.wallets[seatId];
+  delete t.leaving[seatId];
+  if (walletKey) creditWallet(walletKey, stack);
+  appendRecord("mp-leave", { table: t.id, player: seatId, stack });
+}
 const sockets = new Map<WebSocket, { playerId: string; tableId: string }>();
 
 function publicState(t: MpTable, forPlayerId: string | null) {
@@ -61,6 +140,7 @@ function publicState(t: MpTable, forPlayerId: string | null) {
 }
 
 function broadcast(t: MpTable) {
+  persist(t);
   for (const [ws, meta] of sockets) {
     if (meta.tableId !== t.id || ws.readyState !== WebSocket.OPEN) continue;
     ws.send(JSON.stringify({ type: "state", view: publicState(t, meta.playerId) }));
@@ -86,7 +166,12 @@ function startHand(t: MpTable) {
 
 function settleIfOver(t: MpTable) {
   if (!t.state.handOver) return;
-  for (const pending of t.pendingSeats ?? []) seatHuman(t, pending.playerId, pending.name);
+  for (const seatId of Object.keys(t.leaving)) if (t.leaving[seatId]) removeSeat(t, seatId);
+  for (const pending of t.pendingSeats ?? []) {
+    const seated = seatHuman(t, pending.playerId, pending.name);
+    // A queued player who cannot be seated gets the buy-in back.
+    if (!seated.ok && t.wallets[pending.playerId]) { creditWallet(t.wallets[pending.playerId], t.buyIn); delete t.wallets[pending.playerId]; }
+  }
   t.pendingSeats = [];
   const hn = t.state.handNumber;
   appendRecord("mp-hand", {
@@ -158,11 +243,12 @@ export function createMpTable(name: string, smallBlind = 10, bigBlind = 20, buyI
     id, name: name.slice(0, 32) || "Luxe multiplayer table", smallBlind, bigBlind, buyIn,
     state: createTable({ playerName: "_empty_", playerChips: 0, botCount: 5, botChips: 0, smallBlind, bigBlind }),
     players: [], pendingSeats: [], handSecrets: {}, handCommitments: {}, handDecks: {},
-    lastActionAt: Date.now(), createdAt: Date.now(),
+    lastActionAt: Date.now(), createdAt: Date.now(), wallets: {}, leaving: {},
   };
   // strip the placeholder players — multiplayer tables start empty
   t.state = { ...t.state, players: [], handOver: true, winners: [], lastAction: "Waiting for players…" };
   mpTables.set(id, t);
+  persist(t);
   appendRecord("mp-table-open", { table: id, name: t.name, blinds: t.bigBlind });
   return t;
 }
@@ -204,6 +290,7 @@ function humanAct(t: MpTable, playerId: string, action: string, raiseTo: number)
 
 export function attachMultiplayerPoker(server: Server) {
   const wss = new WebSocketServer({ server, path: "/ws/poker" });
+  void restoreTables().catch((err) => console.error("saved poker tables could not be restored", err));
   // Turn timer: if the player to act is offline (or stalls), the table doesn't freeze —
   // after 25s the server checks when possible, otherwise folds them, and continues.
   const TURN_TIMEOUT_MS = 25_000;
@@ -230,8 +317,13 @@ export function attachMultiplayerPoker(server: Server) {
     }
   }, 5_000);
 
-  wss.on("connection", (ws) => {
-    ws.on("message", (raw) => {
+  wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
+    // The wallet is the signed-in account the connection's token belongs to; anonymous players get their own wallet.
+    const token = new URL(req.url ?? "/", "http://ws.local").searchParams.get("token") ?? "";
+    const accountP: Promise<string | null> = token
+      ? accounts.profileForToken(token).then((p) => (p ? p.id : null)).catch(() => null)
+      : Promise.resolve(null);
+    ws.on("message", async (raw) => {
       let msg: { type?: string; tableId?: string; playerId?: string; name?: string; action?: string; raiseTo?: number; tableName?: string };
       try { msg = JSON.parse(String(raw)); } catch { return; }
       const meta = sockets.get(ws);
@@ -248,10 +340,27 @@ export function attachMultiplayerPoker(server: Server) {
       if (msg.type === "join") {
         const t = mpTables.get(String(msg.tableId ?? ""));
         if (!t) { ws.send(JSON.stringify({ type: "error", error: "table_not_found" })); return; }
+        const walletKey = (await accountP) ?? `anon:${playerId}`;
+        const alreadySeated = t.players.some((p) => p.id === playerId);
+        if (!alreadySeated) {
+          const queued = (t.pendingSeats ?? []).some((p) => p.playerId === playerId);
+          if (!queued) {
+            if (t.players.length >= 6) { ws.send(JSON.stringify({ type: "error", error: "table_full" })); return; }
+            // The buy-in leaves the wallet when the seat is taken.
+            const taken = await wallet.debit(await store(), walletKey, t.buyIn);
+            if (taken.ok === false) { ws.send(JSON.stringify({ type: "error", error: "insufficient_chips" })); return; }
+          }
+          t.wallets[playerId] = walletKey;
+        }
         if (t.state.handOver) {
           // Between hands: seat immediately so the player is in from the next deal.
           const seated = seatHuman(t, playerId, String(msg.name ?? "Player"));
-          if (!seated.ok) { ws.send(JSON.stringify({ type: "error", error: seated.error })); return; }
+          if (!seated.ok) {
+            creditWallet(walletKey, t.buyIn);
+            delete t.wallets[playerId];
+            ws.send(JSON.stringify({ type: "error", error: seated.error }));
+            return;
+          }
           sockets.set(ws, { playerId, tableId: t.id });
           ws.send(JSON.stringify({ type: "joined", view: publicState(t, playerId) }));
           broadcast(t);
@@ -265,19 +374,15 @@ export function attachMultiplayerPoker(server: Server) {
         broadcast(t);
         return;
       }
-      if (false) {
-        const t = mpTables.get(String(msg.tableId ?? ""));
-        if (!t) { ws.send(JSON.stringify({ type: "error", error: "table_not_found" })); return; }
-        const seated = seatHuman(t, playerId, String(msg.name ?? "Player"));
-        if (!seated.ok) { ws.send(JSON.stringify({ type: "error", error: seated.error })); return; }
-        sockets.set(ws, { playerId, tableId: t.id });
-        ws.send(JSON.stringify({ type: "joined", view: publicState(t, playerId) }));
-        broadcast(t);
-        return;
-      }
       if (!meta) return;
       const t = mpTables.get(meta.tableId);
       if (!t) return;
+      if (msg.type === "leave") {
+        leaveSeat(t, meta.playerId);
+        sockets.delete(ws);
+        broadcast(t);
+        return;
+      }
       if (msg.type === "action") {
         const r = humanAct(t, meta.playerId, String(msg.action ?? ""), Number(msg.raiseTo ?? 0));
         if (!r.ok) ws.send(JSON.stringify({ type: "error", error: r.error }));
@@ -295,19 +400,9 @@ export function attachMultiplayerPoker(server: Server) {
       if (!meta) return;
       sockets.delete(ws);
       const t = mpTables.get(meta.tableId);
-      const p = t?.players.find((x) => x.id === meta.playerId);
-      if (t && p) {
-        p.connected = false;
-        // fold them out of the current hand if it is their turn or they're in it
-        if (!t.state.handOver) {
-          const sp = t.state.players.find((x) => x.id === meta.playerId);
-          if (sp && !sp.folded && !sp.sittingOut) {
-            try { t.state = applyAction(t.state, meta.playerId, "fold", 0); } catch { /* already out */ }
-            settleIfOver(t);
-          }
-        }
-        broadcast(t);
-      }
+      if (!t) return;
+      leaveSeat(t, meta.playerId);
+      broadcast(t);
     });
   });
   return wss;

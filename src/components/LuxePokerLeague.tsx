@@ -11,6 +11,7 @@ import { LoungeGamesCarousel } from "./LoungeGamesCarousel";
 import { COHORT_SIZE, LEAGUE_TIERS, LEAGUE_XP, PLACEMENT_WEEKS, PROMOTE_COUNT, RELEGATE_COUNT, competitiveRating, confirmedXP, consumeLeagueMove, ensureWeek, integrityFlags, leagueXPForHand, loadReviewQueue, playerId, provisionalXP, recordCompetitiveResult, recordDailyParticipation, recordGamePlayed, recordWeeklyXP, settleLedger, submitForReview, submitHandForScoring, tierByIndex, tournamentXPForFinish, trustState, weekEndsIn, weeklyBoard, weeklyCutoffs } from "../lib/pokerLeague";
 import { prizeEligibility, verifyShuffleFairness, type FairnessProof } from "../lib/fairPlay";
 import { useMultiplayerPoker, type MpTableInfo } from "../lib/useMultiplayerPoker";
+import { claimDailyChips, fetchBalance, holdemAct, holdemDeal, holdemLeave, holdemOpen, holdemState, spendChips, type HoldemReply } from "../lib/cardTableServer";
 import { AccountCard } from "./AccountCard";
 import { SeasonHub } from "./SeasonHub";
 import { PokerFullscreen } from "./PokerFullscreen";
@@ -164,6 +165,8 @@ export const LuxePokerLeague: React.FC = () => {
   const [giftsOpen, setGiftsOpen] = useState(false);
   const [avatar, setAvatar] = useState(() => localStorage.getItem("luxe-poker-avatar") || "");
   const [chips, setChips] = useState(() => Number(localStorage.getItem("luxe-poker-chips") ?? localStorage.getItem("luxe-demo-poker-chips")) || 1000);
+  // The server holds the chip balance; show it as soon as the lounge opens.
+  useEffect(() => { void fetchBalance().then((c) => { if (c !== null) setChips(c); }); }, []);
   const [wallet, setWallet] = useState<Wallet>(() => loadWallet());
   const reviewMode = reviewModeEnabled();
   useEffect(() => { if (acct.profile) acct.syncChips(chips); }, [chips, acct.profile]); // keep server copy of chips in step with this device
@@ -342,29 +345,32 @@ export const LuxePokerLeague: React.FC = () => {
   // oversized-canvas "black screen" on rotate.
 
   const note = (message: string) => { setStatus(message); setFeed((items) => [message, ...items].slice(0, 4)); };
+  // Server-run table: the server deals, plays the bots and holds the stacks; the lounge shows its state.
+  const activeTableIdRef = useRef<string | null>(null);
+  const holdemMessage = (error: string) => ({
+    insufficient_chips: "Not enough chips for that buy-in. Collect your daily chips first.",
+    hand_in_progress: "Finish this hand first.",
+    not_your_turn: "Wait for your turn.",
+    bad_action: "That move is not available.",
+    no_table: "This table is closed. Choose a table again.",
+  } as Record<string, string>)[error] ?? "The table could not be updated. Try again.";
+  const applyHoldem = (r: HoldemReply): boolean => {
+    if (r.ok === false) { note(holdemMessage(r.error)); return false; }
+    setGame(holdemState(r.view)); setChips(r.view.balance);
+    return true;
+  };
+  const seatAtServer = (tableId: string, welcome: string) => {
+    activeTableIdRef.current = tableId;
+    void holdemOpen(tableId).then((r) => {
+      if (applyHoldem(r)) return note(welcome);
+      setActiveTable(null); setScreen("lobby");
+    });
+  };
   const awardXp = (amount: number) => {
     // Competitive rating moves on results, not purchases — cosmetic/store XP no longer touches it.
     void amount;
   };
 
-  // ── Engine: bot turn loop ──
-  useEffect(() => {
-    if (!game || game.handOver) return;
-    const actor = game.players[game.turnIndex];
-    if (!actor || !actor.isBot) return;
-    const timer = window.setTimeout(() => {
-      setGame((g) => {
-        if (!g || g.handOver) return g;
-        const bot = g.players[g.turnIndex];
-        if (!bot?.isBot) return g;
-        const decision = botAction(g, bot);
-        const next = applyAction(g, bot.id, decision.action, decision.raiseTo);
-        if (next.lastAction !== g.lastAction) play(decision.action === "fold" ? "tableKnock" : "chipDrop");
-        return next;
-      });
-    }, 650 + Math.random() * 750);
-    return () => window.clearTimeout(timer);
-  }, [game, play]);
 
   // ── Engine: surface the latest action ──
   useEffect(() => {
@@ -489,7 +495,7 @@ export const LuxePokerLeague: React.FC = () => {
     if (!yourTurn || seconds > 0 || !game || !you) return;
     const auto = toCall > 0 ? "fold" : "check";
     play(pokerActionSound(auto));
-    setGame((g) => (g ? applyAction(g, "you", auto) : g));
+    void holdemAct(auto).then(applyHoldem);
     note(`Time expired — auto ${auto}.`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seconds, yourTurn]);
@@ -512,14 +518,12 @@ export const LuxePokerLeague: React.FC = () => {
     setImpact(null);
     setScreen("table");
     setActiveTable(table);
-    setChips((v) => v - table.buyIn);
-    const table0 = createTable({ playerName: "You", playerChips: table.buyIn, botCount: table.bots, botChips: 1000, smallBlind: table.smallBlind, bigBlind: table.bigBlind });
     settledHand.current = 0;
     aliveRef.current = [];
     finishedRef.current = false;
     handStartAt.current = Date.now();
-    setGame(table0);
-    note(`Welcome to the ${table.name} — you're seated and the dealer is shuffling.`);
+    const index = LEAGUE_TABLES.findIndex((t) => t.name === table.name);
+    seatAtServer(`league:${index}`, `Welcome to the ${table.name} — you're seated and the dealer is shuffling.`);
   };
   // ── The dealer runs the table: hands deal themselves ──
   useEffect(() => {
@@ -528,14 +532,14 @@ export const LuxePokerLeague: React.FC = () => {
     const timer = window.setTimeout(() => {
       play("cardDeal");
       handStartAt.current = Date.now();
-      setGame((g) => (g?.handOver ? dealHand(g) : g));
+      void holdemDeal().then(applyHoldem);
     }, delay);
     return () => window.clearTimeout(timer);
   }, [game?.handOver, game?.handNumber]); // eslint-disable-line react-hooks/exhaustive-deps
-  const takeSeat = () => { play("chipStack"); setGame((g) => (g ? seatPlayer(g, "you") : g)); note("Seat taken. You're in from the next hand."); };
+  const takeSeat = () => { play("chipStack"); note("You're seated and play from the next hand."); };
   const leaveTable = () => {
     const stack = game ? game.players.find((p) => p.id === "you")?.chips ?? 0 : 0;
-    if (game) setChips((v) => v + stack);
+    void holdemLeave().then((r) => { if (r.ok) setChips(r.balance); else note("Your stack could not be returned yet. Try again."); });
     // Exit glide: if the session moved you up the weekly board, glide the row up on return.
     const before = rankAtJoin.current;
     rankAtJoin.current = null;
@@ -555,25 +559,24 @@ export const LuxePokerLeague: React.FC = () => {
   const rebuy = () => {
     if (!activeTable || !game) return;
     if (chips < activeTable.buyIn) return note(`Rebuy needs ${activeTable.buyIn.toLocaleString()} chips — collect daily chips or visit the store.`);
-    setChips((v) => v - activeTable.buyIn);
+    const tableId = activeTableIdRef.current;
+    if (!tableId) return;
     finishedRef.current = false; // rebuy re-enters the table race
     aliveRef.current = [];
-    setGame((g) => g ? { ...g, players: g.players.map((p) => p.id === "you" ? { ...p, chips: p.chips + activeTable.buyIn, sittingOut: false } : p) } : g);
-    note(`Rebought ${activeTable.buyIn.toLocaleString()} chips. Back in the table race.`);
+    void holdemLeave().then(() => seatAtServer(tableId, `Rebought ${activeTable.buyIn.toLocaleString()} chips. Back in the table race.`));
   };
   const act = (action: "fold" | "check" | "call" | "raise") => {
     if (!game || !yourTurn) return;
     play(pokerActionSound(action));
-    setGame((g) => (g ? applyAction(g, "you", action, action === "raise" ? raiseTo : 0) : g));
+    void holdemAct(action, action === "raise" ? raiseTo : 0).then(applyHoldem);
   };
-  const sendGift = (gift: typeof gifts[number]) => { if (chips < gift.cost) return note(`You need ${gift.cost} virtual chips to send ${gift.name}.`); setChips((v) => v - gift.cost); play("success"); setGiftsOpen(false); note(`You sent ${gift.icon} ${gift.name} to ${selectedSeat}. Virtual gift only.`); };
-  const dailyReward = () => { if (!rewardReady) return; setChips((v) => v + 200); play("chipStack"); setRewardReady(false); localStorage.setItem("luxe-poker-reward", new Date().toDateString()); note("Daily sign-in collected: 200 free-play chips."); };
+  const sendGift = (gift: typeof gifts[number]) => { if (chips < gift.cost) return note(`You need ${gift.cost} virtual chips to send ${gift.name}.`); void spendChips(gift.cost).then((r) => { if (!r.ok) return note("That gift could not be sent. Try again."); setChips(r.chips); play("success"); setGiftsOpen(false); note(`You sent ${gift.icon} ${gift.name} to ${selectedSeat}. Virtual gift only.`); }); };
+  const dailyReward = () => { if (!rewardReady) return; void claimDailyChips().then((r) => { if (!r) return note("Daily chips could not be collected. Try again."); setChips(r.chips); if (r.granted) { play("chipStack"); setRewardReady(false); localStorage.setItem("luxe-poker-reward", new Date().toDateString()); note("Daily sign-in collected: 200 free-play chips."); } else note("Daily chips already collected today."); }); };
   const finishAd = () => {
     setAdOpen(false);
     setAdCount(recordAdWatched());
-    setChips((v) => v + AD_REWARD_CHIPS);
     play("coinWin");
-    note(`Thanks for watching — ${AD_REWARD_CHIPS.toLocaleString()} free-play chips added. Ads never cost money and chips never turn into cash.`);
+    note("Ad rewards are paused while chip balances are held on the server.");
   };
   const claimTickets = () => {
     const { wallet: next, granted } = claimDailyTickets(wallet);
@@ -590,14 +593,11 @@ export const LuxePokerLeague: React.FC = () => {
     setImpact(null);
     setScreen("table");
     setActiveTable({ name: t.name, image: "/games/luxe-poker-table.png", blinds: `${t.smallBlind} / ${t.bigBlind}`, smallBlind: t.smallBlind, bigBlind: t.bigBlind, buyIn: t.buyIn, bots: t.bots, tone: "from-zinc-300 to-zinc-500" });
-    setChips((v) => v - t.buyIn);
-    const table0 = createTable({ playerName: "You", playerChips: t.buyIn, botCount: t.bots, botChips: t.buyIn * 5, smallBlind: t.smallBlind, bigBlind: t.bigBlind });
     settledHand.current = 0;
     aliveRef.current = [];
     finishedRef.current = false;
     handStartAt.current = Date.now();
-    setGame(table0);
-    note(`Welcome to ${t.name} — casual social room. No league XP, no prizes, pure fun.`);
+    seatAtServer(t.id, `Welcome to ${t.name} — casual social room. No league XP, no prizes, pure fun.`);
   };
   const leagueTable = LEAGUE_TABLES[Math.min(league.tierIndex, LEAGUE_TABLES.length - 1)];
 

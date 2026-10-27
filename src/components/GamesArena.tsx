@@ -86,7 +86,7 @@ function winningLine(state: ConnectFourState): C4Cell[] {
   }
   return [];
 }
-const PIECE_ART: Record<string, string> = { red: "radial-gradient(circle at 34% 28%, #fda4af, #e11d48 52%, #7f1d1d)", yellow: "radial-gradient(circle at 34% 28%, #fef3c7, #f59e0b 52%, #78350f)" };
+export const PIECE_ART: Record<string, string> = { red: "radial-gradient(circle at 34% 28%, #fda4af, #e11d48 52%, #7f1d1d)", yellow: "radial-gradient(circle at 34% 28%, #fef3c7, #f59e0b 52%, #78350f)" };
 export function ConnectFourBoard({ sound, onResult, onState }: { sound: BoardSound; onResult?: (result: BoardResult) => void; onState?: (s: BoardState) => void }) {
   const [state, setState] = useState<ConnectFourState>(newConnectFour);
   useResultReport(state.status, onResult);

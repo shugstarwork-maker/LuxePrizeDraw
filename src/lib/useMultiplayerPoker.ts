@@ -2,6 +2,7 @@
 // server view, and sends join/action/next-hand messages. The server is the only
 // source of truth; this hook just relays.
 import { useEffect, useRef, useState } from "react";
+import { accountToken } from "./useAccount";
 
 export type MpView = {
   tableId: string;
@@ -47,7 +48,8 @@ export function useMultiplayerPoker(playerId: string, playerName: string) {
     leave();
     setError("");
     const proto = location.protocol === "https:" ? "wss" : "ws";
-    const ws = new WebSocket(`${proto}://${location.host}/ws/poker`);
+    // The token tells the server whose wallet pays the buy-in; anonymous players have their own.
+    const ws = new WebSocket(`${proto}://${location.host}/ws/poker?token=${encodeURIComponent(accountToken())}`);
     wsRef.current = ws;
     ws.onopen = () => {
       setConnected(true);

@@ -17,6 +17,8 @@ import * as worldRanking from "./api/worldRanking";
 import * as blackjackTable from "./api/blackjackTable";
 import * as bragTable from "./api/bragTable";
 import * as matches from "./api/matches";
+import * as wallet from "./api/wallet";
+import * as holdemTable from "./api/holdemTable";
 import { alertOps } from "./api/mailer";
 import http from "http";
 import dotenv from "dotenv";
@@ -1093,11 +1095,80 @@ app.get("/api/match/current", async (req, res) => {
     return res.json(await matches.currentMatch(await accounts.worldStore(), me.id));
   } catch (err) { return accountsUnavailable(res, err); }
 });
+app.post("/api/match/resign", async (req, res) => {
+  try {
+    const me = await signedIn(req);
+    if (!me) return res.status(401).json({ error: "not_signed_in" });
+    const out = await matches.resign(await accounts.worldStore(), me.id, String(req.body?.matchId ?? ""));
+    return out.ok === false ? res.status(400).json({ error: out.error }) : res.json(out);
+  } catch (err) { return accountsUnavailable(res, err); }
+});
 app.post("/api/match/move", async (req, res) => {
   try {
     const me = await signedIn(req);
     if (!me) return res.status(401).json({ error: "not_signed_in" });
     const out = await matches.makeMove(await accounts.worldStore(), me.id, String(req.body?.matchId ?? ""), req.body?.move);
+    return out.ok === false ? res.status(400).json({ error: out.error }) : res.json(out);
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+// Card-game chips, held by the server: the balance, and the once-a-day sign-in chips.
+app.get("/api/wallet", async (req, res) => {
+  try {
+    const who = await bjWho(req);
+    return res.json({ chips: await wallet.balance(await accounts.worldStore(), who.key) });
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+/** Chips spent on the server: only the virtual gift prices the lounge offers are accepted. */
+const SPEND_AMOUNTS = [25, 75, 150];
+app.post("/api/wallet/spend", async (req, res) => {
+  try {
+    const who = await bjWho(req);
+    const amount = Number(req.body?.amount);
+    if (!SPEND_AMOUNTS.includes(amount)) return res.status(400).json({ error: "bad_amount" });
+    const out = await wallet.debit(await accounts.worldStore(), who.key, amount);
+    return out.ok === false ? res.status(409).json({ error: "insufficient_chips" }) : res.json({ chips: out.chips });
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/wallet/daily", async (req, res) => {
+  try {
+    const who = await bjWho(req);
+    return res.json(await wallet.claimDaily(await accounts.worldStore(), who.key));
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+// Server-run Texas Hold'em table: the server deals, plays the bots, and holds the stacks.
+app.post("/api/holdem/table", async (req, res) => {
+  try {
+    const who = await bjWho(req);
+    const out = await holdemTable.openTable(await accounts.worldStore(), who.key, String(req.body?.table ?? ""));
+    return out.ok === false ? res.status(400).json({ error: out.error }) : res.json(out.view);
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.get("/api/holdem/state", async (req, res) => {
+  try {
+    const who = await bjWho(req);
+    const out = await holdemTable.current(await accounts.worldStore(), who.key);
+    if (!out) return res.status(404).json({ error: "no_table" });
+    return out.ok === false ? res.status(400).json({ error: out.error }) : res.json(out.view);
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/holdem/deal", async (req, res) => {
+  try {
+    const who = await bjWho(req);
+    const out = await holdemTable.deal(await accounts.worldStore(), who.key);
+    return out.ok === false ? res.status(out.error === "hand_in_progress" ? 409 : 400).json({ error: out.error }) : res.json(out.view);
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/holdem/act", async (req, res) => {
+  try {
+    const who = await bjWho(req);
+    const out = await holdemTable.act(await accounts.worldStore(), who.key, String(req.body?.action ?? ""), Number(req.body?.raiseTo ?? 0));
+    return out.ok === false ? res.status(out.error === "not_your_turn" ? 409 : 400).json({ error: out.error }) : res.json(out.view);
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/holdem/leave", async (req, res) => {
+  try {
+    const who = await bjWho(req);
+    const out = await holdemTable.leave(await accounts.worldStore(), who.key);
     return out.ok === false ? res.status(400).json({ error: out.error }) : res.json(out);
   } catch (err) { return accountsUnavailable(res, err); }
 });
