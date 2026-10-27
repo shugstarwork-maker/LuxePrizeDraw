@@ -49,13 +49,13 @@ const categories: Category[] = ["Cars", "Luxe Holidays", "Cash", "Bitcoin", "Gol
 
 /** Cinematic promo clip per category, looping on every rolling banner until real prize media is uploaded. */
 const videos: Record<Category, string> = {
-  Cars: "/draw-art/supercar-promo.mp4",
-  "Luxe Holidays": "/draw-art/holiday-promo.mp4",
-  "Gaming Packages": "/draw-art/gaming-pc.mp4",
-  "Luxe Summer Houses": "/draw-art/summerhouse-promo.mp4",
-  Cash: "/draw-art/cash-100p.mp4",
-  Bitcoin: "/draw-art/bitcoin-promo.mp4",
-  "Gold Bullion": "/draw-art/luxe-gold-bar.mp4",
+  Cars: "/draw-art/car-luxe-gt-cine.mp4",
+  "Luxe Holidays": "/draw-art/holiday-cine.mp4",
+  "Gaming Packages": "/draw-art/gaming-pc-cine.mp4",
+  "Luxe Summer Houses": "/draw-art/summerhouse-cine.mp4",
+  Cash: "/draw-art/cash-100p-cine.mp4",
+  Bitcoin: "/draw-art/featured-bitcoin-cine.mp4",
+  "Gold Bullion": "/draw-art/featured-gold-cine.mp4",
 };
 
 export function CategoryDrawCarousel({ category, entryBand }: { category: string; entryBand?: string }) {
@@ -70,7 +70,7 @@ export function CategoryDrawCarousel({ category, entryBand }: { category: string
   const [tierIndex, setTierIndex] = useState(initialTier);
   const { play } = useAudio();
   
-  return <section className="min-h-screen bg-[#08090f] py-8 sm:py-12"><div className="mx-auto max-w-3xl px-4 sm:px-6"><button onClick={() => { window.history.pushState({}, "", "/draws"); window.dispatchEvent(new PopStateEvent("popstate")); }} className="text-xs font-black uppercase tracking-wider text-amber-200">All prize collections</button><p className="mt-5 text-xs font-black uppercase tracking-[.2em] text-amber-200">{parsedCategory}</p><h1 className="mt-2 text-3xl font-black sm:text-5xl">Choose your entry tier.</h1><p className="mt-2 text-sm text-white/60">Each tier increases the planned prize value in this collection. Browse every prize choice now; entries and payments remain disabled until launch approval.</p><RollingCardCarousel items={tiers} getKey={item => item.entry} label="entry tier" activeIndex={tierIndex} onActiveChange={setTierIndex} renderItem={(tier, tierIndex) => <DeckCard className="deck-card--banner" image={images[parsedCategory][tierIndex]} video={videos[parsedCategory]} title={names[parsedCategory][tierIndex]}
+  return <section className="min-h-screen bg-[#08090f] py-8 sm:py-12"><div className="mx-auto max-w-3xl px-4 sm:px-6"><button onClick={() => { window.history.pushState({}, "", "/draws"); window.dispatchEvent(new PopStateEvent("popstate")); }} className="text-xs font-black uppercase tracking-wider text-amber-200">All prize collections</button><p className="mt-5 text-xs font-black uppercase tracking-[.2em] text-amber-200">{parsedCategory}</p><h1 className="mt-2 text-3xl font-black sm:text-5xl">Choose your entry tier.</h1><p className="mt-2 text-sm text-white/60">Each tier increases the planned prize value in this collection. Browse every prize choice now; entries and payments remain disabled until launch approval.</p><RollingCardCarousel items={tiers} getKey={item => item.entry} label="entry tier" activeIndex={tierIndex} onActiveChange={setTierIndex} renderItem={(tier, tierIndex) => <DeckCard image={images[parsedCategory][tierIndex]} video={videos[parsedCategory]} title={names[parsedCategory][tierIndex]}
     facts={[[parsedCategory, Gift], [`${tier.entry} proposed entry`, Ticket], ["Entry not open", CircleAlert]]}
     stats={[{ value: `Up to ${tier.value}`, label: "Prize value" }, { value: tier.entry, label: "Entry" }, { value: "Pending", label: "Status" }]}
     note="Subject to approved rules & prize verification"

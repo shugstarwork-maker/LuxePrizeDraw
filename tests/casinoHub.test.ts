@@ -39,17 +39,19 @@ test("casino welcome gate uses the Luxe gold treatment and hero artwork", () => 
   assert.match(css, /\.casino-welcome-rule/);
 });
 
-test("every draw rolling banner is cinematic 21:9 with a promo video", () => {
+test("every draw carousel card carries a cinematic promo video in the app-trailer style", () => {
   const featured = readFileSync(new URL("../src/components/FeaturedDraws.tsx", import.meta.url), "utf8");
   const cats = readFileSync(new URL("../src/components/DrawCategories.tsx", import.meta.url), "utf8");
   const hols = readFileSync(new URL("../src/components/LuxuryHolidaysSection.tsx", import.meta.url), "utf8");
   const tiers = readFileSync(new URL("../src/components/CategoryDrawCarousel.tsx", import.meta.url), "utf8");
-  for (const src of [featured, cats, hols, tiers]) assert.match(src, /deck-card--banner/);
+  // tall cards restored — no wide banner variant remains
+  for (const src of [featured, cats, hols, tiers]) assert.doesNotMatch(src, /deck-card--banner/);
   assert.ok((cats.match(/video=/g) || []).length >= 5, "category draw cards keep their videos");
-  assert.match(featured, /supercar-promo\.mp4/);
-  assert.match(featured, /bitcoin-promo\.mp4/);
-  assert.match(hols, /holiday-promo\.mp4/);
-  assert.match(tiers, /summerhouse-promo\.mp4/);
-  const css = readFileSync(new URL("../src/index.css", import.meta.url), "utf8");
-  assert.match(css, /\.deck-card--banner \{[^}]*aspect-ratio:21\/9/);
+  assert.match(featured, /car-luxe-gt-cine\.mp4/);
+  assert.match(featured, /featured-bitcoin-cine\.mp4/);
+  assert.match(featured, /featured-ferrari-cine\.mp4/);
+  assert.match(featured, /featured-gold-cine\.mp4/);
+  assert.match(hols, /holiday-cine\.mp4/);
+  assert.match(tiers, /videos: Record<Category, string>/);
+  assert.match(tiers, /video=\{videos\[parsedCategory\]\}/);
 });
