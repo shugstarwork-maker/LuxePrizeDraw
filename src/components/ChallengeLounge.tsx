@@ -7,6 +7,7 @@ import { useAudio } from "../audio/AudioProvider";
 import { ChessBoard, ConnectFourBoard, DraughtsBoard } from "./GamesArena";
 import { GAME_DAILY_XP_CAP, GAME_XP, gameLeagueState, recordGameResult, type GameLeagueState, type GameOutcome } from "../lib/gameLeagues";
 import { bumpStat, markTried } from "../lib/achievements";
+import { GameLeagueCard } from "./GameLeagueCard";
 
 const nav = (href: string) => { window.history.pushState({}, "", href); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); };
 
@@ -63,6 +64,8 @@ export const ChallengeLounge: React.FC = () => {
         <div className="mt-6 rounded-[2rem] border border-amber-200/30 bg-black/30 p-4 shadow-[0_0_60px_rgba(212,175,55,.14)] sm:p-7">
           {screen === "chess" ? <ChessBoard sound={sound} onResult={reportResult("chess")} /> : screen === "connect4" ? <ConnectFourBoard sound={sound} onResult={reportResult("connect4")} /> : <DraughtsBoard sound={sound} onResult={reportResult("draughts")} />}
         </div>
+        <div className="mt-4"><GameLeagueCard title={meta.title} state={state} /></div>
+        <p className="mt-2 text-[10px] leading-relaxed text-white/40">{meta.title} has its own league. Only finished {meta.title} games earn its XP, and the other games do not share it.</p>
         {notice && <p className="mt-4 rounded-xl border border-emerald-300/30 bg-emerald-300/10 p-3 text-sm text-emerald-100">{notice}</p>}
         <p className="mt-4 flex items-center gap-2 text-xs text-white/45"><ShieldCheck className="h-4 w-4 text-emerald-300" />Free-play only — no deposits, no cash wagering, no cash-out. Win a game: +{GAME_XP.win} XP, draw: +{GAME_XP.draw} XP, in this game's league only.</p>
       </div>
