@@ -22,10 +22,10 @@ test("every card and board game is on the casino carousel and routes somewhere r
   }
 });
 
-test("casino deep links into board games go through sitDown, so they count as games played", () => {
+test("casino deep links open the board and count it as tried", () => {
   const lounge = readFileSync(new URL("../src/components/ChallengeLounge.tsx", import.meta.url), "utf8");
-  assert.match(lounge, /sitDown\(requested as ChallengeGameId\)/);
-  assert.match(lounge, /useState<"welcome" \| "lobby" \| ChallengeGameId>\("welcome"\)/);
+  assert.match(lounge, /requestedGame/);
+  assert.match(lounge, /markTried\(screen\)/);
 });
 
 test("casino welcome gate uses the Luxe gold treatment and hero artwork", () => {

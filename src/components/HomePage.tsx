@@ -70,7 +70,6 @@ const PROMISES = [
 
 const GAMES = [
   { name: "Luxe Poker League", href: "/poker", icon: "♠", detail: "Free-play weekly leagues, cinematic tables, live multiplayer." },
-  { name: "Luxe Challenge League", href: "/challenge", icon: "⚔", detail: "Cinematic chess, Connect Four and draughts in the same weekly league." },
   { name: "Player Portal", href: "/portal", icon: "🏆", detail: "League position, quests, achievements and trophies." },
 ];
 
@@ -91,7 +90,7 @@ export const HomePage: React.FC = () => (
         <button type="button" onClick={() => go("/draws")} className="inline-flex items-center gap-2 rounded-full bg-gradient-to-b from-amber-300 to-amber-500 px-7 py-3.5 text-sm font-black text-black shadow-[0_8px_36px_rgba(246,201,69,.4)] transition active:scale-95">
           Explore live prizes <ArrowRight className="h-4 w-4" />
         </button>
-        <button type="button" onClick={() => go("/challenge")} className="rounded-full border border-amber-200/40 bg-black/40 px-6 py-3.5 text-sm font-black text-amber-100 transition hover:border-amber-200/80 active:scale-95">Play free games</button>
+        <button type="button" onClick={() => go("/casino")} className="rounded-full border border-amber-200/40 bg-black/40 px-6 py-3.5 text-sm font-black text-amber-100 transition hover:border-amber-200/80 active:scale-95">Play free games</button>
       </div>
       <p className="relative mx-auto mt-6 max-w-md text-[10px] leading-relaxed text-white/40">
         Clear competition rules · Transparent prize information · Community impact · Pre-launch preview — entries and payments open only after rules are legally approved.

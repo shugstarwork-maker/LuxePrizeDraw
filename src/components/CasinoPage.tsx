@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight, Coins, Crown, Dices, ShieldCheck, Sparkles, Users, type LucideIcon } from "lucide-react";
 import { DeckCard } from "./DeckCard";
 import { RollingCardCarousel } from "./RollingCardCarousel";
+import { OnlineMatch, type OnlineGame } from "./OnlineMatch";
 
 const go = (href: string) => { window.history.pushState({}, "", href); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); };
 
@@ -24,8 +25,11 @@ const KIND_LABEL: Record<string, string> = { Cards: "Card game", Board: "Board g
 /** Paths that belong to the casino, so navigation can highlight it. */
 export const CASINO_PATHS = ["/casino", "/poker", "/blackjack", "/brag", "/chess", "/challenge", "/duel", "/arena", "/arcade", "/lobby", "/league"];
 
+const ONLINE_GAMES: { id: OnlineGame; title: string }[] = [{ id: "chess", title: "Chess" }, { id: "connect4", title: "Connect Four" }, { id: "draughts", title: "Draughts" }];
+
 export function CasinoPage() {
   const [entered, setEntered] = useState(false);
+  const [onlineGame, setOnlineGame] = useState<OnlineGame | null>(null);
   if (!entered) return <main className="casino-welcome min-h-screen px-3 py-4 pb-40 text-white">
     <div className="mx-auto w-full max-w-sm overflow-hidden rounded-[1.5rem] border border-amber-200/40 bg-gradient-to-b from-[#17110a] via-[#0a0805] to-[#050403] shadow-[0_0_70px_rgba(232,187,70,.28)]">
       <div className="flex items-center justify-between gap-2 border-b border-amber-200/15 bg-black/60 px-3 py-3">
@@ -86,6 +90,11 @@ export function CasinoPage() {
           onCta={() => go(g.href)}
         />}
       />
+      <section className="mt-8 text-center">
+        <p className="text-[10px] font-black uppercase tracking-[.2em] text-amber-200">Ranked online · two players</p>
+        {onlineGame ? <div className="mx-auto mt-4 max-w-md"><OnlineMatch game={onlineGame} onClose={() => setOnlineGame(null)} /></div> : <div className="mt-3 grid gap-2 sm:grid-cols-3">{ONLINE_GAMES.map((g) => <button key={g.id} type="button" onClick={() => setOnlineGame(g.id)} className="rounded-xl border border-amber-200/40 bg-black/40 px-3 py-3 text-xs font-black uppercase tracking-wider text-amber-100 transition hover:border-amber-200">{g.title}</button>)}</div>}
+        <p className="mt-3 text-[10px] text-white/40">Ranked games are played against another signed-in player. The free-play boards above are on this device only and are not ranked.</p>
+      </section>
     </div>
   </main>;
 }

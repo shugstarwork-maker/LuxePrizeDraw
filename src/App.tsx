@@ -83,6 +83,8 @@ export default function App() {
   useEffect(() => { const sync = () => setPath(window.location.pathname); window.addEventListener("popstate", sync); return () => window.removeEventListener("popstate", sync); }, []);
   // Opening a casino game counts toward the explorer badges (board games via ?game= are counted on sit-down).
   useEffect(() => { const game = GAME_ROUTES[path]; if (game) markTried(game); }, [path]);
+  // /challenge is the casino unless a board game is named in the URL.
+  const boardGame = ["chess", "connect4", "draughts"].includes(new URLSearchParams(window.location.search).get("game") ?? "");
   const inner = path === "/welcome" ? <WelcomePage onEnter={() => go("/")} />
     : path === "/serenity" ? <SerenityCharityPage />
     : path === "/cash-giveaways" ? <CashGiveawaysPage />
@@ -111,12 +113,12 @@ export default function App() {
     : path === "/brag" ? <><GameLounge brand="3-Card Brag" tagline="The classic British card game. Free play, virtual chips, no cash value." art="/games/brag-card.png" icon="♥" leagueGame="brag" leagueTitle="3-Card Brag"><CardLounge game="brag" /></GameLounge><ScottishHost /></>
     : path === "/arcade" ? <><ArcadeHome /><ScottishHost /><MobileDock /></>
     : path === "/portal" ? <><PlayerPortal /><ScottishHost /><MobileDock /></>
-    : path === "/challenge" ? <><ChallengeLounge /><ScottishHost /></>
+    : path === "/challenge" && !boardGame ? <><CasinoPage /><MobileDock /></> : path === "/challenge" ? <><ChallengeLounge /><ScottishHost /></>
     : path === "/sports-cars" ? <><CategoryDrawCarousel category="Cars" /><ScottishHost /><MobileDock /></>
     : path === "/prizes/luxury-supercar-experience" ? <><ExperienceNav /><PartnershipCampaignPage /><MobileDock /></>
     : path === "/category" ? <><CategoryDrawCarousel category={new URLSearchParams(window.location.search).get("name") || "Cash"} entryBand={new URLSearchParams(window.location.search).get("band") || undefined} /><ScottishHost /><MobileDock /></>
     : <SiteContent path={path} />;
-  const page = <Suspense fallback={<RouteFallback />}>{FULLSCREEN_GAME_PATHS.includes(path) ? <GameFullscreen>{inner}</GameFullscreen> : inner}</Suspense>;
+  const page = <Suspense fallback={<RouteFallback />}>{FULLSCREEN_GAME_PATHS.includes(path) && (path !== "/challenge" || boardGame) ? <GameFullscreen>{inner}</GameFullscreen> : inner}</Suspense>;
 
   const category = path === "/category" ? new URLSearchParams(window.location.search).get("name") : path === "/sports-cars" ? "Cars" : "";
   const backdropTheme = path === "/" ? "money" : category === "Cars" ? "cars" : category === "Cash" || category === "Bitcoin" ? "money" : undefined;
