@@ -6,6 +6,7 @@ import { RollingCardCarousel } from "./RollingCardCarousel";
 import { CASH_DRAW_PROPOSALS, formatCashEntry } from "./CashPrizesCarousel";
 import { ticketsSold, ticketsToUnlock } from "../lib/drawProgress";
 import { HeadlineLuxeCard } from "./FeaturedDraws";
+import { GoldCoinRain } from "./GoldCoinRain";
 import { Banknote, CarFront, Cpu, Gem, ShieldCheck, Sparkles, Ticket, Trophy } from "lucide-react";
 
 const vehicles = [
@@ -89,7 +90,7 @@ export function CashCategory() {
       <WinnersBanner category="Cash" />
       <div className="mt-9"><CategoryHeader eyebrow="Cash only" title="Cash prize draws." intro="Cash prizes from £1,000. Each card shows how many tickets at the proposed entry price would cover that prize. The count is indicative, not a confirmed entry cap, and entries are not open." icon={Banknote} /></div>
       <RollingCardCarousel items={CASH_DRAW_PROPOSALS} getKey={(p) => p.id} label="Cash prize draws" className="mt-9" compactControls
-        renderItem={(p, index) => <DeckCard className="cinematic cash-swell-card coverflow-draw" titleClassName="cash-prize-heading" title={p.title} image={`/draw-art/cash-${p.entryPence}p.jpg`} video={`/draw-art/cash-${p.entryPence}p-cine.mp4`} progress={{ sold: ticketsSold(p.id), needed: ticketsToUnlock(p.valueGBP, p.entryPence) }}
+        renderItem={(p, index) => <DeckCard className="cinematic cash-swell-card coverflow-draw" titleClassName="cash-prize-heading" backdrop={<GoldCoinRain />} title={p.title} image={`/draw-art/cash-${p.entryPence}p.jpg`} video={`/draw-art/cash-${p.entryPence}p-cine.mp4`} progress={{ sold: ticketsSold(p.id), needed: ticketsToUnlock(p.valueGBP, p.entryPence) }}
           facts={[[`Entry ${formatCashEntry(p.entryPence)}`, Ticket], ["CASH ONLY", Banknote], [`Draw ${index + 1} of ${CASH_DRAW_PROPOSALS.length}`, Trophy]]}
           stats={[{ value: money(p.valueGBP), label: "Prize" }, { value: formatCashEntry(p.entryPence), label: "Entry", amount: true }, { value: "Preview", label: "Status" }]}
           cta="Enter now" onCta={terms}

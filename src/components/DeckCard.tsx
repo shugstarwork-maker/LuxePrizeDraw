@@ -31,7 +31,7 @@ function drawSummary(title: string, facts: readonly DeckFact[], stats: readonly 
   };
 }
 
-export function DeckCard({ image, video, title, facts = [], stats = [], summary, cta, ctaLabel, onCta, note, terms, progress, className, titleClassName, children }: {
+export function DeckCard({ image, video, title, facts = [], stats = [], summary, cta, ctaLabel, onCta, note, terms, progress, className, titleClassName, backdrop, children }: {
   image?: string;
   /** Short looping clip; the image, if given, is shown until it loads. */
   video?: string;
@@ -51,6 +51,8 @@ export function DeckCard({ image, video, title, facts = [], stats = [], summary,
   /** Prize draws pass their key terms; the card then links to them. */
   terms?: DrawTermsInfo;
   progress?: DeckProgress;
+  /** Decorative layer drawn over the artwork, under the title bar. */
+  backdrop?: ReactNode;
   children?: ReactNode;
 }) {
   const figures = drawSummary(title, facts, stats, terms, summary);
@@ -58,6 +60,7 @@ export function DeckCard({ image, video, title, facts = [], stats = [], summary,
   return <article className={`deck-card${className ? ` ${className}` : ""}`}>
     <div className="deck-card__stage">
       {video ? <video className="deck-card__bg" src={video} poster={image} autoPlay muted loop playsInline preload="none" aria-label={`${title} preview`} /> : image ? <img className="deck-card__bg" src={image} alt={`${title} preview`} loading="lazy" decoding="async" /> : <div className="deck-card__bg deck-card__bg--plain" aria-hidden="true" />}
+      {backdrop}
     </div>
     <div className="deck-card__bar">
       <div className="deck-card__bar-head">

@@ -2378,3 +2378,11 @@ html.luxury-portrait .poker-playing-page .poker-console .poker-deal-dock { min-h
 .cinematic .deck-card__bg { transition: transform 1.2s ease; }
 .cinematic:hover .deck-card__bg, .cinematic:focus-within .deck-card__bg { transform: scale(1.04); }
 @media (prefers-reduced-motion: reduce) { .cinematic .deck-card__bg { transition: none; } .cinematic:hover .deck-card__bg { transform: none; } }
+
+/* Gold coins falling across each cash card, matching the page money rain. */
+.gold-coin-rain { position:absolute; inset:0; z-index:1; overflow:hidden; pointer-events:none; container-type:size; }
+.gold-coin-rain > span { position:absolute; top:-2rem; display:grid; place-items:center; width:1.15rem; height:1.15rem; border:1px solid #fff0b0; border-radius:50%; background:radial-gradient(circle at 30% 20%,#fff6c4,#e0a72a 55%,#8a5a0c); color:#5a3a02; font:900 .75rem Georgia,serif; box-shadow:0 1px 3px rgba(0,0,0,.5); opacity:.7; animation:gold-coin-fall 18s linear infinite; }
+@keyframes gold-coin-fall { to { transform:translateY(100rem) rotate(240deg); } }
+@supports(height:1cqh) { @keyframes gold-coin-fall { to { transform:translateY(calc(100cqh + 3rem)) rotate(240deg); } } }
+.coverflow-draw:hover .gold-coin-rain > span, .coverflow-draw:focus-within .gold-coin-rain > span { animation-play-state:paused; }
+@media(prefers-reduced-motion:reduce) { .gold-coin-rain { display:none; } }
