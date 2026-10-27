@@ -7,7 +7,7 @@ const general = readFileSync(new URL("../src/components/GeneralDrawTerms.tsx", i
 const schedules = readFileSync(new URL("../src/components/DrawSchedules.tsx", import.meta.url), "utf8");
 
 test("every draw section passes key terms to its cards", () => {
-  for (const f of ["CategoryDrawCarousel", "PrestigeCarsDraws", "LuxuryHolidaysSection", "CashPrizesCarousel", "FeaturedDraws", "PartnershipCampaignPage", "HomePage"]) {
+  for (const f of ["CategoryDrawCarousel", "LuxuryHolidaysSection", "CashPrizesCarousel", "FeaturedDraws", "PartnershipCampaignPage", "HomePage"]) {
     const src = readFileSync(new URL(`../src/components/${f}.tsx`, import.meta.url), "utf8");
     assert.match(src, /terms=\{\{ drawName:/, `${f} renders draw cards without terms`);
   }

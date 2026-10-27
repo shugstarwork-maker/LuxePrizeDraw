@@ -77,6 +77,12 @@ async function restoreTables(): Promise<void> {
       if (!p.id.startsWith("bot-")) t.leaving[p.id] = true;
     }
     mpTables.set(id, t);
+    // Nothing else is driving this table after a restart: finish a stalled hand's bot turns, or cash out now if it is between hands.
+    if (t.state.handOver) {
+      for (const seatId of Object.keys(t.leaving)) if (t.leaving[seatId]) removeSeat(t, seatId);
+    } else {
+      runBotTurns(t);
+    }
   }
 }
 
