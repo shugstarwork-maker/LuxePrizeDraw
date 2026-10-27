@@ -4,7 +4,7 @@
 // Sessions are random 256-bit tokens stored with a 30-day TTL; "sign out everywhere"
 // revokes every session issued before it. Repeated failed sign-ins are rate limited.
 // Players can export or delete their account, and reset a forgotten password by email.
-// Storage: Upstash Redis when configured. If Redis is configured but unreachable the
+// Storage: Redis when configured (REDIS_URL, as Render Key Value provides, or the Upstash REST pair). If Redis is configured but unreachable the
 // account API fails closed (503) instead of writing accounts to a local file. The
 // local JSON file is only used when Redis is not configured at all (demo/offline
 // sandbox), and can be forbidden with ACCOUNTS_REQUIRE_REDIS=true. Accounts stay free-play: no payments, no cash value —
@@ -13,6 +13,7 @@ import crypto from "crypto";
 import fs from "fs";
 import path from "path";
 import { Redis } from "@upstash/redis";
+import { createClient } from "redis";
 import { emailConfigured, sendEmail } from "./mailer";
 
 type Entry = { value: string; expiresAt?: number };
@@ -40,6 +41,35 @@ function redisStore(): Store {
       const n = await r.incr(key);
       // Also repair a key left without a TTL (e.g. if a previous EXPIRE call failed).
       if (n === 1 || (await r.ttl(key)) === -1) await r.expire(key, ttl);
+      return n;
+    },
+  };
+}
+
+/** The open Redis connection, kept so it can be closed (tests and shutdown). */
+let redisClient: ReturnType<typeof createClient> | null = null;
+
+/** Closes the Redis connection if one is open, so a process can exit. */
+export async function closeAccountStore(): Promise<void> {
+  if (redisClient) { await redisClient.quit().catch(() => undefined); redisClient = null; }
+  cached = null;
+}
+
+/** Redis over the standard protocol, as Render Key Value provides (REDIS_URL). */
+async function redisUrlStore(url: string): Promise<Store> {
+  const client = createClient({ url });
+  redisClient = client;
+  client.on("error", (err) => console.error("[accounts] redis error", err.message));
+  await client.connect();
+  return {
+    async get(key) { return client.get(key); },
+    async set(key, value, ttl) { if (ttl) await client.set(key, value, { EX: ttl }); else await client.set(key, value); },
+    async del(key) { await client.del(key); },
+    async take(key) { return client.getDel(key); },
+    async incr(key, ttl) {
+      const n = await client.incr(key);
+      // Also repair a key left without a TTL (e.g. if a previous EXPIRE call failed).
+      if (n === 1 || (await client.ttl(key)) === -1) await client.expire(key, ttl);
       return n;
     },
   };
@@ -81,8 +111,19 @@ let cached: Store | null = null;
 /** The shared account store, for other server modules (e.g. the world ranking). */
 export function worldStore(): Promise<Store> { return store(); }
 
+/** True when a Redis store is configured, either as REDIS_URL or as the Upstash REST pair. */
+const redisConfigured = () => Boolean(process.env.REDIS_URL || (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN));
+
 async function store(): Promise<Store> {
   if (cached) return cached;
+  if (process.env.REDIS_URL) {
+    // Render Key Value: a failed connection is not cached, so the next request retries.
+    const s = await redisUrlStore(process.env.REDIS_URL);
+    await Promise.race([s.get("acc:__probe__"), new Promise((_, rej) => setTimeout(() => rej(new Error("redis timeout")), 3000))]);
+    cached = s;
+    console.log("[accounts] storage: Redis (REDIS_URL)");
+    return cached;
+  }
   if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
     // Redis is configured: never fall back to a file, or accounts would split
     // between two stores. A failed probe is not cached, so the next request retries.
@@ -261,7 +302,7 @@ export async function saveChips(accountId: string, chips: number): Promise<void>
 export async function storageStatus(): Promise<"redis" | "file" | "unavailable"> {
   try {
     const s = await store();
-    if (!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN)) return "file";
+    if (!redisConfigured()) return "file";
     // Probe on every call: the cached client says nothing about whether Redis is up now.
     await Promise.race([s.get("acc:__probe__"), new Promise((_, rej) => setTimeout(() => rej(new Error("redis timeout")), 3000))]);
     return "redis";

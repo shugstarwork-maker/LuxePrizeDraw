@@ -9,6 +9,7 @@ const dir = fs.mkdtempSync(path.join(os.tmpdir(), "luxe-lifecycle-"));
 process.chdir(dir);
 delete process.env.KV_REST_API_URL;
 delete process.env.KV_REST_API_TOKEN;
+delete process.env.REDIS_URL;
 const sent: { to: string[]; text: string }[] = [];
 const realFetch = globalThis.fetch;
 globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit) => {

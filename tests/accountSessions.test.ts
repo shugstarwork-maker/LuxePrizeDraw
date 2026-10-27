@@ -8,6 +8,7 @@ import path from "node:path";
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), "luxe-accounts-"));
 process.chdir(dir);
 delete process.env.KV_REST_API_URL;
+delete process.env.REDIS_URL;
 delete process.env.KV_REST_API_TOKEN;
 const accounts = await import("../api/accounts.ts");
 const storeFile = path.join(dir, "data", "accounts.json");
