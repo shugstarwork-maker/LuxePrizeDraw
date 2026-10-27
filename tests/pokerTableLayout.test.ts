@@ -110,11 +110,11 @@ test("console matches the pro-app sidebar: coin table card, ring quick icons and
   assert.match(hud, /Seat &amp; Stacks/);                            // section headers
   assert.match(hud, /Table Options/);
   assert.match(hud, /data-testid="poker-console-options"/);
-  for (const row of ["Table Info", "How to Play", "Leave Table"]) {
-    assert.ok(hud.includes(`<span>${row}</span>`), `missing option row: ${row}`);
+  const options = hud.slice(hud.indexOf('data-testid="poker-console-options"'), hud.indexOf("poker-console-hand"));
+  for (const row of ["Table Info", "Leaderboard", "Chat", "Sound", "How to Play", "Leave Table"]) {
+    assert.ok(options.includes(`<span>${row}</span>`), `missing option row: ${row}`);
   }
-  // Leaderboard, Chat and Sound already sit in the nav and quick rows — no duplicate option rows.
-  assert.ok(!hud.includes('aria-label="Open leaderboard"'), "duplicate Leaderboard option row is back");
+  assert.match(hud, /\{tierName\} League/);
   assert.match(css, /\.console-table-card__coin \{[^}]*border-radius: 50%/);            // gold coin disc
   assert.match(css, /poker-console-quick \.console-nav-btn svg \{[^}]*border-radius: ?50%/); // circular quick rings
   assert.match(css, /\.poker-console \.poker-console-quick \{[^}]*border:1px solid/);       // framed quick panel
@@ -151,6 +151,16 @@ test("in-play chips are black-and-gold Luxe stacks with a spade face, like the r
   assert.match(css, /\.poker-bet-chips__stack i \{[^}]*#0d0a04/);               // black lacquer chip face
   assert.match(css, /\.poker-bet-chips__stack i \{[^}]*border:2px solid #d9b764/); // gold rim
   assert.match(css, /\.poker-bet-chips__face \{[^}]*color:#f0c86e/);            // gold spade
+});
+
+test("portrait phones letterbox the landscape table into a centred 16:9 band", () => {
+  assert.match(css, /html\.luxury-portrait:has\(\.poker-playing-page\)/);
+  assert.match(css, /html\.luxury-portrait \.poker-playing-page \{[^}]*aspect-ratio:16 \/ 9/);
+  assert.match(css, /html\.luxury-portrait \.poker-playing-page \{[^}]*translate\(-50%, -50%\)/);
+  assert.match(css, /html\.luxury-portrait \.poker-playing-page \.poker-landscape-gate \{ display:none/);
+  assert.match(css, /html\.luxury-portrait \.poker-playing-page \.poker-playing-wrap \{ visibility:visible !important/);
+  assert.match(css, /html\.luxury-portrait \.poker-playing-page \.poker-console \{[^}]*width:27%/);
+  assert.match(css, /html\.luxury-portrait \.poker-playing-page \.poker-playing-wrap \{[^}]*width:73%/);
 });
 
 test("lobby offers a way back to a live table — League/lobby visits no longer strand the player", () => {
