@@ -18,7 +18,7 @@ const draws: Draw[] = [
 export function HeadlineLuxeCard() {
   const { play } = useAudio();
   return <>
-    <div className="headline-luxe-deck"><BitcoinCoinRain /><DeckCard className="headline-luxe-card" image="/prizes/hero-bitcoin.jpg" title="Win £100K · Bitcoin or Cash" progress={{ sold: ticketsSold("headline-bitcoin") }} terms={{ drawName: "£100K Bitcoin or Cash", category: "bitcoin", prize: "£100,000 of Bitcoin or a £100,000 cash alternative — the winner chooses", entry: "to be confirmed" }}
+    <div className="headline-luxe-deck"><BitcoinCoinRain /><DeckCard className="headline-luxe-card cinematic" image="/prizes/hero-bitcoin.jpg" title="Win £100K · Bitcoin or Cash" progress={{ sold: ticketsSold("headline-bitcoin") }} terms={{ drawName: "£100K Bitcoin or Cash", category: "bitcoin", prize: "£100,000 of Bitcoin or a £100,000 cash alternative — the winner chooses", entry: "to be confirmed" }}
       stats={[{ value: "£100,000", label: "Of Bitcoin" }, { value: "or", label: "Your choice" }, { value: "£100K", label: "Cash" }]}
       cta="View draws" onCta={() => { play("button"); navigate("/draws"); }}
       note="Approval pending · Entries and payments disabled · Preview only, no prize entitlement">

@@ -2224,3 +2224,8 @@ body::after {
   .luxe-chess-stage { grid-template-columns:minmax(0, calc(100svh - 2.5rem)) minmax(12rem, 1fr); }
   .luxe-chess-moves { max-height:6.5rem; }
 }
+
+/* Cinematic draw cards: a slow push-in on the artwork when a card is in focus. */
+.cinematic .deck-card__bg { transition: transform 1.2s ease; }
+.cinematic:hover .deck-card__bg, .cinematic:focus-within .deck-card__bg { transform: scale(1.04); }
+@media (prefers-reduced-motion: reduce) { .cinematic .deck-card__bg { transition: none; } .cinematic:hover .deck-card__bg { transform: none; } }
