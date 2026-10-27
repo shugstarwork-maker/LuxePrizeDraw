@@ -1,17 +1,16 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { joinQueue, makeMove, currentMatch, MOVE_TIMEOUT_MS } from '../api/matches';
+import { joinQueue, makeMove, currentMatch, resign, MOVE_TIMEOUT_MS } from '../api/matches';
 import { worldStanding } from '../api/worldRanking';
 import type { Store } from '../api/accounts';
 
 function memoryStore(): Store {
   const data = new Map<string, string>();
-  const counts = new Map<string, number>();
   return {
     async get(k) { return data.get(k) ?? null; },
     async set(k, v) { data.set(k, v); },
     async take(k) { const v = data.get(k) ?? null; data.delete(k); return v; },
-    async incr(k) { const n = (counts.get(k) ?? 0) + 1; counts.set(k, n); return n; },
+    async incr(k) { const n = Number(data.get(k) ?? 0) + 1; data.set(k, String(n)); return n; },
   } as unknown as Store;
 }
 
@@ -95,4 +94,25 @@ test('a finished game does not block joining the queue again', async () => {
 
 test('unknown games are refused', async () => {
   assert.deepEqual(await joinQueue(memoryStore(), ana, 'poker' as never, 1000), { ok: false, error: 'bad_game' });
+});
+
+test('two players joining the same queue at the same moment are paired, not left waiting', async () => {
+  const s = memoryStore();
+  const [x, y] = await Promise.all([
+    joinQueue(s, { id: 'ACC-p', name: 'Pip' }, 'draughts', 1000),
+    joinQueue(s, { id: 'ACC-q', name: 'Quin' }, 'draughts', 1000),
+  ]);
+  assert.ok(x.ok && y.ok);
+  const matched = [x, y].filter((r) => r.ok && r.view).length;
+  assert.equal(matched, 1, 'exactly one of the two should be matched into a game');
+});
+
+test('resigning ends the game, and the other player is ranked the winner', async () => {
+  const s = memoryStore();
+  const id = await pairedChess(s, 1000);
+  const out = await resign(s, ben.id, id, 2000);
+  assert.ok(out.ok && out.view && out.view.status === 'finished' && out.view.winner === 'a');
+  assert.equal((await worldStanding(s, ana.id, new Date(2000))).perGame.chess.wins, 1);
+  assert.equal((await worldStanding(s, ben.id, new Date(2000))).perGame.chess.wins, 0);
+  assert.deepEqual(await resign(s, ana.id, id, 2000), { ok: false, error: 'match_finished' });
 });

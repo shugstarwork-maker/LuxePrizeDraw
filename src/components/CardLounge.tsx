@@ -6,7 +6,7 @@ import { weekEndsIn } from "../lib/pokerLeague";
 import { gameLeagueState, recordGameResult } from "../lib/gameLeagues";
 import { LEAGUE_TIERS } from "../lib/pokerLeague";
 import { handValue, type BjState } from "../games/blackjack";
-import { bjAct as bjActRemote, bjDeal, bjOpenTable, bragAct as bragActRemote, bragDeal, bragOpenTable } from "../lib/cardTableServer";
+import { bjAct as bjActRemote, bjDeal, bjOpenTable, bragAct as bragActRemote, bragDeal, bragOpenTable, claimDailyChips, fetchBalance } from "../lib/cardTableServer";
 import { bragValue, BRAG_LABELS, type BragState } from "../games/brag";
 import { LuxePlayingCard } from "./LuxePlayingCard";
 import { bumpStat } from "../lib/achievements";
@@ -54,6 +54,8 @@ export function CardLounge({ game }: { game: LoungeGame }) {
   const audio = useAudio();
   const [rulesOpen, setRulesOpen] = useState(false);
   const [chips, setChips] = useWallet();
+  // The server holds the card-game balance; show it as soon as the lounge opens.
+  useEffect(() => { void fetchBalance().then((c) => { if (c !== null) setChips(c); }); }, []);
   const [screen, setScreen] = useState<"lobby" | "table">("lobby");
   const [table, setTable] = useState<typeof LOUNGE_TABLES[number] | null>(null);
   const [slide, setSlide] = useState(0);
@@ -70,19 +72,23 @@ export function CardLounge({ game }: { game: LoungeGame }) {
   const leagueTier = league.tier;
 
   const note = (m: string) => setStatus(m);
+  // The server grants the daily chips once per day and reports the balance it holds.
   const dailyReward = () => {
     if (!rewardReady) return;
-    localStorage.setItem(DAILY_KEY, new Date().toDateString());
-    setRewardReady(false);
-    setChips((v) => v + 200);
-    note("Daily sign-in: 200 chips. Free-play only, no cash value.");
+    void claimDailyChips().then((r) => {
+      if (!r) return note("Daily chips could not be collected. Try again.");
+      setChips(r.chips);
+      setRewardReady(false);
+      localStorage.setItem(DAILY_KEY, new Date().toDateString());
+      note(r.granted ? "Daily sign-in: 200 chips. Free-play only, no cash value." : "Daily chips already collected today.");
+    });
   };
 
   const join = (t: typeof LOUNGE_TABLES[number]) => {
     if (chips < t.minBet) { note(`${t.name} needs at least ${t.minBet} chips. Collect daily chips below.`); return; }
     setTable(t); setBet(t.minBet); setScreen("table"); settledRef.current = 0;
-    if (game === "blackjack") void bjOpenTable(t.minBet).then((r) => { if ("state" in r) setBj(r.state); else note("The table could not be opened. Try again."); });
-    else void bragOpenTable(t.minBet).then((r) => { if ("state" in r) setBrag(r.state); else note("The table could not be opened. Try again."); });
+    if (game === "blackjack") void bjOpenTable(t.minBet).then((r) => { if ("state" in r) { setBj(r.state); setChips(r.balance); } else note("The table could not be opened. Try again."); });
+    else void bragOpenTable(t.minBet).then((r) => { if ("state" in r) { setBrag(r.state); setChips(r.balance); } else note("The table could not be opened. Try again."); });
     note(`Welcome to the ${t.name}. Place your ${meta.minBetLabel.toLowerCase()} to start.`);
   };
   const leave = () => {
@@ -101,18 +107,17 @@ export function CardLounge({ game }: { game: LoungeGame }) {
     // Reserve the full stake the hand could need (blackjack double-down / brag play bet); unused chips return at settle.
     const reserve = bet * 2;
     if (chips < reserve) { note(`This stake needs ${reserve.toLocaleString()} chips in reserve.`); return; }
-    setChips((v) => v - reserve);
     sfx("chipDrop"); window.setTimeout(() => sfx("cardDeal"), 260);
     if (game === "blackjack") {
       // The server deals, plays the bots and settles the hand.
       void bjDeal(bet).then((r) => {
-        if ("state" in r) setBj(r.state);
-        else { setChips((v) => v + reserve); note(r.error === "hand_in_progress" ? "Finish this hand first." : "That bet could not be placed. Try again."); }
+        if ("state" in r) { setBj(r.state); setChips(r.balance); }
+        else note(r.error === "hand_in_progress" ? "Finish this hand first." : r.error === "insufficient_chips" ? "Not enough chips for that bet." : "That bet could not be placed. Try again.");
       });
     } else if (game === "brag") {
       void bragDeal(bet).then((r) => {
-        if ("state" in r) setBrag(r.state);
-        else { setChips((v) => v + reserve); note(r.error === "hand_in_progress" ? "Finish this hand first." : "That ante could not be placed. Try again."); }
+        if ("state" in r) { setBrag(r.state); setChips(r.balance); }
+        else note(r.error === "hand_in_progress" ? "Finish this hand first." : r.error === "insufficient_chips" ? "Not enough chips for that ante." : "That ante could not be placed. Try again.");
       });
     }
   };
@@ -126,8 +131,7 @@ export function CardLounge({ game }: { game: LoungeGame }) {
     const you = s.seats.find((p) => p.id === "you");
     if (!you) return;
     const committed = game === "blackjack" ? (you as { bet: number }).bet : (you as { ante: number }).ante + (you as { playBet: number }).playBet;
-    const back = you.chips; // engine returns winnings to seat chips
-    setChips((v) => v + back);
+    // The server has already paid this hand's return into the wallet; the balance comes back with each reply.
     // Use the engine's result: returned chips include the unused reserve, so comparing
     // them with the stake would count a push as a win.
     const result = (you as { result?: string }).result;
@@ -211,7 +215,7 @@ export function CardLounge({ game }: { game: LoungeGame }) {
           <div className="rounded-2xl border p-4" style={{ borderColor: `${leagueTier.colour}55`, background: `${leagueTier.glow}` }}>
             <Crown className="h-5 w-5" style={{ color: leagueTier.colour }} /><b className="mt-3 block">{leagueTier.name} League</b><small className="text-white/55">Ends in {weekEndsIn()} · {league.weekXP} XP this week</small>
           </div>
-          <div className="rounded-2xl border border-amber-200/30 bg-amber-300/10 p-4"><Spade className="h-5 w-5 text-amber-200" /><b className="mt-3 block">Same wallet as poker</b><small className="text-white/55">Chips and league XP are shared across all Luxe lounges</small></div>
+          <div className="rounded-2xl border border-amber-200/30 bg-amber-300/10 p-4"><Spade className="h-5 w-5 text-amber-200" /><b className="mt-3 block">Card-game chips</b><small className="text-white/55">Chips and league XP are shared across all Luxe lounges</small></div>
         </div>
 
         <p className="mt-6 rounded-xl border border-white/10 bg-black/30 p-3 text-xs text-white/60">{leagueTier.name} League · {league.weekXP} XP this week · {league.games} games · {league.wins} wins{league.tierIndex < LEAGUE_TIERS.length - 1 ? ` · next league at ${league.nextAt} XP` : ""}. Only your own games count here.</p>
@@ -286,18 +290,18 @@ export function CardLounge({ game }: { game: LoungeGame }) {
         <button onClick={startHand} className="casino-dock__primary">{game === "blackjack" ? "Deal" : "Ante up"}</button>
       </> : null}
       {yourTurn ? <>
-        <button onClick={() => { sfx("cardDeal"); void bjActRemote("hit").then((r) => { if ("state" in r) setBj(r.state); }); }} className="casino-dock__primary casino-dock__primary--green">Hit</button>
-        <button onClick={() => { sfx("button"); void bjActRemote("stand").then((r) => { if ("state" in r) setBj(r.state); }); }} className="casino-dock__primary">Stand</button>
-        <button onClick={() => { sfx("chipDrop"); void bjActRemote("double").then((r) => { if ("state" in r) setBj(r.state); }); }} disabled={!youSeat || youSeat.cards.length !== 2} className="casino-dock__primary casino-dock__primary--rose">Double</button>
+        <button onClick={() => { sfx("cardDeal"); void bjActRemote("hit").then((r) => { if ("state" in r) { setBj(r.state); setChips(r.balance); } }); }} className="casino-dock__primary casino-dock__primary--green">Hit</button>
+        <button onClick={() => { sfx("button"); void bjActRemote("stand").then((r) => { if ("state" in r) { setBj(r.state); setChips(r.balance); } }); }} className="casino-dock__primary">Stand</button>
+        <button onClick={() => { sfx("chipDrop"); void bjActRemote("double").then((r) => { if ("state" in r) { setBj(r.state); setChips(r.balance); } }); }} disabled={!youSeat || youSeat.cards.length !== 2} className="casino-dock__primary casino-dock__primary--rose">Double</button>
       </> : null}
       {game === "brag" && brag?.phase === "decide" ? <>
-        <button onClick={() => { sfx("chipDrop"); void bragActRemote("play").then((r) => { if ("state" in r) setBrag(r.state); }); }} className="casino-dock__primary">Play {bet.toLocaleString()}</button>
-        <button onClick={() => { sfx("button"); void bragActRemote("fold").then((r) => { if ("state" in r) setBrag(r.state); }); }} className="casino-dock__ghost">Fold</button>
+        <button onClick={() => { sfx("chipDrop"); void bragActRemote("play").then((r) => { if ("state" in r) { setBrag(r.state); setChips(r.balance); } }); }} className="casino-dock__primary">Play {bet.toLocaleString()}</button>
+        <button onClick={() => { sfx("button"); void bragActRemote("fold").then((r) => { if ("state" in r) { setBrag(r.state); setChips(r.balance); } }); }} className="casino-dock__ghost">Fold</button>
       </> : null}
       {game === "blackjack" && bj && (bj.phase === "playing" || bj.phase === "dealer") && !yourTurn ? <span className="casino-dock__wait">Dealer is playing…</span> : null}
       {phase === "settled" ? <button onClick={() => { sfx("button"); if (game === "blackjack") setBj((g) => g ? { ...g, phase: "betting" } : g); else setBrag((g) => g ? { ...g, phase: "ante" } : g); }} className="casino-dock__primary">Next hand</button> : null}
     </div>
-    <p className="casino-footnote">Free-play chips · No cash value · Same wallet &amp; league as Luxe Poker · <button type="button" onClick={() => setRulesOpen(true)} className="underline underline-offset-2">Rules &amp; fair play</button></p>
+    <p className="casino-footnote">Free-play chips · No cash value · Card-game chips are kept separately from Luxe Poker · <button type="button" onClick={() => setRulesOpen(true)} className="underline underline-offset-2">Rules &amp; fair play</button></p>
     {rulesOpen && <CasinoRulesSheet game={game} onClose={() => setRulesOpen(false)} />}
   </section>;
 }

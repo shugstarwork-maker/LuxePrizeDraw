@@ -5,6 +5,7 @@ import { newChess, playChess, type ChessMatch } from "../src/games/chess";
 import { newConnectFour, playConnectFour, type ConnectFourState } from "../src/games/connectFour";
 import { newDraughts, playDraughts, type DraughtsMove, type DraughtsState } from "../src/games/draughts";
 import { recordWorldResult, type WorldGame } from "./worldRanking";
+import { withLock } from "./lock";
 import type { Store } from "./accounts";
 
 export type MatchGame = "chess" | "connect4" | "draughts";
@@ -77,6 +78,11 @@ export type MatchReply = { ok: true; waiting?: boolean; view?: MatchView } | { o
 /** Puts a signed-in player in the queue for a game, or pairs them with the player already waiting. */
 export async function joinQueue(s: Store, player: Player, game: MatchGame, now = Date.now()): Promise<MatchReply> {
   if (!["chess", "connect4", "draughts"].includes(game)) return { ok: false, error: "bad_game" };
+  // One queue per game: read, pair and write under the lock so simultaneous joins pair correctly.
+  return withLock(s, `queue:${game}`, () => joinQueueLocked(s, player, game, now));
+}
+
+async function joinQueueLocked(s: Store, player: Player, game: MatchGame, now: number): Promise<MatchReply> {
   const current = await currentMatch(s, player.id, now);
   if (current.ok && current.view && current.view.status === "playing") return { ok: true, view: current.view };
 
@@ -137,6 +143,21 @@ export async function makeMove(s: Store, playerId: string, matchId: string, move
   if (outcome) { m.status = "finished"; m.winner = outcome; }
   await saveMatch(s, m);
   if (m.status === "finished") await finish(s, m, now);
+  return { ok: true, view: viewFor(m, side) };
+}
+
+/** The player gives up: the other side wins and both players are ranked. */
+export async function resign(s: Store, playerId: string, matchId: string, now = Date.now()): Promise<MatchReply> {
+  const m = await loadMatch(s, matchId);
+  if (!m) return { ok: false, error: "no_match" };
+  const side: Side | null = m.players.a.id === playerId ? "a" : m.players.b.id === playerId ? "b" : null;
+  if (!side) return { ok: false, error: "not_in_match" };
+  if (m.status !== "playing") return { ok: false, error: "match_finished" };
+  m.status = "finished";
+  m.winner = side === "a" ? "b" : "a";
+  m.lastMoveAt = now;
+  await saveMatch(s, m);
+  await finish(s, m, now);
   return { ok: true, view: viewFor(m, side) };
 }
 

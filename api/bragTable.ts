@@ -4,6 +4,7 @@
 import { bragAct, bragAnteUp, createBragTable, type BragAction, type BragCard, type BragState } from "../src/games/brag";
 import { recordWorldResult } from "./worldRanking";
 import type { Store } from "./accounts";
+import * as wallet from "./wallet";
 
 /** Table limits. Bots per table match the lounge tables. */
 export const BRAG_TABLES: Record<number, number> = { 25: 4, 50: 5, 100: 5 };
@@ -13,6 +14,7 @@ const HIDDEN: BragCard = { rank: "A", value: 0, suit: "♠" }; // placeholder; t
 const tableKey = (key: string) => `brag:table:${key}`;
 
 export type BragView = {
+  balance: number;
   phase: BragState["phase"];
   handNumber: number;
   lastAction: string;
@@ -24,9 +26,10 @@ export type BragView = {
 };
 
 /** Hides the dealer's cards until the hand is revealed, strips the deck, and reports the player's payout once settled. */
-export function viewOf(s: BragState): BragView {
+export function viewOf(s: BragState, balance = 0): BragView {
   const you = s.seats.find((p) => p.id === "you");
   return {
+    balance,
     phase: s.phase,
     handNumber: s.handNumber,
     lastAction: s.lastAction,
@@ -60,7 +63,7 @@ export async function openTable(s: Store, key: string, minAnte: number): Promise
   if (bots === undefined) return { ok: false, error: "bad_table" };
   const state = createBragTable({ playerChips: 0, botCount: bots, botChips: 1000, minAnte });
   await saveTable(s, key, state);
-  return { ok: true, view: viewOf(state) };
+  return { ok: true, view: viewOf(state, await wallet.balance(s, key)) };
 }
 
 export async function deal(s: Store, key: string, name: string | null, ante: number): Promise<BragResult> {
@@ -68,11 +71,14 @@ export async function deal(s: Store, key: string, name: string | null, ante: num
   if (!table) return { ok: false, error: "no_table" };
   if (table.phase !== "ante" && table.phase !== "settled") return { ok: false, error: "hand_in_progress" };
   if (!Number.isInteger(ante) || ante < table.minAnte || ante > table.minAnte * 10) return { ok: false, error: "bad_bet" };
-  // Reserve the ante plus the matching play bet, as the lounge does on the client.
-  const reserved = { ...table, seats: table.seats.map((p) => (p.id === "you" ? { ...p, chips: ante * 2 } : p)) };
+  // The server takes the reserve (the ante plus the matching play bet) from the wallet.
+  const reserve = ante * 2;
+  const taken = await wallet.debit(s, key, reserve);
+  if (!taken.ok) return { ok: false, error: "insufficient_chips" };
+  const reserved = { ...table, seats: table.seats.map((p) => (p.id === "you" ? { ...p, chips: reserve } : p)) };
   const state = bragAnteUp(reserved, ante);
   await saveTable(s, key, state);
-  return { ok: true, view: viewOf(state) };
+  return { ok: true, view: viewOf(state, taken.chips) };
 }
 
 export async function act(s: Store, key: string, name: string | null, action: string): Promise<BragResult> {
@@ -81,7 +87,11 @@ export async function act(s: Store, key: string, name: string | null, action: st
   if (!table) return { ok: false, error: "no_table" };
   if (table.phase !== "decide") return { ok: false, error: "not_your_turn" };
   const state = bragAct(table, "you", action as BragAction);
-  if (state.phase === "settled") await settle(s, key, name, state);
+  if (state.phase === "settled") {
+    await settle(s, key, name, state);
+    const you = state.seats.find((p) => p.id === "you");
+    if (you) await wallet.credit(s, key, you.chips);
+  }
   await saveTable(s, key, state);
-  return { ok: true, view: viewOf(state) };
+  return { ok: true, view: viewOf(state, await wallet.balance(s, key)) };
 }

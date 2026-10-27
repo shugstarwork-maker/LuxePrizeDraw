@@ -4,6 +4,7 @@
 import { bjAct, bjBotAction, createBjTable, placeBets, type BjAction, type BjCard, type BjState } from "../src/games/blackjack";
 import { recordWorldResult } from "./worldRanking";
 import type { Store } from "./accounts";
+import * as wallet from "./wallet";
 
 /** Table limits. Bots per table match the lounge tables. */
 export const BJ_TABLES: Record<number, number> = { 25: 4, 50: 5, 100: 5 };
@@ -14,6 +15,7 @@ const HIDDEN: BjCard = { rank: "A", value: 0, suit: "♠" }; // placeholder; the
 const tableKey = (accountId: string) => `bj:table:${accountId}`;
 
 export type BjView = {
+  balance: number;
   phase: BjState["phase"];
   handNumber: number;
   lastAction: string;
@@ -26,9 +28,10 @@ export type BjView = {
 };
 
 /** Strips the deck, hides the dealer's hole card until the dealer plays, and reports the player's payout once settled. */
-export function viewOf(s: BjState): BjView {
+export function viewOf(s: BjState, balance = 0): BjView {
   const you = s.seats.find((p) => p.id === "you");
   return {
+    balance,
     phase: s.phase,
     handNumber: s.handNumber,
     lastAction: s.lastAction,
@@ -68,6 +71,12 @@ async function settle(s: Store, accountId: string, name: string | null, state: B
   await recordWorldResult(s, accountId, name, "blackjack", outcome);
 }
 
+/** Pays the hand's return into the player's wallet once, when it settles. */
+async function payOut(s: Store, accountId: string, state: BjState): Promise<void> {
+  const you = state.seats.find((p) => p.id === "you");
+  if (state.phase === "settled" && you) await wallet.credit(s, accountId, you.chips);
+}
+
 export type BjResult = { ok: true; view: BjView } | { ok: false; error: string };
 
 export async function openTable(s: Store, accountId: string, minBet: number): Promise<BjResult> {
@@ -75,7 +84,7 @@ export async function openTable(s: Store, accountId: string, minBet: number): Pr
   if (bots === undefined) return { ok: false, error: "bad_table" };
   const state = createBjTable({ playerChips: 0, botCount: bots, botChips: 1000, minBet });
   await saveTable(s, accountId, state);
-  return { ok: true, view: viewOf(state) };
+  return { ok: true, view: viewOf(state, await wallet.balance(s, accountId)) };
 }
 
 export async function deal(s: Store, accountId: string, name: string | null, bet: number): Promise<BjResult> {
@@ -83,13 +92,16 @@ export async function deal(s: Store, accountId: string, name: string | null, bet
   if (!table) return { ok: false, error: "no_table" };
   if (table.phase !== "betting" && table.phase !== "settled") return { ok: false, error: "hand_in_progress" };
   if (!Number.isInteger(bet) || bet < table.minBet || bet > table.minBet * 10) return { ok: false, error: "bad_bet" };
-  // Reserve the most the hand can need (double down), as the lounge does on the client.
-  const reserved = { ...table, seats: table.seats.map((p) => (p.id === "you" ? { ...p, chips: bet * 2 } : p)) };
+  // The server takes the reserve (the most the hand can need, for a double down) from the wallet.
+  const reserve = bet * 2;
+  const taken = await wallet.debit(s, accountId, reserve);
+  if (!taken.ok) return { ok: false, error: "insufficient_chips" };
+  const reserved = { ...table, seats: table.seats.map((p) => (p.id === "you" ? { ...p, chips: reserve } : p)) };
   let state = placeBets(reserved, bet);
   state = runBots(state);
-  if (state.phase === "settled") await settle(s, accountId, name, state);
+  if (state.phase === "settled") { await settle(s, accountId, name, state); await payOut(s, accountId, state); }
   await saveTable(s, accountId, state);
-  return { ok: true, view: viewOf(state) };
+  return { ok: true, view: viewOf(state, taken.chips) };
 }
 
 export async function act(s: Store, accountId: string, name: string | null, action: string): Promise<BjResult> {
@@ -100,7 +112,7 @@ export async function act(s: Store, accountId: string, name: string | null, acti
   if (table.phase !== "playing" || table.turnSeat !== you) return { ok: false, error: "not_your_turn" };
   let state = bjAct(table, "you", action as BjAction);
   state = runBots(state);
-  if (state.phase === "settled") await settle(s, accountId, name, state);
+  if (state.phase === "settled") { await settle(s, accountId, name, state); await payOut(s, accountId, state); }
   await saveTable(s, accountId, state);
-  return { ok: true, view: viewOf(state) };
+  return { ok: true, view: viewOf(state, await wallet.balance(s, accountId)) };
 }
