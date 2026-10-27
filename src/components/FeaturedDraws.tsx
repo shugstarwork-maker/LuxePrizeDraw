@@ -20,7 +20,7 @@ export function HeadlineLuxeCard() {
   return <>
     <div className="headline-luxe-deck"><BitcoinCoinRain /><DeckCard className="headline-luxe-card" image="/prizes/hero-bitcoin.jpg" title="Win £100K · Bitcoin or Cash" progress={{ sold: ticketsSold("headline-bitcoin") }} terms={{ drawName: "£100K Bitcoin or Cash", category: "bitcoin", prize: "£100,000 of Bitcoin or a £100,000 cash alternative — the winner chooses", entry: "to be confirmed" }}
       stats={[{ value: "£100,000", label: "Of Bitcoin" }, { value: "or", label: "Your choice" }, { value: "£100K", label: "Cash" }]}
-      cta="View draws" onCta={() => { play("button"); navigate("/draws"); }}
+      cta="Enter" ctaLabel="Enter — opens the approval-pending launch catalogue. This does not submit an entry or take a payment." onCta={() => { play("button"); navigate("/launch-build"); }}
       note="Approval pending · Entries and payments disabled · Preview only, no prize entitlement">
       <p className="headline-deck__eyebrow"><Sparkles className="h-3.5 w-3.5" aria-hidden="true" /> Headline prize preview</p>
       <h1 className="headline-deck__headline">WIN <b>£100K</b> WORTH OF BITCOIN <i>or</i> £100K CASH</h1>

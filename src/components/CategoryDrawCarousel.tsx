@@ -16,7 +16,15 @@ const images: Record<Category, string[]> = {
     "https://images.unsplash.com/photo-1494905998402-395d579af36f?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1504215680853-026ed2a45def?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1502161254066-6c74afbf07aa?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1544829099-b9a0c07fad1a?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&w=1400&q=85",
   ],
   "Luxe Holidays": [
-    "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1529260830199-42c24126f198?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1533104816931-20fa691ff6ca?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1601581875309-fafbf2d3ed3a?auto=format&fit=crop&w=1400&q=85",
+    "/draw-art/holidays/paris.jpg",
+    "/draw-art/holidays/london-suite.jpg",
+    "/draw-art/holidays/monaco.jpg",
+    "/draw-art/holidays/maldives.jpg",
+    "/draw-art/holidays/new-york.jpg",
+    "/draw-art/holidays/milan.jpg",
+    "/draw-art/holidays/london-bridge.jpg",
+    "/draw-art/holidays/santorini.jpg",
+    "/draw-art/holidays/mykonos.jpg",
   ],
   "Gaming Packages": [
     "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1484704849700-f032a568e944?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400&q=85", "https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=1400&q=85",
@@ -47,7 +55,7 @@ const names: Record<Category, string[]> = {
 
 const categories: Category[] = ["Cars", "Luxe Holidays", "Cash", "Bitcoin", "Gold Bullion", "Gaming Packages", "Luxe Summer Houses"];
 
-/** Cinematic promo clip per category, looping on every rolling banner until real prize media is uploaded. */
+/** Cinematic promo clip per category. Luxe Holidays keep stills, so the shared villa reel is not painted on those cards. */
 const videos: Record<Category, string> = {
   Cars: "/draw-art/car-luxe-gt-cine.mp4",
   "Luxe Holidays": "/draw-art/holiday-cine.mp4",
@@ -62,6 +70,7 @@ export function CategoryDrawCarousel({ category, entryBand }: { category: string
   const legacyCategories: Record<string, Category> = {
     Cash: "Cash", Lifestyle: "Luxe Holidays", "Gaming Bundles": "Gaming Packages",
     "Women's prizes": "Luxe Holidays", "Men's prizes": "Cars", "Luxury holidays": "Luxe Holidays",
+    Holidays: "Luxe Holidays",
     "Gaming & tech": "Gaming Packages", "Luxury homes": "Luxe Summer Houses", "Cash alternative": "Cash",
   };
   const parsedCategory = categories.includes(category as Category) ? category as Category : legacyCategories[category] || "Cars";
@@ -70,7 +79,7 @@ export function CategoryDrawCarousel({ category, entryBand }: { category: string
   const [tierIndex, setTierIndex] = useState(initialTier);
   const { play } = useAudio();
   
-  return <section className="min-h-screen bg-[#08090f] py-8 sm:py-12"><div className="mx-auto max-w-3xl px-4 sm:px-6"><button onClick={() => { window.history.pushState({}, "", "/draws"); window.dispatchEvent(new PopStateEvent("popstate")); }} className="text-xs font-black uppercase tracking-wider text-amber-200">All prize collections</button><p className="mt-5 text-xs font-black uppercase tracking-[.2em] text-amber-200">{parsedCategory}</p><h1 className="mt-2 text-3xl font-black sm:text-5xl">Choose your entry tier.</h1><p className="mt-2 text-sm text-white/60">Each tier increases the planned prize value in this collection. Browse every prize choice now; entries and payments remain disabled until launch approval.</p><RollingCardCarousel items={tiers} getKey={item => item.entry} label="entry tier" activeIndex={tierIndex} onActiveChange={setTierIndex} renderItem={(tier, tierIndex) => <DeckCard image={images[parsedCategory][tierIndex]} video={videos[parsedCategory]} title={names[parsedCategory][tierIndex]}
+  return <section className="min-h-screen bg-[#08090f] py-8 sm:py-12"><div className="mx-auto max-w-3xl px-4 sm:px-6"><button onClick={() => { window.history.pushState({}, "", "/draws"); window.dispatchEvent(new PopStateEvent("popstate")); }} className="text-xs font-black uppercase tracking-wider text-amber-200">All prize collections</button><p className="mt-5 text-xs font-black uppercase tracking-[.2em] text-amber-200">{parsedCategory}</p><h1 className="mt-2 text-3xl font-black sm:text-5xl">Choose your entry tier.</h1><p className="mt-2 text-sm text-white/60">Each tier increases the planned prize value in this collection. Browse every prize choice now; entries and payments remain disabled until launch approval.</p><RollingCardCarousel items={tiers} getKey={item => item.entry} label="entry tier" activeIndex={tierIndex} onActiveChange={setTierIndex} renderItem={(tier, tierIndex) => <DeckCard image={images[parsedCategory][tierIndex]} video={parsedCategory === "Luxe Holidays" ? undefined : videos[parsedCategory]} title={names[parsedCategory][tierIndex]}
     facts={[[parsedCategory, Gift], [`${tier.entry} proposed entry`, Ticket], ["Entry not open", CircleAlert]]}
     stats={[{ value: `Up to ${tier.value}`, label: "Prize value" }, { value: tier.entry, label: "Entry" }, { value: "Pending", label: "Status" }]}
     note="Subject to approved rules & prize verification"

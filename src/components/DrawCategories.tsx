@@ -86,11 +86,11 @@ export function CashCategory() {
   return <section id="cash-draws" className="border-y border-emerald-200/15 bg-[#010c08]/70 py-20 sm:py-28">
     <div className="mx-auto max-w-7xl px-4 sm:px-6">
       <WinnersBanner category="Cash" />
-      <div className="mt-9"><CategoryHeader eyebrow="Cash only" title="Cash prize draws." intro="Cash prizes only. Every draw shows its entry fee and prize; prize amounts are shown in full before entry." icon={Banknote} /></div>
+      <div className="mt-9"><CategoryHeader eyebrow="Cash only" title="Cash prize draws." intro="Cash prizes from £1,000. Each card shows how many tickets at the proposed entry price would cover that prize. The count is indicative, not a confirmed entry cap, and entries are not open." icon={Banknote} /></div>
       <RollingCardCarousel items={CASH_DRAW_PROPOSALS} getKey={(p) => p.id} label="Cash prize draws" className="mt-9" compactControls
-        renderItem={(p, index) => <DeckCard title={p.title} image={`/draw-art/cash-${p.entryPence}p.jpg`} video={`/draw-art/cash-${p.entryPence}p-cine.mp4`} progress={{ sold: ticketsSold(p.id), needed: ticketsToUnlock(p.valueGBP, p.entryPence) }}
+        renderItem={(p, index) => <DeckCard className="cash-swell-card coverflow-draw" titleClassName="cash-prize-heading" title={p.title} image={`/draw-art/cash-${p.entryPence}p.jpg`} video={`/draw-art/cash-${p.entryPence}p-cine.mp4`} progress={{ sold: ticketsSold(p.id), needed: ticketsToUnlock(p.valueGBP, p.entryPence) }}
           facts={[[`Entry ${formatCashEntry(p.entryPence)}`, Ticket], ["CASH ONLY", Banknote], [`Draw ${index + 1} of ${CASH_DRAW_PROPOSALS.length}`, Trophy]]}
-          stats={[{ value: money(p.valueGBP), label: "Prize" }, { value: formatCashEntry(p.entryPence), label: "Entry" }, { value: "Preview", label: "Status" }]}
+          stats={[{ value: money(p.valueGBP), label: "Prize" }, { value: formatCashEntry(p.entryPence), label: "Entry", amount: true }, { value: "Preview", label: "Status" }]}
           cta="Enter now" onCta={terms}
           note="Cash only · preview · entries disabled until licensed" />} />
     </div>
@@ -117,7 +117,7 @@ export function QuickDrawsCategory() {
   return <section id="quick-draws" className="border-y border-emerald-200/15 bg-[#010c08]/70 py-20 sm:py-28">
     <div className="mx-auto max-w-7xl px-4 sm:px-6">
       <WinnersBanner category="Quick Draws" />
-      <div className="mt-9"><CategoryHeader eyebrow="Quick cash draws" title="Up to £750, fast draws." intro="Cash only. Each draw closes when enough tickets are sold; administration and processing fees come out of the pool before the prize. Minimum purchase applies." icon={Trophy} /></div>
+      <div className="mt-9"><CategoryHeader eyebrow="Quick cash draws" title="Up to £750, fast draws." intro="Cash only. The ticket count on each card is the indicative number that would cover the proposed prize. It is not a confirmed entry cap. Entries are not open." icon={Trophy} /></div>
       <RollingCardCarousel items={quickDraws} getKey={(d) => d.id} label="Quick cash draws" className="mt-9" compactControls
         renderItem={(d) => <DeckCard image={`/draw-art/quick-${d.prize}.jpg`} video={`/draw-art/quick-${d.prize}-cine.mp4`} title={`${money(d.prize)} Quick Draw`} progress={{ sold: ticketsSold(d.id), needed: ticketsToUnlock(d.prize, d.entryPence) }}
           facts={[[`Entry ${d.entry}`, Ticket], [`Min ${d.minTickets} tickets`, Ticket], ["CASH ONLY", Banknote]]}

@@ -1,4 +1,5 @@
 import { DrawValueHighlights } from "./DrawValueHighlights";
+import { formatTickets, indicativeTicketTarget } from "../lib/drawProgress";
 import React, { useEffect, useState } from "react";
 import type { LaunchDraw } from "./LaunchBuildPage";
 
@@ -55,7 +56,7 @@ export function LaunchCategoryShowcase({ items, label }: { items: LaunchDraw[]; 
       <div className="launch-stage" key={draw.id} role="group" aria-roledescription="slide" aria-label={`${current + 1} of ${items.length}: ${draw.title}`}>
         <div className="launch-stage-copy"><p className="launch-kicker">{draw.grade} // {draw.cat}</p>
           <h3>{draw.title}</h3><p className="launch-kicker">Pre-launch prize proposal</p>
-          <DrawValueHighlights entry={money(draw.price)} prize="Valuation pending" /><p className="launch-meta">Proposed revenue target <b>{money(draw.target)}</b> — not the prize value.</p>
+          <DrawValueHighlights entry={money(draw.price)} prize="Valuation pending" /><p className="launch-meta">Proposed revenue target <b>{money(draw.target)}</b> — not the prize value.</p><p className="launch-meta">Indicative ticket target <b>{formatTickets(indicativeTicketTarget(draw.target, draw.price))}</b>. Proposed revenue divided by the entry price, rounded up. Not a confirmed entry cap.</p>
           <button className="launch-button" disabled>{draw.paused ? "Paused" : "Launch pending"}</button>
         </div>
         <div className="launch-stage-gauge"><LaunchGauge /><LaunchSegments /><p>Verified sales unavailable</p></div>
@@ -73,7 +74,7 @@ export function LaunchCategoryShowcase({ items, label }: { items: LaunchDraw[]; 
 export function LaunchDrawCard({ draw }: { draw: LaunchDraw }) {
   return <article className={`launch-card${draw.paused ? " launch-card-paused" : ""}`}>
       <div className="launch-card-top"><LaunchGauge /><div><p className="launch-kicker">{draw.cat} // Proposed</p><h2>{draw.title}</h2><p className="launch-meta">{draw.grade}</p></div></div>
-      <DrawValueHighlights entry={money(draw.price)} prize="Valuation pending" /><p className="launch-meta">Proposed revenue target <b>{money(draw.target)}</b> — not the prize value.</p>
+      <DrawValueHighlights entry={money(draw.price)} prize="Valuation pending" /><p className="launch-meta">Proposed revenue target <b>{money(draw.target)}</b> — not the prize value.</p><p className="launch-meta">Indicative ticket target <b>{formatTickets(indicativeTicketTarget(draw.target, draw.price))}</b>. Proposed revenue divided by the entry price, rounded up. Not a confirmed entry cap.</p>
       <LaunchSegments /><p className="launch-meta">Verified sales unavailable. No winner selected.</p>
       <p className="launch-kicker">{draw.paused ? "Paused" : "Not open · Awaiting approved rules"}</p>
       <button className="launch-button" disabled>Launch pending</button>

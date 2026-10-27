@@ -792,6 +792,9 @@ async function startServer() {
       server: { middlewareMode: true },
       appType: "spa",
     });
+    // Vite publicDir is off because the copy step flakes. Serve public/ in dev
+    // so prize artwork resolves the same way production does.
+    app.use(express.static(path.join(process.cwd(), "public")));
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), "dist");

@@ -5,23 +5,26 @@ import { Check, CircleAlert, Plane, Sparkles } from "lucide-react";
 import { DrawDetailsPanel } from "./DrawDetailsPanel";
 import { DrawValueHighlights } from "./DrawValueHighlights";
 
+/** Shared villa film. Destination cards do not play it; each card has its own still. */
+export const HOLIDAY_SHARED_REEL = "/draw-art/holiday-cine.mp4";
+
 const destinations = [
-  { name: "Paris", image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1800&q=90" },
-  { name: "Monaco", image: "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=1800&q=90" },
-  { name: "Maldives", image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1800&q=90" },
-  { name: "New York", image: "https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?auto=format&fit=crop&w=1800&q=90" },
-  { name: "Milan", image: "https://images.unsplash.com/photo-1529260830199-42c24126f198?auto=format&fit=crop&w=1800&q=90" },
-  { name: "London", image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=1800&q=90" },
-  { name: "Ibiza", image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1800&q=90" },
-  { name: "Santorini", image: "https://images.unsplash.com/photo-1533104816931-20fa691ff6ca?auto=format&fit=crop&w=1800&q=90" },
-  { name: "Mykonos", image: "https://images.unsplash.com/photo-1601581875309-fafbf2d3ed3a?auto=format&fit=crop&w=1800&q=90" },
+  { name: "Paris", image: "/draw-art/holidays/paris.jpg" },
+  { name: "Monaco", image: "/draw-art/holidays/monaco.jpg" },
+  { name: "Maldives", image: "/draw-art/holidays/maldives.jpg" },
+  { name: "New York", image: "/draw-art/holidays/new-york.jpg" },
+  { name: "Milan", image: "/draw-art/holidays/milan.jpg" },
+  { name: "London", image: "/draw-art/holidays/london-bridge.jpg" },
+  { name: "Ibiza", image: "/draw-art/holidays/ibiza.jpg" },
+  { name: "Santorini", image: "/draw-art/holidays/santorini.jpg" },
+  { name: "Mykonos", image: "/draw-art/holidays/mykonos.jpg" },
 ];
 
 export const HOLIDAY_PACKAGE = { proposedValueGBP: 50000, spendingMoneyGBP: 25000,
   inclusions: ["£25,000 spending money", "Five-star hotel", "Limousine transfers", "Business-class flights"] };
 
 export function LuxuryHolidaysSection() {
-  return <section className="luxury-holidays relative overflow-hidden border-y border-amber-200/15 py-14 sm:py-20"><div className="luxury-holidays__light luxury-holidays__light--one" /><div className="luxury-holidays__light luxury-holidays__light--two" /><div className="luxury-note luxury-note--one" aria-hidden="true">£50</div><div className="luxury-note luxury-note--two" aria-hidden="true">£50</div><div className="relative mx-auto max-w-5xl px-4 sm:px-6"><header className="max-w-3xl"><p className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[.22em] text-amber-200"><Plane className="h-4 w-4" /> Luxury Holidays</p><h2 className="mt-4 text-4xl font-black tracking-tight sm:text-6xl">Luxe Holiday Package of Your Choice</h2><p className="mt-5 max-w-2xl text-sm leading-relaxed text-white/65 sm:text-base">Explore example destinations for one proposed £50,000 holiday package, including £25,000 spending money. Destination choice, travel availability and final inclusions require approval; these are not separate prizes and are not independently verified.</p></header><DrawValueHighlights entry="Pending approval" prize="£50,000" prizeLabel="Proposed total package value" /><div className="holiday-ticket-target"><span>Ticket target</span><strong>Pending approval</strong><small>Confirmed ticket quantity will appear here once approved rules are published.</small></div><div className="mt-7"><RollingCardCarousel items={destinations} getKey={item => item.name} label="holiday destination" className="mt-7" renderItem={(destination) => <DeckCard image={destination.image} video="/draw-art/holiday-cine.mp4" title={destination.name} progress={{ sold: ticketsSold(destination.name) }} terms={{ drawName: `${destination.name} holiday`, category: "holiday", prize: `£50,000 holiday package (${destination.name} is an example destination) with £25,000 spending money`, entry: "to be confirmed" }}
+  return <section data-shared-reel={HOLIDAY_SHARED_REEL} className="luxury-holidays relative overflow-hidden border-y border-amber-200/15 py-14 sm:py-20"><div className="luxury-holidays__light luxury-holidays__light--one" /><div className="luxury-holidays__light luxury-holidays__light--two" /><div className="luxury-note luxury-note--one" aria-hidden="true">£50</div><div className="luxury-note luxury-note--two" aria-hidden="true">£50</div><div className="relative mx-auto max-w-5xl px-4 sm:px-6"><header className="max-w-3xl"><p className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[.22em] text-amber-200"><Plane className="h-4 w-4" /> Luxury Holidays</p><h2 className="mt-4 text-4xl font-black tracking-tight sm:text-6xl">Luxe Holiday Package of Your Choice</h2><p className="mt-5 max-w-2xl text-sm leading-relaxed text-white/65 sm:text-base">Explore example destinations for one proposed £50,000 holiday package, including £25,000 spending money. Destination choice, travel availability and final inclusions require approval; these are not separate prizes and are not independently verified.</p></header><DrawValueHighlights entry="Pending approval" prize="£50,000" prizeLabel="Proposed total package value" /><div className="holiday-ticket-target"><span>Ticket target</span><strong>Pending approval</strong><small>Confirmed ticket quantity will appear here once approved rules are published.</small></div><div className="mt-7"><RollingCardCarousel items={destinations} getKey={item => item.name} label="holiday destination" className="mt-7" renderItem={(destination) => <DeckCard image={destination.image} title={destination.name} progress={{ sold: ticketsSold(destination.name) }} terms={{ drawName: `${destination.name} holiday`, category: "holiday", prize: `£50,000 holiday package (${destination.name} is an example destination) with £25,000 spending money`, entry: "to be confirmed" }}
       facts={HOLIDAY_PACKAGE.inclusions.map((item) => [item, Check] as [string, typeof Check])}
       stats={[{ value: "£50,000", label: "Package value" }, { value: "£25,000", label: "Spending money" }, { value: "Pending", label: "Status" }]}
       cta="View package" onCta={() => deckGo("/draws")}
