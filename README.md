@@ -20,4 +20,4 @@ npm start
 
 `npm test` runs the unit tests. `npm run verify` also typechecks, runs the ticket-database check and builds.
 
-Copy `.env.example` if you need local account or database settings. The public preview works without those secrets.
+Copy `.env.example` if you need local account or database settings. The local dev server stays open so you can work. A production process (`NODE_ENV=production`, which the Docker image sets) does not serve the catalogue until `SITE_ACCESS_CODE` is set on the host. Render should keep `/health` as its health check. Add `SITE_ACCESS_CODE` in the service environment, save, and redeploy, then enter that code on the private page. Do not commit the code.

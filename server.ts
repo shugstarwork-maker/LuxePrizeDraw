@@ -20,6 +20,7 @@ import * as matches from "./api/matches";
 import * as wallet from "./api/wallet";
 import * as holdemTable from "./api/holdemTable";
 import { alertOps } from "./api/mailer";
+import { installSitePrivacy } from "./api/sitePrivacy";
 import http from "http";
 import dotenv from "dotenv";
 
@@ -57,6 +58,10 @@ app.get("/health", async (_req, res) => {
   res.setHeader("cache-control", "no-store");
   res.json({ ok: true, uptimeSeconds: Math.round(process.uptime()), accountStorage });
 });
+
+// Production keeps the catalogue off the public internet. /health is registered
+// above this gate so Render can still probe the process.
+installSitePrivacy(app);
 
 app.get("/api/ticket-draws/status", async (req, res) => {
   const response = await ticketStatus(new Request(`http://localhost${req.originalUrl}`));
