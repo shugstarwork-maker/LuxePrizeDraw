@@ -27,7 +27,7 @@ RUN npm config set fetch-retries 5 \
  && npm config set fetch-retry-maxtimeout 120000 \
  && npm config set fetch-timeout 600000 \
  && for i in 1 2 3 4 5; do \
-      npm ci --omit=dev --no-audit --no-fund && break; \
+      npm ci --omit=dev --ignore-scripts --no-audit --no-fund && break; \
       echo "npm ci attempt $i failed — retrying in 20s"; sleep 20; \
       if [ "$i" = "5" ]; then exit 1; fi; \
     done
