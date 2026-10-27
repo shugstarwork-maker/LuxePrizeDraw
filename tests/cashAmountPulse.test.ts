@@ -19,7 +19,7 @@ test("cash carousel pulses the prize heading and entry fee only", () => {
   assert.match(css, /cash-swell-card:focus-within :is\(\.cash-prize-heading,\.cash-entry-amount\)/);
   assert.match(css, /prefers-reduced-motion:reduce\) \{[^}]*\.cash-swell-card \.cash-entry-amount/);
   const draws = renderToStaticMarkup(createElement(CashCategory));
-  assert.match(draws, /class="deck-card cash-swell-card coverflow-draw"/);
+  assert.match(draws, /class="deck-card cinematic cash-swell-card coverflow-draw"/);
   assert.match(draws, /class="deck-card__title cash-prize-heading"/);
   assert.match(draws, /class="cash-entry-amount">1p</);
   assert.match(draws, /Cash only · preview · entries disabled until licensed/);
