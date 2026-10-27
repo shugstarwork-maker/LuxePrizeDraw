@@ -127,11 +127,16 @@ export async function enforceTurnTimeout(s: Store, key: string, now = Date.now()
   return act(s, key, "fold", 0, now);
 }
 
-/** Stands up: the stack goes back to the wallet and the table closes. */
+/** Stands up: if a hand is in progress the player folds it, then the stack goes back to the wallet and the table closes. */
 export async function leave(s: Store, key: string): Promise<{ ok: true; balance: number } | { ok: false; error: string }> {
   const r = await load(s, key);
   if (!r) return { ok: false, error: "no_table" };
-  if (!r.state.handOver) return { ok: false, error: "hand_in_progress" };
+  if (!r.state.handOver && r.state.players[r.state.turnIndex]?.id === "you") {
+    r.state = runBots(applyAction(r.state, "you", "fold", 0));
+  } else if (!r.state.handOver) {
+    // The bots always act until it is the player's turn, so this only happens if the hand is stuck: fold the player to finish it.
+    r.state = runBots(applyAction(r.state, "you", "fold", 0));
+  }
   const you = r.state.players.find((p) => p.id === "you");
   const stack = you ? you.chips : 0;
   await wallet.credit(s, key, stack);

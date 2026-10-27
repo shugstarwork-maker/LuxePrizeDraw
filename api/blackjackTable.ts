@@ -101,7 +101,8 @@ export async function deal(s: Store, accountId: string, name: string | null, bet
   state = runBots(state);
   if (state.phase === "settled") { await settle(s, accountId, name, state); await payOut(s, accountId, state); }
   await saveTable(s, accountId, state);
-  return { ok: true, view: viewOf(state, taken.chips) };
+  // Read the balance after any payout, so a hand that settles on the deal shows its return.
+  return { ok: true, view: viewOf(state, await wallet.balance(s, accountId)) };
 }
 
 export async function act(s: Store, accountId: string, name: string | null, action: string): Promise<BjResult> {

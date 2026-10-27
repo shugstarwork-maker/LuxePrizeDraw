@@ -539,7 +539,6 @@ export const LuxePokerLeague: React.FC = () => {
   const takeSeat = () => { play("chipStack"); note("You're seated and play from the next hand."); };
   const leaveTable = () => {
     const stack = game ? game.players.find((p) => p.id === "you")?.chips ?? 0 : 0;
-    if (game && !game.handOver) return note("Finish this hand before you leave the table.");
     void holdemLeave().then((r) => { if (r.ok) setChips(r.balance); else note("Your stack could not be returned yet. Try again."); });
     // Exit glide: if the session moved you up the weekly board, glide the row up on return.
     const before = rankAtJoin.current;
