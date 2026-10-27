@@ -82,3 +82,14 @@ test('a player who sits on their turn past the timeout is folded', async () => {
   const timed = await current(s, 'anon:poker-e', later);
   assert.ok(timed && timed.ok && timed.view.state.handOver, 'the hand ends once the player times out');
 });
+
+test('leaving mid-hand folds the hand and returns the remaining stack', async () => {
+  const s = memoryStore();
+  await openTable(s, 'anon:poker-f', tier);
+  const dealt = await deal(s, 'anon:poker-f');
+  assert.ok(dealt.ok);
+  const out = await leave(s, 'anon:poker-f');
+  assert.ok(out.ok);
+  assert.ok(out.ok && out.balance > 0 && out.balance <= STARTING_CHIPS, 'the stack returns, less whatever was committed to the hand');
+  assert.deepEqual(await current(s, 'anon:poker-f'), null);
+});

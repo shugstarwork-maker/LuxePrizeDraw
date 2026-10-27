@@ -44,7 +44,8 @@ test('a blackjack hand takes the reserve at the deal and pays the return on sett
   const dealt = await deal(s, 'anon:wallet', null, 25);
   assert.ok(dealt.ok);
   if (!dealt.ok) return;
-  assert.equal(dealt.view.balance, STARTING_CHIPS - 50, 'the reserve is taken when the hand is dealt');
+  // A hand can settle on the deal (for example a natural blackjack); then the return is already in the balance.
+  if (dealt.view.phase === 'playing') assert.equal(dealt.view.balance, STARTING_CHIPS - 50, 'the reserve is taken when the hand is dealt');
   let view: BjResult = dealt;
   for (let i = 0; i < 10 && view.ok && view.view.phase === 'playing'; i++) view = await act(s, 'anon:wallet', null, 'stand');
   assert.ok(view.ok && view.view.phase === 'settled');
