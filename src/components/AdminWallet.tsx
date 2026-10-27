@@ -38,6 +38,19 @@ export function AdminWallet() {
     }
   };
 
+  const [reports, setReports] = useState<{ id: string; authorId: string; text: string; reason: string }[] | null>(null);
+  const staffHeaders = { "x-admin-password": password, "content-type": "application/json" };
+
+  const loadReports = async () => {
+    const res = await fetch("/api/admin/chat/reports", { headers: { "x-admin-password": password } });
+    if (!res.ok) return setError("Chat reports could not be loaded with that password.");
+    setReports(((await res.json()) as { reports: { id: string; authorId: string; text: string; reason: string }[] }).reports);
+  };
+  const act = async (path: string, body: Record<string, unknown>) => {
+    await fetch(path, { method: "POST", headers: staffHeaders, body: JSON.stringify(body) });
+    await loadReports();
+  };
+
   return <main className="min-h-screen bg-[#07070b] px-4 py-8 text-white">
     <div className="mx-auto max-w-xl space-y-5">
       <h1 className="text-2xl font-black">Player lookup (read-only)</h1>
@@ -50,6 +63,19 @@ export function AdminWallet() {
       </label>
       <button type="button" onClick={() => void search()} disabled={busy || !password || !query} className="rounded-xl bg-white px-5 py-3 text-xs font-black uppercase tracking-wider text-black disabled:opacity-40">Look up</button>
       {error && <p role="alert" className="rounded-lg border border-rose-300/30 bg-rose-300/10 p-3 text-sm text-rose-100">{error}</p>}
+      <section className="space-y-3 rounded-xl border border-white/15 bg-black/40 p-4 text-sm">
+        <h2 className="font-black">Chat reports</h2>
+        <button type="button" onClick={() => void loadReports()} disabled={!password} className="rounded-lg bg-white/10 px-3 py-2 text-xs font-black uppercase tracking-wider disabled:opacity-40">Load open reports</button>
+        {reports?.length === 0 && <p className="text-white/60">No open reports.</p>}
+        {reports?.map((r) => <div key={r.id} className="space-y-2 rounded-lg bg-white/5 p-3">
+          <p className="break-words">"{r.text}"</p>
+          <p className="text-xs text-white/50">Author ID: {r.authorId}</p>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={() => void act("/api/admin/chat/ban", { accountId: r.authorId, reason: `Upheld report ${r.id}` }).then(() => act("/api/admin/chat/resolve", { reportId: r.id, outcome: "upheld" }))} className="rounded-lg bg-rose-300/20 px-3 py-2 text-xs font-black text-rose-100">Ban author and uphold</button>
+            <button type="button" onClick={() => void act("/api/admin/chat/resolve", { reportId: r.id, outcome: "dismissed" })} className="rounded-lg bg-white/10 px-3 py-2 text-xs font-black">Dismiss</button>
+          </div>
+        </div>)}
+      </section>
       {result && <section className="space-y-3 rounded-xl border border-white/15 bg-black/40 p-4 text-sm">
         <p><b>{result.profile.name}</b> · {result.profile.id}</p>
         <p className="text-white/60">{result.profile.email} · joined {new Date(result.profile.createdAt).toLocaleDateString("en-GB")}</p>

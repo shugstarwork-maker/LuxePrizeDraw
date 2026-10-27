@@ -12,6 +12,7 @@ import { bumpStat, markTried } from "../lib/achievements";
 import { GameLeagueCard } from "./GameLeagueCard";
 import { OnlineMatch, type OnlineGame } from "./OnlineMatch";
 import { WorldRankingPanel } from "./WorldRankingPanel";
+import { LoungeChat } from "./LoungeChat";
 
 const nav = (href: string) => { window.history.pushState({}, "", href); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); };
 
@@ -160,7 +161,7 @@ export const ChallengeLounge: React.FC = () => {
         </div>
       </div>}
 
-      {tab === "social" && <div className="mt-8 text-center"><p className="text-[10px] font-black uppercase tracking-[.22em] text-amber-200">Social</p><h2 className="mt-2 text-3xl font-black">Lounge chat</h2><p className="mx-auto mt-3 max-w-md text-sm text-white/60">Lounge chat and friends are not available yet.</p></div>}
+      {tab === "social" && <LoungeChat />}
 
       {tab !== "play" && notice && <p className="mt-4 rounded-xl border border-emerald-300/30 bg-emerald-300/10 p-3 text-sm text-emerald-100">{notice}</p>}
 
