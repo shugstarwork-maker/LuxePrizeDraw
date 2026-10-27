@@ -17,6 +17,7 @@ import * as worldRanking from "./api/worldRanking";
 import * as blackjackTable from "./api/blackjackTable";
 import * as bragTable from "./api/bragTable";
 import * as matches from "./api/matches";
+import * as wallet from "./api/wallet";
 import { alertOps } from "./api/mailer";
 import http from "http";
 import dotenv from "dotenv";
@@ -1107,6 +1108,19 @@ app.post("/api/match/move", async (req, res) => {
     if (!me) return res.status(401).json({ error: "not_signed_in" });
     const out = await matches.makeMove(await accounts.worldStore(), me.id, String(req.body?.matchId ?? ""), req.body?.move);
     return out.ok === false ? res.status(400).json({ error: out.error }) : res.json(out);
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+// Card-game chips, held by the server: the balance, and the once-a-day sign-in chips.
+app.get("/api/wallet", async (req, res) => {
+  try {
+    const who = await bjWho(req);
+    return res.json({ chips: await wallet.balance(await accounts.worldStore(), who.key) });
+  } catch (err) { return accountsUnavailable(res, err); }
+});
+app.post("/api/wallet/daily", async (req, res) => {
+  try {
+    const who = await bjWho(req);
+    return res.json(await wallet.claimDaily(await accounts.worldStore(), who.key));
   } catch (err) { return accountsUnavailable(res, err); }
 });
 app.get("/api/world/ranking", async (req, res) => {

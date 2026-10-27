@@ -5,7 +5,7 @@ import type { BragState } from "../games/brag";
 import { playerId } from "./pokerLeague";
 import { accountToken } from "./useAccount";
 
-type Reply<T> = { state: T } | { error: string };
+type Reply<T> = { state: T; balance: number } | { error: string };
 
 async function call<T>(path: string, body: Record<string, unknown>): Promise<Reply<T>> {
   const token = accountToken();
@@ -17,8 +17,8 @@ async function call<T>(path: string, body: Record<string, unknown>): Promise<Rep
     });
     const data = (await res.json()) as Record<string, unknown>;
     if (!res.ok) return { error: String(data.error ?? "server_error") };
-    // The server strips the deck, so it is always empty on the client.
-    return { state: { ...data, deck: [] } as unknown as T };
+    // The server strips the deck, so it is always empty on the client. The balance is the wallet the server holds.
+    return { state: { ...data, deck: [] } as unknown as T, balance: Number(data.balance ?? 0) };
   } catch {
     return { error: "unreachable" };
   }
@@ -31,3 +31,27 @@ export const bjAct = (action: "hit" | "stand" | "double") => call<BjState>("/api
 export const bragOpenTable = (minAnte: number) => call<BragState>("/api/brag/table", { minAnte });
 export const bragDeal = (ante: number) => call<BragState>("/api/brag/deal", { ante });
 export const bragAct = (action: "play" | "fold") => call<BragState>("/api/brag/act", { action });
+
+/** The player's chip balance, as the server holds it. */
+export async function fetchBalance(): Promise<number | null> {
+  const token = accountToken();
+  try {
+    const res = await fetch("/api/wallet", { headers: { "x-player-id": playerId(), ...(token ? { authorization: `Bearer ${token}` } : {}) } });
+    if (!res.ok) return null;
+    return ((await res.json()) as { chips: number }).chips;
+  } catch {
+    return null;
+  }
+}
+
+/** Claims the daily sign-in chips, once per day, on the server. */
+export async function claimDailyChips(): Promise<{ granted: boolean; chips: number } | null> {
+  const token = accountToken();
+  try {
+    const res = await fetch("/api/wallet/daily", { method: "POST", headers: { "x-player-id": playerId(), ...(token ? { authorization: `Bearer ${token}` } : {}) } });
+    if (!res.ok) return null;
+    return (await res.json()) as { granted: boolean; chips: number };
+  } catch {
+    return null;
+  }
+}
