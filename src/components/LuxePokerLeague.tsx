@@ -335,6 +335,18 @@ export const LuxePokerLeague: React.FC = () => {
   const you = game?.players.find((p) => p.id === "you");
   const youSeated = Boolean(you && !you.sittingOut);
   const yourTurn = Boolean(game && !game.handOver && youSeated && game.players[game.turnIndex]?.id === "you");
+  // Any chips going into the pot make the chip sound: blinds, calls, raises and all-ins.
+  const yourBet = you?.bet ?? 0;
+  const mpYourBet = mp.view?.state?.players.find((p) => p.id === playerId())?.bet ?? 0;
+  const lastBets = useRef({ table: 0, mp: 0 });
+  useEffect(() => {
+    if (yourBet > lastBets.current.table) play("chipDrop");
+    lastBets.current.table = yourBet;
+  }, [yourBet, play]);
+  useEffect(() => {
+    if (mpYourBet > lastBets.current.mp) play("chipDrop");
+    lastBets.current.mp = mpYourBet;
+  }, [mpYourBet, play]);
   const toCall = game && you ? game.currentBet - you.bet : 0;
   const minRaiseTo = game && you ? Math.min(game.currentBet + game.minRaise, you.bet + you.chips) : 0;
   const maxRaiseTo = you ? you.bet + you.chips : 0;
@@ -571,7 +583,7 @@ export const LuxePokerLeague: React.FC = () => {
   };
   const act = (action: "fold" | "check" | "call" | "raise") => {
     if (!game || !yourTurn) return;
-    play(pokerActionSound(action));
+    if (action === "check" || action === "fold") play(pokerActionSound(action));
     void holdemAct(action, action === "raise" ? raiseTo : 0).then(applyHoldem);
   };
   const sendGift = (gift: typeof gifts[number]) => { if (chips < gift.cost) return note(`You need ${gift.cost} virtual chips to send ${gift.name}.`); void spendChips(gift.cost).then((r) => { if (!r.ok) return note("That gift could not be sent. Try again."); setChips(r.chips); play("success"); setGiftsOpen(false); note(`You sent ${gift.icon} ${gift.name} to ${selectedSeat}. Virtual gift only.`); }); };
@@ -873,7 +885,7 @@ export const LuxePokerLeague: React.FC = () => {
                   if (p.bet <= 0 || p.sittingOut) return null;
                   return <BetChips key={`bet-${p.id}`} amount={p.bet} spot={BET_SPOTS[Math.min(i, BET_SPOTS.length - 1)]} isYou={p.id === myId} />;
                 })}</div>
-                <div className="poker-live-board flex justify-center gap-1">{[0, 1, 2, 3, 4].map((i) => g.board[i] ? <div key={key(g.board[i])} className="poker-board-deal" style={{ animationDelay: `${i * 0.15}s` }}><CardView card={g.board[i]} /></div> : <div key={i} aria-hidden="true" className="invisible h-16 w-11 sm:h-20 sm:w-14" />)}</div>
+                <div className="poker-live-board flex justify-center gap-1">{[0, 1, 2, 3, 4].map((i) => g.board[i] ? <div key={key(g.board[i])} className="poker-board-deal" style={{ animationDelay: `${i * 0.12}s` }}><CardView card={g.board[i]} /></div> : <div key={i} aria-hidden="true" className="invisible h-16 w-11 sm:h-20 sm:w-14" />)}</div>
                 {/* Your cards ride on your seat badge like every other player — no centre-felt hand strip. */}
               </PokerTableArtwork>
               <LuxeDealer stage={mpStage} active={Boolean(v.yourTurn)} mood={mpMood} />
@@ -893,7 +905,7 @@ export const LuxePokerLeague: React.FC = () => {
                 <div className="mt-3 grid grid-cols-3 gap-2">
                   <button onClick={() => mp.act("fold")} className="rounded-xl bg-zinc-800/90 py-4 text-xs font-black text-zinc-100 shadow-lg shadow-black/60 transition hover:bg-zinc-700 active:scale-95">Fold</button>
                   {mpToCall > 0 ? <button onClick={() => mp.act("call")} className="rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-4 text-xs font-black text-black shadow-lg shadow-black/50 transition hover:brightness-110 active:scale-95">Call {Math.min(mpToCall, me?.chips ?? 0).toLocaleString()}</button> : <button onClick={() => mp.act("check")} className="rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 py-4 text-xs font-black text-black shadow-lg shadow-black/50 transition hover:brightness-110 active:scale-95">Check</button>}
-                  <button data-no-tap-sound onClick={() => { play(pokerActionSound("raise")); mp.act("raise", Math.min(Math.max(raiseTo, mpMinRaise), mpMaxRaise)); }} disabled={mpMaxRaise <= mpToCall} className="rounded-xl bg-gradient-to-b from-rose-400 to-rose-600 py-4 text-xs font-black text-white shadow-lg shadow-black/50 transition hover:brightness-110 active:scale-95 disabled:opacity-40">{Math.min(Math.max(raiseTo, mpMinRaise), mpMaxRaise) >= mpMaxRaise ? "All-in" : "Raise to"} {Math.min(Math.max(raiseTo, mpMinRaise), mpMaxRaise).toLocaleString()}</button>
+                  <button data-no-tap-sound onClick={() => mp.act("raise", Math.min(Math.max(raiseTo, mpMinRaise), mpMaxRaise))} disabled={mpMaxRaise <= mpToCall} className="rounded-xl bg-gradient-to-b from-rose-400 to-rose-600 py-4 text-xs font-black text-white shadow-lg shadow-black/50 transition hover:brightness-110 active:scale-95 disabled:opacity-40">{Math.min(Math.max(raiseTo, mpMinRaise), mpMaxRaise) >= mpMaxRaise ? "All-in" : "Raise to"} {Math.min(Math.max(raiseTo, mpMinRaise), mpMaxRaise).toLocaleString()}</button>
                 </div>
               </div>}
               {!g.handOver && !v.yourTurn && mpSeated && <p className="poker-thinking-note mt-5 flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-black/30 py-3 text-xs text-white/55"><Bot className="h-4 w-4 text-amber-200" />{g.players[g.turnIndex]?.name ?? "Table"} is thinking…</p>}
@@ -926,13 +938,13 @@ export const LuxePokerLeague: React.FC = () => {
                   <b className="mt-1 block truncate text-[9px] text-amber-100">{p.name}{!p.sittingOut && game.players[game.dealerIndex]?.id === p.id ? " 🔘" : ""}</b>
                   <small className="text-[8px] text-white/55">{p.sittingOut ? (p.isBot ? "Away" : "Watching") : p.chips.toLocaleString()}{p.allIn ? " · ALL-IN" : ""}</small>
 
-                  {p.cards.length === 2 && !p.sittingOut && <span className={`mt-1 flex justify-center gap-0.5 ${isYou ? "poker-seat-hand" : ""}`}>{p.cards.map((c, cardIndex) => { const dealStyle = { animationDelay: `${(cardIndex * game.players.length + game.players.indexOf(p)) * 0.12}s` }; return (isYou || showCards) ? <span key={key(c)} style={dealStyle} className={`poker-deal-card flex items-center justify-center rounded-sm border border-black/20 bg-white font-mono font-black ${isYou ? "h-7 w-[1.3rem] text-[10px]" : "h-6 w-[1.1rem] text-[9px]"} ${c.suit === "♥" || c.suit === "♦" ? "text-red-600" : "text-zinc-900"}`}>{c.rank}{c.suit}</span> : <span key={key(c)} style={dealStyle} className="poker-deal-card flex h-6 w-[1.1rem] items-center justify-center rounded-sm border border-amber-200/40 bg-gradient-to-br from-amber-900 to-black text-[7px] text-amber-200/70">♛</span>; })}</span>}
+                  {p.cards.length === 2 && !p.sittingOut && <span className={`mt-1 flex justify-center gap-0.5 ${isYou ? "poker-seat-hand" : ""}`}>{p.cards.map((c, cardIndex) => { const dealStyle = { animationDelay: `${(cardIndex * game.players.length + game.players.indexOf(p)) * 0.08}s` }; return (isYou || showCards) ? <span key={key(c)} style={dealStyle} className={`poker-deal-card flex items-center justify-center rounded-sm border border-black/20 bg-white font-mono font-black ${isYou ? "h-7 w-[1.3rem] text-[10px]" : "h-6 w-[1.1rem] text-[9px]"} ${c.suit === "♥" || c.suit === "♦" ? "text-red-600" : "text-zinc-900"}`}>{c.rank}{c.suit}</span> : <span key={key(c)} style={dealStyle} className="poker-deal-card flex h-6 w-[1.1rem] items-center justify-center rounded-sm border border-amber-200/40 bg-gradient-to-br from-amber-900 to-black text-[7px] text-amber-200/70">♛</span>; })}</span>}
                 </div>;
               })}{game && game.players.map((p) => {
                 if (p.bet <= 0 || p.sittingOut) return null;
                 const slotIndex = p.isBot ? botSlots.indexOf(p) : 5;
                 return <BetChips key={`bet-${p.id}`} amount={p.bet} spot={BET_SPOTS[slotIndex]} isYou={!p.isBot} />;
-              })}</div><div className="poker-live-board flex justify-center gap-1">{[0, 1, 2, 3, 4].map((i) => game?.board[i] ? <div key={key(game.board[i])} className="poker-board-deal" style={{ animationDelay: `${i * 0.15}s` }}><CardView card={game.board[i]} /></div> : <div key={i} aria-hidden="true" className="invisible h-16 w-11 sm:h-20 sm:w-14" />)}</div>{/* Your cards ride on your seat badge like every other player. */}</PokerTableArtwork>
+              })}</div><div className="poker-live-board flex justify-center gap-1">{[0, 1, 2, 3, 4].map((i) => game?.board[i] ? <div key={key(game.board[i])} className="poker-board-deal" style={{ animationDelay: `${i * 0.12}s` }}><CardView card={game.board[i]} /></div> : <div key={i} aria-hidden="true" className="invisible h-16 w-11 sm:h-20 sm:w-14" />)}</div>{/* Your cards ride on your seat badge like every other player. */}</PokerTableArtwork>
               <LuxeDealer stage={dealerStage} active={yourTurn} mood={dealerMood} />
             </div><div className="poker-below-table relative"><div className="mb-3 flex justify-center"><PokerFullscreen /></div><div className="poker-round-meta flex justify-between text-[10px] font-black uppercase tracking-wider text-white/60"><span>{activeTable?.name} · Hand #{game?.handNumber ?? 0} · Blinds {activeTable?.blinds}</span><span className="inline-flex items-center gap-1"><Timer className="h-3 w-3" />{yourTurn ? `00:${String(seconds).padStart(2, "0")}` : game?.handOver ? "Hand over" : "Playing"}</span></div><div className="poker-round-status mt-5 rounded-xl bg-black/35 p-3 text-center text-sm text-emerald-100" role="status">{status}</div>
             <div className="mt-2 flex flex-wrap justify-center gap-1.5">{feed.slice(0, 3).map((line, i) => <span key={`${line}-${i}`} className={`rounded-full px-2.5 py-1 text-[10px] ${i === 0 ? "bg-amber-300/15 text-amber-100" : "bg-white/5 text-white/40"}`}>{line}</span>)}</div>

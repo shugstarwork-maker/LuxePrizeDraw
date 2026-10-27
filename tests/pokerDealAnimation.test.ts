@@ -11,7 +11,7 @@ test("hole cards deal round-robin, one card to each seat before the second", () 
 
 test("community cards drop in one after another", () => {
   const source = readFileSync(new URL("../src/components/LuxePokerLeague.tsx", import.meta.url), "utf8");
-  assert.match(source, /className="poker-board-deal" style=\{\{ animationDelay: `\$\{i \* 0\.15\}s` \}\}/);
+  assert.match(source, /className="poker-board-deal" style=\{\{ animationDelay: `\$\{i \* 0\.12\}s` \}\}/);
 });
 
 test("deal animations flyin from the table centre and respect reduced motion", () => {
@@ -20,8 +20,9 @@ test("deal animations flyin from the table centre and respect reduced motion", (
   assert.match(css, /prefers-reduced-motion: reduce\) \{ \.poker-deal-card, \.poker-board-deal \{ animation:none; \} \}/);
 });
 
-test("raising plays the poker chip sound without the tap beep on top", () => {
+test("any chips going into the pot play the chip sound", () => {
   const source = readFileSync(new URL("../src/components/LuxePokerLeague.tsx", import.meta.url), "utf8");
   assert.equal((source.match(/data-no-tap-sound onClick=\{\(\) => act\("raise"\)\}/g) ?? []).length, 1);
-  assert.match(source, /play\(pokerActionSound\("raise"\)\); mp\.act\("raise"/);
+  assert.match(source, /const yourBet = you\?\.bet \?\? 0;/);
+  assert.match(source, /if \(yourBet > lastBets\.current\.table\) play\("chipDrop"\);/);
 });
