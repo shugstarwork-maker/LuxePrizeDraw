@@ -2394,3 +2394,12 @@ html.luxury-portrait .poker-playing-page .poker-console .poker-deal-dock { min-h
 @keyframes streak-bolt-sky { 0% { opacity:0; } 8% { opacity:1; } 16% { opacity:.3; } 26% { opacity:.9; } 40%, 100% { opacity:0; } }
 @keyframes streak-bolt-strike { 0% { opacity:0; transform:translate3d(-30vw,-4%,0) rotate(28deg); } 10% { opacity:1; } 18% { opacity:.25; } 24% { opacity:1; } 60% { opacity:.7; transform:translate3d(75vw,-4%,0) rotate(28deg); } 100% { opacity:0; transform:translate3d(90vw,-4%,0) rotate(28deg); } }
 @media (prefers-reduced-motion: reduce) { .streak-bolt { display:none; } }
+
+/* Zynga-style deal: hole cards fly from the middle of the table to each seat, one at a time, round-robin. */
+.poker-live-seats { container-type:size; }
+.poker-deal-card { animation:poker-card-fly .5s cubic-bezier(.2,.9,.25,1) both; }
+@keyframes poker-card-fly { from { opacity:0; transform:translate(calc((50 - var(--seat-x)) * 1cqw), calc((50 - var(--seat-y)) * 1cqh)) scale(.5) rotate(-10deg); } to { opacity:1; transform:none; } }
+/* Community cards come down from the deck above the board, one after another. */
+.poker-board-deal { animation:poker-board-drop .45s cubic-bezier(.2,.9,.25,1) both; }
+@keyframes poker-board-drop { from { opacity:0; transform:translate3d(0,-260%,0) scale(.55) rotate(-10deg); } to { opacity:1; transform:none; } }
+@media (prefers-reduced-motion: reduce) { .poker-deal-card, .poker-board-deal { animation:none; } }
