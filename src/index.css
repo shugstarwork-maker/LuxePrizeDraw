@@ -2386,3 +2386,11 @@ html.luxury-portrait .poker-playing-page .poker-console .poker-deal-dock { min-h
 @supports(height:1cqh) { @keyframes gold-coin-fall { to { transform:translateY(calc(100cqh + 3rem)) rotate(240deg); } } }
 .coverflow-draw:hover .gold-coin-rain > span, .coverflow-draw:focus-within .gold-coin-rain > span { animation-play-state:paused; }
 @media(prefers-reduced-motion:reduce) { .gold-coin-rain { display:none; } }
+
+/* Hand streak bolt: a lightning strike that crosses the whole screen, with a sky flash. */
+.streak-bolt { position:fixed; inset:0; z-index:60; overflow:hidden; pointer-events:none; background:radial-gradient(circle at 60% 20%,rgba(232,244,255,.5),transparent 48%); animation:streak-bolt-sky 1.4s ease-out forwards; }
+.streak-bolt svg { position:absolute; top:-6%; left:0; width:min(26vw,220px); height:112%; animation:streak-bolt-strike 1.4s ease-out forwards; filter:drop-shadow(0 0 10px #fff6c4) drop-shadow(0 0 28px #ffd36a); }
+.streak-bolt polygon { fill:#fffbe6; stroke:#ffe08a; stroke-width:2; }
+@keyframes streak-bolt-sky { 0% { opacity:0; } 8% { opacity:1; } 16% { opacity:.3; } 26% { opacity:.9; } 40%, 100% { opacity:0; } }
+@keyframes streak-bolt-strike { 0% { opacity:0; transform:translate3d(-30vw,-4%,0) rotate(28deg); } 10% { opacity:1; } 18% { opacity:.25; } 24% { opacity:1; } 60% { opacity:.7; transform:translate3d(75vw,-4%,0) rotate(28deg); } 100% { opacity:0; transform:translate3d(90vw,-4%,0) rotate(28deg); } }
+@media (prefers-reduced-motion: reduce) { .streak-bolt { display:none; } }

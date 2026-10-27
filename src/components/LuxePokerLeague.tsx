@@ -37,6 +37,7 @@ import { CheckoutStubDialog, type PricedItem } from "./CheckoutStubDialog";
 import { AD_REWARD_CHIPS, adsRemainingToday, adsWatchedToday, recordAdWatched, SOCIAL_TABLES, type SocialTable } from "../lib/pokerMonetization";
 import { COIN_PACKS, DAILY_FREE_TICKETS, PRIZE_TABLES, cardCapRemainingPence, claimDailyTickets, dailyTicketsAvailable, loadWallet, purchaseWithinCap, type Wallet } from "../lib/currencies";
 import { reviewModeEnabled, setReviewMode } from "../lib/reviewMode";
+import { StreakBolt } from "./StreakBolt";
 
 const CardView = LuxePlayingCard;
 const key = (card: { rank: string; suit: string }) => `${card.rank}${card.suit}`;
@@ -189,6 +190,7 @@ export const LuxePokerLeague: React.FC = () => {
   const [avatarFrame, setAvatarFrame] = useState<"none" | "gold" | "platinum">("none");
   const [tickets, setTickets] = useState(0);
   const [winFlash, setWinFlash] = useState(false);
+  const [streakBolt, setStreakBolt] = useState(0);
   const [levelFlash, setLevelFlash] = useState(false);
   const [stats, setStats] = useState(() => { try { return JSON.parse(localStorage.getItem("luxe-poker-stats") || "") ?? { handsWon: 0, biggestPot: 0, streak: 0, bestStreak: 0 }; } catch { return { handsWon: 0, biggestPot: 0, streak: 0, bestStreak: 0 }; } });
   const cr = competitiveRating();
@@ -436,6 +438,8 @@ export const LuxePokerLeague: React.FC = () => {
     }
     if (mine) {
       play("coinWin");
+      // A bolt flashes on a three-hand streak ("On a roll") and on each win after it.
+      if (stats.streak + 1 >= 3) setStreakBolt((count) => count + 1);
       setWinFlash(true);
       window.setTimeout(() => setWinFlash(false), 1800);
       awardXp(20 * (tickets > 0 ? 2 : 1));
@@ -908,6 +912,7 @@ export const LuxePokerLeague: React.FC = () => {
   const nextTable = LEAGUE_TABLES[Math.min(league.tierIndex + 1, LEAGUE_TABLES.length - 1)];
   return <section id="poker-league" className="poker-playing-page min-h-screen bg-[radial-gradient(circle_at_top,#3a2a08,#0a0805_52%)] px-3 py-4 pb-28 text-white">{ceremony}<RotateGate onBack={leaveTable} />
     <div className="poker-playing-wrap mx-auto max-w-5xl"><header className="flex items-center justify-between rounded-2xl border border-amber-200/30 bg-black/35 px-3 py-2"><button onClick={() => setLeaveOpen(true)} className="inline-flex items-center gap-1 rounded-lg bg-white/10 px-3 py-2 text-xs font-black"><ChevronLeft className="h-4 w-4" />Lobby</button><span className="font-mono text-sm font-black text-amber-100">{chips.toLocaleString()} wallet · {you?.chips.toLocaleString() ?? 0} at table · <span style={{ color: leagueTier.colour }}>{leagueTier.name} {league.xp}XP</span></span><button onClick={() => setEnabled(!enabled)} className="rounded-lg bg-white/10 p-2"><Volume2 className="h-4 w-4" /></button></header><article className="poker-game-article relative mt-4 overflow-hidden rounded-[2rem] border border-amber-200/50 bg-[radial-gradient(ellipse_at_center,#2a2318,#151009_55%,#090604)] p-4 shadow-[0_0_70px_rgba(212,175,55,.22),inset_0_0_140px_rgba(0,0,0,0.5)] sm:p-6"><div className={`poker-surface-frame relative rounded-[2rem] ${winFlash ? "poker-win-flash" : ""} ${tableTheme === "onyx" ? "ring-4 ring-amber-400/50" : tableTheme === "noir" ? "ring-4 ring-zinc-400/50" : ""}`}>
+              {streakBolt > 0 && <div key={streakBolt}><StreakBolt onDone={() => setStreakBolt(0)} /></div>}
               {winFlash && <div className="pointer-events-none absolute inset-0 z-20 flex items-start justify-center gap-2 pt-14">{[...Array(6)].map((_, i) => <span key={i} className="poker-chip-fly h-4 w-4 rounded-full border border-amber-200/70 bg-gradient-to-br from-amber-300 to-amber-600" style={{ animationDelay: `${i * 90}ms` }} />)}</div>}
               <PokerTableArtwork pot={game?.pot ?? 0} stage={dealerStage} winner={potWinner}><StudioBroadcastOverlay /><div className="poker-live-seats pointer-events-none absolute inset-0">{game && game.players.map((p) => {
                 const slotIndex = p.isBot ? botSlots.indexOf(p) : 5;
