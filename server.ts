@@ -1093,6 +1093,14 @@ app.get("/api/match/current", async (req, res) => {
     return res.json(await matches.currentMatch(await accounts.worldStore(), me.id));
   } catch (err) { return accountsUnavailable(res, err); }
 });
+app.post("/api/match/resign", async (req, res) => {
+  try {
+    const me = await signedIn(req);
+    if (!me) return res.status(401).json({ error: "not_signed_in" });
+    const out = await matches.resign(await accounts.worldStore(), me.id, String(req.body?.matchId ?? ""));
+    return out.ok === false ? res.status(400).json({ error: out.error }) : res.json(out);
+  } catch (err) { return accountsUnavailable(res, err); }
+});
 app.post("/api/match/move", async (req, res) => {
   try {
     const me = await signedIn(req);

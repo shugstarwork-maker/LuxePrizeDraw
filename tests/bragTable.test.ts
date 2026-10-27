@@ -6,12 +6,11 @@ import type { Store } from '../api/accounts';
 
 function memoryStore(): Store {
   const data = new Map<string, string>();
-  const counts = new Map<string, number>();
   return {
     async get(k) { return data.get(k) ?? null; },
     async set(k, v) { data.set(k, v); },
     async take(k) { const v = data.get(k) ?? null; data.delete(k); return v; },
-    async incr(k) { const n = (counts.get(k) ?? 0) + 1; counts.set(k, n); return n; },
+    async incr(k) { const n = Number(data.get(k) ?? 0) + 1; data.set(k, String(n)); return n; },
   } as unknown as Store;
 }
 

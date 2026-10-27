@@ -6,6 +6,8 @@ import { draughtsMoves, type DraughtsState } from "../games/draughts";
 import type { ConnectFourState } from "../games/connectFour";
 import type { ChessMatch } from "../games/chess";
 import { accountToken } from "../lib/useAccount";
+import { LuxeChessFrame } from "./LuxeChessFrame";
+import { PIECE_ART } from "./GamesArena";
 
 export type OnlineGame = "chess" | "connect4" | "draughts";
 type Side = "a" | "b";
@@ -76,6 +78,15 @@ export function OnlineMatch({ game, onClose }: { game: OnlineGame; onClose: () =
     });
   };
 
+  const resign = () => {
+    if (!view || view.status !== "playing") return;
+    void api("/api/match/resign", { matchId: view.matchId }).then((r) => {
+      if (!alive.current) return;
+      if (!r.ok) return setError("Could not resign. Try again.");
+      if (r.view) { setError(""); setView(r.view); }
+    });
+  };
+
   const header = <div className="flex items-center justify-between gap-3">
     <button type="button" onClick={onClose} className="rounded-lg bg-white/10 px-3 py-2 text-xs font-black">Back</button>
     <span className="font-black text-amber-100">{TITLES[game]} · ranked online</span>
@@ -96,9 +107,12 @@ export function OnlineMatch({ game, onClose }: { game: OnlineGame; onClose: () =
     {game === "chess" && <ChessOnline view={view} myTurn={myTurn} selected={selected as string | null} setSelected={setSelected} send={sendMove} />}
     {game === "connect4" && <ConnectOnline view={view} myTurn={myTurn} send={sendMove} />}
     {game === "draughts" && <DraughtsOnline view={view} myTurn={myTurn} selected={selected as [number, number] | null} setSelected={setSelected} send={sendMove} />}
+    {view.status === "playing" && <div className="flex justify-center"><button type="button" onClick={resign} className="rounded-xl border border-rose-300/40 bg-rose-300/10 px-4 py-2 text-xs font-black uppercase tracking-wider text-rose-100">Resign</button></div>}
     <p className="text-center text-[10px] text-white/40">Ranked. Each move is checked by the server. A side that takes over three minutes on its move loses.</p>
   </div>;
 }
+
+const GLYPH: Record<string, string> = { wp: "♙", wn: "♘", wb: "♗", wr: "♖", wq: "♕", wk: "♔", bp: "♟", bn: "♞", bb: "♝", br: "♜", bq: "♛", bk: "♚" };
 
 function ChessOnline({ view, myTurn, selected, setSelected, send }: { view: MatchView; myTurn: boolean; selected: string | null; setSelected: (s: string | null) => void; send: (m: Record<string, unknown>) => void }) {
   const match = view.state as ChessMatch;
@@ -109,40 +123,38 @@ function ChessOnline({ view, myTurn, selected, setSelected, send }: { view: Matc
   const squareName = (r: number, c: number) => `${String.fromCharCode(97 + c)}${8 - r}`;
   const rows = [...Array(8).keys()].map((i) => (flip ? 7 - i : i));
   const cols = [...Array(8).keys()].map((i) => (flip ? 7 - i : i));
-  return <div className="mx-auto grid w-full max-w-sm grid-cols-8 overflow-hidden rounded-xl border border-amber-200/40">
+  return <LuxeChessFrame><div className="luxe-chess-grid grid grid-cols-8 overflow-hidden">
     {rows.flatMap((r) => cols.map((c) => {
       const sq = squareName(r, c);
       const piece = board[r][c];
-      const dark = (r + c) % 2 === 1;
       const isLegal = legal.includes(sq as never);
-      return <button key={sq} type="button" disabled={!myTurn && !isLegal} aria-label={sq}
+      const last = match.lastMove && (match.lastMove.from === sq || match.lastMove.to === sq);
+      return <button key={sq} type="button" aria-label={sq} aria-pressed={selected === sq}
         onClick={() => {
           if (!myTurn) return;
           if (selected && isLegal) return send({ from: selected, to: sq, promotion: "q" });
           if (piece && piece.color === (view.you === "a" ? "w" : "b")) setSelected(sq); else setSelected(null);
         }}
-        className={`relative aspect-square text-xl leading-none ${dark ? "bg-[#6b4b1d]" : "bg-[#e9d7a8]"} ${selected === sq ? "ring-2 ring-inset ring-amber-300" : ""}`}>
-        {piece && <span className={piece.color === "w" ? "text-white drop-shadow" : "text-black"}>{glyph(piece.type, piece.color)}</span>}
-        {isLegal && <span className="absolute inset-0 m-auto h-2.5 w-2.5 rounded-full bg-emerald-400/80" />}
+        className={`aspect-square text-3xl sm:text-5xl ${(r + c) % 2 ? "luxe-chess-square--dark" : "luxe-chess-square--light"}${last ? " luxe-chess-square--last" : ""} ${selected === sq ? "ring-4 ring-cyan-300" : ""}`}>
+        {piece && <span className={piece.color === "w" ? "luxe-chess-piece luxe-chess-piece--ivory" : "luxe-chess-piece luxe-chess-piece--onyx"}>{GLYPH[piece.color + piece.type]}</span>}
+        {isLegal && <i className={piece ? "luxe-chess-hint luxe-chess-hint--capture" : "luxe-chess-hint"} aria-hidden="true" />}
       </button>;
     }))}
-  </div>;
+  </div></LuxeChessFrame>;
 }
-
-const glyph = (type: string, color: string) => {
-  const map: Record<string, string> = { k: "♚", q: "♛", r: "♜", b: "♝", n: "♞", p: "♟" };
-  return color === "w" ? map[type].toUpperCase() : map[type];
-};
 
 function ConnectOnline({ view, myTurn, send }: { view: MatchView; myTurn: boolean; send: (m: Record<string, unknown>) => void }) {
   const state = view.state as ConnectFourState;
-  return <div className="mx-auto w-full max-w-sm space-y-2">
-    <div className="grid grid-cols-7 gap-1">
-      {[...Array(7).keys()].map((col) => <button key={col} type="button" disabled={!myTurn || state.board[0][col] !== null} onClick={() => send({ column: col })}
-        className="rounded-lg bg-white/10 py-1 text-[10px] font-black text-white/70 disabled:opacity-30">{col + 1}</button>)}
-    </div>
-    <div className="grid grid-cols-7 gap-1 rounded-xl bg-blue-950/70 p-2">
-      {state.board.flat().map((cell, i) => <span key={i} className={`aspect-square rounded-full ${cell === "red" ? "bg-rose-500" : cell === "yellow" ? "bg-amber-300" : "bg-black/50"}`} />)}
+  return <div className="board3d-scene c4-scene mx-auto max-w-xl">
+    <div className="board3d-tilt board3d-frame c4-frame rounded-3xl p-3 sm:p-4">
+      <div className="c4-grid grid grid-cols-7 gap-1.5 sm:gap-2">
+        {[...Array(7).keys()].map((col) => <button key={col} type="button" disabled={!myTurn || state.board[0][col] !== null} onClick={() => send({ column: col })} className="c4-column group" aria-label={`Drop in column ${col + 1}`}>
+          {state.board.map((row, r) => {
+            const piece = row[col];
+            return <span key={r} className={`slot3d c4-slot block aspect-square rounded-full${piece ? " disc3d c4-disc" : " c4-empty"}`} style={piece ? { background: PIECE_ART[piece] } : undefined} />;
+          })}
+        </button>)}
+      </div>
     </div>
   </div>;
 }
@@ -154,21 +166,23 @@ function DraughtsOnline({ view, myTurn, selected, setSelected, send }: { view: M
   const flip = view.you === "b";
   const rows = [...Array(8).keys()].map((i) => (flip ? 7 - i : i));
   const cols = [...Array(8).keys()].map((i) => (flip ? 7 - i : i));
-  return <div className="mx-auto grid w-full max-w-sm grid-cols-8 overflow-hidden rounded-xl border border-amber-200/40">
-    {rows.flatMap((r) => cols.map((c) => {
-      const piece = state.board[r][c];
-      const dark = (r + c) % 2 === 1;
-      const isTarget = targets.some((t) => t[0] === r && t[1] === c);
-      return <button key={`${r}-${c}`} type="button" disabled={!myTurn && !isTarget} aria-label={`${r},${c}`}
-        onClick={() => {
-          if (!myTurn) return;
-          if (selected && isTarget) return send({ from: selected, to: [r, c] });
-          if (piece && piece.color === mine) setSelected([r, c]); else setSelected(null);
-        }}
-        className={`relative aspect-square ${dark ? "bg-[#6b4b1d]" : "bg-[#e9d7a8]"} ${selected && selected[0] === r && selected[1] === c ? "ring-2 ring-inset ring-amber-300" : ""}`}>
-        {piece && <span className={`absolute inset-1 rounded-full border-2 ${piece.color === "white" ? "border-amber-100 bg-stone-100" : "border-black bg-stone-900"} ${piece.king ? "ring-2 ring-amber-300" : ""}`} />}
-        {isTarget && <span className="absolute inset-0 m-auto h-2.5 w-2.5 rounded-full bg-emerald-400/80" />}
-      </button>;
-    }))}
+  return <div className="board3d-scene draughts-scene mx-auto max-w-[38rem]">
+    <div className="board3d-tilt board3d-frame draughts-frame grid grid-cols-8 overflow-hidden rounded-2xl">
+      {rows.flatMap((r) => cols.map((c) => {
+        const piece = state.board[r][c];
+        const dark = (r + c) % 2 === 1;
+        const isSelected = selected !== null && selected[0] === r && selected[1] === c;
+        const isTarget = targets.some((t) => t[0] === r && t[1] === c);
+        return <button key={`${r}-${c}`} type="button" disabled={!myTurn && !isTarget} aria-label={`Square ${r + 1},${c + 1}`}
+          onClick={() => {
+            if (!myTurn) return;
+            if (selected && isTarget) return send({ from: selected, to: [r, c] });
+            if (piece && piece.color === mine) setSelected([r, c]); else setSelected(null);
+          }}
+          className={`draughts-square aspect-square ${dark ? "draughts-square--dark" : "draughts-square--light"}${isSelected ? " draughts-square--selected" : ""}${isTarget ? " draughts-square--move" : ""}`}>
+          {piece && <span className={`draughts-piece ${piece.color === "white" ? "draughts-piece--white" : "draughts-piece--black"}${piece.king ? " draughts-piece--king" : ""}`}>{piece.king ? "♛" : ""}</span>}
+        </button>;
+      }))}
+    </div>
   </div>;
 }
