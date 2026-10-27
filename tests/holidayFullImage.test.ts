@@ -7,7 +7,9 @@ import { readFileSync } from 'node:fs';
 test('holiday cards use full-bleed destination photos and retain disclosures', () => {
   const html = renderToStaticMarkup(createElement(LuxuryHolidaysSection));
   assert.match(html, /deck-card__bg/);
-  assert.match(html, /deck-card__shade/);
+  assert.match(html, /deck-card__bar/);
+  assert.match(html, /Cash alternative/);
+  assert.doesNotMatch(html, /deck-card__panel/);
   assert.match(html, /Dubai/);
   assert.match(html, /src="\/draw-art\/holidays\/dubai\.mp4"/);
   assert.match(html, /Approval pending/);

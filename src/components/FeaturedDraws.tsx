@@ -18,8 +18,7 @@ const draws: Draw[] = [
 export function HeadlineLuxeCard() {
   const { play } = useAudio();
   return <>
-    <div className="headline-luxe-deck"><BitcoinCoinRain /><DeckCard className="headline-luxe-card" image="/prizes/hero-bitcoin.jpg" title="Win £100K · Bitcoin or Cash" progress={{ sold: ticketsSold("headline-bitcoin") }} terms={{ drawName: "£100K Bitcoin or Cash", category: "bitcoin", prize: "£100,000 of Bitcoin or a £100,000 cash alternative — the winner chooses", entry: "to be confirmed" }}
-      stats={[{ value: "£100,000", label: "Of Bitcoin" }, { value: "or", label: "Your choice" }, { value: "£100K", label: "Cash" }]}
+    <div className="headline-luxe-deck"><BitcoinCoinRain /><DeckCard className="headline-luxe-card" image="/prizes/hero-bitcoin.jpg" title="Win £100K · Bitcoin or Cash" progress={{ sold: ticketsSold("headline-bitcoin") }} summary={{ entry: "Pending approval", prize: "£100,000", cash: "£100,000" }} terms={{ drawName: "£100K Bitcoin or Cash", category: "bitcoin", prize: "£100,000 of Bitcoin or a £100,000 cash alternative — the winner chooses", entry: "to be confirmed" }}
       cta="Enter" ctaLabel="Enter — opens the approval-pending launch catalogue. This does not submit an entry or take a payment." onCta={() => { play("button"); navigate("/launch-build"); }}
       note="Approval pending · Entries and payments disabled · Preview only, no prize entitlement">
       <p className="headline-deck__eyebrow"><Sparkles className="h-3.5 w-3.5" aria-hidden="true" /> Headline prize preview</p>

@@ -21,9 +21,9 @@ const gamingPrizes = [
 ];
 
 const luxePrizes = [
-  { title: "1kg Fine Gold Bar", image: "/draw-art/luxe-gold-held.jpg", video: "/draw-art/luxe-gold-bar-cine.mp4", facts: ["999.9 fine gold", "Or cash equivalent", "Tracked fulfilment"], value: "1kg gold", equivalent: "Cash equivalent on request" },
-  { title: "Diamond Collection", image: "/draw-art/luxe-diamonds-held.jpg", video: "/draw-art/luxe-diamonds-cine.mp4", facts: ["Certified stones", "Or cash equivalent", "Insured delivery"], value: "Diamonds", equivalent: "Cash equivalent on request" },
-  { title: "Luxe Garden Summer House", image: "/draw-art/summerhouse.jpg", video: "/draw-art/summerhouse-cine.mp4", facts: ["Glass pavilion at dusk", "Or cash equivalent", "Built to order"], value: "Summer house", equivalent: "Cash equivalent on request" },
+  { title: "1kg Fine Gold Bar", image: "/draw-art/luxe-gold-held.jpg", video: "/draw-art/luxe-gold-bar-cine.mp4", facts: ["999.9 fine gold", "Or cash equivalent", "Tracked fulfilment"], value: "1kg gold", equivalent: "On request" },
+  { title: "Diamond Collection", image: "/draw-art/luxe-diamonds-held.jpg", video: "/draw-art/luxe-diamonds-cine.mp4", facts: ["Certified stones", "Or cash equivalent", "Insured delivery"], value: "Diamonds", equivalent: "On request" },
+  { title: "Luxe Garden Summer House", image: "/draw-art/summerhouse.jpg", video: "/draw-art/summerhouse-cine.mp4", facts: ["Glass pavilion at dusk", "Or cash equivalent", "Built to order"], value: "Summer house", equivalent: "On request" },
 ];
 
 // Short quick draws: prize is paid out when the pool fills. Fees are shown, not charged.

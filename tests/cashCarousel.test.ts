@@ -30,7 +30,9 @@ test('homepage cash carousel discloses pending approval and never offers checkou
   assert.match(html, /22 proposed cash draws/);
   assert.match(html, /Approval pending/);
   assert.match(html, /entries and payments remain disabled/);
-  assert.match(html, /Proposed entry/);
+  assert.match(html, />Entry</);
+  assert.match(html, />1p</);
+  assert.match(html, /Cash alternative/);
   assert.doesNotMatch(html, /Entry from 1p draw preview|<form|Buy now|Enter now/);
 });
 
