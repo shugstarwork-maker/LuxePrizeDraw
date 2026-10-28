@@ -3,7 +3,8 @@
 import { ChevronRight, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { DrawTermsButton, type DrawTermsInfo } from "./DrawTermsSheet";
-import { formatTickets } from "../lib/drawProgress";
+// Percentage of the indicative target reached. Zero until real entries exist.
+const percentSold = (progress: DeckProgress) => (progress.needed ? Math.min(100, Math.round((progress.sold / progress.needed) * 100)) : 0);
 
 /** Tickets sold toward unlocking a draw; `needed` is undefined while the target is TBC. */
 export type DeckProgress = { sold: number; needed?: number };
@@ -76,8 +77,8 @@ export function DeckCard({ image, video, title, facts = [], stats = [], summary,
       {children && <div className="deck-card__extra">{children}</div>}
       {(progress || note || terms) && <div className="deck-card__meta">
         {progress && <div className="deck-card__progress">
-          <div className="deck-card__track" role="progressbar" aria-label={progress.needed ? `${formatTickets(progress.sold)} of ${formatTickets(progress.needed)} tickets toward ${title}. Indicative target, not a confirmed entry cap.` : `Tickets sold toward unlocking ${title}`} aria-valuemin={0} aria-valuemax={progress.needed ?? 0} aria-valuenow={progress.sold}><span style={{ width: `${progress.needed ? Math.min(100, (progress.sold / progress.needed) * 100) : 0}%` }} /></div>
-          <small>{progress.needed ? `${formatTickets(progress.sold)} of ${formatTickets(progress.needed)} tickets` : `${formatTickets(progress.sold)} tickets sold`}</small>
+          <div className="deck-card__track" role="progressbar" aria-label={`${percentSold(progress)}% sold toward ${title}${progress.needed ? ". Indicative target, not a confirmed entry cap." : ""}`} aria-valuemin={0} aria-valuemax={progress.needed ?? 0} aria-valuenow={progress.sold}><span style={{ width: `${percentSold(progress)}%` }} /></div>
+          <small>{percentSold(progress)}% sold</small>
           {progress.needed != null && <small className="deck-card__target-note">Indicative target, not a confirmed entry cap.</small>}
         </div>}
         {note && <p className="deck-card__note">{note}</p>}

@@ -3,7 +3,7 @@
 // proposed catalogue ("entries opening soon"), deals launch with approved partners
 // only, community figures show £0 until real distributions exist. Nothing invented.
 import React from "react";
-import { ArrowRight, BadgeCheck, CarFront, Coins, Cpu, Crown, Gamepad2, Handshake, Heart, Palmtree, Scale, ShieldCheck, Sparkles, TreePine, Trophy, Users } from "lucide-react";
+import { ArrowRight, BadgeCheck, CarFront, Coins, Cpu, Crown, Gamepad2, Handshake, Heart, Palmtree, Scale, ShieldCheck, Smartphone, Sparkles, TreePine, Trophy, Users } from "lucide-react";
 import { DrawTermsButton, categoryFor } from "./DrawTermsSheet";
 
 const go = (path: string) => { window.history.pushState({}, "", path); window.dispatchEvent(new PopStateEvent("popstate")); window.scrollTo({ top: 0, behavior: "smooth" }); };
@@ -68,10 +68,25 @@ const PROMISES = [
   { icon: Users, title: "Verified winners & real support", detail: "Winner announcements only with consent, plus accessible customer support and a clear complaints route." },
 ];
 
-const GAMES = [
-  { name: "Luxe Poker League", href: "/poker", icon: "♠", detail: "Free-play weekly leagues, cinematic tables, live multiplayer." },
-  { name: "Player Portal", href: "/portal", icon: "🏆", detail: "League position, quests, achievements and trophies." },
+const CARD_GAMES = [
+  { name: "Texas Hold'em", href: "/poker" },
+  { name: "Blackjack", href: "/blackjack" },
+  { name: "3-Card Brag", href: "/brag" },
 ];
+const CHALLENGE_GAMES = [
+  { name: "Chess", href: "/chess" },
+  { name: "Connect Four", href: "/challenge?game=connect4" },
+  { name: "Draughts", href: "/challenge?game=draughts" },
+];
+
+function GameListTile({ title, games }: { title: string; games: { name: string; href: string }[] }) {
+  return <div className="rounded-2xl border border-white/12 bg-white/[.04] p-4">
+    <b className="block text-sm text-amber-100">{title}</b>
+    <ul className="mt-2 space-y-1.5">
+      {games.map((g) => <li key={g.name}><button type="button" onClick={() => go(g.href)} className="text-left text-xs text-white/75 underline-offset-4 hover:text-amber-200 hover:underline">{g.name}</button></li>)}
+    </ul>
+  </div>;
+}
 
 export const HomePage: React.FC = () => (
   <main className="bg-[#0a0805] pb-28 text-white">
@@ -211,14 +226,17 @@ export const HomePage: React.FC = () => (
         <p className="text-[10px] font-black uppercase tracking-[.25em] text-amber-200"><Trophy className="mr-1 inline h-4 w-4" />Free to play</p>
         <h2 className="mt-2 text-2xl font-black">Games &amp; weekly leagues</h2>
         <p className="mt-2 text-xs text-white/50">Free-to-play entertainment — virtual chips and league pride only. Separate from any competition or prize-bearing mode.</p>
-        <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          {GAMES.map((g) => (
-            <button key={g.name} type="button" onClick={() => go(g.href)} className="rounded-2xl border border-white/12 bg-white/[.04] p-4 text-left transition hover:border-amber-200/50 active:scale-[.98]">
-              <span className="text-2xl">{g.icon}</span>
-              <b className="mt-2 block text-sm text-amber-100">{g.name}</b>
-              <p className="mt-1 text-[11px] leading-relaxed text-white/55">{g.detail}</p>
-            </button>
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          {["App Store", "Google Play"].map((store) => (
+            <span key={store} aria-disabled="true" className="flex items-center gap-3 rounded-xl border border-white/25 bg-black px-3 py-2.5 text-white/70">
+              <Smartphone className="h-6 w-6 shrink-0 text-white/60" aria-hidden="true" />
+              <span className="leading-tight"><span className="block text-[9px] font-bold uppercase tracking-wider text-white/45">Coming soon</span><b className="block text-sm text-white">{store}</b></span>
+            </span>
           ))}
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          <GameListTile title="Card games" games={CARD_GAMES} />
+          <GameListTile title="Challenge games" games={CHALLENGE_GAMES} />
         </div>
       </div>
     </section>

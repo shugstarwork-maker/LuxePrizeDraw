@@ -15,13 +15,13 @@ test("ticket targets use whole pennies and round up", () => {
 
 test("cash cards show the cover count and say it is not a confirmed cap", () => {
   const html = renderToStaticMarkup(createElement(CashCategory));
-  assert.match(html, /0 of 100,000 tickets/);
+  assert.match(html, /0% sold/);
   assert.match(html, /Indicative target, not a confirmed entry cap/);
   assert.match(html, /entries are not open/);
 });
 
 test("cards without a target keep a sold count and no cap disclaimer", () => {
   const html = renderToStaticMarkup(createElement(DeckCard, { title: "Preview", progress: { sold: 0 } }));
-  assert.match(html, /0 tickets sold/);
+  assert.match(html, /0% sold/);
   assert.doesNotMatch(html, /confirmed entry cap/);
 });
