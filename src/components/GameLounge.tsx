@@ -11,6 +11,7 @@ import { GameLeagueCard } from "./GameLeagueCard";
 import { claimDailyChips } from "../lib/cardTableServer";
 import { WorldRankingPanel } from "./WorldRankingPanel";
 import { LoungeChat } from "./LoungeChat";
+import { LoungeWallet } from "./LoungeWallet";
 import { useAudio } from "../audio/AudioProvider";
 
 export type GameLoungeProps = {
@@ -72,7 +73,9 @@ export function GameLounge({ brand, tagline, art, icon, leagueGame, leagueTitle,
 
       {tab === "social" && <LoungeChat />}
 
-      <LoungeTabBar tab={tab} onTab={(t) => { play("button"); setTab(t); }} />
+      {tab === "wallet" && <div className="mt-6"><LoungeWallet chips={chips} /></div>}
+
+      <LoungeTabBar tab={tab} onTab={(t) => { play("button"); setTab(t); }} showWallet />
     </div>
   </section>;
 }

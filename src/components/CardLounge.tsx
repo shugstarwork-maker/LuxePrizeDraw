@@ -9,6 +9,7 @@ import { handValue, type BjState } from "../games/blackjack";
 import { bjAct as bjActRemote, bjDeal, bjOpenTable, bragAct as bragActRemote, bragDeal, bragOpenTable, claimDailyChips, fetchBalance } from "../lib/cardTableServer";
 import { bragValue, BRAG_LABELS, type BragState } from "../games/brag";
 import { LuxePlayingCard } from "./LuxePlayingCard";
+import { LoungeWallet } from "./LoungeWallet";
 import { bumpStat } from "../lib/achievements";
 import { useAudio } from "../audio/AudioProvider";
 import { CasinoRulesSheet } from "./CasinoRulesSheet";
@@ -210,6 +211,10 @@ export function CardLounge({ game }: { game: LoungeGame }) {
         </div>
         <p className="mt-2 text-center text-xs font-black text-amber-100">{t.name} · {meta.minBetLabel} {t.minBet} · {t.note}</p>
 
+        <details className="mt-7 rounded-2xl">
+          <summary className="cursor-pointer rounded-2xl border border-amber-200/30 bg-black/35 px-4 py-3 text-sm font-black text-amber-100">Wallet · buy packs</summary>
+          <div className="mt-3"><LoungeWallet chips={chips} /></div>
+        </details>
         <div className="mt-7 grid gap-3 sm:grid-cols-3">
           <button onClick={dailyReward} disabled={!rewardReady} className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-4 text-left disabled:opacity-40"><Gift className="h-5 w-5 text-emerald-200" /><b className="mt-3 block">{rewardReady ? "Daily sign-in: 200 chips" : "Daily chips claimed"}</b><small className="text-white/55">200 free-play chips every day</small></button>
           <div className="rounded-2xl border p-4" style={{ borderColor: `${leagueTier.colour}55`, background: `${leagueTier.glow}` }}>
