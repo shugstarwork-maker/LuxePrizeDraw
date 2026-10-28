@@ -1,6 +1,6 @@
 // Casino — a cinematic welcome gate, then every free-play game on one carousel.
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Coins, Crown, Dices, ShieldCheck, Sparkles, Users, type LucideIcon } from "lucide-react";
+import { Coins, Crown, Dices, ShieldCheck, Sparkles, Users, type LucideIcon } from "lucide-react";
 import { DeckCard } from "./DeckCard";
 import { RollingCardCarousel } from "./RollingCardCarousel";
 import { OnlineMatch, type OnlineGame } from "./OnlineMatch";
@@ -55,8 +55,6 @@ export function CasinoPage() {
         <img src="/games/casino-welcome-hero.jpg" alt="Gold chips and four aces on a Luxe casino table" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-transparent to-black/85" />
         <div className="absolute inset-x-0 top-0 flex items-center justify-between px-4 py-2.5 text-[11px] font-black uppercase tracking-wide text-amber-100" style={{ textShadow: "0 1px 3px #000" }}><span>Featured table</span><span>8 games</span></div>
-        <span className="absolute left-2 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-amber-200/60 bg-black/60 text-amber-200 shadow-[0_0_14px_rgba(0,0,0,.6)]" aria-hidden="true"><ChevronLeft className="h-5 w-5" /></span>
-        <span className="absolute right-2 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-amber-200/60 bg-black/60 text-amber-200 shadow-[0_0_14px_rgba(0,0,0,.6)]" aria-hidden="true"><ChevronRight className="h-5 w-5" /></span>
         <div className="absolute inset-x-0 top-[34%] flex flex-col items-center gap-2">
           <span className="rounded-full border border-amber-200/70 bg-black/75 px-4 py-1.5 text-[11px] font-black uppercase tracking-wide text-amber-100 shadow-[0_0_18px_rgba(0,0,0,.7)]">Free-play chips</span>
           <span className="grid h-12 w-12 place-items-center rounded-full border-2 border-amber-200/90 bg-black text-xl text-amber-200 shadow-[0_0_20px_rgba(232,187,70,.5)]">♠</span>
