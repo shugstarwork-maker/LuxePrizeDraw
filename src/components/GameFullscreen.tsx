@@ -16,5 +16,6 @@ export function GameFullscreen({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  return <div ref={ref} className="min-h-[100dvh] bg-[#070605]">{children}</div>;
+  // In full screen the element is held to the screen height, so it scrolls itself when a lobby is taller.
+  return <div ref={ref} className="min-h-[100dvh] overflow-y-auto bg-[#070605]">{children}</div>;
 }
