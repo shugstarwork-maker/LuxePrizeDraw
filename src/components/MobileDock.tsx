@@ -1,12 +1,12 @@
 import React from "react";
-import { Crown, Flower2, Home, Trophy, UserRound } from "lucide-react";
+import { Crown, Gift, Home, Trophy, UserRound } from "lucide-react";
 import { CASINO_PATHS } from "./CasinoPage";
 
 const primaryItems = [
   { href: "/", label: "Home", icon: Home },
   { href: "/draws", label: "Draws", icon: Trophy },
   { href: "/casino", label: "Casino", icon: Crown },
-  { href: "/serenity", label: "Serenity", icon: Flower2 },
+  { href: "/portal", label: "Rewards", icon: Gift },
   { href: "/portal", label: "Portal", icon: UserRound },
 ];
 

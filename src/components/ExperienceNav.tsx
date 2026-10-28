@@ -1,5 +1,5 @@
 import React from "react";
-import { BadgeCheck, Crown, Gamepad2, Home, Menu, Sparkles, Trophy } from "lucide-react";
+import { BadgeCheck, Crown, Gamepad2, Heart, Home, Menu, Sparkles, Trophy } from "lucide-react";
 import { useAudio } from "../audio/AudioProvider";
 
 type Link = { href: string; label: string; icon: React.ElementType };
@@ -8,6 +8,7 @@ const primaryLinks: Link[] = [
   { href: "/draws", label: "Prize Draws", icon: Trophy },
   { href: "/arcade", label: "Arcade", icon: Gamepad2 },
   { href: "/poker", label: "Poker", icon: Crown },
+  { href: "/serenity", label: "Serenity", icon: Heart },
 ];
 const moreLinks: Link[] = [
   { href: "/prizes/luxury-supercar-experience", label: "Partnerships", icon: Sparkles },
