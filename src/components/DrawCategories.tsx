@@ -25,7 +25,7 @@ const luxePrizes = [
   { title: "1kg Fine Gold Bar", image: "/draw-art/luxe-gold-held.jpg", video: "/draw-art/luxe-gold-bar-cine.mp4", facts: ["999.9 fine gold", "Or cash equivalent", "Tracked fulfilment"], value: "1kg gold", equivalent: "On request" },
   { title: "Diamond Collection", image: "/draw-art/luxe-diamonds-held.jpg", video: "/draw-art/luxe-diamonds-cine.mp4", facts: ["Certified stones", "Or cash equivalent", "Insured delivery"], value: "Diamonds", equivalent: "On request" },
   { title: "Luxe Garden Summer House", image: "/prizes/hero-summerhouse.jpg", facts: ["Premium timber garden room", "Or cash equivalent", "Built to order"], value: "Summer house", equivalent: "On request" },
-  { title: "Start-up Package", facts: ["Your own website", "Company set-up and start-up grant", "Branding and a van"], value: "TBC", equivalent: "To be confirmed" },
+  { title: "Win your own company", facts: ["Own limited company", "Web site, app and branding", "Company vehicle"], features: ["Your own limited company", "Your own web site / app and branding", "Own company vehicle with graphics", "A start-up grant of £100k", "AI receptionist", "Company professional email"], value: "TBC", equivalent: "To be confirmed" },
 ];
 
 // Short quick draws: prize is paid out when the pool fills. Fees are shown, not charged.
@@ -104,14 +104,15 @@ export function LuxeUniqueCategory() {
   return <section id="luxe-unique" className="border-y border-amber-200/15 bg-black/35 py-20 sm:py-28">
     <div className="mx-auto max-w-7xl px-4 sm:px-6">
       <WinnersBanner category="Luxe Unique" />
-      <div className="mt-9"><CategoryHeader eyebrow="Luxe Unique" title="Gold, diamonds, bitcoin and more." intro="A solid gold bar, a diamond collection, the bitcoin headline prize, a bespoke Luxe garden summer house and a start-up package. Each has a cash equivalent, and winners may take the item or its cash equivalent." icon={Gem} /></div>
+      <div className="mt-9"><CategoryHeader eyebrow="Luxe Unique" title="Gold, diamonds, bitcoin and more." intro="A solid gold bar, a diamond collection, the bitcoin headline prize, a bespoke Luxe garden summer house and your own company. Each has a cash equivalent, and winners may take the item or its cash equivalent." icon={Gem} /></div>
       <div className="mt-9"><HeadlineLuxeCard /></div>
       <RollingCardCarousel items={luxePrizes} getKey={(p) => p.title} label="Luxe prizes" className="mt-9" compactControls
         renderItem={(p) => <DeckCard className="cinematic" image={p.image} video={p.video} title={p.title} progress={{ sold: ticketsSold(p.title) }}
           facts={p.facts.map((s) => [s, ShieldCheck] as [string, typeof ShieldCheck])}
           stats={[{ value: p.value, label: "Prize" }, { value: p.equivalent, label: "Cash equivalent" }, { value: "Preview", label: "Status" }]}
           cta="Enter now" onCta={terms}
-          note="Stylised artwork · entries not yet open" />} />
+          note="Stylised artwork · entries not yet open"
+          children={"features" in p ? <div className="space-y-1 text-xs leading-relaxed text-white/85"><ul className="space-y-1">{p.features.map((f) => <li key={f}>✓ {f}</li>)}</ul><p className="pt-1 font-black text-amber-200">Bring your ideas to life!</p></div> : undefined} />} />
     </div>
   </section>;
 }
