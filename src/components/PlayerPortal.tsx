@@ -271,7 +271,7 @@ const BoardRow: React.FC<{ row: { name: string; xp: number; you: boolean; delta:
     <li className={`flex items-center gap-3 px-4 py-2.5 text-sm ${zoneClass} ${row.you ? "bg-amber-300/10 font-black text-amber-100" : "text-white/75"}`}>
       <span className="w-6 text-center text-xs font-black text-white/40">{rank}</span>
       <span className={`relative grid h-7 w-7 place-items-center rounded-full text-[10px] font-black ${row.you ? "bg-amber-300 text-black" : "bg-white/10 text-white/60"}`}>{row.name.slice(0, 2).toUpperCase()}<span className="absolute -bottom-1 -right-1 text-[10px] leading-none drop-shadow">{row.flag}</span></span>
-      <span className="flex-1 truncate">{row.name}{row.you && " — you"} <span className="ml-0.5">{row.flag}</span></span>
+      <span className="flex-1 truncate">{row.name}{row.you && " — you"}</span>
       <span className={`text-[10px] font-black ${row.delta > 0 ? "text-emerald-300" : row.delta < 0 ? "text-rose-300" : "text-white/30"}`}>{row.delta > 0 ? `▲${row.delta}` : row.delta < 0 ? `▼${-row.delta}` : "–"}</span>
       <span className="w-14 text-right font-black">{row.xp} <span className="text-[9px] font-bold text-white/40">XP</span></span>
     </li>

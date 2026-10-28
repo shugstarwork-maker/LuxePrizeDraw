@@ -685,7 +685,7 @@ export const LuxePokerLeague: React.FC = () => {
                 <span className={`w-6 text-center font-mono text-xs font-black ${zone === "promote" ? "text-emerald-300" : zone === "demote" ? "text-rose-300" : "text-white/40"}`}>{rank}</span>
                 <span className={`w-5 text-center text-[10px] font-black ${row.delta > 0 ? "text-emerald-300" : row.delta < 0 ? "text-rose-300" : "text-white/25"}`} title={row.delta > 0 ? `Up ${row.delta}` : row.delta < 0 ? `Down ${-row.delta}` : "No change"}>{row.delta > 0 ? `▲${row.delta}` : row.delta < 0 ? `▼${-row.delta}` : "–"}</span>
                 <span className="relative flex h-7 w-7 items-center justify-center rounded-full border text-[10px] font-black" style={{ borderColor: `${leagueTier.colour}66`, background: "#0008", color: leagueTier.colour }}>{row.you ? "YOU" : row.name.slice(0, 2).toUpperCase()}<span className="absolute -bottom-1 -right-1 text-[10px] leading-none drop-shadow">{row.flag}</span></span>
-                <b className={`flex-1 truncate text-sm ${row.you ? "text-amber-100" : "text-white/80"}`}>{row.name}{row.you ? " — you" : ""} <span className="ml-0.5">{row.flag}</span></b>
+                <b className={`flex-1 truncate text-sm ${row.you ? "text-amber-100" : "text-white/80"}`}>{row.name}{row.you ? " — you" : ""}</b>
                 <span className="font-mono text-[10px] text-white/40">{row.games}g</span>
                 <span className="relative font-mono text-xs font-black text-white/70">{row.xp} XP{row.you && xpFloats.map((f) => <span key={f.id} className="xp-float">+{f.amount} XP</span>)}</span>
               </div>;
