@@ -81,7 +81,7 @@ export function GameLounge({ brand, tagline, art, icon, leagueGame, leagueTitle,
 }
 
 /** Free-play daily sign-in, granted once a day on the server. Chips have no cash value. */
-function RewardsPanel() {
+export function RewardsPanel() {
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const collect = () => {

@@ -6,8 +6,8 @@ const primaryItems = [
   { href: "/", label: "Home", icon: Home },
   { href: "/draws", label: "Draws", icon: Trophy },
   { href: "/casino", label: "Casino", icon: Crown },
-  { href: "/portal", label: "Rewards", icon: Gift },
-  { href: "/portal", label: "Portal", icon: UserRound },
+  { href: "/rewards", label: "Rewards", icon: Gift },
+  { href: "/portal", label: "Profile", icon: UserRound },
 ];
 
 export const MobileDock: React.FC = () => {

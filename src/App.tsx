@@ -25,6 +25,7 @@ import { LuxeHost } from "./components/LuxeHost";
 import { MembershipPreview } from "./components/MembershipPreview";
 import { MobileDock } from "./components/MobileDock";
 import { PrizePlatform } from "./components/PrizePlatform";
+import { RewardsPage } from "./components/RewardsPage";
 import { PartnerShowcase } from "./components/PartnerShowcase";
 import { OwnershipNotice } from "./components/OwnershipNotice";
 import { PrizeStandings } from "./components/PrizeStandings";
@@ -112,6 +113,7 @@ export default function App() {
     : path === "/blackjack" ? <><GameLounge brand="Luxe Blackjack" tagline="Beat the dealer to 21. Free play, virtual chips, no cash value." art="/games/blackjack-card.png" icon="♣" leagueGame="blackjack" leagueTitle="Blackjack"><CardLounge game="blackjack" /></GameLounge><ScottishHost /></>
     : path === "/brag" ? <><GameLounge brand="3-Card Brag" tagline="The classic British card game. Free play, virtual chips, no cash value." art="/games/brag-card.png" icon="♥" leagueGame="brag" leagueTitle="3-Card Brag"><CardLounge game="brag" /></GameLounge><ScottishHost /></>
     : path === "/arcade" ? <><ArcadeHome /><ScottishHost /><MobileDock /></>
+    : path === "/rewards" ? <><RewardsPage /><MobileDock /></>
     : path === "/portal" ? <><PlayerPortal /><ScottishHost /><MobileDock /></>
     : path === "/challenge" && !boardGame ? <><CasinoPage /><MobileDock /></> : path === "/challenge" ? <><ChallengeLounge /><ScottishHost /></>
     : path === "/sports-cars" ? <><CategoryDrawCarousel category="Cars" /><ScottishHost /><MobileDock /></>
