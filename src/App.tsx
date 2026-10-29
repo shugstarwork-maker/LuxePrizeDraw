@@ -64,6 +64,7 @@ const ResponsiblePlayPage = lazy(() => import("./components/ResponsiblePlayPage"
 import { RealityCheck } from "./components/RealityCheck";
 import { markTried } from "./lib/achievements";
 import { AchievementToaster } from "./components/Achievements";
+import { StreakCelebrationHost } from "./components/StreakCelebrationHost";
 
 /** Board and card game pages go full screen while they are played. Poker keeps its own rotate gate. */
 const FULLSCREEN_GAME_PATHS = ["/blackjack", "/brag", "/chess", "/challenge", "/duel", "/arena"];
@@ -120,7 +121,7 @@ export default function App() {
 
   const category = path === "/category" ? new URLSearchParams(window.location.search).get("name") : path === "/sports-cars" ? "Cars" : "";
   const backdropTheme = path === "/" ? "money" : category === "Cars" ? "cars" : category === "Cash" || category === "Bitcoin" ? "money" : undefined;
-  return <div className="storm-page luxe-brand-theme"><div className="storm-page__content"><OwnershipNotice />{page}<footer className="border-t border-white/10 bg-black/60 px-4 py-6 pb-28 text-center text-xs text-white/65 sm:pb-6"><a href="/terms" onClick={(e) => { e.preventDefault(); go("/terms"); }} className="font-bold text-amber-200 underline underline-offset-4">General terms for all draws</a><span className="mx-2 text-white/30">·</span><a href="/privacy" onClick={(e) => { e.preventDefault(); go("/privacy"); }} className="font-bold text-amber-200 underline underline-offset-4">Privacy &amp; cookies</a><p className="mt-2">Pre-launch · Draft rules require legal approval before entries open.</p></footer><IntellectualPropertyNotice /></div><StormBackdrop theme={backdropTheme} />{path !== "/lobby" && <AudioControls />}<InstallAppPrompt /><RealityCheck /><AchievementToaster /></div>;
+  return <div className="storm-page luxe-brand-theme"><div className="storm-page__content"><OwnershipNotice />{page}<footer className="border-t border-white/10 bg-black/60 px-4 py-6 pb-28 text-center text-xs text-white/65 sm:pb-6"><a href="/terms" onClick={(e) => { e.preventDefault(); go("/terms"); }} className="font-bold text-amber-200 underline underline-offset-4">General terms for all draws</a><span className="mx-2 text-white/30">·</span><a href="/privacy" onClick={(e) => { e.preventDefault(); go("/privacy"); }} className="font-bold text-amber-200 underline underline-offset-4">Privacy &amp; cookies</a><p className="mt-2">Pre-launch · Draft rules require legal approval before entries open.</p></footer><IntellectualPropertyNotice /></div><StormBackdrop theme={backdropTheme} />{path !== "/lobby" && <AudioControls />}<InstallAppPrompt /><RealityCheck /><AchievementToaster /><StreakCelebrationHost /></div>;
 }
 
 function SiteContent({ path }: { path: string }) {
