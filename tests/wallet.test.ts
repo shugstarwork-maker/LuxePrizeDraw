@@ -33,11 +33,8 @@ test('the daily chips are granted once per day', async () => {
   const s = memoryStore();
   const day1 = new Date('2026-10-27T09:00:00Z');
   const first = await claimDaily(s, 'ACC-d', day1);
-  assert.equal(first.granted, true);
-  assert.equal(first.chips, STARTING_CHIPS + DAILY_CHIPS);
-  const again = await claimDaily(s, 'ACC-d', new Date('2026-10-27T20:00:00Z'));
-  assert.equal(again.granted, false);
-  assert.equal(again.chips, STARTING_CHIPS + DAILY_CHIPS);
+  assert.deepEqual(first, { granted: true, chips: STARTING_CHIPS + DAILY_CHIPS });
+  assert.deepEqual(await claimDaily(s, 'ACC-d', new Date('2026-10-27T20:00:00Z')), { granted: false, chips: STARTING_CHIPS + DAILY_CHIPS });
   assert.equal((await claimDaily(s, 'ACC-d', new Date('2026-10-28T08:00:00Z'))).granted, true);
 });
 
