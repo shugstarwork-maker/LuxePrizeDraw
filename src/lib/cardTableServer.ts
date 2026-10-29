@@ -5,6 +5,7 @@ import type { BragState } from "../games/brag";
 import type { HoldemState } from "../games/holdem";
 import { playerId } from "./pokerLeague";
 import { accountToken } from "./useAccount";
+import { announceStreak } from "./streakEvents";
 
 type Reply<T> = { state: T; balance: number } | { error: string };
 
@@ -45,13 +46,20 @@ export async function fetchBalance(): Promise<number | null> {
   }
 }
 
-/** Claims the daily sign-in chips, once per day, on the server. */
-export async function claimDailyChips(): Promise<{ granted: boolean; chips: number } | null> {
+/** What the server says about a daily claim. The streak fields are missing from servers older than streaks. */
+export type DailyClaim = { granted: boolean; chips: number; streak?: number; bestStreak?: number; day?: string; reward?: number; bonus?: number };
+
+/** Claims the daily sign-in chips, once per day, on the server. A claim that counts a new day also plays the streak celebration. */
+export async function claimDailyChips(): Promise<DailyClaim | null> {
   const token = accountToken();
   try {
     const res = await fetch("/api/wallet/daily", { method: "POST", headers: { "x-player-id": playerId(), ...(token ? { authorization: `Bearer ${token}` } : {}) } });
     if (!res.ok) return null;
-    return (await res.json()) as { granted: boolean; chips: number };
+    const claim = (await res.json()) as DailyClaim;
+    if (claim.granted && Number.isInteger(claim.streak) && (claim.streak as number) >= 1) {
+      announceStreak({ streak: claim.streak as number, day: claim.day, reward: claim.reward, bonus: claim.bonus });
+    }
+    return claim;
   } catch {
     return null;
   }
